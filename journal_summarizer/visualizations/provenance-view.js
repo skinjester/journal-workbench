@@ -258,8 +258,8 @@
 
   /**
    * Matrix overlay: keep ### section headings from the month file, but only bullets that match
-   * this cell’s provenance (everything else hidden). No highlight chrome. Stops at --- (closing
-   * narrative omitted). If no section matches structurally, falls back to a flat line list.
+   * this cell’s provenance (everything else hidden). Full ### People Involved list is appended
+   * after an &lt;hr&gt; (not filtered to highlights). Stops at --- for structured walk.
    */
   function renderFilteredOverlayBody(bodyEl, source, hlSet, highlights) {
     var lines = source.split('\n');
@@ -267,6 +267,7 @@
     var i = 0;
     var n = lines.length;
     var noHl = new Set();
+    var peopleBlock = null;
 
     function flushSection(headingTrimmed, matchedTrimmedLines) {
       if (matchedTrimmedLines.length === 0) return;
@@ -274,6 +275,17 @@
       for (var k = 0; k < matchedTrimmedLines.length; k++) {
         parts.push('<div class="summary-block">' + parseLineMarkdown(matchedTrimmedLines[k]) + '</div>');
       }
+    }
+
+    function appendFullPeopleSection(chunks) {
+      if (!peopleBlock || !peopleBlock.entries || peopleBlock.entries.length === 0) return;
+      var inner = renderPeopleEntriesHtml(peopleBlock.entries, noHl);
+      if (!inner) return;
+      chunks.push('<hr class="summary-body-lead-divider" aria-hidden="true" />');
+      chunks.push(
+        '<div class="summary-block">' + parseLineMarkdown(peopleBlock.headingLine.trim()) + '</div>'
+      );
+      chunks.push('<div class="summary-block summary-block--people">' + inner + '</div>');
     }
 
     while (i < n) {
@@ -289,16 +301,8 @@
       }
       if (PEOPLE_H3.test(t)) {
         var sec = parsePeopleSectionLines(lines, i);
-        var matchedEnt = sec.entries.filter(function (e) {
-          var nl = normLine(e.rawLine);
-          return nl && hlSet.has(nl);
-        });
-        if (matchedEnt.length > 0) {
-          parts.push('<div class="summary-block">' + parseLineMarkdown(trimmed) + '</div>');
-          var inner = renderPeopleEntriesHtml(matchedEnt, noHl);
-          if (inner) {
-            parts.push('<div class="summary-block summary-block--people">' + inner + '</div>');
-          }
+        if (!peopleBlock && sec.entries.length > 0) {
+          peopleBlock = { headingLine: trimmed, entries: sec.entries };
         }
         i = sec.endIdx;
         continue;
@@ -337,14 +341,31 @@
     }
 
     if (parts.length === 0 && highlights && highlights.length > 0) {
-      renderFlatMatchFallback(bodyEl, source, hlSet, highlights);
-      return;
-    }
-    if (parts.length === 0) {
+      var flat = orderedMatchingLines(source, hlSet, highlights);
+      var flatParts = flat.map(function (trimmed) {
+        return '<div class="summary-block">' + parseLineMarkdown(trimmed) + '</div>';
+      });
+      appendFullPeopleSection(flatParts);
+      if (flatParts.length > 0) {
+        bodyEl.innerHTML = flatParts.join('');
+        return;
+      }
       bodyEl.innerHTML =
         '<span class="empty">No matching lines found in the summary for this month.</span>';
       return;
     }
+    if (parts.length === 0) {
+      var onlyPeople = [];
+      appendFullPeopleSection(onlyPeople);
+      if (onlyPeople.length > 0) {
+        bodyEl.innerHTML = onlyPeople.join('');
+        return;
+      }
+      bodyEl.innerHTML =
+        '<span class="empty">No matching lines found in the summary for this month.</span>';
+      return;
+    }
+    appendFullPeopleSection(parts);
     bodyEl.innerHTML = parts.join('');
   }
 

@@ -152,6 +152,7 @@
       border: 1px solid rgba(255,255,255,0.12);
       background: rgba(20, 24, 31, 0.97);
       box-shadow: 0 18px 42px rgba(0,0,0,0.4);
+      /* none: must not sit above the heatmap and steal hover — Plotly keeps updating; exit defer + slop keep the panel up. */
       pointer-events: none;
       display: none;
     }
@@ -362,6 +363,31 @@
       position: absolute; inset: 0;
       pointer-events: auto;
       background: rgba(6, 8, 12, 0.42);
+    }
+    .provenance-overlay.provenance-overlay--hover .provenance-overlay__backdrop {
+      opacity: 0;
+      pointer-events: none;
+    }
+    /* Pass hover through to Plotly except close + scroll body (same idea as #chart-tooltip). */
+    .provenance-overlay.provenance-overlay--hover .provenance-overlay__dialog {
+      pointer-events: none;
+      overflow: visible;
+      display: flex;
+      flex-direction: column;
+    }
+    .provenance-overlay.provenance-overlay--hover .provenance-overlay__dialog .provenance-overlay__close {
+      pointer-events: auto;
+    }
+    .provenance-overlay.provenance-overlay--hover .provenance-overlay__dialog .provenance-overlay__kicker,
+    .provenance-overlay.provenance-overlay--hover .provenance-overlay__dialog .provenance-overlay__headline,
+    .provenance-overlay.provenance-overlay--hover .provenance-overlay__dialog .chart-tooltip__meta {
+      pointer-events: none;
+    }
+    .provenance-overlay.provenance-overlay--hover .provenance-overlay__dialog #prov-overlay-body {
+      pointer-events: auto;
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: auto;
     }
     .provenance-overlay__dialog {
       position: fixed;
@@ -668,21 +694,173 @@
       }
     }
 
-    function openProvenanceOverlay(month, project, activity, bbox, fallbackRect) {
+    /** Leaving the heatmap (gap before the floating panel) fires plotly_unhover immediately; defer cleanup
+     *  so the pointer can reach #chart-tooltip or the provenance dialog. */
+    const MATRIX_HOVER_EXIT_MS = 250;
+    /** Padded hit slop around last cell + panels so fast moves don’t hide UI before tooltip/dialog repos. */
+    const MATRIX_HOVER_EXIT_SLOP_PX = 120;
+    let matrixHoverExitTimer = null;
+    let lastPointerClientX = -1;
+    let lastPointerClientY = -1;
+    let lastPointerPageX = -1;
+    let lastPointerPageY = -1;
+
+    (function bindGlobalPointerTrail() {
+      const rec = (e) => {
+        lastPointerClientX = e.clientX;
+        lastPointerClientY = e.clientY;
+        lastPointerPageX = e.pageX;
+        lastPointerPageY = e.pageY;
+      };
+      window.addEventListener('pointermove', rec, { passive: true, capture: true });
+      window.addEventListener('pointerdown', rec, { passive: true, capture: true });
+    })();
+
+    function cancelMatrixHoverExit() {
+      if (matrixHoverExitTimer != null) {
+        clearTimeout(matrixHoverExitTimer);
+        matrixHoverExitTimer = null;
+      }
+    }
+
+    function shouldDeferMatrixHoverExitCleanup() {
+      const cx = lastPointerClientX;
+      const cy = lastPointerClientY;
+      const pad = MATRIX_HOVER_EXIT_SLOP_PX;
+      if (cx >= 0 && cy >= 0) {
+        const el = document.elementFromPoint(cx, cy);
+        if (el) {
+          if (el.closest('#matrix-chart')) return true;
+          if (el.closest('#matrix-labels')) return true;
+          if (el.closest('#chart-tooltip')) return true;
+          if (el.closest('.provenance-overlay__dialog')) return true;
+        }
+      }
+      const ch = document.getElementById('matrix-chart');
+      const b = ch && ch._lastMatrixCellBboxPage;
+      if (b && lastPointerPageX >= 0 && lastPointerPageY >= 0) {
+        const px = lastPointerPageX;
+        const py = lastPointerPageY;
+        if (px >= b.x0 - pad && px <= b.x1 + pad && py >= b.y0 - pad && py <= b.y1 + pad) return true;
+      }
+      const tt = document.getElementById('chart-tooltip');
+      if (tt && tt.style.display === 'block' && cx >= 0 && cy >= 0) {
+        const r = tt.getBoundingClientRect();
+        if (cx >= r.left - pad && cx <= r.right + pad && cy >= r.top - pad && cy <= r.bottom + pad) return true;
+      }
+      const po = document.getElementById('provenance-overlay');
+      if (po && !po.hidden && cx >= 0 && cy >= 0) {
+        const dlg = po.querySelector('.provenance-overlay__dialog');
+        if (dlg) {
+          const r = dlg.getBoundingClientRect();
+          if (cx >= r.left - pad && cx <= r.right + pad && cy >= r.top - pad && cy <= r.bottom + pad) return true;
+        }
+      }
+      return false;
+    }
+
+    function runMatrixHoverExitCleanup() {
+      if (shouldDeferMatrixHoverExitCleanup()) {
+        scheduleMatrixHoverExit();
+        return;
+      }
+      const ml = document.getElementById('matrix-labels');
+      const ch = document.getElementById('matrix-chart');
+      if (ch) ch._lastMatrixCellBboxPage = null;
+      if (ml) Array.from(ml.children).forEach((el) => el.classList.remove('hover-row-affordance'));
+      hideChartTooltip();
+      const po = document.getElementById('provenance-overlay');
+      if (po && !po.hidden && po.classList.contains('provenance-overlay--hover')) {
+        closeProvenanceOverlay();
+      }
+      if (ch) ch._matrixHoverBandKey = '';
+      const j = ch && ch._matrixHoverBaseShapesJson;
+      if (ch && j) {
+        try {
+          Plotly.relayout(ch, { shapes: JSON.parse(j) });
+        } catch (e) { /* ignore */ }
+      }
+    }
+
+    function scheduleMatrixHoverExit() {
+      cancelMatrixHoverExit();
+      matrixHoverExitTimer = setTimeout(() => {
+        matrixHoverExitTimer = null;
+        runMatrixHoverExitCleanup();
+      }, MATRIX_HOVER_EXIT_MS);
+    }
+
+    function openProvenanceOverlay(month, project, activity, bbox, fallbackRect, opts) {
+      const options = opts || {};
+      const mode = options.mode === 'hover' ? 'hover' : 'click';
       const root = document.getElementById('provenance-overlay');
       const chart = document.getElementById('matrix-chart');
+      const dialog = root && root.querySelector('.provenance-overlay__dialog');
       const prov = typeof provenanceData !== 'undefined' ? provenanceData : null;
       if (!root || typeof ProvenanceView === 'undefined' || !prov || !prov.monthSources) {
         navigateProvenancePage(month, project, activity);
         return;
       }
+      cancelMatrixHoverExit();
+      const cellKey = `${month}\0${project}\0${activity}`;
+      if (mode === 'hover') {
+        hideChartTooltip();
+        if (
+          chart &&
+          !root.hidden &&
+          root.classList.contains('provenance-overlay--hover') &&
+          chart._provenanceOpenKey === cellKey
+        ) {
+          requestAnimationFrame(() => positionProvenanceDialog(bbox, fallbackRect));
+          return;
+        }
+        if (typeof marked !== 'undefined') {
+          marked.setOptions({ gfm: true, breaks: false });
+        }
+        root.classList.add('provenance-overlay--hover');
+        if (dialog) dialog.setAttribute('aria-modal', 'false');
+        root.removeAttribute('hidden');
+        root.setAttribute('aria-hidden', 'false');
+        if (chart) chart._provenanceOpenKey = cellKey;
+        ProvenanceView.render({
+          month,
+          project,
+          activity,
+          provenanceData: prov,
+          matchesOnly: true,
+          kickerEl: document.getElementById('prov-overlay-kicker'),
+          titleEl: document.getElementById('prov-overlay-title'),
+          metaEl: document.getElementById('prov-overlay-meta'),
+          bodyEl: document.getElementById('prov-overlay-body'),
+        });
+        requestAnimationFrame(() => positionProvenanceDialog(bbox, fallbackRect));
+        return;
+      }
       hideChartTooltip();
+      if (
+        chart &&
+        !root.hidden &&
+        root.classList.contains('provenance-overlay--hover') &&
+        chart._provenanceOpenKey === cellKey
+      ) {
+        root.classList.remove('provenance-overlay--hover');
+        if (dialog) dialog.setAttribute('aria-modal', 'true');
+        clearMatrixHoverBands(chart);
+        requestAnimationFrame(() => {
+          positionProvenanceDialog(bbox, fallbackRect);
+          document.getElementById('prov-overlay-close')?.focus();
+        });
+        return;
+      }
       clearMatrixHoverBands(chart);
+      root.classList.remove('provenance-overlay--hover');
+      if (dialog) dialog.setAttribute('aria-modal', 'true');
       if (typeof marked !== 'undefined') {
         marked.setOptions({ gfm: true, breaks: false });
       }
       root.removeAttribute('hidden');
       root.setAttribute('aria-hidden', 'false');
+      if (chart) chart._provenanceOpenKey = cellKey;
       ProvenanceView.render({
         month,
         project,
@@ -701,7 +879,9 @@
     }
 
     function closeProvenanceOverlay() {
+      cancelMatrixHoverExit();
       const root = document.getElementById('provenance-overlay');
+      const chart = document.getElementById('matrix-chart');
       if (!root) return;
       const dialog = root.querySelector('.provenance-overlay__dialog');
       if (dialog) {
@@ -711,19 +891,27 @@
         dialog.style.height = '';
         dialog.style.overflow = '';
         dialog.style.transition = '';
+        dialog.setAttribute('aria-modal', 'true');
       }
+      root.classList.remove('provenance-overlay--hover');
       root.setAttribute('hidden', '');
       root.setAttribute('aria-hidden', 'true');
+      if (chart) chart._provenanceOpenKey = '';
     }
 
     (function bindProvenanceOverlay() {
       const root = document.getElementById('provenance-overlay');
       if (!root) return;
+      const dialog = root.querySelector('.provenance-overlay__dialog');
       root.querySelector('[data-provenance-dismiss]')?.addEventListener('click', closeProvenanceOverlay);
       document.getElementById('prov-overlay-close')?.addEventListener('click', closeProvenanceOverlay);
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && !root.hidden) closeProvenanceOverlay();
       });
+      if (dialog) {
+        dialog.addEventListener('pointerenter', cancelMatrixHoverExit, true);
+        dialog.addEventListener('pointerleave', scheduleMatrixHoverExit, true);
+      }
     })();
 
     const mileColors = { Prototype: '#80e2a2', Presentation: '#ffba68', PDF: '#d29aff' };
@@ -975,17 +1163,6 @@
         <div class="chart-tooltip__body">
           ${viz}
           ${closingBlock || fallbackDesc}
-        </div>
-      `;
-    }
-
-    function buildActivityRowTooltipHtml(month, project, activityName) {
-      return `
-        <div class="chart-tooltip__kicker">${escapeHtml(month)}</div>
-        <div class="chart-tooltip__title">${escapeHtml(project)}</div>
-        <div class="chart-tooltip__meta">${escapeHtml(activityName)}</div>
-        <div class="chart-tooltip__body">
-          <p class="tt-hint">Click the cell to open the monthly summary with matching lines highlighted.</p>
         </div>
       `;
     }
@@ -1332,7 +1509,9 @@
           if (row && row.type === 'activity') {
             const pt = pickMatrixHoverPoint(event.points);
             const bbox = pt && pt.bbox ? pt.bbox : null;
-            openProvenanceOverlay(xKey, row.project, row.label, bbox, chart.getBoundingClientRect());
+            openProvenanceOverlay(xKey, row.project, row.label, bbox, chart.getBoundingClientRect(), {
+              mode: 'click'
+            });
           }
         });
         chart.on('plotly_hover', (ev) => {
@@ -1345,16 +1524,19 @@
           const xKey = typeof pt.x === 'string' ? pt.x : String(pt.x);
           const idx = rows.findIndex(r => r.key === yKey || r.key === pt.y);
           if (idx < 0) {
-            Array.from(ml.children).forEach(el => el.classList.remove('hover-row-affordance'));
-            chart._matrixHoverBandKey = '';
-            hideChartTooltip();
-            const j = chart._matrixHoverBaseShapesJson;
-            if (j) {
-              try {
-                Plotly.relayout(chart, { shapes: JSON.parse(j) });
-              } catch (e) { /* ignore */ }
-            }
+            scheduleMatrixHoverExit();
             return;
+          }
+          cancelMatrixHoverExit();
+          if (pt.bbox) {
+            chart._lastMatrixCellBboxPage = {
+              x0: pt.bbox.x0,
+              y0: pt.bbox.y0,
+              x1: pt.bbox.x1,
+              y1: pt.bbox.y1
+            };
+          } else {
+            chart._lastMatrixCellBboxPage = null;
           }
           const kids = ml.children;
           for (let i = 0; i < kids.length; i++) {
@@ -1365,11 +1547,19 @@
           const globalMonthIdx = localMonthIdx >= 0 ? (visibleStartIdx + localMonthIdx) : -1;
           let tooltipHtml = '';
           if (row.type === 'project' && globalMonthIdx >= 0) {
+            const po = document.getElementById('provenance-overlay');
+            if (po && !po.hidden && po.classList.contains('provenance-overlay--hover')) {
+              closeProvenanceOverlay();
+            }
             tooltipHtml = buildProjectRowTooltipHtml(xKey, row.project, globalMonthIdx);
           } else if (row.type === 'activity' && localMonthIdx >= 0) {
-            tooltipHtml = buildActivityRowTooltipHtml(xKey, row.project, row.label);
+            openProvenanceOverlay(xKey, row.project, row.label, pt.bbox, chart.getBoundingClientRect(), {
+              mode: 'hover'
+            });
           }
-          showChartTooltip(tooltipHtml, pt.bbox, chart.getBoundingClientRect());
+          if (tooltipHtml) {
+            showChartTooltip(tooltipHtml, pt.bbox, chart.getBoundingClientRect());
+          }
           const json = chart._matrixHoverBaseShapesJson;
           if (!json) return;
           const bandKey = `${idx}\0${xKey}`;
@@ -1390,17 +1580,7 @@
           }
         });
         chart.on('plotly_unhover', () => {
-          const ml = document.getElementById('matrix-labels');
-          if (!ml) return;
-          Array.from(ml.children).forEach(el => el.classList.remove('hover-row-affordance'));
-          hideChartTooltip();
-          const ch = document.getElementById('matrix-chart');
-          if (ch) ch._matrixHoverBandKey = '';
-          const j = ch && ch._matrixHoverBaseShapesJson;
-          if (!ch || !j) return;
-          try {
-            Plotly.relayout(ch, { shapes: JSON.parse(j) });
-          } catch (e) { /* ignore */ }
+          scheduleMatrixHoverExit();
         });
       });
 
