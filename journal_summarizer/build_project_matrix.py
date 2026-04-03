@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Build the `data` payload for `visualizations/project-matrix-all-summaries.html`
-from tagged monthly summaries (`summaries/*.md`).
+from tagged monthly summaries (`summaries/*.md`), plus provenance data for the drill-down page.
 
 Usage (from repo root or this directory):
     python build_project_matrix.py
@@ -193,6 +193,7 @@ ACTIVITY_RULES: List[Tuple[str, Tuple[str, ...]]] = [
     ("Community & social surfaces", (r"community hub", r"guild", r"social", r"forum")),
     ("Email & newsletters", (r"newsletter", r"mailchimp", r"subscribe", r"email blast")),
     ("Analytics & measurement", (r"analytics", r"\bseo\b", r"funnel", r"metrics", r"instrumentation")),
+    ("Operations & runbooks", (r"runbook", r"checklist", r"speed test", r"gateway", r"router", r"disk management", r"mount point", r"drive letter", r"filesystem")),
     ("CMS & publishing", (r"\bcms\b", r"confluence", r"publishing", r"boilerplate", r"content matrix")),
     ("Templates & page systems", (r"template", r"layout system", r"responsive", r"breakpoint")),
     ("Navigation & hubs", (r"\bhub\b", r"navigation", r"breadcrumb", r"tab switcher", r"wayfinding")),
@@ -212,7 +213,7 @@ ACTIVITY_RULES: List[Tuple[str, Tuple[str, ...]]] = [
     ("Immersive & installation", (r"immersive", r"cinechamber", r"projection", r"niagara", r"sequencer")),
     ("Audio & hardware studio", (r"\brack\b", r"\baudio\b", r"midi", r"cable map", r"controller")),
     ("Accessibility", (r"a11y", r"accessibility", r"screen reader", r"wcag")),
-    ("Documentation & specs", (r"documentation", r"design doc", r"spec\b", r"readme", r"style guide")),
+    ("Documentation & specs", (r"documentation", r"design doc", r"spec\b", r"readme", r"style guide", r"status doc", r"audit summary", r"acceptance criteria", r"implementation notes")),
     ("Prototyping & wireframes", (r"prototype", r"wireframe", r"mock-?up", r"figma", r"\bxd\b")),
     ("Presentations & critiques", (r"presentation", r"slide", r"keynote", r"critique", r"town hall")),
     ("Meetings & coordination", (r"1:1", r"stand-?up", r"\bmeeting\b", r"sync\b", r"retro")),
@@ -230,6 +231,7 @@ PROJECT_PREFIX_RULES: Dict[str, List[Tuple[str, Tuple[str, ...]]]] = {
         ("Site build & CMS", (r"flywheel", r"squarespace", r"wordpress", r"portfolio site")),
     ],
     "OPS": [
+        ("Operations & runbooks", (r"nas", r"drive", r"migration", r"backup", r"restore", r"throughput", r"bandwidth", r"disk", r"users/gary")),
         ("Keyboard & desk hardware", (r"keyboard", r"switch\b", r"desk setup")),
     ],
     "Project Ansible": [
@@ -286,15 +288,32 @@ def extract_closing_paragraph_html(text: str) -> str:
 
 def parse_month_file(
     path: Path,
-) -> Tuple[str, Counter, Dict[str, Counter], str, Dict[str, Dict[str, int]]]:
+) -> Tuple[
+    str,
+    str,
+    Counter,
+    Dict[str, Counter],
+    str,
+    Dict[str, Dict[str, int]],
+    Dict[str, Dict[str, List[str]]],
+]:
     """
-    Returns (month_key, tag_totals, per_tag_activity_counts, closing_paragraph_html, per_tag_lifecycle_counts).
+    Returns (
+        month_key,
+        full_file_text,
+        tag_totals,
+        per_tag_activity_counts,
+        closing_paragraph_html,
+        per_tag_lifecycle_counts,
+        per_tag_activity_lines (verbatim bullet lines per activity bucket),
+    ).
     """
     stem = path.stem
     text = path.read_text(encoding="utf-8", errors="replace")
     tag_totals: Counter = Counter()
     tag_activity: Dict[str, Counter] = defaultdict(Counter)
     tag_lifecycle: Dict[str, Dict[str, int]] = defaultdict(_empty_lifecycle_counts)
+    tag_activity_lines: Dict[str, Dict[str, List[str]]] = defaultdict(lambda: defaultdict(list))
     closing_paragraph_html = extract_closing_paragraph_html(text)
 
     for line in text.splitlines():
@@ -310,8 +329,13 @@ def parse_month_file(
         tag_activity[raw_tag][bucket] += 1
         stage = lifecycle_stage_for_line(raw_tag, desc)
         tag_lifecycle[raw_tag][stage] += 1
+        tag_activity_lines[raw_tag][bucket].append(line.rstrip("\n"))
 
-    return stem, tag_totals, dict(tag_activity), closing_paragraph_html, dict(tag_lifecycle)
+    lines_out: Dict[str, Dict[str, List[str]]] = {
+        tag: {act: list(lines) for act, lines in acts.items()}
+        for tag, acts in tag_activity_lines.items()
+    }
+    return stem, text, tag_totals, dict(tag_activity), closing_paragraph_html, dict(tag_lifecycle), lines_out
 
 
 def _count_to_intensity(s: int, max_s: int) -> int:
@@ -421,6 +445,8 @@ def dominant_runs(months: List[str], projects: List[str], project_scores: Dict[s
 def build_payload(summaries_dir: Path, intensity_mode: str = "volume") -> Dict[str, Any]:
     files = sorted(summaries_dir.glob("*.md"))
     months: List[str] = []
+    per_month_full_text: List[str] = []
+    per_month_tag_activity_lines: List[Dict[str, Dict[str, List[str]]]] = []
     per_month_tags: List[Dict[str, Counter]] = []
     per_month_activities: List[Dict[str, Dict[str, int]]] = []
     month_closing_html: List[str] = []
@@ -432,15 +458,16 @@ def build_payload(summaries_dir: Path, intensity_mode: str = "volume") -> Dict[s
     grand_totals: Counter = Counter()
 
     for path in files:
-        month, tag_totals, tag_act, closing_html, tag_lc = parse_month_file(path)
+        month, full_text, tag_totals, tag_act, closing_html, tag_lc, tag_lines = parse_month_file(path)
         months.append(month)
+        per_month_full_text.append(full_text)
+        per_month_tag_activity_lines.append(tag_lines)
         per_month_tags.append(tag_totals)
         per_month_activities.append({k: dict(v) for k, v in tag_act.items()})
         month_closing_html.append(closing_html)
         per_month_tag_lifecycle.append(tag_lc)
         grand_totals.update(tag_totals)
-        text = path.read_text(encoding="utf-8", errors="replace")
-        p, r, d = strict_flags_for_text(text)
+        p, r, d = strict_flags_for_text(full_text)
         strict_proto.append(p)
         strict_pres.append(r)
         strict_pdf.append(d)
@@ -518,6 +545,18 @@ def build_payload(summaries_dir: Path, intensity_mode: str = "volume") -> Dict[s
         )
         project_activities[p] = activities
 
+    month_sources: Dict[str, str] = {months[i]: per_month_full_text[i] for i in range(n)}
+    activity_provenance: Dict[str, Dict[str, List[List[str]]]] = {}
+    for p in projects:
+        dname = DISPLAY_NAMES[p]
+        activity_provenance[dname] = {}
+        for act in project_activities[p]:
+            act_name = act["name"]
+            activity_provenance[dname][act_name] = [
+                list(per_month_tag_activity_lines[mi].get(p, {}).get(act_name, []))
+                for mi in range(n)
+            ]
+
     # Match Plotly heatmap xgap (~2) + cell body (~40px) in project-matrix-all-summaries.html.
     cell_w, gap = 40, 2
     heat_w = n * (cell_w + gap) + 80
@@ -540,6 +579,8 @@ def build_payload(summaries_dir: Path, intensity_mode: str = "volume") -> Dict[s
         "descriptions": descriptions,
         "projectScores": {DISPLAY_NAMES[p]: project_scores[p] for p in projects},
         "projectActivities": {DISPLAY_NAMES[p]: project_activities[p] for p in projects},
+        "monthSources": month_sources,
+        "activityProvenance": activity_provenance,
         "activityHints": {DISPLAY_NAMES[p]: activity_hints[p] for p in projects},
         "activityTopRows": {DISPLAY_NAMES[p]: activity_top_rows[p] for p in projects},
         "monthClosingHtml": month_closing_html,
@@ -575,7 +616,9 @@ def strip_builder_only_keys(payload: Dict[str, Any]) -> Dict[str, Any]:
     return out
 
 
-def splice_html(html_path: Path, payload: Dict[str, Any]) -> None:
+def splice_html(
+    html_path: Path, payload: Dict[str, Any], provenance: Dict[str, Any] | None = None
+) -> None:
     text = html_path.read_text(encoding="utf-8")
     start = text.find("const data = ")
     if start < 0:
@@ -585,8 +628,27 @@ def splice_html(html_path: Path, payload: Dict[str, Any]) -> None:
     if end < 0:
         raise SystemExit(f"Could not find splice end marker in {html_path}")
     json_blob = json.dumps(payload, separators=(",", ":"), ensure_ascii=False)
-    new_text = text[:start] + json_blob + text[end:]
+    prov_insert = ""
+    if provenance is not None:
+        prov_json = json.dumps(provenance, separators=(",", ":"), ensure_ascii=False)
+        prov_insert = f";\n    const provenanceData = {prov_json}"
+    new_text = text[:start] + json_blob + prov_insert + text[end:]
     html_path.write_text(new_text, encoding="utf-8")
+
+
+def splice_provenance_html(html_path: Path, prov: Dict[str, Any]) -> None:
+    text = html_path.read_text(encoding="utf-8")
+    start_marker = "const provenanceData = "
+    end_marker = "// __PROVENANCE_DATA_END__"
+    start = text.find(start_marker)
+    if start < 0:
+        raise SystemExit(f"Could not find `{start_marker}` in {html_path}")
+    start += len(start_marker)
+    end = text.find(end_marker, start)
+    if end < 0:
+        raise SystemExit(f"Could not find `{end_marker}` in {html_path}")
+    json_blob = json.dumps(prov, separators=(",", ":"), ensure_ascii=False)
+    html_path.write_text(text[:start] + json_blob + text[end:], encoding="utf-8")
 
 
 def main() -> None:
@@ -603,6 +665,12 @@ def main() -> None:
         default=Path(__file__).resolve().parent / "visualizations" / "project-matrix-all-summaries.html",
         help="HTML file to patch with generated JSON",
     )
+    ap.add_argument(
+        "--provenance",
+        type=Path,
+        default=Path(__file__).resolve().parent / "visualizations" / "provenance.html",
+        help="Provenance drill-down HTML file to patch with monthSources + activityProvenance",
+    )
     ap.add_argument("--stdout", action="store_true", help="Print JSON only; do not patch HTML")
     ap.add_argument(
         "--intensity-mode",
@@ -618,7 +686,13 @@ def main() -> None:
         sys.exit(1)
 
     raw = build_payload(args.summaries, intensity_mode=args.intensity_mode)
-    payload = strip_builder_only_keys(raw)
+    prov_subset = {
+        "months": raw["months"],
+        "monthSources": raw["monthSources"],
+        "activityProvenance": raw["activityProvenance"],
+    }
+    matrix_raw = {k: v for k, v in raw.items() if k not in ("monthSources", "activityProvenance")}
+    payload = strip_builder_only_keys(matrix_raw)
 
     if args.stdout:
         json.dump(payload, sys.stdout, indent=2, ensure_ascii=False)
@@ -629,8 +703,15 @@ def main() -> None:
         print(f"Missing HTML file: {args.html}", file=sys.stderr)
         sys.exit(1)
 
-    splice_html(args.html, payload)
-    print(f"Wrote data -> {args.html} ({payload['summaryCount']} summaries, {len(payload['months'])} months)")
+    splice_html(args.html, payload, prov_subset)
+    if not args.provenance.is_file():
+        print(f"Missing provenance HTML: {args.provenance}", file=sys.stderr)
+        sys.exit(1)
+    splice_provenance_html(args.provenance, prov_subset)
+    print(
+        f"Wrote data -> {args.html} ({payload['summaryCount']} summaries, {len(payload['months'])} months); "
+        f"provenance -> {args.provenance}"
+    )
 
 
 if __name__ == "__main__":
