@@ -1,5 +1,7 @@
 /**
  * Shared cell provenance UI: monthly summary markdown → HTML with per-line highlights.
+ * Matrix overlay (`matchesOnly`): same ### sections as the month file, only lines relevant
+ * to the selected activity (no highlight styling). Full page view keeps the whole summary.
  * Depends on global `marked` (https://marked.js.org) loaded before this script.
  */
 (function (global) {
@@ -135,7 +137,31 @@
     return out;
   }
 
-  function renderSummaryBody(bodyEl, source, hlSet) {
+  /**
+   * Monthly files end with `---` then a short narrative paragraph; show that first in the overlay.
+   * Uses the last `---` line only so an accidental rule earlier does not split the doc.
+   */
+  function splitClosingSummaryParagraph(source) {
+    var lines = source.split('\n');
+    var ruleIdx = -1;
+    for (var k = lines.length - 1; k >= 0; k--) {
+      if (/^---\s*$/.test(lines[k].trim())) {
+        ruleIdx = k;
+        break;
+      }
+    }
+    if (ruleIdx < 0) {
+      return { lead: '', detail: source };
+    }
+    var lead = lines.slice(ruleIdx + 1).join('\n').trim();
+    var detail = lines.slice(0, ruleIdx).join('\n').trimEnd();
+    if (lead) {
+      return { lead: lead, detail: detail };
+    }
+    return { lead: '', detail: detail };
+  }
+
+  function renderSummaryParts(source, hlSet) {
     var lines = source.split('\n');
     var parts = [];
     var i = 0;
@@ -166,10 +192,158 @@
         i++;
         continue;
       }
-      var inner = parseLineMarkdown(trimmed);
+      var innerMd = parseLineMarkdown(trimmed);
       var cls = hl ? 'summary-block summary-block--hl' : 'summary-block';
-      parts.push('<div class="' + cls + '">' + inner + '</div>');
+      parts.push('<div class="' + cls + '">' + innerMd + '</div>');
       i++;
+    }
+    return parts;
+  }
+
+  function renderSummaryBody(bodyEl, source, hlSet) {
+    var split = splitClosingSummaryParagraph(source);
+    var chunks = [];
+    if (split.lead) {
+      chunks = chunks.concat(renderSummaryParts(split.lead, hlSet));
+      if (split.detail) {
+        chunks.push('<hr class="summary-body-lead-divider" aria-hidden="true" />');
+        chunks = chunks.concat(renderSummaryParts(split.detail, hlSet));
+      }
+    } else {
+      chunks = renderSummaryParts(split.detail, hlSet);
+    }
+    bodyEl.innerHTML = chunks.join('');
+  }
+
+  /**
+   * Flat list: file order, then highlight strings missing from file. Used as overlay fallback.
+   */
+  function orderedMatchingLines(source, hlSet, highlights) {
+    var ordered = [];
+    var seenNorm = new Set();
+    var lines = source.split('\n');
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i];
+      var t = line.trim();
+      if (!t || /^---\s*$/.test(t)) continue;
+      var n = normLine(line);
+      if (n && hlSet.has(n) && !seenNorm.has(n)) {
+        seenNorm.add(n);
+        ordered.push(t);
+      }
+    }
+    for (var j = 0; j < highlights.length; j++) {
+      var h = highlights[j];
+      var nh = normLine(h);
+      if (nh && !seenNorm.has(nh)) {
+        seenNorm.add(nh);
+        ordered.push(String(h).trim());
+      }
+    }
+    return ordered;
+  }
+
+  function renderFlatMatchFallback(bodyEl, source, hlSet, highlights) {
+    var rows = orderedMatchingLines(source, hlSet, highlights);
+    if (rows.length === 0) {
+      bodyEl.innerHTML =
+        '<span class="empty">No matching lines found in the summary for this month.</span>';
+      return;
+    }
+    var parts = rows.map(function (trimmed) {
+      return '<div class="summary-block">' + parseLineMarkdown(trimmed) + '</div>';
+    });
+    bodyEl.innerHTML = parts.join('');
+  }
+
+  /**
+   * Matrix overlay: keep ### section headings from the month file, but only bullets that match
+   * this cell’s provenance (everything else hidden). No highlight chrome. Stops at --- (closing
+   * narrative omitted). If no section matches structurally, falls back to a flat line list.
+   */
+  function renderFilteredOverlayBody(bodyEl, source, hlSet, highlights) {
+    var lines = source.split('\n');
+    var parts = [];
+    var i = 0;
+    var n = lines.length;
+    var noHl = new Set();
+
+    function flushSection(headingTrimmed, matchedTrimmedLines) {
+      if (matchedTrimmedLines.length === 0) return;
+      parts.push('<div class="summary-block">' + parseLineMarkdown(headingTrimmed) + '</div>');
+      for (var k = 0; k < matchedTrimmedLines.length; k++) {
+        parts.push('<div class="summary-block">' + parseLineMarkdown(matchedTrimmedLines[k]) + '</div>');
+      }
+    }
+
+    while (i < n) {
+      var line = lines[i];
+      var trimmed = line.trimEnd();
+      var t = trimmed.trim();
+      if (!t) {
+        i++;
+        continue;
+      }
+      if (/^---\s*$/.test(t)) {
+        break;
+      }
+      if (PEOPLE_H3.test(t)) {
+        var sec = parsePeopleSectionLines(lines, i);
+        var matchedEnt = sec.entries.filter(function (e) {
+          var nl = normLine(e.rawLine);
+          return nl && hlSet.has(nl);
+        });
+        if (matchedEnt.length > 0) {
+          parts.push('<div class="summary-block">' + parseLineMarkdown(trimmed) + '</div>');
+          var inner = renderPeopleEntriesHtml(matchedEnt, noHl);
+          if (inner) {
+            parts.push('<div class="summary-block summary-block--people">' + inner + '</div>');
+          }
+        }
+        i = sec.endIdx;
+        continue;
+      }
+      if (/^###\s/.test(t)) {
+        var headingLine = trimmed;
+        i++;
+        var matchedLines = [];
+        while (i < n) {
+          var L = lines[i];
+          var Te = L.trim();
+          if (!Te) {
+            i++;
+            continue;
+          }
+          if (/^---\s*$/.test(Te)) {
+            break;
+          }
+          if (/^###\s/.test(Te)) {
+            break;
+          }
+          var nrm = normLine(L);
+          if (nrm && hlSet.has(nrm)) {
+            matchedLines.push(Te);
+          }
+          i++;
+        }
+        flushSection(headingLine, matchedLines);
+        continue;
+      }
+      var nrm2 = normLine(line);
+      if (nrm2 && hlSet.has(nrm2)) {
+        parts.push('<div class="summary-block">' + parseLineMarkdown(t) + '</div>');
+      }
+      i++;
+    }
+
+    if (parts.length === 0 && highlights && highlights.length > 0) {
+      renderFlatMatchFallback(bodyEl, source, hlSet, highlights);
+      return;
+    }
+    if (parts.length === 0) {
+      bodyEl.innerHTML =
+        '<span class="empty">No matching lines found in the summary for this month.</span>';
+      return;
     }
     bodyEl.innerHTML = parts.join('');
   }
@@ -183,6 +357,7 @@
     const metaEl = options.metaEl;
     const bodyEl = options.bodyEl;
     const provenanceData = options.provenanceData || {};
+    const matchesOnly = Boolean(options.matchesOnly);
 
     if (!bodyEl) return { ok: false, error: 'Missing body element' };
 
@@ -202,8 +377,9 @@
     const source = (provenanceData.monthSources && provenanceData.monthSources[month]) || '';
     const prov = provenanceData.activityProvenance && provenanceData.activityProvenance[project];
     const series = prov && prov[activity];
-    const highlights = series && mi >= 0 && mi < series.length ? series[mi] : [];
-    const hlSet = new Set((highlights || []).map(normLine));
+    const rawHl = series && mi >= 0 && mi < series.length ? series[mi] : null;
+    const highlights = Array.isArray(rawHl) ? rawHl : [];
+    const hlSet = new Set(highlights.map(normLine));
 
     if (kickerEl) kickerEl.textContent = month;
     if (titleEl) titleEl.textContent = project;
@@ -214,13 +390,24 @@
       return { ok: true };
     }
 
-    renderSummaryBody(bodyEl, source, hlSet);
+    if (matchesOnly) {
+      if (highlights.length === 0) {
+        bodyEl.innerHTML =
+          '<span class="empty">No matching lines for this activity in this month.</span>';
+      } else {
+        renderFilteredOverlayBody(bodyEl, source, hlSet, highlights);
+      }
+    } else {
+      renderSummaryBody(bodyEl, source, hlSet);
+    }
 
-    const first = bodyEl.querySelector('.summary-block--hl, .people-chip--hl');
-    if (first && typeof first.scrollIntoView === 'function') {
-      requestAnimationFrame(function () {
-        first.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-      });
+    if (!matchesOnly) {
+      const first = bodyEl.querySelector('.summary-block--hl, .people-chip--hl');
+      if (first && typeof first.scrollIntoView === 'function') {
+        requestAnimationFrame(function () {
+          first.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        });
+      }
     }
     return { ok: true };
   }

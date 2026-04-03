@@ -1,0 +1,44 @@
+/**
+ * Journal Workbench — shared theme, typography, and 8px layout grid.
+ * Spacing: use --sp-1 (8px) … --sp-6 (48px). Half-step --sp-0-5 (4px) only for hairlines/nudges.
+ */
+:root {
+  --bg: #0d1117;
+  --panel: #141a24;
+  --line: #263242;
+  --text: #edf3fb;
+  --muted: #9dabbc;
+  --track-0: #0d1117;
+  --track-1: #1c2b41;
+  --track-2: #316dca;
+  --track-3: #79c0ff;
+  --prototype: #80e2a2;
+  --presentation: #ffba68;
+  --pdf: #d29aff;
+  --shadow: rgba(0, 0, 0, 0.36);
+  --hl-bg: rgba(49, 109, 202, 0.22);
+  --hl-border: rgba(121, 192, 255, 0.45);
+  /* Slightly softer than pure white for dense bold in markdown */
+  --text-strong-muted: #f0f4fa;
+
+  --sp-0-5: 4px;
+  --sp-1: 8px;
+  --sp-2: 16px;
+  --sp-3: 24px;
+  --sp-4: 32px;
+  --sp-5: 40px;
+  --sp-6: 48px;
+
+  --text-2xs: 9px;
+  --text-xs: 10px;
+  --text-sm: 11px;
+  --text-md: 13px;
+  --text-body: 14px;
+  --text-section: 12px;
+  --text-lg: 18px;
+  --text-xl: 20px;
+  --lh-tight: 1.2;
+  --lh-snug: 1.35;
+  --lh-body: 1.55;
+  --lh-body-relaxed: 1.58;
+}
