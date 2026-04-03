@@ -654,24 +654,25 @@
       chartTooltip.innerHTML = '';
     }
 
-    function showChartTooltip(html, anchorRect) {
+    function showChartTooltip(html, bbox, fallbackRect) {
       if (!chartTooltip || !html) return;
       chartTooltip.innerHTML = html;
       chartTooltip.style.display = 'block';
 
       const pad = 12;
-      const rect = anchorRect || { left: pad, right: window.innerWidth - pad, top: pad, bottom: window.innerHeight - pad };
-      const tipRect = chartTooltip.getBoundingClientRect();
-      let left = rect.right - tipRect.width - 16;
-      let top = rect.top + 16;
+      const rect = fallbackRect || { left: pad, right: pad, top: pad, bottom: pad };
+      let left = bbox ? (bbox.x1 - window.scrollX + 14) : (rect.right + 14);
+      let top = bbox ? (bbox.y0 - window.scrollY - 2) : rect.top;
 
-      if (left < rect.left + 16) {
-        left = Math.max(pad, window.innerWidth - tipRect.width - pad);
+      const tipRect = chartTooltip.getBoundingClientRect();
+      if (left + tipRect.width > window.innerWidth - pad) {
+        left = bbox ? (bbox.x0 - window.scrollX - tipRect.width - 14) : (window.innerWidth - tipRect.width - pad);
       }
-      if (left + tipRect.width > window.innerWidth - pad) left = window.innerWidth - tipRect.width - pad;
-      if (top + tipRect.height > window.innerHeight - pad) top = window.innerHeight - tipRect.height - pad;
-      if (top < pad) top = pad;
       if (left < pad) left = pad;
+      if (top + tipRect.height > window.innerHeight - pad) {
+        top = window.innerHeight - tipRect.height - pad;
+      }
+      if (top < pad) top = pad;
 
       chartTooltip.style.left = `${Math.round(left)}px`;
       chartTooltip.style.top = `${Math.round(top)}px`;
@@ -1016,8 +1017,7 @@
             const rawCount = row.rawMonthly && row.rawMonthly[localMonthIdx];
             tooltipHtml = buildActivityRowTooltipHtml(xKey, row.project, row.label, rawCount || 0);
           }
-          const matrixViewport = document.getElementById('matrix-scroll');
-          showChartTooltip(tooltipHtml, matrixViewport ? matrixViewport.getBoundingClientRect() : chart.getBoundingClientRect());
+          showChartTooltip(tooltipHtml, pt.bbox, chart.getBoundingClientRect());
           const json = chart._matrixHoverBaseShapesJson;
           if (!json) return;
           const bandKey = `${idx}\0${xKey}`;
