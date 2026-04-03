@@ -1,0 +1,1814 @@
+
+
+2020-01-24 11:57:30
+
+DESCRIPTION OF CONSULTING SERVICES
+Consultant will be required to report to the CEO concerning the services performed under this agreement. The nature and frequency of tyhese reports will be left to the4 discretion of the CEO
+
+- Work with RPVR to develop content SDK draft user stories- MVP features document
+
+- Work with the team as needed to develop the Volumetric Show document and user interface concept doc
+
+- Work with RPVR team on Technical Validation of Niagara as UI framework and under the direction of Olaf in regards to performance
+
+- Develop, document, design, and implement custom overview of UI requirements in collaboration with our Creative Director for public release and potentially beyond including the UI contemplated in Dose 1 and 2, as well as follow on Doses or other content
+
+- Collaborate with RPVR leadership a clear set of initial priorities based on the above high level and immediate objectives
+
+
+
+2020-01-24 11:58:40
+NEXT
+x follow up w Laurent - thank him for this opportunity
+x follow up w Khoi for Slack/P4 access
+
+2020-01-24 14:11:33
+identify stakeholders for interviewing about the project Khoi and I are chatting a bit later, base strategy on that conversation/
+
+I'm trying to get into the mindset of the project and understand where it stands and where its going.
+
+That affects my approach to designing UX/UI - simply identifying the users. I need to begin by listening. Is everyone working on the same project? How much bigger is it than believed? Where does it need attention?
+
+Who are the stakeholders?
+
+At this time I don't understand what valuable research or observation means. I want to understand this to document the MVP event on April 2  to gain insights avd validate  functionality.
+
+The Volumetric show is multidimensional. Its not just about the VR. The event would be amazing without VR. What signals can we listen for in this space. What signals can we send, and why would we want to send a signal at all?
+
+Put another way how can we make it easy to remember and talk about
+
+photo opportunities
+- how to reconfigure the space
+collateral?
+- one sheet?
+-  fineart from in-world image capture
+-  personal prints? selfies? photo-mode?
+-  stickers? (nice ones)
+social?
+- photo mode>
+- share to?
+- stream from?
+    + similar to in-world portal, but streamed imagery from web through webcam, twitter, IG, FB
+- Onboarding
+    + providing guides to get guests in and out of VR
+        * clean the gear
+        * system maintenance
+        *  could there be a guide inside VR as well. A living NPC basically who could help people out or organize/initiate behaviors in the space - a concierge?
+        *  a field guide?
+        *  an actor playing a role?
+
+
+2020-01-27 10:14:33
+meeting with Khoi later
+
+2020-01-27 10:29:16
+Following up with Christian
+
+2020-01-27 11:01:42
+I came across an interesting document for Cat VR (PVRR) It was a parody document for a design studios process but is actually a pretty go0d guide for constructing a synopsis
+
+NEXT
+- construct a presentation template in Google Slides to match the PVRR synopsis
+    + how much of this structure can I use to guide my own work
+- Integrate UE4 with Oculus Rift-S
+- Reach out to MAX for stakeholder interview
+    +  discuss his work on content SDK draft user stories
+    +  how can I help?
+
+
+2020-01-28 11:12:24
+collating my notes from phone calls with Olaf and Khoi. Looking to refine the questions I ask for expediency and insight
+
+SAMPLE SURVEY QUESTIONS
+
+How easy was it to group up with other players and form a team?
+- Extremely easy
+- Somewhat easy
+- Somewhat difficult
+- Extremely difficult
+- I did not group up with other players
+
+Is there anything that you would change to make grouping up easier?
+- text entry
+
+How is your group encouraged to stay together and work together?
+- text entry
+
+What could be done to better encourage grouping up and working together?
+- text entry
+
+Did you feel that you and your team were fighting together as a unit? Or more like a collection of individuals, each with their own objectives?
+- fighting together as unit
+- fighting as collection of individuals
+
+How did the game deliver narrative and story to your entire group? Or did it only deliver the story to you as an individual?
+- text entry
+
+Do you have any additional thoughts or comments?
+- text entry
+
+Do you have any suggestions on improving the playtest/feedback process?
+- text entry
+
+
+SAMPLE SURVEY QUESTIONS
+1. What is the one thing we must get right to make this game’s UX/UI worth undertaking?
+
+    Formally, we must understand the role of multiple presentation layers in the world and in the front end, and must know when, why and how to exploit these patterns fluidly. Put another way, we need to understand and creatively communicate where the Fourth Wall begins and ends. Thematically, as Jared mentioned, we need to approach our Futurism with an understanding of where the technology came from and extend that to our own fiction.
+
+2. How do you all define success in UX? How are we breaking down the areas of responsibility in order to achieve this success?
+
+    I love when creative work gets to a place where it "writes itself". For this project, I define overall success as constructing a vision that is easy to communicate to the public and our industry. Commercial success to me is profitability and popularity while making a personal connection with consumers. I would love to see our UX/UI inspire this industry the way titles such as Dead Space and Horizon Zero Dawn captured my imagination.
+
+    Empathy, Scalability, Accountability and Serendipity are the criteria by which I measure success. Good UX doesn't try to be all things to all people - rather, it has a point of view. That point of view emerges as a synthesis of each of these criteria. As creators within our own disciplines, we see the product differently than our customers, and differently than a journalist or someone in community support. Without identifying those other viewpoints, we fall into the trap of the "elastic user" and speak to no one. 
+
+    Similarly, part of Good UX is identifying patterns through research and observation while supporting the creative pillars of the game. At this early stage, the onboarding materials, games designs and prototyped behaviors we examined are a huge step forward for ZOS in presenting a coherent and inspiring vision to a particular group of "users" - content creators and developers. One challenge ahead of us will be to broaden this footprint.
+
+
+3. What aspects of the internal culture or external environment could put this game’s UX/UI at risk to fail?
+
+    I wanted to take what he had done and add to it! Then see if he liked it! Watching Dave work through game mechanics using the ESO engine seemed very practical to me, but also suspicious. This methodology raised red flags, having used it before as a designer. For me, the ESO system is a closed box which is hard to open. For a UI designer (or any artist) to draw a rectangle onscreen (for example) takes multiple people and a pipeline which is overkill for that designer's needs and purposes. However the new rendering system may be months or years away. Investing time in ESO-style development may be a sunk cost that creates a bottleneck around creativity while promoting a hands-off approach. 
+
+    I feel that a switch to an Unreal-based work environment needs to be prioritized. ZOS has become very familiar with the features and limitations of an existing system but I do not feel that using this system until a finalized new system comes along is the right way to "Think Different" or think long-term. It is important for UX/UI people (and other creators)  to "get skin in the game" so we can better work with our Art, Design, Engineering and Animation teammates. 
+
+    Secondly, I really like the documentation style the team has adopted.  Its great to see such a strong emphasis made on presentation and graphics I keep asking myself, is reliance on Confluence for capturing this type of documentation problematic? Unless documentation is created in Confluence itself, embedded links do not remain live, and worse - are not searchable. Perhaps there is a distinction to be made between documentation for production and preproduction. I can't help looking at alternative solutions such as Google's ecosystem of Docs, Sheets, Slides and so forth, which are broadly used for collaborative document creation, 
+
+4. Assuming we mitigate that risk, what would exceed your wildest dreams?
+
+    Designing within the delivery system offers context and control to a broader audience and a broader group of creators. There are of course other design processes and artifacts. Interactive visualization capability is just a tool. But what an amazing tool! As a designer and developer, I've found great value in mobile dev and webdev processes in which the authoring environments are largely the same as the delivery environment, leading to faster experimentation, easy sharing, more iteration and quicker course correction.
+
+    My hope is that UX/UI can help inform and inspire the design effort and identify behavioral and presentational issues early on. Just once, I would love to avoid overdesigning :) 
+
+    Its not so much a matter of getting it right or wrong, but rather getting to next steps, and informing those steps better. Fior example, traversal, targeting and ability usage are a couple of high frequency areas which rely on layered behaviors from multiple systems (animation, design, engineering, art, UI. There is nothing like seeing this all happening at once in context; being able to "touch" the design as a whole. It lets a designer shift perspectives and think like someone else - an engineer, an artist, a director, a debugger, etc..
+
+    At its best, UX/UI shapes the perception of a product - how it is experienced. How I would love to be able to work directly with a game designer or engineer - to build on their work even as they build on my own - to realize and perhaps even inspire their thinking about their own work
+
+
+2020-01-28 12:00:44
+I am thinking that initially my conversations with Laurent can be supported if I send him sections of mind maps and other visually focused research as I do it, rather than as some final document. If I send him material ahead of time, it will be easier to stay on focus and keep discussions constrained to actions
+
+2020-01-28 12:42:38
+This map is looking more interesting and connected after working on it for a while. I've captured my conversations w Olaf and Khoi, and also extracted some generalized questions for my next conversations
+
+NEXT:
+- setup conversation with Max
+- setup conversation with Niall
+- setup converstion w Jake
+
+
+What is your role at Redpill?
+Why did you join Redpill?
+Describe the MVP Event
+    - Who is this for?
+    - What can we learn from this?
+    - What are the risks?
+What is Redpill selling?
+Who is the competition?
+Who are our partners?
+What are you working on today?
+What do you want to achieve in the next 4 months?
+Name an important thing that this project must accomplish?
+What aspects of the internal culture or the external environment could put this project at risk?
+How do you define success?
+What would exceed your expectations?
+
+2020-01-28 13:42:35
+contacted Jake by email to setup interview
+
+2020-01-29 07:45:31
+I'm unable to access the gmail account that was created for me and followed up with Christian and Jake. I will reach out to Jake for stakeholder interview today. Prior to that I will get in contact with Nghia Lam, who is the person I think I hung out with at the after party during the tech summit
+
+2020-01-29 07:56:17
+reached out to Nghia Lam with introductory email
+
+2020-01-29 07:56:54
+When is Laurent back in the office. I need to speak with him about goals and expectations. I want to be able to share the mapping I've been working on with him to show my thought process. I also need to speak about my current pain points in getting up to speed with the project. 
+
+2020-01-29 14:35:12
+gmail account is up and running
+
+2020-01-29 16:05:10
+Slack is up
+Redpill
+URL: redpillteam.slack.com
+Email: gary.boodhoo@redpillvr.com
+
+2020-01-30 11:23:10
+starting to chat casually w people at LA office
+Nghia reached out to me and share art direction documentation and project plan for MVP show
+I asked him about setting up the demo locally to get that conversation started
+
+2020-01-30 22:44:16
+Worked with Tim Welsh to get P4 and the Unreal development environment setup
+I got in touch with James (Fader) to talk about what he wants to do as a VJ and the challenges & aspirations he's facing. We set up a hangout for tomorrow
+I read up a bit on James and started taking notes for our conversation
+         
+NEXT
+- get in touch w Laurent and setup a chat about my current status
+    - initial payment we agreed upon is overdue
+x meeting with James (Fader)
+- follow up w Tim on environment setup status
+    + verify by runing the SV_Sunset projec t again
+        + The project opens, but when I run it there's a black screen
+        + I can see the Unreal viewer starting up in my headset but it stalls
+        + I can see some network and CPU activity
+- Product meeting with Nghia & Christian
+    + this is where I expect to get specific problems stated and we work to understand my role
+
+
+2020-01-31 12:09:11
+met with James and took notes. He's pretty eager to do a simple button and slider based solution for VJ'ing in Virtual space. Also, his activity strictly will take place in virtual space - he's not controlling the exterior environment
+
+This is my first example of a disconnect between the needs of a stakeholder with a UI environment
+
+I need to get a bit more back story on this matter though. Its not clear to me why what he's requeting can't be prototyped directly in Unreal? For my part all I can do at the moment is sketch it out in VR space using:
+- Tilt Brush
+- Blocks
+- Medium
+- Sketchbox
+
+2020-02-01 17:12:08
+Field notes: Tactics for Engagement
+The goal is to create a slide deck with examples
+I'm also going to locate the UI heuristics document I'd stated several years ago and create a working document from that
+
+
+2020-02-02 10:59:46
+writing up invoice for my retainer payment to send out to Jake & Lauren on Monday am
+
+2020-02-02 13:23:48
+finished and saved invoice for later
+worked a bit on the Tactics for Engagement map
+
+2020-02-02 16:43:20
+Prepping laptop for research and documentation during travel next week
+
+2020-02-03 10:38:27
+Sent starting payment invoice to Laurent. Referred to Tim Baylor for invoicing guidelines. Expecting follow up from him today
+
+Meetings today
+- Backlog refinement (Core Pod)
+- Project setup and questions w Olaf
+- Logging Time & Tasks w Christian
+- Expecting follow-up from Tim. Contact him directly f I havent yet heard anything by 4p
+
+2020-02-03 13:27:01
+https://redpillvr.atlassian.net/secure/RapidBoard.jspa?rapidView=29&selectedIssue=CT-816
+
+There are items labeled here as Menu, Tutorial which all call out UX/UI dependencies
+
+NEXT STEPS
+- look through backlog with Christian at 3:30 meeting
+    + how long is this sprint running?
+- study design docs Nghia shared w me
+
+2020-02-03 13:31:38
+DOCUMENTATION
+
+Define the User
+- Player
+- VJ
+- DJ
+- maintainer
+- engineer
+- producer
+- investor
+
+Tactics of Engagement
+
+2020-02-03 13:44:40
+I'm able to run the lobby project as Unreal VR preview
+
+Chatting w Olaf in a bit
+Wondering if its possible to pull down the demo? If so, how?
+
+
+2020-02-03 16:05:52
+My first task is an in-game menu design for the game. There's pre-existing work on this to be questioned and refined
+
+I told Christian I would look through the JIRA task he created and create subtasks
+
+DAILY
+log time using Tempo
+https://redpillvr.atlassian.net/secure/Dashboard.jspa
+Choose Tempo from left-side menu, Then My Work
+Hover over the timeline and choose Log Time/Plan Time
+
+
+
+NEXT 
+For tomorrow am
+look at JIRA task for menu design, create subtasks and estimates
+https://redpillvr.atlassian.net/browse/CT-848
+
+
+2020-02-04 20:00:30
+I studied the MVP Menu document and chatted a bit with Olivier (Montreal) who had put it together. I took my findings and turned them into subtasks in JIRA. Spoke briefly w Christian, who thanked me for doing so and reminded me to add time estimates. The wifi on the airplane was a bit sketchy, so I'm wishing I had done it there, however I can find time tomorrow during a break to do so.
+
+Tim (finance) advised me on procedure for submitting invoices, which I'm goin to do right now
+
+NEXT
+- add estimates to  MVP Menu subtasks
+
+2020-02-06 19:04:21
+My invoiced starting fee is in the system
+Followed up w Christian on questions about Tutorial design. He referred me to Olivier to discuss text and content. An artist named Ryan will be doing the in-world modeling of the wrist menu
+Some basic UI has been placed in the game in current changelist. Nothing special just floating text in space attached to a keybind
+
+2020-02-09 23:02:26
+Brief chat with Laurent who had provided EXA as a reference. I think we can also use this as a kind of prototyping tool, or maybe simply derive working interactive examples from this. Of all the (3) prototyping tools I've use, this is by far the most creative and complex - allowing even for MIDI output. Its truly interactive, at least in the domain of triggering audio reactive cues.
+
+Evaluated Sketchbox. Its pretty cool. May be exactly what I was looking for to communicate in 3D at low fidelity.
+
+Some interesting new ideas developing in my mind around consumables. They were easy, but I think they are what I was hired to do. Instea dof picking up a capsule and taking a dose, how about: Reach for the capsule, it hatches a snake which curls around your arm. Its rides on your arm until you're ready to use it. You see the snakes on other people, so you know they've got doses too. You activate by touching its head, or pressing a single control on your palm, or bringing your wrist close to your face and looking at your reflection in its eye(!) The snake bites you, or merges with your body and the dose is delivered. The snake can travel from arm to arm when you put your hands together. It bobs its head to the music you hear. The snake can travel to another person. You see snakes on other people, so you know they've got doses too.
+
+Created stub documents to capture my thinking on Wrist menus, tutorials, consumables and some conceptual games.
+
+2020-02-10 09:59:25
+reviewing Oli's updates to Tutorial Menu doc prior to chatting with hime
+
+2020-02-10 12:52:22
+Syncing to latest and running SV_SunsetVR in engine to see if I can come back to it later. Sprint meeting shortly
+
+2020-02-10 13:04:57
+During this sprint meetig ask what does NEED-ST, A, OE mean?
+
+2020-02-10 13:19:45
+Christian literally called out my work as visual development. RPVR isn't looking for me to immediately re-do or maybe even revise the UX. I do need to call out questionable choices where I've found them. Grouping I think is the thing to focus on. 
+
+NEXT
+x Slack chat or meeting w Olivier to discuss content and ideation for tutorial system.
+    - Are panels our only chice or is there an opportunity here to teach by demonstrating (mimicry).
+    - A similar idea is mentioned in the avatar customization doc.
+x Introduce myself to Ryan to frame call for later this week
+- refresh this week's schedule base on Sprint review and/or conversation w Christian
+- verify UE4 build working
+
+2020-02-10 13:26:01
+Christian mentions: We have 8 weeks left. I need to focus my work, UX/docs only needed to provide context and examples. Visual development and layout are the deliverables. Need to get to working in UE4 if I can add value with low cost. WIll talk to Ryan about that
+
+
+LATER
+x Introduce myself to Ryan and speak about the design challenges I'm facing. What's he targeting as an in-world design. Accept advice.
+
+
+2020-02-10 14:52:23
+syncing to latest. Previous effort may have caused a problem, or maybe just an issue w Oculus. Reboot after successful sync.
+
+2020-02-10 16:00:31
+I spent more time getting latest than expected, but its important. I need to be seeing the work in UE4 for baseline reality check. Everything in the last changelist I am prompted to sync seems without incident. Hopefully I can run thbe project in engine
+
+2020-02-10 16:13:13
+Unable to proceed. Need to get my P4 situation resolved tomorrow. Can't spend more time on this today
+
+2020-02-10 16:13:54
+ETA 1h
+x scrub through footage and capture wrist menu reference
+x scrub through footage and capture button and panel reference
+
+NEXT
+x log time for today's work
+- create a dumb wrist menu sketch in Sketchbox just to get started
+- import a simple wireframe into Sketchbox to see how that works
+- get help with syncing to latest
+
+2020-02-11 08:27:10
+attempting game sync
+
+2020-02-11 08:30:37
+logged yesterday's time
+
+2020-02-11 10:14:07
+Brief chat w Tim, he's looking into it. Resyncing to latest just to see what happens. Yeah same 
+
+NEXT
+- get help with syncing to latest
+- create a dumb wrist menu sketch in Sketchbox just to get started
+- import a simple wireframe into Sketchbox to see how that works
+
+2020-02-11 14:56:24
+Finished cleaning my p4 workspace
+UE4 looks like its loading the project after recent sync
+
+2020-02-11 15:11:24
+Project opened, compiling shaders
+
+Failed to load /Game/VirtualReality/Materials/M_SplineArcMat.M_SplineArcMat Referenced by UiButton
+
+2020-02-13 07:41:07
+The SV_Sunset build is working and there are basic UI mechanics for navigating the Avatar Selection UI mirror. Unable to teleport though, and not sure if this is something already built in? What else do I need on this machine? I notice problems when I sync to other builds such as Alien World
+
+Reaching to Julien for advice
+Spending today entirely on the menu design
+
+10.0.76.8:777
+
+
+2020-02-13 09:07:30
+working with Tim to figure out how to teleport into Alien World
+outcome of that conversation
+it's possible to run server from Editor, but need to add something to commandline upon launching the Editor
+there are precompiled builds
+
+2020-02-13 09:45:09
+Didn't occur to me to look at other maps in the SV_Sunset project file
+spoke with Olaf, and got satisfaction on thios. TRhis removes a weight from my shoulders!
+
+2020-02-14 08:09:11
+good analysis and design yesterday. I wasnt sure where I was going when I started recording splitscreen of myself and VR output. I found that the dominant hand if used as-is will cause the arm to (weirdly?) overlap the field of view when pressing buttons attached to non-dominant hand
+
+- one fix to this is to redraw the hands as hand only when they get close to the body (as is the case when interacting w the menu)
+
+I'm starting the spatial mockup
+I want to share this material with the team. but need to be selective. I am wary of posting any design in the wild without talking through it
+- how about setting up a design review for next week Monday?
+    + Ryan
+    + Olivier
+    + Nghia
+    + Christian
+
+2020-02-14 08:35:55
+#Tech-Art (this is being used as a channel for standup. Christian asked me to post here)
+Y: wireframes and metrics for wrist menu (CT-875), Spatial mockup wrist menu (CT-877)
+T: wireframes and metrics for wrist menu (CT-875), Spatial mockup wrist menu (CT-877), Documentation (CT-955)
+Blockers: -
+
+
+2020-02-16 08:10:07
+design review on Monday am
+
+WHAT ARE YOU DOING RIGHT NOW?
+I'm preparing to export the geometry I made in Blender as a .fbx file I can open in Sketchbox
+I'm doing so to increase the fidelity of the wireframe I'm delivering
+I'm also looking to setup a foundation - whether in sketchbox or as "snapshots" or animation and transition states requireing physical motion. 
+
+FOLLOWING THAT
+Import fbx file to Sketchbox. Has that gotten me what I wanted?
+
+I'll take a look at the Illustrator wirfeframes I created
+- cleanup to match current design spec
+- remap flow
+- create artboards to contain the content sections I previously identified
+
+2020-02-16 11:49:58
+Rebuilding scene in Blender, as the exportee doesn't like when the container transform is used, those need to be object edits instead
+
+2020-02-16 15:11:07
+I've rebuild the scene at millimeter scale and added color coding to see if that passes thru with export. Testing that now.
+
+2020-02-16 22:42:11
+captured video stepping through each scene for reference
+NEXT
+x extract screenshots from videocatpure
+x construct wireframe base
+what's the quickest way to do so?
+x reconstruct illustrator 2D from Blender screenshot
+x provide Blender screenshots as visual reference - part of the spatial layout task not the wireframes
+
+2020-02-17 01:54:11
+good work today
+
+NEXT
+
+build slide deck
+gfx for these states
+- Item Focus (Pointing At, Released from being Pointed At)
+- Pressed (What the item does when pressed, When does Pressed trigger Selected)
+- Selected (Item Selected State)
+- Released (No longer being Pressed)
+- Paging Transition (What happens when paging between menus)
+- List Build Transition (What happens when the list is built after page update)
+
+2020-02-17 09:51:26
+ready to present
+meeting postponed to 10:30a
+shared slide deck w CHristian, Ryan, Olivier
+
+2020-02-17 10:04:07
+adding additional slide detailing menu structure in 2D w description text
+
+2020-02-17 10:23:16
+added additional slide describing and linking to Sketchbox
+added additional (rough) menu anatomy slide
+
+2020-02-17 13:11:31
+logged time in JIRA
+
+NEXT
+- review Tutorial UI tasks and create estimates
+x update time log on new spreadsheet
+- meet w Kye-wan Sung to get menu UI built out in UE4
+- follow up w Nghia on the Launcher. Get some background on this effort.
+
+
+2020-02-18 12:26:13
+What do I need to create a single tutorial panel
+- what does it say?
+- what does it look like?
+    - does it use illustrations?
+    - typography
+
+Avatar Calibration
+    - needs picture for (place your arms as in the picture)
+    - need hint attached to controller (re-iterate press any button)
+
+Teleport Locomotion
+    - needs illustration for required action
+    - needs hints attached to controller (push, aim, release) 
+
+Walk Locomotion
+    - needs illustration for required action
+    - needs hints attached to controllers (swing your arms)
+
+Stand in Front of the Mirror
+    - needs illustration for required action
+    - needs extra visual design to draw attention to itself
+
+Choose a Slot (Customize a body part)
+    - must point at target button
+
+Scroll Reflexions Panel
+    - need hints attached to controller
+
+Confirm Panel
+    - must point at target button 
+
+Mirror Tutorial Complete
+    - need illustration(maybe)
+
+Dose Start
+    - need illustration
+    - need controller hint
+
+Group Up
+    - need illustration
+
+[added] High-Five
+    - need copy
+    - need illustration 
+
+Consumable Panel
+    - need illustration
+    - (need to demonstrate how to eat something)
+
+Tutorial Wrapup
+    - need illustration
+
+
+subtasks
+- collate and concept tutorial panel illustrations (12h)
+- design controller hint labels (8h)
+- tutorial panel visual development (12h)
+- tutorial panel template design (8h)
+- tutorial panel spatial mockup (8h)
+
+2020-02-18 17:13:49
+spoke w Nghia about doing him a quick favor for the Turbulence site. He wants to show social badges on the site and integrate their layout and style with the existing mockup
+https://drive.google.com/drive/u/3/folders/1jk-frxfnZeKlY0DXHxWKCNFJysuv2Q6o
+
+after talking it through I advised against hiding those badges behind a navigation - as in the navigation reference he provided
+
+instead we can:
+- place them at the top of the page
+- place them at the bottom of the page
+- add a section in the sidebar under the list of shows to contain them
+- place them in a non scrolling widget at the side
+    + add some style so that on hover the focused item gets bigger
+
+I told him I'd throw together some mockups and get back w him on Wednesday afternoon
+
+2020-02-21 00:02:37
+sent over social badge mockups to Nghia. He's good with what I provided.Asked me to include a specific list of logo assets which it will take me a little time to collate.
+
+Made good progress on splashscreen wireframe. Trying to make it fun, maybe a bit dramatic. You place your hand in the circle of the word "tOuch". Its a portal that expands to replace the world or otherwise transition into the next level.
+
+If there is a delay, it can hold, maybe throbbing (lol) to act as a kind of activity spinner
+
+2020-02-21 07:07:09
+continuing work on splash screen wireframe and adding content to slide deck
+When completed I'll discuss this design w Ryan and Kye.
+
+2020-02-21 13:00:56
+I've completed 1st draft of splashscreen design and cleaned up the deck. Before I share it, what is missing?
+- spatial mockup
+- details about what happens on touch
+    - haptics
+- flow
+
+2020-02-21 15:00:56
+Progress
+x spatial mockup
+x details about what happens on touch
+    x haptics
+x flow
+
+2020-02-23 01:30:05
+added notes on testable criteria to wrist menu design doc
+
+2020-02-23 15:01:16
+logos for Launcher Social badges
+x Twitch
+x Steam
+x Hulu
+x Netflix
+x HBO
+x Amazon
+
+2020-02-23 15:49:16
+finding and collating logos
+
+2020-02-23 16:34:11
+I've collated and added vector art of all the logos in a seperate artboard
+
+2020-02-23 18:28:13
+I've completed the layout
+- export gfx
+
+2020-02-23 21:19:14
+I've exported a PDF doc w my design work and updated Nghia
+
+2020-02-24 07:10:28
+updating splashscreen UI design to incorporate the avatar selection step following the press start step
+
+Why make the user initiate the experience only to present them with a choice? Based on the Main menu, avatar creation needs to be a "place" a user can return to. Similarly Quitting the game or starting the game needs to be its own destination. I don't want to quit the game only to be presented with the choice of avatar calibration, when at that point my journey is over. OK, it makes sense to me then that:
+1. there are 2 steps
+    - press start
+    - avatar calibration
+2. I start the game at PRESS START
+3. I quit out of the the game to PRESS START
+4. PRESS START always leads to CALIBRATION 
+5. I can step into CALIBRATION from the game, and after doing so will return back to the game
+
+2020-02-24 07:58:19
+Sketched expanded flow better integrating CALIBRATION
+
+2020-02-24 08:18:23
+sent sketch over to Olivier for him to think about, Set up chat between he & I at 10a. Following that, I should be able to update the design accordingly, unless there's more to think about.
+
+NEXT
+x setup meeting w Olivier
+x ask Christian about logging time on iterative work
+    + Menu
+    + Splashscreen
+
+2020-02-24 09:55:10
+updated Splashscreen UI flow diagram
+updated editorial text for transition  example. more procedural.
+
+2020-02-24 10:28:10
+create storyboard to supplement flow on Splashscreen UI doc
+
+2020-02-25 08:49:26
+chatting w Oli and Octavian shortly about Tutorials
+
+2020-02-26 13:41:34
+synced to latest
+creating slide deck to capture my thoughts
+
+2020-02-26 14:08:54
+In the process of experiencing/understanding the flow
+
+2020-02-26 17:00:20
+I'm working on capturing video of the current intro experience from UE4
+
+NEXT
+- can I use Unreal for simple spatial mockup?
+
+2020-02-26 17:31:10
+Octavian just added his work on traveling tutorial panel. Syncing to latest now
+
+2020-02-26 18:23:14
+added captures for each stage of the onboarding experience
+
+NEXT
+- label storyboard with proper Tutorial Panel and any further annotations
+- can I use Unreal for simple spatial mockup?
+    + if so - start there
+    + if not - start in sketchbox
+- research panel size vs distance in Oculus Home dash
+
+2020-02-27 00:05:20
+Created a stub UI guide where I'll capture my thoughts. Even in this form though it shows the true scope of this design. I need to look at my task estimates again and rescope after capturing some design ideas first for discussion w Oli & Octavian
+
+I captured a storyboard from the build to put the tutorial steps in context and uncover some solutions to pathfinding and display. I think that there's more to this system than the help panels, although those are certainly central. I think there's less illustration than expected as well. But there are 2 other areas that I think will come into play:
+- Big objective labels - names of each objective
+- Waypoint markers: where to go next
+    + show finished steps in [completed] state
+    + show next steps in [new] state
+    + animated
+
+2020-02-27 07:16:19
+What information can I add to the deck before designing stuff?
+- does this need an illustration?
+- does this need a marker?
+- where are the objectives drawn and how large are they?
+
+REFERENCE
+https://www.dimensions.guide/
+
+2020-02-27 07:42:57
+I captured the new floating panel in UE4 and am using that as a sizing/scale reference for panel layouts. Its currently a 1:1 aspect, around the size of the iPad Pro, squared off to the shorter edge
+
+
+2020-02-28 07:22:47
+Oli sent out this flow, which I'll incorporate into my revised stopryboard now
+
+Step by step of how I see this, to help our discussions:
+
+STEP ZERO: Avatar Calibration
+Let's check this later, flow seems pretty bad right now.
+
+FIRST STEP: Walking (but for now it's teleport)
+Should not see anything near mirror: 
+Should have this: camera panel + in-world pin, but not next to mirror
+As soon as you perform the action displayed on the panel, so before you are actually on the pin, remove the camera panel. So for walk = after a few steps
+COMPLETION
+When you step on the pin
+What happens: 
+Pin is removed  
+follow up message appears and disappears
+then new camera panel appears and new pin appears next to mirror
+
+SECOND STEP: Teleport
+Should have this by now: camera panel + in-world pin next to mirror
+As soon as you perform the action displayed on the panel, so before you are actually on the pin, remove the camera panel. For teleport = as soon as you push the joystick.
+COMPLETION
+When you step on the pin that is next to the mirror
+What happens: 
+Pin is removed   
+Follow up message appears on the mirror
+Then first customization panel appears on the mirror
+
+THIRD STEP: Open customization slot
+Should have this by now: panel on the mirror that tells you to press on a button
+COMPLETION
+After you pressed on the button
+A slot is opened with the reflexions line-up
+A new panel appears on the mirror
+
+FOURTH STEP: Scroll
+Should have this by now: panel on the mirror that tells you how to scroll
+COMPLETION
+After you scrolled and a reflexion landed in front of you
+A new panel appears on the mirror
+
+FIFTH STEP: Confirm
+Should have this by now: panel on the mirror that tells you to confirm
+COMPLETION
+After you pressed confirm
+You are now back at the initial state of the mirror
+A new panel appear telling you that you know how to customize your avatar, turn around when you are ready
+A visual also indicates to turn around
+
+SIXTH STEP: Turn around
+Should have this by now: panel on the mirror + visual that tells you to turn around
+NOTE: If you do NOT turn around and keep customizing, these visuals should disappear and reappear when you are back at the main mirror menu
+COMPLETION
+You turned around
+A pin appears next to the red pill
+
+SEVENTH STEP: Reach the red pill
+Should have this by now: a pin next to the red pill
+COMPLETION
+You reach the red pill
+Pin is removed
+follow up message appears and disappears
+Something appears telling you how to grab (TBD)
+
+EIGHT STEP: Grab the red pill
+TBD
+
+NINTH STEP: Group up and Consumables
+When you spawn into alien world
+Should have this: camera panel showing you how to group up and showing you what is a consumable
+COMPLETION (to discuss)
+Press confirm?
+Move pass a certain point
+
+
+2020-02-28 11:29:06
+panel Ideas I arrived at last night are good direction. I've iterated a bit on the initial design, but not clear if I';ve improved upon it. Meeting w Oli & Octavian at 2p for ongoing discussion. I wabnt to have an updated storyboard ready for that and I can show my WIP on the panel and get sonme thoughts to move it along.
+
+2020-03-01 14:21:09
+Summarized the tutorial flow discussed last week. I had some realizations how to make this simpler. I don't think the overal design for this feature is sound - but its not disastrous either.
+
+The idea of using a Helper panel was a step forward. I'm using it to show information about traversal only. When you teleport and/or walk successfully, the helper is set to a "completed" state, but it doesn't go away
+
+Markers are used to advertise objectives: Pill/Mirror. There are help Panels plaaced at each of these locations for backstory and friwendly help text relevant to being at that location
+
+2020-03-02 07:28:20
+creating invoice for Februrary work
+Dates for time/project worked 
+Hours for time/project
+Rate (monthly)
+
+Y: Tutorial Panel template design (CT-860), Teleport locomotion panel (CT-863), Walk locomotion panel (CT-976),
+T: Teleport locomotion panel (CT-863), Walk locomotion panel (CT-976), Avatar Generation system panel (CT-864)
+Blockers: - 
+
+2020-03-02 11:00:38
+added controller gfx to locomotion:walk panel
+What work remains to finalize these?
+x draw diagrams and labels on teleport illustration
+x draw diagrams and labels on walk illustration
+x completion state (checkmark)
+x refinement of teleport and walk icon
+x refinement (maybe invert color?) of icon framing ring
+x adapt for 2-up layout (place icon ring on opposite sides?)
+- export to sketchbox for legibility testing
+
+2020-03-02 13:15:01
+added Objective marker task CT-1001
+
+2020-03-03 07:20:09
+finished locomotion: teleport
+finished locomotion: walking
+
+NEXT
+meet w Oli and Octavian 9a or maybe 10a
+
+Y: Tutorial Panel template design (CT-860), Tutorial Panel visual development (CT-861), Teleport locomotion panel (CT-863), Walk Locomotion panel (CT-976)
+T: Avatar Generation system wireframe (CT-864), Group Up tutorial panel (CT-866), Consumable tutorial panel (CT-867), Tutorial meeting
+Blockers:
+
+
+2020-03-03 09:56:33
+P1  prepare asset and annotation package for Octavian to get material stubbed in
+x  Avatar Customization panel
+P2  integrating text Oli posted into design
+P3  update flow in design doc
+P3  NEW PANEL instruct on how to turn w controllers
+    - add subtask to JIRA 
+
+2020-03-04 06:11:02
+generating assets for the Avatar Customization panel (Mirror). Once I get the panel laid out the goal will be to slice up and process my existing work for delivery to Octavian.
+
+Y: Customize Avatar panel (CT-864), Visual development (CT-861), Tutorial design meeeting w Oli and Octavian, Prepared panel assets for Octavian
+T: Group Up tutorial panel (CT-866), Consumable tutorial panel (CT-867), Grab Pill panel (CT-865), End of Tutorial panel (CT-868)
+Blockers:
+
+2020-03-04 07:09:10
+x  prepare asset and annotation package for Octavian to get material stubbed in
+P2  integrating text Oli posted into design
+P3  update flow in design doc
+P3  NEW PANEL instruct on how to turn w controllers
+    - add subtask to JIRA 
+
+2020-03-04 08:27:52
+updated deck w new Customization panel layouts
+
+2020-03-04 10:16:00
+Figured a way to output assets at 2048x2048px
+Exported panel assets to Drive and shared location
+Notified Octavian
+
+2020-03-04 11:14:46
+Introduced myself to Alexis the CD at Redpill Montreal. Discussing controller mapping with him at the moment. They're wanting to make the walk behavior dependent on a face button, so we're talking about how to teach that. It also means I will need to update the gfx for walking
+
+2020-03-04 12:28:02
+starting work on info callouts fot the mirror controls
+
+2020-03-04 13:17:20
+cleaned up deck a bit, added layout metrics page
+
+2020-03-04 17:31:08
+worked out flow for Mirror callouts, entry and exit
+making a diagram of that in the deck now
+updated Tutorial text content matrix spreadsheet
+
+2020-03-04 18:19:37
+added Mirror callout flow to deck
+
+2020-03-05 07:20:00
+completed end Tutorial design
+building out variations
+- export assets
+
+
+2020-03-05 08:40:27
+Added End of Tutorial gfx to deck
+
+
+NEXT
+- Design sync up meeting
+- callout text for Avatar Customization
+    + simplest layout possible
+- export assets: End of Tutorial
+x move all design work to folder Christian shared
+    https://drive.google.com/drive/folders/1anALNpzQZsiONMTtsSPLDjzE3Uh5LiIr
+
+2020-03-05 09:34:37
+Presentation went well
+
+2020-03-05 10:24:47
+relocated design guides to Projects>Sunset>Design and added permissions, etc.
+
+2020-03-05 12:40:34
+validated asset placement and visibility in Skethboc
+built out 3D sketch of Mirror site which I'll add to the design doc 
+
+2020-03-05 16:34:34
+I've built out stubs for the 4 remaining panels.
+Sketching the art I want to put in them:
+- Group Up
+x Consumables
+x Dose
+x How to Turn
+
+2020-03-06 00:24:59
+I've created 1st pass or further iteration for the remaining art
+
+
+2020-03-06 06:46:36
+Y: Tutorial Panels (CT-865, CT-866, CT-867), Visual development (CT-861), Posted tutorial panel assets for Octavian, design documentation
+T: Objective markers (CT-1001), Avatar Calibration tutorial panel (CT-862)
+Blockers: -
+
+NEXT
+x finalize Group Up art 
+x prepare monochrome versions of all new panels
+x Export new panels and add to design doc
+x create Mirror callout label design spec
+P1 export panel assets to Drive
+P2 create spatial mockup for Pill objective
+P2 finish spatial mockup for Mirror objective
+
+https://docs.google.com/presentation/d/1VNI7r3yPo-CihDHuG-jE5GyWqIVwOujjKBl1PSWEZnY/edit?usp=sharing
+
+2020-03-09 07:21:56
+Y: Tutorial Panels (CT-865, CT-866, CT-867), Visual development (CT-861), Posted tutorial panel assets for Octavian, design documentation
+T: Objective markers (CT-1001), Avatar Calibration tutorial panel (CT-862)
+Blockers: -
+
+2020-03-09 13:07:05
+sprint planning meeting now
+
+NEXT
+- finish objective marker wireframe task
+- finish avatar calivration panel task
+- setup meeting to discuss latest build w Octavian on Wed afternoon. Maybe Thursday am is better though due to tinme difference
+- Discuss next tasks & refinement w Oli/Christian
+
+2020-03-09 15:06:37
+great chat w Oli about the Mirror/Character Customizer. Its larger goals, some history. Pain points. WHat can be done to mitigate over the short term.
+
+2020-03-10 15:05:13
+The locomotion control scheme has been changed. Here's what I need to do:
+- update Teleport panel to specify the Right controller
+- create a new Helper panel describing Strafe/Move, which uses the Left controller.
+- update the Turning panelto specify usage of the Left controller
+
+Y: Objective markers (CT-1001)
+T: Update How to Teleport panel (CT-1113), Update How to Turn Panel (CT-1115), Create How to Strafe/Move panel (CT-1114)
+Blockers: -
+
+2020-03-11 13:57:36
+attempting to sync to latest. Can't. UE4 fails before loading the content.
+Assertion Failed: SerializeNum >=0
+
+
+Y: Update How to Teleport panel (CT-1113), Update How to Turn Panel (CT-1115)
+T: Update Walk panel (CT-1116), Create new tutorial panel for Strafe/Move (CT-1114), Avatar Calibration tutorial panel (CT-862)
+Blockers: --
+
+2020-03-12 18:12:40
+- Teleport
+- Walk
+- Travel to Alien World
+- How to Turn
+- How to Move
+- Calibration
+
+2020-03-13 00:22:37
+updated illustrator file w new text and created new artboards
+generated new asset for Left controller
+
+NEXT
+figure out layout to show 2 controllers (or just the buttons) in a panel
+
+2020-03-13 07:28:05
+finalizing and exporting panels as I go
+
+2020-03-13 07:36:19
+x Teleport
+https://drive.google.com/open?id=1v0PLkjNIBL8fq-Rkb4r5c7e73gr4y3gX
+x Travel to Alien World
+https://drive.google.com/open?id=1b4D3hQQhMWYXlfL4v0GOgAKihUwrhphK
+x How to Turn
+https://drive.google.com/open?id=1-pVgL7BMlXf4IwAl39ENjBPSEKSD0vqV
+x Walk
+https://drive.google.com/open?id=1D5I9eGaa5gZQH4XPXtmi1QYz8cDyfqsp
+- How to Move
+https://drive.google.com/open?id=1YCtAzPfa29Qa3Skl4UzLQZ022marf-lC
+
+
+- Calibration
+
+2020-03-13 08:23:59
+integrated new 3d gfx into Walk panel. Need to add yellow hilite on each button
+
+2020-03-13 09:55:06
+exported gfx to Drive and shared w Oli & Octavian
+Met w Christian, Oli, Octavian earliier. Laid out my plan for Avatar Calibration. Everyone's good w it. Working on that now
+
+2020-03-13 10:13:19
+Y:  Update Walk panel (CT-1116), Create new tutorial panel for Strafe/Move (CT-1114)
+T: Avatar Calibration tutorial panel (CT-862), posted tutorial assets for Octavian
+Blockers: --
+
+
+2020-03-13 11:51:46
+created 1st draft of avatar calibratioon panel
+
+2020-03-13 13:28:19
+avatar calibration was less and more than I expected. I thought I'd use 2 panels - helper panel and objective panel. Which implied a simple flow. But I was able to combine all the information into a single panel which looks pretty trippy and may be all that's needed.
+
+2020-03-13 14:37:42
+uploaded calibration gfx to drive
+making revisions to design doc
+testing new panel in sketchbox
+
+2020-03-13 17:54:56
+wrapping up updates to design doc. Just need to capture a man-sized view of the Avatar Calibration panel
+
+2020-03-16 07:52:12
+Y:  Avatar Calibration tutorial panel (CT-862)
+T:Identify testable criteria for AGS Mirror UI (CT-1013), follow up w Octavian on Tutorial implementation
+Blockers: --
+
+2020-03-16 08:00:22
+upcoming work
+refine and iterate on Wrist menu. The current in-game version is not what I expected, and I'm not convinced the design approach I took is valid for our purposes.
+
+2020-03-17 08:01:16
+Y: Identify testable criteria for AGS Mirror UI (CT-1013)
+T: Wireframe for Mirror UI (CT-1010)
+Blockers: --
+
+2020-03-18 10:40:21
+Christian asked me to modify pose of figure in Avatar calibration panel to match engineering requirement for the pose. He's sending over some reference
+
+Chatted w Octavian earlier. Will get latest this afternoon to take a look at the tutorial work in place?
+
+Y: Wireframe for Mirror UI (CT-1010)
+T: Wireframe for Mirror UI (CT-1010), Spatial design for Mirror UI (CT-1011)
+Blockers: --
+
+2020-03-20 07:05:28
+working on Mirror UI task. Its feeling huge and out of my control, like what I design for it wont make a difference either way. That can't be true. The best way to get started on thios is to chat w Oli and see where the discussion leads.
+
+2020-03-20 07:06:15
+I'll make field notes and video capture the experience before speaking w Oli.
+
+Y: Wireframing for Mirror UI (CT-1010), Spatial design for Mirror UI (CT-1011)
+T: Wireframing for Mirror UI (CT-1010), Spatial design for Mirror UI (CT-1011), documentation (CT-1012)
+Blockers: --
+
+2020-03-20 08:55:08
+I need to be clear on what needs to be included in this design.
+(a) fix what's in the build
+(b) scalability for extented functionality as described in Oli's initial design doc
+
+2020-03-20 09:22:36
+I've synced back to abuild where I can use joystick to move in addition to teleport
+change 11949
+
+2020-03-20 19:43:24
+I've expressed a design concept in Sketchbox. I think its plausible. I think its an improvement. I think its can be scaled upwards. I need to populate it with icons representing the feature parts. Having mocked it up in Sketchbox. I need to think about how to communicate the design more formally - Illustrator assets should be fine
+- LAYOUT
+- BUTTON STATES
+- REFLEXIONS UI FOR SCROLLING
+- AFFORDANCES
+- UX NOTES/OBSERVATIONS
+    + The nature of scrolling
+    + Activation & Deactivation
+
+
+2020-03-21 11:58:18
+NEXT
+- find vector icons for body categories
+    + male
+    + female
+    + hair
+    + head
+    + upper body
+    + lower body
+    + feet
+
+2020-03-22 14:25:25
+completed initial iconography research. Can I organize what I have and view in Sketchbox yet?
+
+2020-03-22 17:33:25
+pulled 2nd pass of category icons as consistent looking SVG from Noun project. Now lets see what can be done with these
+
+2020-03-23 06:05:32
+refined mockup in Sketchbox and working on collating wireframe documentation
+
+Y: Wireframing for Mirror UI (CT-1010), Spatial design for Mirror UI (CT-1011)
+T: documentation (CT-1012), identify testable metrics for Mirror UI (CT-1013)
+Blockers: --
+
+
+2020-03-23 06:59:43
+good hand icons 
+https://thenounproject.com/coquet_adrien/collection/figure-number-with-finger/
+
+2020-03-23 08:37:15
+working on wireframe layout. Just placed 2D iconography and rapid iteration fronm there.
+
+2020-03-23 10:03:04
+added artboards w selection and active state for each body category and switch state for male/female
+added callout message relevant for each selection
+
+NEXT
+x style back button
+x style confirm button
+x style radial selection ring & arrows
+- use screencaptures as a guide to map out basic flow as wireframes
+
+At this point I'll have wireframe template assets and states to post in design doc
+ 
+2020-03-23 11:20:54
+only now does it occur to me that there's no need for a back button. What would it do? Is there a need for a confirmation button? What would it do though? 
+
+As conceived changes to your reflection apply to you implicitly. You don't have to confirm them.
+
+2020-03-23 14:58:21
+I've mapped the basic flow and refined interaction
+What more do I need for design doc?
+
+2020-03-24 06:40:41
+fleshing out first draft of design document
+
+Y: documentation (CT-1012), identify testable metrics for Mirror UI (CT-1013)
+T: cleanup/export Adobe Illustrator Tutorial asset files
+Blockers: --
+
+2020-03-24 10:45:08
+The MVP_UX method of Character Creation using a magic mirror uniquely identifies a player with her reflection. The association is implicit. Who you see is who you are.
+From a usability perspective, Cancel and Confirm choices lead to a rhythm of making serial choices to explore visual possibilities.
+
+2020-03-24 12:17:58
+completed 1st draft of Mirror UI design doc
+
+2020-03-24 12:38:49
+updated design doc to final content for deliverable
+NEXT
+- complete slide for scrolling
+- complete slide for selecting
+
+eta 30m
+
+2020-03-24 12:39:44
+I want to get back in touch with laurent and get input from him on where to head next. Christian has suggested the Launcher, but there must be other targets as well.
+
+In my opinion, in order to move  forward and do our best work, we need to design the design process, and ask more of it.
+For the short term:
+
+The designs I made have been implemented to various levels of completion. They all overlook Production Design basics, because that was never prioritized. Necessarily so, I think - that's the point of a minimum viable product after all - to uncover assumptions and 
+
+I can't hand off work for others to create when I feel I only begin to see the possibilities once the material is in VR
+
+I need to become familiar enough with UE4 to make a meaningful contibution is that space as well
+
+For the Long Term
+Who is in charge, and what is the vision. More to the point, how can we evaluate and build that vision while allowing for serendipity and happy accidents.
+
+There are more optimal ways of doing distributed design than we're currently doing. What are they? I have some ideas but need to hear from others
+
+Context
+How has the recent COVID-19 pandemic affected our plans?
+
+
+2020-03-24 14:25:33
+posted Avatar Customization design,. It can use further refinements but I'm going to wait to see what feedback emerges.
+
+2020-03-24 15:07:15
+The next several Sprints
+Expanding my scope
+Learning the craft
+
+Post MVP UX/UI design and concepting
+Production Design for MVP work
+- Main Menu
+- Tutorial
+- Splash Screen
+
+Web Platform & Services
+Launcher
+
+Process & Experience
+Designing a better design process
+
+What's Missing?
+Still remain unclear on the trajectory of this project and although I've read a lot of documents, I've been pretty focused on immediate work at hand and haven;t had many Creative or Holistic discussions
+
+My inexperience with UE4 is a bottlenexk and I am committed to iterating on design in this space. At the same time - there are far quicker and simpler methods of arriving at or validating conclusions, such as shared prototyping in Sketchbox or Tivori
+
+Lack of space to play, not quite sure how to begin doing so. Need some encouragemenet
+
+2020-03-24 19:54:01
+Next steps:
+write up my organizational thoughts (from above) for Laurent to reference.
+He explicitly expressed the need for a product owner. SOmeone to centralize decisioons. That can be me. Write from that point of view.
+
+2020-03-25 17:17:07
+packaging Tutorial gfx source file for delivery to RPVR
+Calibration
+Confirmation (standalone)
+Consumables
+Customize
+
+2020-03-25 18:24:32
+posted Tutorial gfx source files to RPVR Drive Projects > Sunset > Art > Tutorial
+
+2020-03-26 08:29:55
+Y: UX - prepare and deliver source files (CT-1178),  prepare post-MVP UI design strategy notes for Laurent (CT-1181)
+T: prepare post-MVP UI design strategy notes for Laurent (CT-1181)
+Blockers: --
+
+2020-03-27 07:37:45
+Y: prepare post-MVP UI design strategy notes (CT-1181)
+T: prepare post-MVP UI design strategy notes (CT-1181)
+Blockers: --
+
+2020-03-27 11:05:55
+I've added my notes and reference material to a Google Doc that I'm continuing to aggregate material into.
+
+- include my ideas on the stages of interface outcomes and what it may take to get there
+
+- Are any of my intial analyses on project scope relevant here?
+NOT NOW
+
+2020-03-30 16:53:16
+standing by
+
+2020-04-02 07:31:40
+received DM from Dom Roussy, who is Head of Content in Montreal. He asked me to share with Alexis, who I've previously introduced myself to
+
+
+2020-04-02 08:05:43
+preparing RPVR invoice
+
+NEXT
+- refinement pass to Boundaries doc
+- get in touch w Alexis
+
+What if this pause in the action - this figuring out what and how to do now IS the job? How do I win at this?
+- Follow the Trail. This is a Quest. Get to the next Objective
+
+2020-04-02 09:22:04
+Hi guys, Laurent recently asked me to put together some notes summarizing my thoughts about UX/UI design strategy at RedPill. Let me share that document with you to begin our conversation. To start with, how can I help you?
+I'm working w Red Pill on a contract and need to know where best to shift my attention, as I've completed my immediate workload for the CoreTech group. 
+
+Here is some background so this won't seem like its coming out of the blue! I'm an interaction designer, artist and educator who has focused on emotional interfaces throughout my career. I've worked mainly in the game industry and branched out into web-based products a few years ago. I run a small studio and design under the name Skinjester. Laurent brought me on as a consultant to help understand and design our platform for humans. I am presently splitting my time between RedPill and Zenimax.
+
+2020-04-02 10:39:21
+sent intro and document link to Don & Alexis. Don is head of content, Alexis is a Creative Director. Both are in Montreal
+
+2020-04-05 20:51:03
+Laurent sent me this note on Slack
+drinking from the fire hose fyi - could not find time to review what you sent - it’s utter madness these days but wanted to reach out and say, everyone loves you and intend is to continue, we are attempting to revisit product roadmap and clearer definition as we do 100 other things to instruct us to do the right next steps. Long way of me saying stand by my friend
+
+2020-04-05 20:51:48
+Khoi is returning to Vietnam. He leaves behind an interesting document about Technological future of Redpill in the new era. I haven't read it through, but will do so during the week
+
+
+2020-07-14 10:41
+Working with the team at RedPill again
+Organized UI Discovery Meeting w Ollie, Ryan, Jeremy, Christian
+
+Goal: Identify and create a content inventory of UI components by identifying what customers requirements at different stages of the Progression System
+
+
+DISCOVER
+- What is the product?
+- Who is this feature for?
+DEFINE
+- What data do we need to know about the customer(s)
+- What do we need to know about the environment(s)
+- Name the parts of the interface, where do they live?
+- Content inventory
+- How can we measure 
+IDEATE
+- what does a customer need to know?
+- what behavior do we expect for a customer
+- how to break the experience
+- methods for creative collaboration
+PROTOTYPE
+    - TBD
+EVALUATE
+    -TBD
+
+NEXT
+- work out details of using Sketchbox for collaborative presentation 
+- VR play & experience
+    + add screenshots & video reference
+- Install current build using previous steps
+    + may need assistance
+
+
+2020-07-19 18:20
+capturing my notes as a mind map.
+My goal is to:
+Identify the stages of the Progression system
+Identify what needs to be visible in each stage
+Identify simple data structure needs - icons, names, locations, history, etc.
+Record the analysis I've previously done.
+
+
+2020-07-19 23:28
+reviewed MLD Design document and my previous notes in detail.
+Constructed maps from my notes and talking points
+Identified stages of the progression system
+
+2020-07-20 09:52
+NEXT
+- transfer material from maps into seperate slides
+- log time
+- create new invoice from old to log time daily
+- create subtasks to fill out sections of the design doc
+    + wireframes
+    + data gathering
+    + research and analysis
+    + sketching
+- find decent persona template and add to the design doc
+- create dedicated slack channel
+- share documentation in progress
+- setup meeting w team to go over posted documentation
+
+2020-07-20 17:40
+continuing to transcribe my notes into 1st draft design doc.
+
+
+2020-07-20 20:38
+Set up meeting to review work in progress and determine next steps for tomorrow at 9a PT
+
+
+2020-07-21 11:20
+review was a bit chaotic, but thats's ok as it uncovered next steps. Initial focis is to be on the part I've identified as the PASSPORT-PROFILE.
+
+meeting w Jeremy a bit later to go over my design analysis and questions in greater detail. In the future, make a distinction betweeen factfinding, ideation and review. The kind of input I need right now is factfinding. The meeting veered off into ideation and without curation and framework for idea capture that is chaos.
+
+
+2020-07-21 13:31
+Meeting w Jeremy now
+
+
+2020-07-21 15:34
+productive meeting where terms were defined and got to know the man better as well.
+
+Passport Details (Wireframe)
+Passport Details (Layout/Flow)
+Passport Details (Visual Design)
+
+Notification Template (Wireframe)
+Notification Template (Layout/Flow)
+
+Notification Challenge Updated (Layout/Flow)
+Notification Challenge Updated (Visual Design)
+Notification Challenge Completed (Layout/FLow)
+Notification Challenge Completed (Visual Design)
+Notification New Rank Achieved (Layout/Flow)
+Notification New Rank Achieved (Visual Design)
+
+
+2020-07-22 18:16
+Looking at the work posted on JIRA these are the UI dependencies I've identified.
+
+(Wireframe) Passport Details 
+(Layout/Flow) Passport Details 
+(Visual Design) Passport Details 
+(Wireframe) Notification Template 
+(Layout/Flow) Notification Template 
+(Layout/Flow) Notification Challenge Updated 
+(Visual Design) Notification Challenge Updated
+(Layout/Flow) Notification Challenge Completed
+(Visual Design) Notification Challenge Completed
+(Layout/Flow) Notification New Rank Achieved
+(Visual Design) Notification New Rank Achieved
+
+
+2020-07-22 18:16
+taking a look at Adobe XD to see if its as suitable as Illustrator for design purposes.
+
+NEXT
+- log time in JIRA
+- prepare timesheet for last week
+- prepare timesheet for this week
+- set up meeting/chat w Christian on how to enter the tasks I've identifies into JIRA
+
+
+2020-07-23 07:56
+doing some housekeeping and preparing some material to go over with Christian about how I'd like to organize my design process for JIRA
+
+x update timesheet
+x update JIRA (current tasks)
+- update JIRA new tasks
+- prepare work samples for discussion w RPVR
+    + wireframing
+    + layout and flow
+    + visual design
+
+
+
+2020-07-23 08:36
+link to timesheet
+https://docs.google.com/spreadsheets/d/16q3tfx2HlfXzimxNUOVSCiu_ov7IvC32hzz2eUQuaGs/edit#gid=0
+
+
+2020-07-23 08:50
+preparing some material for post to Slack about how I work.
+Definitions + examples
+
+
+2020-07-23 13:05
+met w Christian and set up JIRA to match this working model
+NEXT
+- add subtasks and estimates
+- update #daily-tech-art w today's status
+- UI sketching for Passport Display
+
+
+
+2020-07-23 17:42
+I've entered my subtasks to the stories Christian & I created.
+Need to add estimates for what I can
+
+
+2020-07-23 18:05
+added task estimates for wireframing the Passport design
+added story points for other stories
+
+
+2020-07-27 08:28
+starting on initial wireframing for Passport Details Display
+
+
+2020-07-27 12:21
+continuing to develop some ideas and representations in my sketches
+
+
+2020-07-27 14:23
+I've worked out some ideas and representations in sketched form that are ready to bring into wireframeworld.
+
+
+2020-07-27 19:27
+set up working project file with metrics from ARIS design
+
+
+2020-07-27 20:57
+making some progress transcribing from sketch to wireframe. 1st pass layout ETA 1h
+
+
+2020-07-28 01:09
+recreated my sketches in Illustrator and did a bit more iteration on placement and itemization.
+
+
+
+2020-07-28 07:25
+added my notes to wireframe deck
+finished preparing artboards in AI for export
+
+NEXT
+x export gfx from Illustrator to Google Slides
+x add annotation
+
+
+2020-07-28 08:44
+ready to present
+https://docs.google.com/presentation/d/18kuqhd6O8P_5XV2EHUCOnNO8gE_chAxoQRUEQFQ8nZ4/edit?usp=sharing
+
+
+2020-07-28 14:50
+presentation went well, especially the idea of categorizing challenges and rewards. 
+
+NEXT
+- another iteration of the wireframes to capture feedback and refine presentation & process. I did not have time to use XD for the current work but want to rebuild the AI work in that space for the next one
+
+
+2020-07-30 17:30
+transferring my AI work into XD
+setup review meeting for tomorrow at 10a, but Christian asked me to move it to 9a then Jeremy had a scheduling conflict, so I've set it to Mon 10a, which will provide me some room to think about this better.
+
+
+2020-08-03 07:48
+sent out RPVR invoice
+
+
+2020-08-03 07:48
+I rescheduled the wireframe review meeting to Tuesday am 8/4. Spending today focused on deliverables for discussion about next steps
+
+
+2020-08-03 09:52
+collating last week's material and feedback and determining what I want to present tomorrow
+
+
+2020-08-03 23:14
+I spent the day sketching some ideas and figuring out what to do next. Now I'm doing it quickly.
+
+I've widened the layout to a more horizontal aspect - a consequence of that is that the challenges are listed in 2 columns, which might work, but relies on each of the list items being the same size?
+
+2 options
+- turn the challenge listing into a carousel, where each item may be of independent height
+- make the items shorter
+- make the items wider
+- make the large are into a 2-col layout
+- make the large are have a lot of whitespace
+
+
+
+2020-08-04 01:31
+I have the basic framing layout configured     
+I have the challenge category layout configured
+I have the account information configured
+I have the rank information configured
+
+NEXT
+x figure out challenge item list
+- set up histogram-based reward listing
+- setup notifications list
+
+I don't want to spend available time exporting to Google Slides. Will present difrectly from XD
+
+ 
+2020-08-04 02:12
+landed on a 2-col solution for challenge items. nice job. definitely more readable and more present than the 
+
+
+2020-08-04 07:29
+x Challenge list - Adventure
+x Challenge list - Hunt
+x Rewards list
+x Notifications list
+
+
+2020-08-04 09:41
+ready to present.
+
+
+2020-08-04 11:26
+went well
+
+NEXT
+- transfer to SLIDES
+- share to Slack channel
+
+
+2020-08-05 09:59
+meeting w progression workgroup to discuss prototyping goals
+
+
+2020-08-06 17:42
+I've spent several hours researching VR/UI patterns in
+SteamVR
+Oculush Dashboard
+Alyx
+Soundstage VR
+Various Valve lab experiments
+
+Valve is by far the most interesting and refined developer catured here.
+Soundstage VR is the most BASIC, but possibly either the target or the anti- target. Not sure which.
+
+I collated images and took quick notes as I went
+
+NEXT
+- spend some time refining and reducing the amount of research captured in slides
+- annotate where possible
+- I want to get to a point where I can stand up a panel type layout (SteamVR), a Pages on Rails type layout (Alyx), and a Simulated Device type layout (Valve Labs)
+- From that point I want to be able to point to the research I've done as working examples of the form.
+
+
+2020-08-06 22:17
+I've invested a lot of time on research and it feels like it might have been time spent doing something else. Its not like my basic design idea was changed significantly. I can state what the safe option is at least, and will spend the remaining time developing that idea further
+
+NEXT
+- take parts from wireframe and import into Sketchpad as a simple layout
+    + validate and test for legibility and scale
+- clean up research slides to point at the UI types I collated
+    - slide 1: 3D wireframe layout
+    - slide 2: Steam VR example
+    - slide 3: Alyx example
+    - slide 4: Valve Labs example
+
+
+2020-08-07 06:16
+starting worksession to prep material for review later today
+
+WHAT ARE YOU DOING RIGHT NOW?
+- reviewing the material I captured yesterday and seeing what I can ignore/delete
+
+
+2020-08-07 07:57
+
+WHAT ARE YOU DOINg RIGHT NOW?
+- taking a look at the recent wireframes in XD and exporting assets to bring into Sketchbox
+
+my goal this morning is to make a literal translation of the wireframes into Sketchbox
+
+
+2020-08-07 08:27
+evaluated presenting from inside Sketchbox VR environment. I'll want to share a link to this space which I think persists when I'm not in it.
+
+
+
+2020-08-07 10:39
+did rough test during sprint review and came across the pain points for VR presentation. Need to be in that space at meeting start. Neet to have headset setup for speaking
+
+
+2020-08-07 12:45
+ready to present. Only just now started some design thinking in this space.
+
+
+2020-08-07 13:36
+presentation was well received
+people on team are interested in using sketchbox
+share link to sketchbox w channel
+
+menu in Lone Echo was mentioned as reference for menuing
+
+next steps:
+step away from passport (?)
+step into definition for global UX/UI
+leading to mid level draft for prototyping global UX/UI
+
+create JIRA task
+global UX/UI - needs to have story points adjusted
+
+
+2020-08-09 16:51
+working on layout iteration for details display. Seeing it VR pointed the way forward. I have worked out how to export assets from Blender to Sketchbox so can now work with greated precision with minimal effort. I'm working towards setting up a panel similar to SteamVR
+
+the review last week was confusing but also exciting. I want to get material setup in Sketchbox for further iteration
+
+
+2020-08-10 07:24
+shared updated layout idea w Ollie
+
+TODAY
+- sprint planning
+- need more details about CT-1484 UI/UX R&D before I can scope tasks for this
+
+https://sketchbox3d.com/join?id=030c48
+
+
+
+2020-08-10 10:41
+captured screenshots from Sketchbox environment and updated Passport Devide Display Layout deck with new content as well as a link to a shared Sketchbox workspace
+
+
+2020-08-10 11:20
+updated deck w screenshots and annotation and shared w channel
+
+
+2020-08-10 11:46
+I have setup a meeting tomorrow to discuss findings from visual prototyping. Before that meeting I want to:
+- update the visuals
+- add a new approach
+
+making those changes will take a minimum of 5h
+
+
+2020-08-10 13:33
+sprint planning meeting    
+
+
+2020-08-10 18:47
+initial import into Sketchbox for layout iteration. At first glance, this is a good simplification of the prior version. Certainly feels easier to read.
+
+
+2020-08-11 09:12
+I've seperated assets for import to Sketchbox. Doing so now.    
+
+
+2020-08-11 11:25
+ready to present   
+
+
+2020-08-11 14:54
+presentation went well. good discussion of work shown as well as posture vs. engagement. Ryan showed initial work that was promising. He'll be iterating further on anchoring & placement & size of the menu. 
+
+NEXT
+optimize 0304 design for better touchability & visual presence. take a look at the way Sketchbox UI does this. This is the desired level of "chunk"
+
+
+
+2020-08-17 09:02
+13(c) Payment Terms. The payment terms shall be net 10 days following the
+Company’s receipt of an accurate and uncontested invoice from Consultant. For on-going month-to–month consulting services, the company shall pay all invoices within 10 days of last day of each month.
+
+sent payment due notice to accounting cc: Christian, Laurent
+
+
+2020-08-19 15:53
+chatted w Christian about late payment and gave good faith agreement for 8h work to close out the passport design. They're happy with the work I'm providing. Perhaps just symptom of the general chaos energy
+
+
+2020-08-19 16:44
+I'm updating sizes of assets and general layout for inclusion into v3 sketchbox layout
+- include icon & asset sources w deliverable
+- clean up design documentation 
+- ideation for notifications (use an old idea)
+- update JIRA
+- create/refresh this months invoice to include current
+
+
+
+2020-08-23 11:39
+RPVR Consulting Agreement
+
+1. Consulting Relationship
+Company shall pay to Consultant the amounts specified in Exhibuit A at the times specified therin
+
+4. Term and Termination
+Either party may terminate this agreement at any time upon 10 days written notice. In the event of such termination consultant shall be paid for any portion of the services that have been performed prior to the termination
+[TO-DO] prepare invoice with current status
+
+13a. Amendments and Waivers
+Any waiver, modification or amendment of any provision of this agreement will be effective only if in writing and signed by the parties hereto 
+
+13c. Payment Terms
+The payment terms shall be net 10 days following the Company’s receipt of an accurate and uncontested invoice from Consultant. For on-going month-to
+–month consulting services, the company shall pay all invoices within 10 days of last day of each month. All payments will be made in accordance with the company’s payment policies and procedures.
+
+13d. Notices
+Any notice required or permitted by this Agreement shall be in writing and shall be deemed sufficient upon receipt, when delivered personally or by courier, overnight delivery service or confirmed facsimile, 48 hours after being deposited in the regular mail as certified or registered mail (airmail if sent internationally) with postage prepaid, if such notice is addressed to the party to be notified at such party’s address or facsimile number as set forth below, or as subsequently modified by written notice.
+
+
+2020-08-23 12:45
+finished updating RPVR invoice for August
+If everything goes well this week, I can complete work in progress for 45 additional hours before the end of month, which would bring me up to stated total of 120h monthly
+
+
+2020-08-27 16:30
+posted my August invoice
+contacted Laurent via Slack regarding my delinquent July payment
+
+
+2020-08-30 09:59
+no response from Red Pill
+I spoke w Olaf yesterday and he mentioned that he too had not been paid for his July invoice and was about to submit his August invoice.
+
+
+2020-09-09 07:08
+as of yet, nothing. I need to escalate this. Both these invoices were accepted and entered into the billing system (or at least registered on bill.com)
+
+Invoice RPVR-03
+Submitted 8/3/2020
+Due 8/13/2020
+$8283.33
+29 days overdue
+
+Invoice RPVR-04
+Submitted 8/27/2020
+Due 9/7/2020
+$8750.00
+4 days overdue
+
+NEXT
+- writeup a paragraph detailing the situation. forward to Nick & Tom for legal advice
+
+
+2020-09-11 09:03
+I sent out an email with request for payment
+
+
+2020-09-14 17:24
+I spoke with Laurent who wove a tale of what he described as a "hostile takeover". Apparently related investors are purchasing/have purchased the company or the IP or the assets? Its unclear what he meant. However the Montreal Studio is no longer a part of the LA cohort. Laurent mentioned the term "emergency" several times and the beginning of litigation w the "hostile" company. He also mentioned 3 potential outcomes, which unfortunately I don't recall so clearly. I think they were:
+- regain control of the company and continue as before using litigation and additional investment
+- take "payment in equity"
+    + by which I think he meant some kind of ownership of the new Red Pill business entity.
+    + what I meant by this was receive payment in company assets such as gear - computers, monitors, shipping cases, etc.
+- I don't remember the 3rd possibility he mentioned
+
+Vexingly, he mentioned specifically that "he was not responsible". Which technically I suppose is correct. He also mentioned that Red Pill has not paid other contractors and suppliers, which I can probably confirm
+
+Even as he said this he mentioned a recent writeup and continued interest in the possibilities of the platform because that's his nature
+
+The tone of the conversation was friendly. Overly so because of my anxiety. I'm so angry about this. No next steps were offered. A vague apology was offered. No timeframe was mentioned.
+
+I've pushed on this by myself as long as I can. I don't know how much leverage I actually have but personal communications aren't efficient or workable in this situation. I don't know if I'll get paid, but I can't just let this go. Its affected my mood and will break my confidence if I don't escalate this
+
+NEXT STEPS
+- contact Nick for legal recommendation
+- contact Olaf to see what his status is
+- contact Max Pruessner (whom I'd met when I visted several months ago) and see if he'll share his perspective on the matter.
+
+
+
+2020-09-24 13:48
+Slack account is deactivated
+JIRA is deactivated
+Google services including mail are still up
+
+
+2020-09-24 15:50
+Exported recent mail as PDF
+Started mind map to document this new legal adventure
+
+
+
+
+
+
+

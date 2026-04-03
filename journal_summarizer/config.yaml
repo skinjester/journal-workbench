@@ -1,0 +1,53 @@
+# Journal Summarizer — local parsing and rule-based summaries only.
+# Editorial synthesis: use Cursor with CURSOR_SYNTHESIS_INSTRUCTIONS.md + monthly_dumps/YYYY-MM.md
+
+# Path to the directory containing journal files
+journals_directory: "/Users/garyboodhoo/Documents/Obsidian Vault/PROJECTS/journal-workbench"
+
+# File patterns to include
+include_patterns:
+  - "*.md"
+  - "*.txt"
+
+# File patterns to exclude
+exclude_patterns:
+  - "reporting-template.md"
+  - "summary-*.md"
+  - "**/.*"
+  - "**/venv/**"
+  - "**/journal_summarizer/**"
+  - "**/node_modules/**"
+  - "**/__pycache__/**"
+  - "**/dist/**"
+  - "**/build/**"
+
+# Output directory for generated summaries
+output_directory: "summaries"
+
+# Entry processing
+processing:
+  max_entry_length: 500
+  min_confidence: 0.3
+  batch_size: 20
+
+# Timestamp formats to detect (regex patterns)
+timestamp_patterns:
+  - pattern: "^#\\s*✎\\s*(\\d{4}-\\d{2}-\\d{2}\\s+\\d{2}:\\d{2})"
+    format: "%Y-%m-%d %H:%M"
+  - pattern: "^#{1,6}\\s*(\\d{4}-\\d{2}-\\d{2}\\s+\\d{2}:\\d{2})"
+    format: "%Y-%m-%d %H:%M"
+  - pattern: "^(\\d{4}-\\d{2}-\\d{2}\\s+\\d{2}:\\d{2}:\\d{2})"
+    format: "%Y-%m-%d %H:%M:%S"
+  - pattern: "^(\\d{4}-\\d{2}-\\d{2}\\s+\\d{2}:\\d{2})"
+    format: "%Y-%m-%d %H:%M"
+
+# Used by rule-based categorization heuristics
+template_sections:
+  - Goals
+  - Workstream
+  - Artifacts Delivered
+  - Coverage
+  - Key Decisions
+  - Collaboration and Inputs
+  - Open Questions / Follow Ups
+  - People Involved

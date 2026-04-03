@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Project Matrix Across All Summaries</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --panel: #141a24;
+      --line: #263242;
+      --text: #edf3fb;
+      --muted: #9dabbc;
+      /* Discrete 0–3 blues (minimal heatmap, ~GitHub dark contribution graph). */
+      --track-0: #0d1117;
+      --track-1: #1c2b41;
+      --track-2: #316dca;
+      --track-3: #79c0ff;
+      --prototype: #80e2a2;
+      --presentation: #ffba68;
+      --pdf: #d29aff;
+      --shadow: rgba(0, 0, 0, 0.36);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; color: var(--text); font-family: "Manrope", system-ui, sans-serif;
+      background:
+        radial-gradient(circle at 14% 14%, rgba(140, 195, 255, 0.16), transparent 24%),
+        radial-gradient(circle at 86% 16%, rgba(255, 186, 104, 0.12), transparent 22%),
+        radial-gradient(circle at 78% 82%, rgba(128, 226, 162, 0.11), transparent 24%),
+        linear-gradient(180deg, #090c11 0%, var(--bg) 100%);
+    }
+    .wrap { max-width: min(1320px, 100%); margin: 0 auto; padding: 40px clamp(20px, 4vw, 40px) 56px; }
+    .page-header {
+      margin-bottom: 44px;
+      padding-bottom: 40px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .eyebrow { margin: 0 0 14px; color: var(--muted); letter-spacing: 0.16em; text-transform: uppercase; font-size: 11px; font-weight: 800; }
+    h1 {
+      margin: 0;
+      max-width: 22rem;
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: clamp(2.5rem, 5.2vw, 3.75rem);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      font-weight: 700;
+      color: #f6f9ff;
+      text-wrap: balance;
+    }
+    .lede { max-width: 85ch; margin: 22px 0 0; color: var(--muted); font-size: 15px; line-height: 1.75; }
+    .panel { border: 1px solid var(--line); border-radius: 18px; background: linear-gradient(180deg, rgba(255,255,255,0.018), rgba(255,255,255,0.01)); box-shadow: 0 20px 56px var(--shadow); overflow: hidden; }
+    .chart-panel { padding: clamp(20px, 2.5vw, 28px); margin-top: 0; }
+    .panel-head { margin-bottom: 28px; padding-bottom: 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+    .panel-head h2 {
+      margin: 0;
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: clamp(1.35rem, 2.2vw, 1.65rem);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      text-transform: none;
+      color: var(--text);
+    }
+    .meta-panel h2, .detail-panel h2 {
+      margin: 0 0 12px;
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: 1.2rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      text-transform: none;
+      color: var(--text);
+    }
+    .panel-head p { margin: 12px 0 0; color: var(--muted); font-size: 13px; line-height: 1.62; max-width: 82ch; }
+    .matrix-shell, .milestone-shell { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 0; align-items: start; }
+    .matrix-shell { margin-bottom: 36px; }
+    .fixed-labels {
+      position: sticky; left: 0; z-index: 2;
+      background: linear-gradient(90deg, rgba(20,26,36,0.98), rgba(20,26,36,0.92));
+      border-right: 1px solid rgba(255,255,255,0.04);
+      border-radius: 12px 0 0 12px;
+      /* Match Plotly matrix margin: top 82, bottom 52 (see renderMatrix). */
+      padding: 82px 12px 52px 0;
+      align-self: start;
+    }
+    .fixed-labels.milestones { padding-top: 10px; padding-bottom: 46px; }
+    /* Must match JS rowHeight; Plotly ygap draws gutters inside each row bin (labels still align). */
+    .fixed-labels-grid {
+      display: grid;
+      gap: 0;
+      align-content: start;
+      height: auto;
+    }
+    .fixed-label {
+      display: flex; align-items: center; justify-content: flex-start; text-align: left; width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+      height: 28px;
+      min-height: 28px;
+      max-height: 28px;
+      padding: 0 12px 0 14px; color: var(--text); font-size: 12px; line-height: 1.15; font-family: inherit;
+      background: rgba(255,255,255,0.015); border-radius: 6px; cursor: pointer; transition: background 120ms ease, color 120ms ease;
+      border: 0; appearance: none;
+      overflow: hidden;
+    }
+    .fixed-label-text {
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      text-align: left;
+    }
+    .fixed-label.project {
+      font-weight: 800;
+      background: rgba(95, 146, 214, 0.12);
+      box-shadow: inset 0 -1px 0 rgba(255,255,255,0.05);
+    }
+    .fixed-label.project::after {
+      content: '';
+      margin-left: auto;
+      width: 0;
+      height: 0;
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      border-left: 7px solid rgba(237, 243, 251, 0.72);
+      transition: transform 120ms ease, border-left-color 120ms ease;
+      transform-origin: 30% 50%;
+    }
+    .fixed-label:hover { background: rgba(255,255,255,0.05); }
+    .fixed-label.active { background: rgba(140, 195, 255, 0.18); color: #ffffff; }
+    .fixed-label.project-open::after {
+      transform: rotate(90deg);
+      border-left-color: rgba(255, 255, 255, 0.95);
+    }
+    .fixed-label.child {
+      justify-content: flex-start; text-align: left; padding-left: 22px; padding-right: 12px;
+      font-size: 11px; font-weight: 600; color: #c8d8ee; background: rgba(255,255,255,0.008);
+      border-radius: 0;
+      box-sizing: border-box;
+      height: 28px;
+      min-height: 28px;
+      max-height: 28px;
+      min-width: 0;
+      border-top: 1px solid rgba(255,255,255,0.03);
+      overflow: hidden;
+    }
+    .fixed-label.child::before {
+      content: ''; width: 8px; height: 1px; background: rgba(255,255,255,0.22);
+      margin-right: 8px; flex: 0 0 auto;
+    }
+    .fixed-label.project-open {
+      background: rgba(95, 146, 214, 0.18);
+      box-shadow: inset 0 0 0 1px rgba(140, 195, 255, 0.18);
+    }
+    /* Matrix hover: sync with Plotly spikes so the row label matches the cell under the cursor. */
+    .fixed-label.hover-row-affordance {
+      box-shadow: inset 0 0 0 1px rgba(140, 195, 255, 0.5);
+      background: rgba(140, 195, 255, 0.12);
+    }
+    .fixed-label.project.hover-row-affordance {
+      background: rgba(95, 146, 214, 0.26);
+    }
+    .fixed-label.child.hover-row-affordance {
+      background: rgba(140, 195, 255, 0.1);
+    }
+    .fixed-label.milestone {
+      color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+      background: transparent; cursor: default;
+    }
+    .scroll-area { overflow-x: auto; overflow-y: hidden; border-radius: 0 12px 12px 0; padding-bottom: 0; }
+    /* Let Plotly set height exactly = margins + rows*rowHeight (no min-height drift vs labels). */
+    #matrix-chart { min-height: 0; }
+    #milestone-chart { height: 220px; margin-top: 14px; }
+    .month-range {
+      display: grid;
+      gap: 8px;
+      padding: 0 4px 8px;
+      margin-bottom: 28px;
+    }
+    .month-range .month-range-label {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding-left: 6px;
+    }
+    .month-range .month-range-sub {
+      font-size: 11px;
+      color: var(--muted);
+      opacity: 0.92;
+      padding-left: 6px;
+      padding-top: 2px;
+      letter-spacing: 0.02em;
+    }
+    .month-range .range-slider {
+      position: relative;
+      height: 28px;
+      display: flex;
+      align-items: center;
+    }
+    .month-range .range-slider input[type="range"] {
+      width: 100%;
+      position: relative;
+      height: 28px;
+      margin: 0;
+      background: transparent;
+      pointer-events: all;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    .month-range .range-slider input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: rgba(237, 243, 251, 0.92);
+      border: 2px solid rgba(140, 195, 255, 0.7);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.35);
+      /* Center thumb on the 6px track (WebKit). */
+      margin-top: -6px;
+    }
+    .month-range .range-slider input[type="range"]::-webkit-slider-runnable-track {
+      height: 6px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 999px;
+    }
+
+    /* Firefox */
+    .month-range .range-slider input[type="range"]::-moz-range-track {
+      height: 6px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 999px;
+    }
+    .month-range .range-slider input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: rgba(237, 243, 251, 0.92);
+      border: 2px solid rgba(140, 195, 255, 0.7);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.35);
+    }
+    /* Slider "range highlight" removed (we only need the thumb for zoom). */
+    .month-range .range-slider .range-track-highlight { display: none; }
+    .lower-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.85fr); gap: 24px; margin-top: 44px; align-items: start; }
+    .detail-panel, .meta-panel { padding: clamp(20px, 2.5vw, 26px); }
+    .detail-head { display: flex; flex-wrap: wrap; gap: 12px; align-items: baseline; justify-content: space-between; }
+    .detail-head p { margin: 6px 0 0; color: var(--muted); font-size: 13px; line-height: 1.55; max-width: 72ch; }
+    .detail-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+    .stat, .card { border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,0.02); }
+    .stat { padding: 12px; }
+    .stat .value { display: block; margin-bottom: 4px; font-size: 22px; font-weight: 800; color: var(--text); }
+    .stat .label { display: block; color: var(--muted); font-size: 12px; line-height: 1.35; }
+    .selected-project-card h3 { margin: 0 0 8px; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; }
+    .selected-project-card p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.58; }
+    .meta-panel { display: grid; gap: 0; background: rgba(8,11,16,0.42); }
+    .meta-panel > section:not(:first-child) {
+      margin-top: 32px;
+      padding-top: 32px;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    .card { padding: 14px; }
+    .card h3 { margin: 0 0 8px; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; }
+    .card p, .card li { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.58; }
+    .card ul { margin: 0; padding-left: 18px; }
+    .legend { display: grid; gap: 9px; margin-top: 8px; }
+    .legend-item { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; }
+    .swatch { width: 12px; height: 12px; border-radius: 999px; flex: 0 0 auto; }
+    .runs { display: grid; gap: 8px; }
+    .run { padding: 8px 10px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.04); }
+    .run strong { color: var(--text); }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.95em; background: rgba(255,255,255,0.05); padding: 0.12rem 0.34rem; border-radius: 5px; color: var(--text); }
+    @media (max-width: 1180px) {
+      .lower-grid { grid-template-columns: 1fr; }
+      .detail-layout { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="page-header">
+      <p class="eyebrow">Project Matrix / <span id="cov-range">2013-01 to 2024-08</span> / Tagged summaries</p>
+      <h1>Projects across the full folder</h1>
+      <p class="lede">
+        Each row is a project tag from your monthly summaries (<code>**[TAG]**</code> bullets). <span id="intensity-explainer">Project heat uses <strong>volume mode</strong>: among months where that project has bullets, counts are <strong>ranked</strong> and split into lower / middle / upper thirds → shades 1 / 2 / 3 (zeros stay empty). That keeps contrast along the timeline even when one project “wins” every month. Rebuild with <code>--intensity-mode dominance</code> for the older cross-project monthly competition.</span>
+        Data is rebuilt from all <code id="lede-summary-count">118</code> files in <code>journal_summarizer/summaries</code> via <code>build_project_matrix.py</code>.
+        Expand a row to see <strong>activity types</strong> inferred from each bullet’s description (keywords + <code>deliv:</code> tags)—not summary section headings.
+      </p>
+    </header>
+
+    <section class="panel chart-panel">
+      <div class="panel-head">
+        <h2>Projects + Milestones</h2>
+        <p>Top: tagged project intensity by month. Click a project to expand <strong>activity-type</strong> sub-rows under it; all project rows stay visible (click again to collapse). Bottom: milestone hints; strip stays synced with the matrix.</p>
+      </div>
+      <div class="month-range" aria-label="Month range filter">
+        <div class="month-range-label" id="month-range-label">Zoom</div>
+        <div class="month-range-sub" id="month-range-sub"></div>
+        <div class="range-slider">
+          <div class="range-track-highlight" id="month-range-highlight"></div>
+          <input type="range" id="month-zoom" min="0" max="0" step="1" value="0" />
+        </div>
+      </div>
+      <div class="matrix-shell">
+        <div class="fixed-labels"><div class="fixed-labels-grid" id="matrix-labels"></div></div>
+        <div class="scroll-area" id="matrix-scroll"><div id="matrix-chart"></div></div>
+      </div>
+      <div class="milestone-shell">
+        <div class="fixed-labels milestones"><div class="fixed-labels-grid" id="milestone-labels"></div></div>
+        <div class="scroll-area" id="milestone-scroll"><div id="milestone-chart"></div></div>
+      </div>
+    </section>
+
+    <div class="lower-grid">
+      <aside class="panel meta-panel">
+        <section class="card selected-project-card">
+          <h3 id="detail-title">Selected Project</h3>
+          <p id="detail-copy"></p>
+        </section>
+
+        <section class="stats" id="detail-stats"></section>
+
+        <section>
+          <h2>Legend</h2>
+          <div class="legend">
+            <div class="legend-item"><span class="swatch" style="background: var(--track-0); border: 1px solid rgba(255,255,255,0.06);"></span><span><strong>0</strong> absent</span></div>
+            <div class="legend-item"><span class="swatch" style="background: var(--track-1);"></span><span><strong>1</strong> trace signal</span></div>
+            <div class="legend-item"><span class="swatch" style="background: var(--track-2);"></span><span><strong>2</strong> active secondary thread</span></div>
+            <div class="legend-item"><span class="swatch" style="background: var(--track-3);"></span><span><strong>3</strong> peak for that project row (volume) or monthly winner (dominance)</span></div>
+            <div class="legend-item"><span class="swatch" style="background: var(--track-2);"></span><span>Expanded rows (same 0–3 intensity blues)</span></div>
+            <div class="legend-item"><span class="swatch" style="background: var(--prototype);"></span><span>Prototype marker</span></div>
+            <div class="legend-item"><span class="swatch" style="background: var(--presentation);"></span><span>Presentation marker</span></div>
+            <div class="legend-item"><span class="swatch" style="background: var(--pdf);"></span><span>PDF marker</span></div>
+          </div>
+        </section>
+
+        <section class="stats" id="stats"></section>
+
+        <section class="card">
+          <h3>Project tags</h3>
+          <ul>
+            <li><strong>ESO</strong>, <strong>ESO-Platform</strong>, <strong>ESO-Studio Site</strong>, <strong>KESTREL</strong>: Zenimax-era slices as tagged in summaries.</li>
+            <li><strong>OPS</strong>: personal infrastructure and operations.</li>
+            <li><strong>Portfolio</strong>, <strong>skinjestercorp</strong>: sites and related product work.</li>
+            <li><strong>Project Ansible</strong>: studio / rack / production systems.</li>
+            <li><strong>Image Garden</strong>, <strong>deepdreamvisionquest</strong>, <strong>xoholo</strong>, <strong>iveda</strong>, <strong>RPVR</strong>: other tagged project lines.</li>
+          </ul>
+        </section>
+
+        <section class="card">
+          <h3>Dominant Runs</h3>
+          <div class="runs" id="runs"></div>
+        </section>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const data = {"months":["2013-01","2013-02","2013-03","2013-04","2013-09","2013-10","2013-11","2013-12","2014-01","2014-02","2014-03","2014-04","2014-05","2014-06","2014-07","2014-08","2014-09","2014-10","2014-11","2014-12","2015-01","2015-02","2015-03","2015-04","2015-05","2015-06","2015-07","2015-08","2015-09","2015-10","2015-11","2016-01","2016-02","2016-03","2016-04","2016-05","2016-06","2016-07","2016-08","2016-09","2016-10","2016-11","2016-12","2017-01","2017-02","2017-03","2017-04","2017-05","2017-06","2017-07","2017-08","2017-09","2017-10","2017-11","2017-12","2018-01","2018-02","2018-03","2018-04","2018-05","2018-06","2018-07","2018-08","2018-09","2018-10","2018-11","2018-12","2019-01","2019-02","2019-03","2019-04","2019-05","2019-06","2019-07","2019-08","2019-09","2019-10","2019-11","2019-12","2020-01","2020-02","2020-03","2020-04","2020-05","2020-06","2020-07","2020-08","2020-09","2020-10","2020-11","2020-12","2021-01","2021-02","2021-03","2021-04","2021-05","2021-06","2021-07","2021-08","2021-09","2021-10","2021-11","2021-12","2022-01","2022-02","2022-03","2022-04","2022-05","2022-06","2022-07","2022-08","2022-09","2022-12","2023-01","2023-11","2024-05","2024-07","2024-08"],"rows":["ESO","ESO-Platform","ESO-Studio Site","KESTREL","OPS","Portfolio","Project Ansible","skinjestercorp","Image Garden","deepdreamvisionquest","xoholo","iveda","RPVR"],"intensity":[[0,0,0,0,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,1,2,3,1,3,3,3,1,1,1,2,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,1,1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,3,1,3,3,3,3,2,2,3,2,2,2,2,3,1,1,1,2,2,1,0,1,3,2,3,2,1,2,1,1,1,2,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,1,0,0,0,0,0,2,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,3,1,1,2,2,1,0,1,3,3,3,3,3,3,1,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,1,0,1,1,1,0,1,0,0,0,0,3,2,3,0,0,2,2,3,3,2,0,3],[3,3,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,0,1,1,0,1,0,0,0,1,2,2,1,3,2,1,2,2,0,0,0,2,0,0,0,2,1,0,0,3,3,3,3,0,0,0,3,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,1,3,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,0,0,0,0,0,0,0,0,0,3,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,3,0,0,0,0,0,0,0,1,3,1,0,0,2,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,3,0,0,0,0,2,2,0,2,1,2,2,2,1,3,3,3,3,3,1,3,2,3,2,1,2,0,3,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,1,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,2,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,2,2,1,3,3,2,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,3,2,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]],"efforts":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"strictProto":[1,0,0,1,0,1,1,0,1,1,0,0,1,0,1,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,1,1,0,0,1,1,1,0,0,0,0,0,0,1,1,0,1,1,0,1,0,0,0,0,1,0,1,1,0,1,0,0,0,0,1,1,1,1,0,0,0,1,1,1,0,0,1,1,1,1,0,0,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"strictPres":[0,0,0,0,0,0,1,0,0,0,1,1,1,0,0,0,0,1,0,0,1,0,0,0,1,1,0,0,0,0,0,0,0,0,1,0,1,0,1,0,0,0,0,1,0,0,0,0,1,1,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,0,0,1,1,1,1,1,1,1,1,0,0,1,0,0,0,1,0,1,1,0,0,1,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"strictPdf":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"monthNotes":{"2013-01":"Active projects: Portfolio","2013-02":"Active projects: Portfolio","2013-03":"Active projects: Portfolio","2013-04":"Active projects: Portfolio","2013-09":"Active projects: ESO","2013-10":"Active projects: ESO","2013-11":"Active projects: ESO","2013-12":"Active projects: ESO","2014-01":"Active projects: ESO","2014-02":"Active projects: ESO","2014-03":"Active projects: ESO","2014-04":"Active projects: ESO","2014-05":"Active projects: ESO","2014-06":"Active projects: ESO","2014-07":"Active projects: ESO","2014-08":"Active projects: ESO","2014-09":"Active projects: ESO","2014-10":"Active projects: ESO","2014-11":"Active projects: ESO","2014-12":"Active projects: ESO","2015-01":"Active projects: ESO","2015-02":"Active projects: ESO","2015-03":"Active projects: ESO","2015-04":"Active projects: ESO","2015-05":"Active projects: ESO","2015-06":"Active projects: ESO","2015-07":"Active projects: ESO","2015-08":"Active projects: ESO","2015-09":"Active projects: ESO","2015-10":"Active projects: ESO","2015-11":"Active projects: ESO, Portfolio","2016-01":"Active projects: ESO, deepdreamvisionquest","2016-02":"Active projects: ESO, OPS","2016-03":"Active projects: ESO, Portfolio","2016-04":"Active projects: ESO","2016-05":"Active projects: ESO","2016-06":"Active projects: ESO-Platform, ESO","2016-07":"Active projects: ESO-Platform, deepdreamvisionquest","2016-08":"Active projects: ESO-Platform","2016-09":"Active projects: ESO-Platform","2016-10":"Active projects: deepdreamvisionquest, ESO-Platform","2016-11":"Active projects: ESO-Platform","2016-12":"Active projects: ESO-Platform, Portfolio","2017-01":"Active projects: ESO-Platform, skinjestercorp","2017-02":"Active projects: ESO-Platform","2017-03":"Active projects: ESO-Platform, deepdreamvisionquest","2017-04":"Active projects: ESO-Platform, deepdreamvisionquest","2017-05":"Active projects: ESO-Platform","2017-06":"Active projects: ESO-Platform, deepdreamvisionquest","2017-07":"Active projects: ESO-Platform, deepdreamvisionquest","2017-08":"Active projects: ESO-Platform, deepdreamvisionquest","2017-09":"Active projects: ESO-Platform, deepdreamvisionquest","2017-10":"Active projects: ESO-Platform, deepdreamvisionquest","2017-11":"Active projects: ESO-Studio Site, deepdreamvisionquest, ESO-Platform","2017-12":"Active projects: deepdreamvisionquest, ESO-Platform","2018-01":"Active projects: deepdreamvisionquest, ESO-Platform, Portfolio","2018-02":"Active projects: ESO-Platform, deepdreamvisionquest, Image Garden","2018-03":"Active projects: ESO-Platform, deepdreamvisionquest, Portfolio","2018-04":"Active projects: deepdreamvisionquest, OPS, ESO-Platform","2018-05":"Active projects: Image Garden, ESO-Studio Site, deepdreamvisionquest","2018-06":"Active projects: deepdreamvisionquest, OPS, ESO-Platform","2018-07":"Active projects: ESO-Platform, deepdreamvisionquest","2018-08":"Active projects: ESO-Platform, deepdreamvisionquest","2018-09":"Active projects: ESO-Platform, deepdreamvisionquest","2018-10":"Active projects: ESO-Platform, ESO, deepdreamvisionquest","2018-11":"Active projects: ESO-Platform, ESO-Studio Site, deepdreamvisionquest","2018-12":"Active projects: ESO-Platform, ESO","2019-01":"Active projects: ESO-Platform, deepdreamvisionquest, ESO, Image Garden","2019-02":"Active projects: ESO, Image Garden, ESO-Platform","2019-03":"Active projects: ESO, KESTREL, ESO-Platform, Image Garden","2019-04":"Active projects: KESTREL, ESO-Platform","2019-05":"Active projects: KESTREL, ESO","2019-06":"Active projects: KESTREL, Image Garden, deepdreamvisionquest","2019-07":"Active projects: KESTREL, ESO","2019-08":"Active projects: KESTREL, ESO-Studio Site","2019-09":"Active projects: KESTREL","2019-10":"Active projects: KESTREL, ESO-Platform, Image Garden, OPS","2019-11":"Active projects: KESTREL, Portfolio","2019-12":"Active projects: KESTREL, Portfolio","2020-01":"Active projects: KESTREL, RPVR","2020-02":"Active projects: RPVR, KESTREL","2020-03":"Active projects: RPVR, ESO-Platform","2020-04":"Active projects: KESTREL, RPVR, Portfolio","2020-05":"Active projects: KESTREL, Portfolio","2020-06":"Active projects: KESTREL","2020-07":"Active projects: KESTREL, Portfolio","2020-08":"Active projects: KESTREL, RPVR","2020-09":"Active projects: KESTREL","2020-10":"Active projects: KESTREL","2020-11":"Active projects: KESTREL, ESO, Portfolio","2020-12":"Active projects: KESTREL, Portfolio, deepdreamvisionquest","2021-01":"Active projects: KESTREL, Portfolio, deepdreamvisionquest","2021-02":"Active projects: OPS, Portfolio","2021-03":"Active projects: Portfolio, ESO-Platform","2021-04":"Active projects: xoholo, Portfolio","2021-05":"Active projects: xoholo, OPS, Portfolio","2021-06":"Active projects: xoholo, Portfolio","2021-07":"Active projects: xoholo, Portfolio, OPS, iveda","2021-08":"Active projects: iveda, OPS, xoholo","2021-09":"Active projects: iveda, OPS","2021-10":"Active projects: iveda","2021-11":"Active projects: iveda, Portfolio, OPS","2021-12":"Active projects: iveda","2022-01":"Active projects: iveda","2022-02":"Active projects: iveda, skinjestercorp","2022-03":"Active projects: skinjestercorp, Portfolio","2022-04":"Active projects: OPS, deepdreamvisionquest, Portfolio","2022-05":"Active projects: Project Ansible, OPS","2022-06":"Active projects: OPS","2022-07":"Active projects: Portfolio, Image Garden","2022-08":"Active projects: Portfolio, deepdreamvisionquest","2022-09":"Active projects: Portfolio, OPS","2022-12":"Active projects: Portfolio, OPS","2023-01":"Active projects: OPS, Project Ansible","2023-11":"Active projects: Project Ansible, OPS","2024-05":"Active projects: skinjestercorp, OPS","2024-07":"Active projects: Portfolio","2024-08":"Active projects: OPS"},"descriptions":{"ESO":"Game client UI and related live product work (PC/console), tagged as ESO in summaries.","ESO-Platform":"ElderScrollsOnline.com, marketing web, and merchandising surfaces.","ESO-Studio Site":"Studio recruiting / studio site work.","KESTREL":"Kestrel-era UI systems: quests, HUD, inventory, navigation, design deliverables.","OPS":"Personal infrastructure, tooling, and operations.","Portfolio":"Portfolio sites, web publishing, and personal web projects.","Project Ansible":"Studio rack, audio, controllers, and production-environment work.","skinjestercorp":"skinjestercorp-related work as tagged in summaries.","Image Garden":"Image Garden workshops, talks, and related creative-tech work.","deepdreamvisionquest":"DeepDream Vision Quest and related experiments.","xoholo":"Futureworld / CineChamber / immersive media threads tagged xoholo.","iveda":"iveda-tagged project work.","RPVR":"RPVR-tagged project work."},"projectScores":{"ESO":[0,0,0,0,12,13,13,12,34,11,10,11,11,11,11,11,11,10,10,10,11,12,11,12,9,10,11,9,11,11,11,9,9,9,9,9,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,4,1,4,4,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ESO-Platform":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,9,8,9,9,3,8,9,8,9,7,7,9,7,7,7,7,7,1,4,2,5,5,1,0,1,7,6,8,6,4,6,4,1,2,4,0,0,0,0,0,3,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"ESO-Studio Site":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,0,0,0,0,0,3,0,0,0,0,0,4,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"KESTREL":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,5,7,6,7,6,8,4,5,6,7,4,0,4,7,8,7,7,8,8,5,5,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"OPS":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,0,0,1,0,1,1,1,0,1,0,0,0,0,4,3,7,0,0,3,1,5,3,1,0,7],"Portfolio":[17,19,12,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,3,0,0,0,1,1,0,1,0,0,0,1,2,3,1,7,2,1,4,2,0,0,0,2,0,0,0,3,1,0,0,6,6,5,6,0,0,0,7,0],"Project Ansible":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,2,4,0,0,0],"skinjestercorp":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,4,0,0,0,0,0,0,0,0,0,6,0,0],"Image Garden":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,6,0,0,0,0,0,0,0,1,4,1,0,0,1,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0],"deepdreamvisionquest":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,6,0,0,0,0,3,3,0,3,2,3,3,3,2,6,6,4,4,5,1,6,3,4,3,1,3,0,3,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,1,0,0,0,0,0,0,0],"xoholo":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,6,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"iveda":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,6,7,7,5,7,7,6,0,0,0,0,0,0,0,0,0,0,0,0,0],"RPVR":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,5,7,4,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},"projectActivities":{"ESO":[{"name":"General & planning","total":93,"activeMonths":32,"monthly":[0,0,0,0,3,4,4,1,12,3,1,2,3,1,2,3,1,3,1,1,2,4,0,5,2,4,4,0,3,1,4,2,4,4,4,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Documentation & specs","total":40,"activeMonths":30,"monthly":[0,0,0,0,1,2,1,1,6,0,0,0,2,1,0,1,1,0,1,1,0,1,1,2,1,1,1,1,1,2,1,1,1,2,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Store & monetization","total":40,"activeMonths":17,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,3,0,1,2,0,4,6,3,1,5,1,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,3,1,3,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"CMS & publishing","total":32,"activeMonths":17,"monthly":[0,0,0,0,0,1,2,0,9,0,0,2,2,1,2,2,2,0,0,0,0,1,1,0,1,0,0,0,0,0,0,1,1,1,1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Inventory & equipment","total":29,"activeMonths":16,"monthly":[0,0,0,0,1,0,1,0,0,2,2,3,2,5,2,1,0,0,0,1,1,0,0,2,1,0,0,0,0,0,1,0,0,2,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Quest & journal systems","total":15,"activeMonths":14,"monthly":[0,0,0,0,1,0,1,2,0,0,0,0,1,0,0,0,1,0,1,0,1,0,1,1,0,0,1,1,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Community & social surfaces","total":28,"activeMonths":13,"monthly":[0,0,0,0,1,0,0,0,0,1,0,0,0,1,0,0,2,1,3,5,3,2,5,0,0,2,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Video & motion","total":12,"activeMonths":8,"monthly":[0,0,0,0,0,0,0,3,2,0,0,0,0,0,0,1,0,1,0,0,0,1,0,0,0,1,2,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"HUD & objectives","total":11,"activeMonths":8,"monthly":[0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,2,1,2,0,0,0,1,0,1,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Templates & page systems","total":9,"activeMonths":8,"monthly":[0,0,0,0,1,0,1,0,0,0,2,1,0,1,1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Workshops & talks","total":8,"activeMonths":7,"monthly":[0,0,0,0,0,0,0,0,2,0,0,1,0,0,1,0,1,1,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Engineering handoff","total":7,"activeMonths":7,"monthly":[0,0,0,0,0,1,0,0,0,1,0,0,0,1,1,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Prototyping & wireframes","total":8,"activeMonths":6,"monthly":[0,0,0,0,0,3,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Meetings & coordination","total":6,"activeMonths":6,"monthly":[0,0,0,0,1,1,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Analytics & measurement","total":6,"activeMonths":4,"monthly":[0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Audio & hardware studio","total":4,"activeMonths":4,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Map & world navigation","total":4,"activeMonths":4,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Navigation & hubs","total":4,"activeMonths":4,"monthly":[0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Presentations & critiques","total":4,"activeMonths":4,"monthly":[0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Presentations & deck work","total":4,"activeMonths":4,"monthly":[0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Visual design & wireframes","total":4,"activeMonths":4,"monthly":[0,0,0,0,0,0,1,1,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Copywriting & messaging","total":4,"activeMonths":3,"monthly":[0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Visual design & theming","total":4,"activeMonths":3,"monthly":[0,0,0,0,0,0,1,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Research & discovery","total":3,"activeMonths":3,"monthly":[0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Design systems & components","total":2,"activeMonths":2,"monthly":[0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Infrastructure & scripts","total":2,"activeMonths":2,"monthly":[0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Email & newsletters","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Recruiting & studio site","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}],"ESO-Platform":[{"name":"General & planning","total":68,"activeMonths":32,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,2,5,3,2,1,2,2,3,3,1,0,2,2,4,2,3,0,1,2,0,3,1,0,1,3,3,2,1,3,1,0,1,0,1,0,0,0,0,0,2,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Documentation & specs","total":18,"activeMonths":17,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,2,0,1,0,0,1,0,1,1,1,1,0,1,1,0,0,0,0,1,0,0,0,0,0,1,0,1,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"CMS & publishing","total":16,"activeMonths":14,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,0,0,1,1,0,0,1,0,1,0,0,0,1,0,0,0,1,1,1,1,0,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Store & monetization","total":16,"activeMonths":10,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,3,0,0,0,0,2,1,2,0,1,0,0,0,0,2,0,0,0,0,0,0,0,1,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Marketing & player-facing web","total":13,"activeMonths":10,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,2,1,0,1,2,0,0,0,2,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Templates & page systems","total":10,"activeMonths":8,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,1,1,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,2,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Prototyping & wireframes","total":8,"activeMonths":7,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,1,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Community & social surfaces","total":5,"activeMonths":5,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Prototyping & experiments","total":5,"activeMonths":5,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Visual design & wireframes","total":5,"activeMonths":5,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Visual design & theming","total":4,"activeMonths":4,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Engineering handoff","total":3,"activeMonths":3,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Meetings & coordination","total":3,"activeMonths":3,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Navigation & hubs","total":3,"activeMonths":3,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Email & newsletters","total":3,"activeMonths":2,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Copywriting & messaging","total":2,"activeMonths":2,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Domains, hosting & deploy","total":2,"activeMonths":2,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Information architecture","total":2,"activeMonths":2,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Infrastructure & scripts","total":2,"activeMonths":2,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Research & discovery","total":2,"activeMonths":2,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Video & motion","total":2,"activeMonths":2,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Workshops & talks","total":2,"activeMonths":2,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Analytics & measurement","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Integrations & APIs","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Operations & runbooks","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Presentations & critiques","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Presentations & deck work","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Quest & journal systems","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Recruiting & studio site","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Research & audits","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}],"ESO-Studio Site":[{"name":"Analytics & measurement","total":2,"activeMonths":2,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"CMS & publishing","total":2,"activeMonths":2,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Documentation & specs","total":2,"activeMonths":2,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"General & planning","total":2,"activeMonths":2,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Recruiting & studio site","total":2,"activeMonths":2,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Information architecture","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Presentations & deck work","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Prototyping & wireframes","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Templates & page systems","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Video & motion","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Workshops & talks","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}],"KESTREL":[{"name":"General & planning","total":26,"activeMonths":15,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,1,2,1,2,4,1,2,1,0,1,0,0,2,1,0,0,2,2,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Documentation & specs","total":11,"activeMonths":10,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,1,0,0,0,0,0,0,1,0,0,1,1,0,2,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Inventory & equipment","total":13,"activeMonths":9,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,3,1,0,0,1,0,3,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"HUD & objectives","total":16,"activeMonths":8,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,0,2,0,0,0,0,3,2,0,0,0,0,1,3,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Quest & journal systems","total":16,"activeMonths":8,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,3,4,0,3,2,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Presentations & critiques","total":9,"activeMonths":8,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,1,1,1,0,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Prototyping & experiments","total":6,"activeMonths":6,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Map & world navigation","total":5,"activeMonths":4,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,2,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Presentations & deck work","total":3,"activeMonths":3,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Video & motion","total":3,"activeMonths":3,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Visual design & wireframes","total":3,"activeMonths":3,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Navigation & hubs","total":3,"activeMonths":2,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Audio & hardware studio","total":2,"activeMonths":2,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"CMS & publishing","total":2,"activeMonths":2,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Meetings & coordination","total":2,"activeMonths":2,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Prototyping & wireframes","total":2,"activeMonths":2,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Templates & page systems","total":2,"activeMonths":2,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Visual design & theming","total":2,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Analytics & measurement","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Engineering handoff","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Integrations & APIs","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Research & discovery","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Store & monetization","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}],"OPS":[{"name":"General & planning","total":24,"activeMonths":13,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,1,0,0,0,0,0,0,1,3,5,0,0,0,0,1,2,1,0,4]},{"name":"Operations & runbooks","total":8,"activeMonths":8,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,1,0,0,0,0,0,1]},{"name":"Infrastructure & scripts","total":8,"activeMonths":5,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,2]},{"name":"Inventory & equipment","total":3,"activeMonths":3,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0]},{"name":"Keyboard & desk hardware","total":3,"activeMonths":2,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0]},{"name":"Audio & hardware studio","total":2,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0]},{"name":"Domains, hosting & deploy","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0]},{"name":"Map & world navigation","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0]},{"name":"Meetings & coordination","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Navigation & hubs","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0]},{"name":"Quest & journal systems","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Workshops & talks","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]}],"Portfolio":[{"name":"General & planning","total":54,"activeMonths":24,"monthly":[1,9,7,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,1,0,0,1,0,0,0,1,1,2,1,4,2,0,0,2,0,0,0,0,0,0,0,2,0,0,0,1,2,2,1,0,0,0,5,0]},{"name":"Documentation & specs","total":17,"activeMonths":12,"monthly":[2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,2,1,0,1,0,0,0,1,0]},{"name":"Site build & CMS","total":15,"activeMonths":10,"monthly":[4,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,2,1,1,0,0,0,0,0]},{"name":"Domains, hosting & deploy","total":7,"activeMonths":6,"monthly":[2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,1,1,0,0,0,0,0]},{"name":"Visual design & theming","total":6,"activeMonths":4,"monthly":[2,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0]},{"name":"Analytics & measurement","total":3,"activeMonths":3,"monthly":[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0]},{"name":"CMS & publishing","total":3,"activeMonths":3,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Video & motion","total":3,"activeMonths":2,"monthly":[2,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Meetings & coordination","total":2,"activeMonths":2,"monthly":[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Operations & runbooks","total":2,"activeMonths":2,"monthly":[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0]},{"name":"Prototyping & experiments","total":2,"activeMonths":2,"monthly":[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Prototyping & wireframes","total":2,"activeMonths":2,"monthly":[0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Recruiting & studio site","total":2,"activeMonths":2,"monthly":[0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0]},{"name":"Templates & page systems","total":2,"activeMonths":2,"monthly":[0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Visual design & wireframes","total":2,"activeMonths":2,"monthly":[0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Branding & identity","total":2,"activeMonths":1,"monthly":[0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Immersive & installation","total":2,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Community & social surfaces","total":1,"activeMonths":1,"monthly":[0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Generative & ML art","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0]},{"name":"HUD & objectives","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Information architecture","total":1,"activeMonths":1,"monthly":[0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Infrastructure & scripts","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Inventory & equipment","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Navigation & hubs","total":1,"activeMonths":1,"monthly":[0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Presentations & critiques","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Quest & journal systems","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0]},{"name":"Research & discovery","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}],"Project Ansible":[{"name":"Rack & cabling","total":6,"activeMonths":3,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,1,2,0,0,0]},{"name":"Operations & runbooks","total":3,"activeMonths":3,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,1,0,0,0]},{"name":"General & planning","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0]}],"skinjestercorp":[{"name":"Operations & runbooks","total":2,"activeMonths":2,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0]},{"name":"General & planning","total":4,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0]},{"name":"Analytics & measurement","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Branding & identity","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Domains, hosting & deploy","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Quest & journal systems","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0]},{"name":"Templates & page systems","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Video & motion","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0]}],"Image Garden":[{"name":"Workshops & talks","total":8,"activeMonths":7,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,2,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0]},{"name":"General & planning","total":5,"activeMonths":4,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Documentation & specs","total":2,"activeMonths":2,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Generative & ML art","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Quest & journal systems","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Research & discovery","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}],"deepdreamvisionquest":[{"name":"General & planning","total":33,"activeMonths":21,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,2,0,0,0,0,1,0,0,1,1,0,2,1,1,5,2,0,1,1,1,5,1,0,2,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0]},{"name":"Documentation & specs","total":16,"activeMonths":16,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,1,0,1,0,1,1,1,1,1,1,0,1,1,0,0,1,1,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Video & motion","total":9,"activeMonths":7,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,1,2,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Workshops & talks","total":8,"activeMonths":4,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,3,0,2,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Generative & ML art","total":6,"activeMonths":4,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Infrastructure & scripts","total":2,"activeMonths":2,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Visual design & wireframes","total":2,"activeMonths":2,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"CMS & publishing","total":2,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Audio & hardware studio","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Domains, hosting & deploy","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Engineering handoff","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Presentations & critiques","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Presentations & deck work","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Quest & journal systems","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Visual design & theming","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}],"xoholo":[{"name":"General & planning","total":8,"activeMonths":5,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,3,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Immersive & installation","total":5,"activeMonths":3,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Visual design & wireframes","total":3,"activeMonths":3,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Research & discovery","total":2,"activeMonths":2,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Integrations & APIs","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Research & audits","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Templates & page systems","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Video & motion","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}],"iveda":[{"name":"General & planning","total":21,"activeMonths":7,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,3,1,4,4,5,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Prototyping & wireframes","total":4,"activeMonths":3,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"CMS & publishing","total":3,"activeMonths":3,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Integrations & APIs","total":3,"activeMonths":3,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Design systems & components","total":2,"activeMonths":2,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Documentation & specs","total":2,"activeMonths":2,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Visual design & wireframes","total":2,"activeMonths":2,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Map & world navigation","total":3,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"HUD & objectives","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Immersive & installation","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Information architecture","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Navigation & hubs","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Presentations & critiques","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Presentations & deck work","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}],"RPVR":[{"name":"General & planning","total":8,"activeMonths":3,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,2,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Video & motion","total":3,"activeMonths":2,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Documentation & specs","total":2,"activeMonths":2,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Audio & hardware studio","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Engineering handoff","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"HUD & objectives","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Prototyping & wireframes","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{"name":"Visual design & wireframes","total":1,"activeMonths":1,"monthly":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}]},"activityHints":{"ESO":["","","","","Top activities: General & planning 3, Analytics & measurement 1, Community & social surfaces 1, Design systems & components 1, Documentation & specs 1, Infrastructure & scripts 1","Top activities: General & planning 4, Prototyping & wireframes 3, Documentation & specs 2, CMS & publishing 1, Design systems & components 1, Engineering handoff 1","Top activities: General & planning 4, CMS & publishing 2, Documentation & specs 1, Inventory & equipment 1, Prototyping & wireframes 1, Quest & journal systems 1","Top activities: Video & motion 3, Copywriting & messaging 2, Quest & journal systems 2, Documentation & specs 1, General & planning 1, HUD & objectives 1","Top activities: General & planning 12, CMS & publishing 9, Documentation & specs 6, Video & motion 2, Workshops & talks 2, HUD & objectives 1","Top activities: General & planning 3, Inventory & equipment 2, Analytics & measurement 1, Community & social surfaces 1, Engineering handoff 1, Navigation & hubs 1","Top activities: Inventory & equipment 2, Templates & page systems 2, Visual design & theming 2, General & planning 1, Navigation & hubs 1, Presentations & deck work 1","Top activities: Inventory & equipment 3, CMS & publishing 2, General & planning 2, Presentations & critiques 1, Presentations & deck work 1, Templates & page systems 1","Top activities: General & planning 3, CMS & publishing 2, Documentation & specs 2, Inventory & equipment 2, Meetings & coordination 1, Quest & journal systems 1","Top activities: Inventory & equipment 5, CMS & publishing 1, Community & social surfaces 1, Documentation & specs 1, Engineering handoff 1, General & planning 1","Top activities: CMS & publishing 2, General & planning 2, Inventory & equipment 2, Engineering handoff 1, Research & discovery 1, Templates & page systems 1","Top activities: General & planning 3, CMS & publishing 2, HUD & objectives 2, Audio & hardware studio 1, Documentation & specs 1, Inventory & equipment 1","Top activities: CMS & publishing 2, Community & social surfaces 2, Audio & hardware studio 1, Documentation & specs 1, General & planning 1, HUD & objectives 1","Top activities: General & planning 3, HUD & objectives 2, Community & social surfaces 1, Presentations & deck work 1, Store & monetization 1, Video & motion 1","Top activities: Community & social surfaces 3, Analytics & measurement 2, Documentation & specs 1, General & planning 1, Infrastructure & scripts 1, Navigation & hubs 1","Top activities: Community & social surfaces 5, Documentation & specs 1, General & planning 1, Inventory & equipment 1, Map & world navigation 1, Templates & page systems 1","Top activities: Community & social surfaces 3, General & planning 2, Inventory & equipment 1, Map & world navigation 1, Presentations & critiques 1, Presentations & deck work 1","Top activities: General & planning 4, Community & social surfaces 2, CMS & publishing 1, Documentation & specs 1, Engineering handoff 1, HUD & objectives 1","Top activities: Community & social surfaces 5, Store & monetization 3, CMS & publishing 1, Documentation & specs 1, Quest & journal systems 1","Top activities: General & planning 5, Documentation & specs 2, Inventory & equipment 2, HUD & objectives 1, Quest & journal systems 1, Workshops & talks 1","Top activities: General & planning 2, CMS & publishing 1, Documentation & specs 1, Email & newsletters 1, Engineering handoff 1, Inventory & equipment 1","Top activities: General & planning 4, Community & social surfaces 2, Store & monetization 2, Documentation & specs 1, Video & motion 1","Top activities: General & planning 4, Video & motion 2, Audio & hardware studio 1, Copywriting & messaging 1, Documentation & specs 1, Quest & journal systems 1","Top activities: Store & monetization 4, Community & social surfaces 1, Documentation & specs 1, Map & world navigation 1, Quest & journal systems 1, Templates & page systems 1","Top activities: Store & monetization 6, General & planning 3, Audio & hardware studio 1, Documentation & specs 1","Top activities: Store & monetization 3, Documentation & specs 2, HUD & objectives 2, Community & social surfaces 1, Copywriting & messaging 1, General & planning 1","Top activities: General & planning 4, Analytics & measurement 2, Documentation & specs 1, Engineering handoff 1, Inventory & equipment 1, Meetings & coordination 1","Top activities: Store & monetization 5, General & planning 2, CMS & publishing 1, Documentation & specs 1","Top activities: General & planning 4, CMS & publishing 1, Documentation & specs 1, Meetings & coordination 1, Navigation & hubs 1, Store & monetization 1","Top activities: General & planning 4, Documentation & specs 2, Inventory & equipment 2, CMS & publishing 1","Top activities: General & planning 4, Store & monetization 2, CMS & publishing 1, Documentation & specs 1, Presentations & critiques 1","Top activities: CMS & publishing 2, General & planning 2, Inventory & equipment 2, Documentation & specs 1, Quest & journal systems 1, Video & motion 1","Top activities: Research & discovery 1","","","","","","","","","","","","","","","","","","","","","","","","","","","","Top activities: Store & monetization 2, Documentation & specs 1","","Top activities: Store & monetization 3, Documentation & specs 1","Top activities: Store & monetization 1","Top activities: Store & monetization 3, Documentation & specs 1","Top activities: General & planning 2, Documentation & specs 1, Store & monetization 1","","Top activities: Prototyping & wireframes 1","","Top activities: Prototyping & wireframes 1","","","","","","","","","","","","","","","","Top activities: General & planning 1, Quest & journal systems 1","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],"ESO-Platform":["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","Top activities: General & planning 4, Documentation & specs 1, Marketing & player-facing web 1, Navigation & hubs 1, Presentations & critiques 1, Store & monetization 1","Top activities: General & planning 2, Copywriting & messaging 1, Marketing & player-facing web 1, Prototyping & experiments 1, Prototyping & wireframes 1, Store & monetization 1","Top activities: General & planning 5, Marketing & player-facing web 2, Infrastructure & scripts 1, Prototyping & experiments 1","Top activities: General & planning 3, Documentation & specs 2, Community & social surfaces 1, Marketing & player-facing web 1, Research & discovery 1, Workshops & talks 1","Top activities: General & planning 2, Operations & runbooks 1","Top activities: Templates & page systems 2, Community & social surfaces 1, Documentation & specs 1, Domains, hosting & deploy 1, Engineering handoff 1, General & planning 1","Top activities: Store & monetization 3, General & planning 2, Marketing & player-facing web 2, Prototyping & wireframes 1, Visual design & wireframes 1","Top activities: CMS & publishing 2, General & planning 2, Email & newsletters 1, Meetings & coordination 1, Prototyping & experiments 1, Templates & page systems 1","Top activities: General & planning 3, CMS & publishing 2, Documentation & specs 1, Information architecture 1, Prototyping & wireframes 1, Templates & page systems 1","Top activities: General & planning 3, Analytics & measurement 1, Engineering handoff 1, Research & discovery 1, Visual design & wireframes 1","Top activities: Marketing & player-facing web 2, Community & social surfaces 1, Documentation & specs 1, General & planning 1, Recruiting & studio site 1, Templates & page systems 1","Top activities: Email & newsletters 2, Store & monetization 2, CMS & publishing 1, Documentation & specs 1, Marketing & player-facing web 1, Navigation & hubs 1","Top activities: General & planning 2, CMS & publishing 1, Documentation & specs 1, Marketing & player-facing web 1, Meetings & coordination 1, Store & monetization 1","Top activities: General & planning 2, Store & monetization 2, Community & social surfaces 1, Documentation & specs 1, Visual design & theming 1","Top activities: General & planning 4, Marketing & player-facing web 1, Presentations & deck work 1, Prototyping & wireframes 1","Top activities: General & planning 2, CMS & publishing 1, Documentation & specs 1, Store & monetization 1, Templates & page systems 1, Video & motion 1","Top activities: General & planning 3, Documentation & specs 1, Integrations & APIs 1, Quest & journal systems 1, Visual design & theming 1","Top activities: CMS & publishing 1","Top activities: General & planning 1, Information architecture 1, Prototyping & wireframes 1, Visual design & wireframes 1","Top activities: General & planning 2","Top activities: Store & monetization 2, Visual design & theming 1, Visual design & wireframes 1, Workshops & talks 1","Top activities: General & planning 3, CMS & publishing 1, Documentation & specs 1","Top activities: General & planning 1","","Top activities: General & planning 1","Top activities: General & planning 3, CMS & publishing 1, Prototyping & experiments 1, Prototyping & wireframes 1, Templates & page systems 1","Top activities: General & planning 3, CMS & publishing 1, Copywriting & messaging 1, Visual design & wireframes 1","Top activities: General & planning 2, Prototyping & wireframes 2, Templates & page systems 2, CMS & publishing 1, Documentation & specs 1","Top activities: CMS & publishing 1, General & planning 1, Infrastructure & scripts 1, Navigation & hubs 1, Prototyping & experiments 1, Store & monetization 1","Top activities: General & planning 3, Documentation & specs 1","Top activities: CMS & publishing 1, Community & social surfaces 1, Documentation & specs 1, Domains, hosting & deploy 1, General & planning 1, Meetings & coordination 1","Top activities: Store & monetization 2, Documentation & specs 1, Engineering handoff 1","Top activities: General & planning 1","Top activities: CMS & publishing 1, Documentation & specs 1","Top activities: CMS & publishing 1, Documentation & specs 1, General & planning 1, Templates & page systems 1","","","","","","Top activities: General & planning 2, Research & audits 1","","","","","Top activities: General & planning 1","","","","","","","","","","","","Top activities: General & planning 1","","","","","","","","","","","","","","","","","","","","","","","",""],"ESO-Studio Site":["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","Top activities: Analytics & measurement 1, Documentation & specs 1, General & planning 1, Prototyping & wireframes 1, Recruiting & studio site 1, Templates & page systems 1","","","","","","Top activities: Analytics & measurement 1, CMS & publishing 1, Presentations & deck work 1","","","","","","Top activities: CMS & publishing 1, Documentation & specs 1, Recruiting & studio site 1, Video & motion 1","","","","","","","","","Top activities: General & planning 1, Information architecture 1","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],"KESTREL":["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","Top activities: General & planning 3","Top activities: Documentation & specs 1, HUD & objectives 1, Map & world navigation 1, Meetings & coordination 1, Presentations & critiques 1","Top activities: HUD & objectives 3, Presentations & critiques 2, Documentation & specs 1, General & planning 1","Top activities: General & planning 2, Meetings & coordination 1, Presentations & critiques 1, Prototyping & experiments 1, Research & discovery 1","Top activities: HUD & objectives 2, Audio & hardware studio 1, CMS & publishing 1, General & planning 1, Presentations & critiques 1, Prototyping & experiments 1","Top activities: General & planning 2, Presentations & critiques 1, Prototyping & experiments 1, Quest & journal systems 1, Store & monetization 1","Top activities: General & planning 4, Map & world navigation 2, Documentation & specs 1, Inventory & equipment 1","Top activities: Audio & hardware studio 1, General & planning 1, Presentations & critiques 1, Presentations & deck work 1","Top activities: General & planning 2, Analytics & measurement 1, Presentations & critiques 1, Presentations & deck work 1","Top activities: HUD & objectives 3, General & planning 1, Prototyping & experiments 1, Templates & page systems 1","Top activities: HUD & objectives 2, Integrations & APIs 1, Inventory & equipment 1, Map & world navigation 1, Video & motion 1, Visual design & wireframes 1","Top activities: General & planning 1, Map & world navigation 1, Presentations & critiques 1, Prototyping & experiments 1","","Top activities: Inventory & equipment 3, Documentation & specs 1","Top activities: Quest & journal systems 3, General & planning 2, Inventory & equipment 1, Visual design & wireframes 1","Top activities: Quest & journal systems 4, CMS & publishing 1, General & planning 1, HUD & objectives 1, Visual design & wireframes 1","Top activities: HUD & objectives 3, Navigation & hubs 2, Documentation & specs 1, Prototyping & wireframes 1","Top activities: Quest & journal systems 3, Documentation & specs 1, Inventory & equipment 1, Navigation & hubs 1, Video & motion 1","Top activities: General & planning 2, Quest & journal systems 2, HUD & objectives 1, Presentations & deck work 1, Prototyping & wireframes 1, Video & motion 1","Top activities: Inventory & equipment 3, Documentation & specs 2, General & planning 2, Quest & journal systems 1","Top activities: Documentation & specs 1, Engineering handoff 1, Inventory & equipment 1, Quest & journal systems 1, Templates & page systems 1","Top activities: Documentation & specs 1, General & planning 1, Inventory & equipment 1, Prototyping & experiments 1, Quest & journal systems 1","Top activities: Visual design & theming 2, Documentation & specs 1, Inventory & equipment 1","","","","","","","","","","","","","","","","","","","","","","","","","",""],"OPS":["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","Top activities: Infrastructure & scripts 1","","","","","","","","","","","","","","","","","","","","","","","","","","Top activities: General & planning 2, Operations & runbooks 1","","Top activities: General & planning 1, Infrastructure & scripts 1, Operations & runbooks 1","","","","","","","","","","","","","","","","Top activities: Operations & runbooks 1","","","","","","","","","","","","","","","","Top activities: Infrastructure & scripts 3, Keyboard & desk hardware 1, Meetings & coordination 1, Operations & runbooks 1, Quest & journal systems 1","","","Top activities: General & planning 1","","Top activities: General & planning 1","Top activities: General & planning 1","Top activities: General & planning 1","","Top activities: Inventory & equipment 1","","","","","Top activities: General & planning 1, Infrastructure & scripts 1, Operations & runbooks 1, Workshops & talks 1","Top activities: General & planning 3","Top activities: General & planning 5, Inventory & equipment 1, Operations & runbooks 1","","","Top activities: Keyboard & desk hardware 2, Operations & runbooks 1","Top activities: Domains, hosting & deploy 1","Top activities: Audio & hardware studio 2, General & planning 1, Inventory & equipment 1, Map & world navigation 1","Top activities: General & planning 2, Navigation & hubs 1","Top activities: General & planning 1","","Top activities: General & planning 4, Infrastructure & scripts 2, Operations & runbooks 1"],"Portfolio":["Top activities: Site build & CMS 4, Documentation & specs 2, Domains, hosting & deploy 2, Video & motion 2, Visual design & theming 2, Analytics & measurement 1","Top activities: General & planning 9, Branding & identity 2, Documentation & specs 2, Community & social surfaces 1, Domains, hosting & deploy 1, Site build & CMS 1","Top activities: General & planning 7, Documentation & specs 2, Navigation & hubs 1, Templates & page systems 1, Visual design & wireframes 1","Top activities: General & planning 4, Documentation & specs 2, Information architecture 1, Prototyping & wireframes 1, Recruiting & studio site 1, Site build & CMS 1","","","","","","","","","","","","","","","","","","","","","","","","","","","Top activities: Site build & CMS 2, Prototyping & experiments 1","","","Top activities: General & planning 1","","","","","","","","","Top activities: General & planning 1","","","","","","","","","","","","","Top activities: Site build & CMS 1","","Top activities: General & planning 1","","","","","","","","","","","","","","","","","","","","Top activities: CMS & publishing 1, Documentation & specs 1, General & planning 1, Site build & CMS 1","Top activities: CMS & publishing 1, Documentation & specs 1, General & planning 1","","","","Top activities: General & planning 1","Top activities: HUD & objectives 1","","Top activities: General & planning 1","","","","Top activities: General & planning 1","Top activities: General & planning 1, Inventory & equipment 1","Top activities: General & planning 2, Research & discovery 1","Top activities: General & planning 1","Top activities: General & planning 4, Documentation & specs 1, Meetings & coordination 1, Presentations & critiques 1","Top activities: General & planning 2","Top activities: Infrastructure & scripts 1","Top activities: Immersive & installation 2, Documentation & specs 1, Prototyping & wireframes 1","Top activities: General & planning 2","","","","Top activities: Domains, hosting & deploy 1, Site build & CMS 1","","","","Top activities: General & planning 2, Analytics & measurement 1","Top activities: CMS & publishing 1","","","Top activities: Documentation & specs 2, Analytics & measurement 1, Domains, hosting & deploy 1, General & planning 1, Recruiting & studio site 1","Top activities: General & planning 2, Site build & CMS 2, Documentation & specs 1, Generative & ML art 1","Top activities: General & planning 2, Domains, hosting & deploy 1, Operations & runbooks 1, Site build & CMS 1","Top activities: Visual design & theming 2, Documentation & specs 1, Domains, hosting & deploy 1, General & planning 1, Site build & CMS 1","","","","Top activities: General & planning 5, Documentation & specs 1, Quest & journal systems 1",""],"Project Ansible":["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","Top activities: Rack & cabling 3, Operations & runbooks 1","","","","","","Top activities: Operations & runbooks 1, Rack & cabling 1","Top activities: Rack & cabling 2, General & planning 1, Operations & runbooks 1","","",""],"skinjestercorp":["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","Top activities: Templates & page systems 1","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","Top activities: Video & motion 1","Top activities: Analytics & measurement 1, Branding & identity 1, Domains, hosting & deploy 1, Operations & runbooks 1","","","","","","","","","","Top activities: General & planning 4, Operations & runbooks 1, Quest & journal systems 1","",""],"Image Garden":["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","Top activities: Workshops & talks 1","","","Top activities: General & planning 2, Workshops & talks 2, Documentation & specs 1, Quest & journal systems 1","","","","","","","","Top activities: Workshops & talks 1","Top activities: Documentation & specs 1, General & planning 1, Generative & ML art 1, Workshops & talks 1","Top activities: Workshops & talks 1","","","Top activities: General & planning 1","","","","Top activities: General & planning 1, Research & discovery 1, Workshops & talks 1","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","Top activities: Workshops & talks 1","","","","","","","",""],"deepdreamvisionquest":["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","Top activities: General & planning 1","","","","","","Top activities: General & planning 1","","","Top activities: General & planning 2, Video & motion 2, Audio & hardware studio 1, Documentation & specs 1","","","","","Top activities: Documentation & specs 1, General & planning 1, Video & motion 1","Top activities: Video & motion 2, Documentation & specs 1","","Top activities: Documentation & specs 1, General & planning 1, Presentations & critiques 1","Top activities: General & planning 1, Video & motion 1","Top activities: Workshops & talks 2, Documentation & specs 1","Top activities: General & planning 2, Documentation & specs 1","Top activities: Documentation & specs 1, Engineering handoff 1, General & planning 1","Top activities: Documentation & specs 1, General & planning 1","Top activities: General & planning 5, Documentation & specs 1","Top activities: Generative & ML art 3, General & planning 2, Documentation & specs 1","Top activities: Workshops & talks 3, Presentations & deck work 1","Top activities: Documentation & specs 1, General & planning 1, Generative & ML art 1, Infrastructure & scripts 1","Top activities: Workshops & talks 2, Documentation & specs 1, Domains, hosting & deploy 1, General & planning 1","Top activities: General & planning 1","Top activities: General & planning 5, Visual design & wireframes 1","Top activities: Documentation & specs 1, General & planning 1, Video & motion 1","Top activities: Documentation & specs 1, Generative & ML art 1, Infrastructure & scripts 1, Video & motion 1","Top activities: General & planning 2, Documentation & specs 1","Top activities: General & planning 1","Top activities: General & planning 1, Video & motion 1, Visual design & wireframes 1","","Top activities: Documentation & specs 1, General & planning 1, Workshops & talks 1","","","","","Top activities: Generative & ML art 1","","","","","","","","","","","","","","","","","","Top activities: Quest & journal systems 1","Top activities: Visual design & theming 1","","","","","","","","","","","","","","","Top activities: CMS & publishing 2","","","","Top activities: General & planning 1","","","","","","",""],"xoholo":["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","Top activities: General & planning 2, Research & audits 1, Research & discovery 1, Templates & page systems 1","Top activities: General & planning 3, Immersive & installation 2, Visual design & wireframes 1","Top activities: Immersive & installation 2, General & planning 1, Video & motion 1, Visual design & wireframes 1","Top activities: General & planning 1, Immersive & installation 1, Integrations & APIs 1, Research & discovery 1, Visual design & wireframes 1","Top activities: General & planning 1","","","","","","","","","","","","","","","","","","",""],"iveda":["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","Top activities: Immersive & installation 1","Top activities: CMS & publishing 1, Design systems & components 1, General & planning 1, Information architecture 1, Integrations & APIs 1, Prototyping & wireframes 1","Top activities: General & planning 3, Map & world navigation 3, Visual design & wireframes 1","Top activities: General & planning 3, Integrations & APIs 1, Presentations & critiques 1, Presentations & deck work 1, Prototyping & wireframes 1","Top activities: Prototyping & wireframes 2, Design systems & components 1, General & planning 1, Integrations & APIs 1","Top activities: General & planning 4, CMS & publishing 1, Documentation & specs 1, Navigation & hubs 1","Top activities: General & planning 4, CMS & publishing 1, HUD & objectives 1, Visual design & wireframes 1","Top activities: General & planning 5, Documentation & specs 1","","","","","","","","","","","","",""],"RPVR":["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","Top activities: HUD & objectives 1","Top activities: General & planning 3, Video & motion 1, Visual design & wireframes 1","Top activities: General & planning 2, Video & motion 2, Audio & hardware studio 1, Documentation & specs 1, Engineering handoff 1","Top activities: General & planning 3, Documentation & specs 1","","","","Top activities: Prototyping & wireframes 1","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""]},"activityTopRows":{"ESO":[[],[],[],[],[{"label":"General & planning","n":3},{"label":"Analytics & measurement","n":1},{"label":"Community & social surfaces","n":1}],[{"label":"General & planning","n":4},{"label":"Prototyping & wireframes","n":3},{"label":"Documentation & specs","n":2}],[{"label":"General & planning","n":4},{"label":"CMS & publishing","n":2},{"label":"Documentation & specs","n":1}],[{"label":"Video & motion","n":3},{"label":"Copywriting & messaging","n":2},{"label":"Quest & journal systems","n":2}],[{"label":"General & planning","n":12},{"label":"CMS & publishing","n":9},{"label":"Documentation & specs","n":6}],[{"label":"General & planning","n":3},{"label":"Inventory & equipment","n":2},{"label":"Analytics & measurement","n":1}],[{"label":"Inventory & equipment","n":2},{"label":"Templates & page systems","n":2},{"label":"Visual design & theming","n":2}],[{"label":"Inventory & equipment","n":3},{"label":"CMS & publishing","n":2},{"label":"General & planning","n":2}],[{"label":"General & planning","n":3},{"label":"CMS & publishing","n":2},{"label":"Documentation & specs","n":2}],[{"label":"Inventory & equipment","n":5},{"label":"CMS & publishing","n":1},{"label":"Community & social surfaces","n":1}],[{"label":"CMS & publishing","n":2},{"label":"General & planning","n":2},{"label":"Inventory & equipment","n":2}],[{"label":"General & planning","n":3},{"label":"CMS & publishing","n":2},{"label":"HUD & objectives","n":2}],[{"label":"CMS & publishing","n":2},{"label":"Community & social surfaces","n":2},{"label":"Audio & hardware studio","n":1}],[{"label":"General & planning","n":3},{"label":"HUD & objectives","n":2},{"label":"Community & social surfaces","n":1}],[{"label":"Community & social surfaces","n":3},{"label":"Analytics & measurement","n":2},{"label":"Documentation & specs","n":1}],[{"label":"Community & social surfaces","n":5},{"label":"Documentation & specs","n":1},{"label":"General & planning","n":1}],[{"label":"Community & social surfaces","n":3},{"label":"General & planning","n":2},{"label":"Inventory & equipment","n":1}],[{"label":"General & planning","n":4},{"label":"Community & social surfaces","n":2},{"label":"CMS & publishing","n":1}],[{"label":"Community & social surfaces","n":5},{"label":"Store & monetization","n":3},{"label":"CMS & publishing","n":1}],[{"label":"General & planning","n":5},{"label":"Documentation & specs","n":2},{"label":"Inventory & equipment","n":2}],[{"label":"General & planning","n":2},{"label":"CMS & publishing","n":1},{"label":"Documentation & specs","n":1}],[{"label":"General & planning","n":4},{"label":"Community & social surfaces","n":2},{"label":"Store & monetization","n":2}],[{"label":"General & planning","n":4},{"label":"Video & motion","n":2},{"label":"Audio & hardware studio","n":1}],[{"label":"Store & monetization","n":4},{"label":"Community & social surfaces","n":1},{"label":"Documentation & specs","n":1}],[{"label":"Store & monetization","n":6},{"label":"General & planning","n":3},{"label":"Audio & hardware studio","n":1}],[{"label":"Store & monetization","n":3},{"label":"Documentation & specs","n":2},{"label":"HUD & objectives","n":2}],[{"label":"General & planning","n":4},{"label":"Analytics & measurement","n":2},{"label":"Documentation & specs","n":1}],[{"label":"Store & monetization","n":5},{"label":"General & planning","n":2},{"label":"CMS & publishing","n":1}],[{"label":"General & planning","n":4},{"label":"CMS & publishing","n":1},{"label":"Documentation & specs","n":1}],[{"label":"General & planning","n":4},{"label":"Documentation & specs","n":2},{"label":"Inventory & equipment","n":2}],[{"label":"General & planning","n":4},{"label":"Store & monetization","n":2},{"label":"CMS & publishing","n":1}],[{"label":"CMS & publishing","n":2},{"label":"General & planning","n":2},{"label":"Inventory & equipment","n":2}],[{"label":"Research & discovery","n":1}],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[{"label":"Store & monetization","n":2},{"label":"Documentation & specs","n":1}],[],[{"label":"Store & monetization","n":3},{"label":"Documentation & specs","n":1}],[{"label":"Store & monetization","n":1}],[{"label":"Store & monetization","n":3},{"label":"Documentation & specs","n":1}],[{"label":"General & planning","n":2},{"label":"Documentation & specs","n":1},{"label":"Store & monetization","n":1}],[],[{"label":"Prototyping & wireframes","n":1}],[],[{"label":"Prototyping & wireframes","n":1}],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[{"label":"General & planning","n":1},{"label":"Quest & journal systems","n":1}],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]],"ESO-Platform":[[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[{"label":"General & planning","n":4},{"label":"Documentation & specs","n":1},{"label":"Marketing & player-facing web","n":1}],[{"label":"General & planning","n":2},{"label":"Copywriting & messaging","n":1},{"label":"Marketing & player-facing web","n":1}],[{"label":"General & planning","n":5},{"label":"Marketing & player-facing web","n":2},{"label":"Infrastructure & scripts","n":1}],[{"label":"General & planning","n":3},{"label":"Documentation & specs","n":2},{"label":"Community & social surfaces","n":1}],[{"label":"General & planning","n":2},{"label":"Operations & runbooks","n":1}],[{"label":"Templates & page systems","n":2},{"label":"Community & social surfaces","n":1},{"label":"Documentation & specs","n":1}],[{"label":"Store & monetization","n":3},{"label":"General & planning","n":2},{"label":"Marketing & player-facing web","n":2}],[{"label":"CMS & publishing","n":2},{"label":"General & planning","n":2},{"label":"Email & newsletters","n":1}],[{"label":"General & planning","n":3},{"label":"CMS & publishing","n":2},{"label":"Documentation & specs","n":1}],[{"label":"General & planning","n":3},{"label":"Analytics & measurement","n":1},{"label":"Engineering handoff","n":1}],[{"label":"Marketing & player-facing web","n":2},{"label":"Community & social surfaces","n":1},{"label":"Documentation & specs","n":1}],[{"label":"Email & newsletters","n":2},{"label":"Store & monetization","n":2},{"label":"CMS & publishing","n":1}],[{"label":"General & planning","n":2},{"label":"CMS & publishing","n":1},{"label":"Documentation & specs","n":1}],[{"label":"General & planning","n":2},{"label":"Store & monetization","n":2},{"label":"Community & social surfaces","n":1}],[{"label":"General & planning","n":4},{"label":"Marketing & player-facing web","n":1},{"label":"Presentations & deck work","n":1}],[{"label":"General & planning","n":2},{"label":"CMS & publishing","n":1},{"label":"Documentation & specs","n":1}],[{"label":"General & planning","n":3},{"label":"Documentation & specs","n":1},{"label":"Integrations & APIs","n":1}],[{"label":"CMS & publishing","n":1}],[{"label":"General & planning","n":1},{"label":"Information architecture","n":1},{"label":"Prototyping & wireframes","n":1}],[{"label":"General & planning","n":2}],[{"label":"Store & monetization","n":2},{"label":"Visual design & theming","n":1},{"label":"Visual design & wireframes","n":1}],[{"label":"General & planning","n":3},{"label":"CMS & publishing","n":1},{"label":"Documentation & specs","n":1}],[{"label":"General & planning","n":1}],[],[{"label":"General & planning","n":1}],[{"label":"General & planning","n":3},{"label":"CMS & publishing","n":1},{"label":"Prototyping & experiments","n":1}],[{"label":"General & planning","n":3},{"label":"CMS & publishing","n":1},{"label":"Copywriting & messaging","n":1}],[{"label":"General & planning","n":2},{"label":"Prototyping & wireframes","n":2},{"label":"Templates & page systems","n":2}],[{"label":"CMS & publishing","n":1},{"label":"General & planning","n":1},{"label":"Infrastructure & scripts","n":1}],[{"label":"General & planning","n":3},{"label":"Documentation & specs","n":1}],[{"label":"CMS & publishing","n":1},{"label":"Community & social surfaces","n":1},{"label":"Documentation & specs","n":1}],[{"label":"Store & monetization","n":2},{"label":"Documentation & specs","n":1},{"label":"Engineering handoff","n":1}],[{"label":"General & planning","n":1}],[{"label":"CMS & publishing","n":1},{"label":"Documentation & specs","n":1}],[{"label":"CMS & publishing","n":1},{"label":"Documentation & specs","n":1},{"label":"General & planning","n":1}],[],[],[],[],[],[{"label":"General & planning","n":2},{"label":"Research & audits","n":1}],[],[],[],[],[{"label":"General & planning","n":1}],[],[],[],[],[],[],[],[],[],[],[],[{"label":"General & planning","n":1}],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]],"ESO-Studio Site":[[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[{"label":"Analytics & measurement","n":1},{"label":"Documentation & specs","n":1},{"label":"General & planning","n":1}],[],[],[],[],[],[{"label":"Analytics & measurement","n":1},{"label":"CMS & publishing","n":1},{"label":"Presentations & deck work","n":1}],[],[],[],[],[],[{"label":"CMS & publishing","n":1},{"label":"Documentation & specs","n":1},{"label":"Recruiting & studio site","n":1}],[],[],[],[],[],[],[],[],[{"label":"General & planning","n":1},{"label":"Information architecture","n":1}],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]],"KESTREL":[[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[{"label":"General & planning","n":3}],[{"label":"Documentation & specs","n":1},{"label":"HUD & objectives","n":1},{"label":"Map & world navigation","n":1}],[{"label":"HUD & objectives","n":3},{"label":"Presentations & critiques","n":2},{"label":"Documentation & specs","n":1}],[{"label":"General & planning","n":2},{"label":"Meetings & coordination","n":1},{"label":"Presentations & critiques","n":1}],[{"label":"HUD & objectives","n":2},{"label":"Audio & hardware studio","n":1},{"label":"CMS & publishing","n":1}],[{"label":"General & planning","n":2},{"label":"Presentations & critiques","n":1},{"label":"Prototyping & experiments","n":1}],[{"label":"General & planning","n":4},{"label":"Map & world navigation","n":2},{"label":"Documentation & specs","n":1}],[{"label":"Audio & hardware studio","n":1},{"label":"General & planning","n":1},{"label":"Presentations & critiques","n":1}],[{"label":"General & planning","n":2},{"label":"Analytics & measurement","n":1},{"label":"Presentations & critiques","n":1}],[{"label":"HUD & objectives","n":3},{"label":"General & planning","n":1},{"label":"Prototyping & experiments","n":1}],[{"label":"HUD & objectives","n":2},{"label":"Integrations & APIs","n":1},{"label":"Inventory & equipment","n":1}],[{"label":"General & planning","n":1},{"label":"Map & world navigation","n":1},{"label":"Presentations & critiques","n":1}],[],[{"label":"Inventory & equipment","n":3},{"label":"Documentation & specs","n":1}],[{"label":"Quest & journal systems","n":3},{"label":"General & planning","n":2},{"label":"Inventory & equipment","n":1}],[{"label":"Quest & journal systems","n":4},{"label":"CMS & publishing","n":1},{"label":"General & planning","n":1}],[{"label":"HUD & objectives","n":3},{"label":"Navigation & hubs","n":2},{"label":"Documentation & specs","n":1}],[{"label":"Quest & journal systems","n":3},{"label":"Documentation & specs","n":1},{"label":"Inventory & equipment","n":1}],[{"label":"General & planning","n":2},{"label":"Quest & journal systems","n":2},{"label":"HUD & objectives","n":1}],[{"label":"Inventory & equipment","n":3},{"label":"Documentation & specs","n":2},{"label":"General & planning","n":2}],[{"label":"Documentation & specs","n":1},{"label":"Engineering handoff","n":1},{"label":"Inventory & equipment","n":1}],[{"label":"Documentation & specs","n":1},{"label":"General & planning","n":1},{"label":"Inventory & equipment","n":1}],[{"label":"Visual design & theming","n":2},{"label":"Documentation & specs","n":1},{"label":"Inventory & equipment","n":1}],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]],"OPS":[[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[{"label":"Infrastructure & scripts","n":1}],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[{"label":"General & planning","n":2},{"label":"Operations & runbooks","n":1}],[],[{"label":"General & planning","n":1},{"label":"Infrastructure & scripts","n":1},{"label":"Operations & runbooks","n":1}],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[{"label":"Operations & runbooks","n":1}],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[{"label":"Infrastructure & scripts","n":3},{"label":"Keyboard & desk hardware","n":1},{"label":"Meetings & coordination","n":1}],[],[],[{"label":"General & planning","n":1}],[],[{"label":"General & planning","n":1}],[{"label":"General & planning","n":1}],[{"label":"General & planning","n":1}],[],[{"label":"Inventory & equipment","n":1}],[],[],[],[],[{"label":"General & planning","n":1},{"label":"Infrastructure & scripts","n":1},{"label":"Operations & runbooks","n":1}],[{"label":"General & planning","n":3}],[{"label":"General & planning","n":5},{"label":"Inventory & equipment","n":1},{"label":"Operations & runbooks","n":1}],[],[],[{"label":"Keyboard & desk hardware","n":2},{"label":"Operations & runbooks","n":1}],[{"label":"Domains, hosting & deploy","n":1}],[{"label":"Audio & hardware studio","n":2},{"label":"General & planning","n":1},{"label":"Inventory & equipment","n":1}],[{"label":"General & planning","n":2},{"label":"Navigation & hubs","n":1}],[{"label":"General & planning","n":1}],[],[{"label":"General & planning","n":4},{"label":"Infrastructure & scripts","n":2},{"label":"Operations & runbooks","n":1}]],"Portfolio":[[{"label":"Site build & CMS","n":4},{"label":"Documentation & specs","n":2},{"label":"Domains, hosting & deploy","n":2}],[{"label":"General & planning","n":9},{"label":"Branding & identity","n":2},{"label":"Documentation & specs","n":2}],[{"label":"General & planning","n":7},{"label":"Documentation & specs","n":2},{"label":"Navigation & hubs","n":1}],[{"label":"General & planning","n":4},{"label":"Documentation & specs","n":2},{"label":"Information architecture","n":1}],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[{"label":"Site build & CMS","n":2},{"label":"Prototyping & experiments","n":1}],[],[],[{"label":"General & planning","n":1}],[],[],[],[],[],[],[],[],[{"label":"General & planning","n":1}],[],[],[],[],[],[],[],[],[],[],[],[],[{"label":"Site build & CMS","n":1}],[],[{"label":"General & planning","n":1}],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[{"label":"CMS & publishing","n":1},{"label":"Documentation & specs","n":1},{"label":"General & planning","n":1}],[{"label":"CMS & publishing","n":1},{"label":"Documentation & specs","n":1},{"label":"General & planning","n":1}],[],[],[],[{"label":"General & planning","n":1}],[{"label":"HUD & objectives","n":1}],[],[{"label":"General & planning","n":1}],[],[],[],[{"label":"General & planning","n":1}],[{"label":"General & planning","n":1},{"label":"Inventory & equipment","n":1}],[{"label":"General & planning","n":2},{"label":"Research & discovery","n":1}],[{"label":"General & planning","n":1}],[{"label":"General & planning","n":4},{"label":"Documentation & specs","n":1},{"label":"Meetings & coordination","n":1}],[{"label":"General & planning","n":2}],[{"label":"Infrastructure & scripts","n":1}],[{"label":"Immersive & installation","n":2},{"label":"Documentation & specs","n":1},{"label":"Prototyping & wireframes","n":1}],[{"label":"General & planning","n":2}],[],[],[],[{"label":"Domains, hosting & deploy","n":1},{"label":"Site build & CMS","n":1}],[],[],[],[{"label":"General & planning","n":2},{"label":"Analytics & measurement","n":1}],[{"label":"CMS & publishing","n":1}],[],[],[{"label":"Documentation & specs","n":2},{"label":"Analytics & measurement","n":1},{"label":"Domains, hosting & deploy","n":1}],[{"label":"General & planning","n":2},{"label":"Site build & CMS","n":2},{"label":"Documentation & specs","n":1}],[{"label":"General & planning","n":2},{"label":"Domains, hosting & deploy","n":1},{"label":"Operations & runbooks","n":1}],[{"label":"Visual design & theming","n":2},{"label":"Documentation & specs","n":1},{"label":"Domains, hosting & deploy","n":1}],[],[],[],[{"label":"General & planning","n":5},{"label":"Documentation & specs","n":1},{"label":"Quest & journal systems","n":1}],[]],"Project Ansible":[[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[{"label":"Rack & cabling","n":3},{"label":"Operations & runbooks","n":1}],[],[],[],[],[],[{"label":"Operations & runbooks","n":1},{"label":"Rack & cabling","n":1}],[{"label":"Rack & cabling","n":2},{"label":"General & planning","n":1},{"label":"Operations & runbooks","n":1}],[],[],[]],"skinjestercorp":[[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[{"label":"Templates & page systems","n":1}],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[{"label":"Video & motion","n":1}],[{"label":"Analytics & measurement","n":1},{"label":"Branding & identity","n":1},{"label":"Domains, hosting & deploy","n":1}],[],[],[],[],[],[],[],[],[],[{"label":"General & planning","n":4},{"label":"Operations & runbooks","n":1},{"label":"Quest & journal systems","n":1}],[],[]],"Image Garden":[[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[{"label":"Workshops & talks","n":1}],[],[],[{"label":"General & planning","n":2},{"label":"Workshops & talks","n":2},{"label":"Documentation & specs","n":1}],[],[],[],[],[],[],[],[{"label":"Workshops & talks","n":1}],[{"label":"Documentation & specs","n":1},{"label":"General & planning","n":1},{"label":"Generative & ML art","n":1}],[{"label":"Workshops & talks","n":1}],[],[],[{"label":"General & planning","n":1}],[],[],[],[{"label":"General & planning","n":1},{"label":"Research & discovery","n":1},{"label":"Workshops & talks","n":1}],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[{"label":"Workshops & talks","n":1}],[],[],[],[],[],[],[],[]],"deepdreamvisionquest":[[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[{"label":"General & planning","n":1}],[],[],[],[],[],[{"label":"General & planning","n":1}],[],[],[{"label":"General & planning","n":2},{"label":"Video & motion","n":2},{"label":"Audio & hardware studio","n":1}],[],[],[],[],[{"label":"Documentation & specs","n":1},{"label":"General & planning","n":1},{"label":"Video & motion","n":1}],[{"label":"Video & motion","n":2},{"label":"Documentation & specs","n":1}],[],[{"label":"Documentation & specs","n":1},{"label":"General & planning","n":1},{"label":"Presentations & critiques","n":1}],[{"label":"General & planning","n":1},{"label":"Video & motion","n":1}],[{"label":"Workshops & talks","n":2},{"label":"Documentation & specs","n":1}],[{"label":"General & planning","n":2},{"label":"Documentation & specs","n":1}],[{"label":"Documentation & specs","n":1},{"label":"Engineering handoff","n":1},{"label":"General & planning","n":1}],[{"label":"Documentation & specs","n":1},{"label":"General & planning","n":1}],[{"label":"General & planning","n":5},{"label":"Documentation & specs","n":1}],[{"label":"Generative & ML art","n":3},{"label":"General & planning","n":2},{"label":"Documentation & specs","n":1}],[{"label":"Workshops & talks","n":3},{"label":"Presentations & deck work","n":1}],[{"label":"Documentation & specs","n":1},{"label":"General & planning","n":1},{"label":"Generative & ML art","n":1}],[{"label":"Workshops & talks","n":2},{"label":"Documentation & specs","n":1},{"label":"Domains, hosting & deploy","n":1}],[{"label":"General & planning","n":1}],[{"label":"General & planning","n":5},{"label":"Visual design & wireframes","n":1}],[{"label":"Documentation & specs","n":1},{"label":"General & planning","n":1},{"label":"Video & motion","n":1}],[{"label":"Documentation & specs","n":1},{"label":"Generative & ML art","n":1},{"label":"Infrastructure & scripts","n":1}],[{"label":"General & planning","n":2},{"label":"Documentation & specs","n":1}],[{"label":"General & planning","n":1}],[{"label":"General & planning","n":1},{"label":"Video & motion","n":1},{"label":"Visual design & wireframes","n":1}],[],[{"label":"Documentation & specs","n":1},{"label":"General & planning","n":1},{"label":"Workshops & talks","n":1}],[],[],[],[],[{"label":"Generative & ML art","n":1}],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[{"label":"Quest & journal systems","n":1}],[{"label":"Visual design & theming","n":1}],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[{"label":"CMS & publishing","n":2}],[],[],[],[{"label":"General & planning","n":1}],[],[],[],[],[],[],[]],"xoholo":[[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[{"label":"General & planning","n":2},{"label":"Research & audits","n":1},{"label":"Research & discovery","n":1}],[{"label":"General & planning","n":3},{"label":"Immersive & installation","n":2},{"label":"Visual design & wireframes","n":1}],[{"label":"Immersive & installation","n":2},{"label":"General & planning","n":1},{"label":"Video & motion","n":1}],[{"label":"General & planning","n":1},{"label":"Immersive & installation","n":1},{"label":"Integrations & APIs","n":1}],[{"label":"General & planning","n":1}],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]],"iveda":[[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[{"label":"Immersive & installation","n":1}],[{"label":"CMS & publishing","n":1},{"label":"Design systems & components","n":1},{"label":"General & planning","n":1}],[{"label":"General & planning","n":3},{"label":"Map & world navigation","n":3},{"label":"Visual design & wireframes","n":1}],[{"label":"General & planning","n":3},{"label":"Integrations & APIs","n":1},{"label":"Presentations & critiques","n":1}],[{"label":"Prototyping & wireframes","n":2},{"label":"Design systems & components","n":1},{"label":"General & planning","n":1}],[{"label":"General & planning","n":4},{"label":"CMS & publishing","n":1},{"label":"Documentation & specs","n":1}],[{"label":"General & planning","n":4},{"label":"CMS & publishing","n":1},{"label":"HUD & objectives","n":1}],[{"label":"General & planning","n":5},{"label":"Documentation & specs","n":1}],[],[],[],[],[],[],[],[],[],[],[],[],[]],"RPVR":[[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[{"label":"HUD & objectives","n":1}],[{"label":"General & planning","n":3},{"label":"Video & motion","n":1},{"label":"Visual design & wireframes","n":1}],[{"label":"General & planning","n":2},{"label":"Video & motion","n":2},{"label":"Audio & hardware studio","n":1}],[{"label":"General & planning","n":3},{"label":"Documentation & specs","n":1}],[],[],[],[{"label":"Prototyping & wireframes","n":1}],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]},"xticks":["2013-01","2014-02","2014-11","2015-08","2016-06","2017-03","2017-12","2018-09","2019-06","2020-03","2020-12","2021-09","2022-06","2024-08"],"xticktext":["2013-01","2014-02","2014-11","2015-08","2016-06","2017-03","2017-12","2018-09","2019-06","2020-03","2020-12","2021-09","2022-06","2024-08"],"heatWidth":5036,"mileWidth":5036,"coverageStart":"2013-01","coverageEnd":"2024-08","summaryCount":118,"monthsWithEffort":0,"monthsWithMilestones":62,"dominantRuns":[["2013-01","2013-04","Portfolio"],["2013-09","2016-05","ESO"],["2016-06","2016-09","ESO-Platform"],["2016-10","2016-10","deepdreamvisionquest"],["2016-11","2017-10","ESO-Platform"],["2017-11","2017-11","ESO-Studio Site"],["2017-12","2018-01","deepdreamvisionquest"],["2018-02","2018-03","ESO-Platform"],["2018-04","2018-04","deepdreamvisionquest"],["2018-05","2018-05","Image Garden"],["2018-06","2018-06","deepdreamvisionquest"],["2018-07","2019-01","ESO-Platform"],["2019-02","2019-03","ESO"],["2019-04","2020-01","KESTREL"],["2020-02","2020-03","RPVR"],["2020-04","2021-01","KESTREL"],["2021-02","2021-02","OPS"],["2021-03","2021-03","Portfolio"],["2021-04","2021-07","xoholo"],["2021-08","2022-02","iveda"],["2022-03","2022-03","skinjestercorp"],["2022-04","2022-04","OPS"],["2022-05","2022-05","Project Ansible"],["2022-06","2022-06","OPS"],["2022-07","2022-12","Portfolio"],["2023-01","2023-01","OPS"],["2023-11","2023-11","Project Ansible"],["2024-05","2024-05","skinjestercorp"],["2024-07","2024-07","Portfolio"],["2024-08","2024-08","OPS"]],"defaultProject":"ESO","intensityMode":"volume"};
+    const mileRows = ['Prototype', 'Presentation', 'PDF'];
+    const mileColors = { Prototype: '#80e2a2', Presentation: '#ffba68', PDF: '#d29aff' };
+    (function syncIntensityLede() {
+      const el = document.getElementById('intensity-explainer');
+      if (!el || data.intensityMode !== 'dominance') return;
+      el.innerHTML =
+        'Project heat uses <strong>dominance mode</strong>: each month compares projects—the leader gets intensity 3. If one project almost always has the most bullets, its row stays one flat shade. Rebuild without <code>--intensity-mode dominance</code> (default <strong>volume</strong>) for busy vs quiet months <em>within</em> each project.';
+    })();
+    /* Four-step monochromatic blue for z 0…3 (minimal; project + activity layers match). */
+    const intensityBluescale = [
+      [0.0, '#0d1117'],
+      [0.3333, '#1c2b41'],
+      [0.6666, '#316dca'],
+      [1.0, '#79c0ff']
+    ];
+    const projectColorscale = intensityBluescale;
+    const activityColorscale = intensityBluescale;
+
+    function makeYearBandShapes(months) {
+      const yearRanges = [];
+      let currentYear = null;
+      let startMonth = null;
+      months.forEach((month, index) => {
+        const year = month.slice(0, 4);
+        if (year !== currentYear) {
+          if (currentYear !== null) {
+            yearRanges.push({ year: currentYear, start: startMonth, end: months[index - 1] });
+          }
+          currentYear = year;
+          startMonth = month;
+        }
+      });
+      if (currentYear !== null) {
+        yearRanges.push({ year: currentYear, start: startMonth, end: months[months.length - 1] });
+      }
+      return yearRanges.filter((_, i) => i % 2 === 0).map(range => ({
+        type: 'rect',
+        xref: 'x',
+        yref: 'paper',
+        x0: range.start,
+        x1: range.end,
+        y0: 0,
+        y1: 1,
+        fillcolor: 'rgba(255,255,255,0.03)',
+        line: { width: 0 },
+        layer: 'below'
+      }));
+    }
+
+    /**
+     * Shape xref "paper" uses _fullLayout._size: x_pixel = gs.l + gs.w * paperX (not layout.width).
+     * Hover bbox is figure/SVG x plus gd.offsetLeft; convert to plot-area paper coords.
+     */
+    function matrixPaperColumnXFromHoverBbox(gd, bbox) {
+      if (!gd || !bbox || !gd._fullLayout) return null;
+      const gs = gd._fullLayout._size;
+      if (!gs || !(gs.w > 0)) return null;
+      const gLeft = gd.offsetLeft + gd.clientLeft;
+      const figX0 = bbox.x0 - gLeft;
+      const figX1 = bbox.x1 - gLeft;
+      const clamp = (t) => Math.max(0, Math.min(1, t));
+      const a = clamp((figX0 - gs.l) / gs.w);
+      const b = clamp((figX1 - gs.l) / gs.w);
+      return { x0: Math.min(a, b), x1: Math.max(a, b) };
+    }
+
+    /**
+     * Row tint uses paper y fractions (same math as expanded-project strip).
+     * Column tint prefers hover bbox (exact cell bounds); falls back to uniform inner width if missing.
+     */
+    function matrixHoverBandShapes(rowIndex, monthKey, rowCount, gd, hoverBbox) {
+      if (rowIndex < 0 || rowCount <= 0 || monthKey == null || monthKey === '') return [];
+      const fill = 'rgba(140, 195, 255, 0.12)';
+      const rowRect = {
+        type: 'rect',
+        xref: 'paper',
+        yref: 'paper',
+        x0: 0,
+        x1: 1,
+        y0: 1 - (rowIndex + 1) / rowCount,
+        y1: 1 - rowIndex / rowCount,
+        fillcolor: fill,
+        line: { width: 0 },
+        layer: 'above'
+      };
+      const layout = gd && gd._fullLayout;
+      const months = gd && gd._matrixVisibleMonths;
+      let colX = matrixPaperColumnXFromHoverBbox(gd, hoverBbox);
+      if (!colX && months && layout && layout._size) {
+        const gs = layout._size;
+        const mi = months.indexOf(monthKey);
+        const ncols = Math.max(1, months.length);
+        if (mi >= 0 && gs.w > 0) {
+          colX = { x0: mi / ncols, x1: (mi + 1) / ncols };
+        }
+      }
+      if (!colX) return [rowRect];
+      const colRect = {
+        type: 'rect',
+        xref: 'paper',
+        yref: 'paper',
+        x0: colX.x0,
+        x1: colX.x1,
+        y0: 0,
+        y1: 1,
+        fillcolor: fill,
+        line: { width: 0 },
+        layer: 'above'
+      };
+      return [rowRect, colRect];
+    }
+
+    /** Prefer the heatmap trace that has a real z at this cell (dual project/activity layers). */
+    function pickMatrixHoverPoint(points) {
+      if (!points || !points.length) return null;
+      const hasZ = (p) => {
+        const z = p.z;
+        return z !== undefined && z !== null && !(typeof z === 'number' && Number.isNaN(z));
+      };
+      const withZ = points.find(hasZ);
+      return withZ || points[0];
+    }
+    const milestoneLaneCenters = { Prototype: 2, Presentation: 1, PDF: 0 };
+    function makeMilestoneLaneShapes(months) {
+      if (!months || months.length === 0) return [];
+      return mileRows.flatMap((row, idx) => {
+        const center = milestoneLaneCenters[row];
+        const y0 = center - 0.5;
+        const y1 = center + 0.5;
+        return [
+          {
+            type: 'rect',
+            xref: 'x',
+            yref: 'y',
+            x0: months[0],
+            x1: months[months.length - 1],
+            y0,
+            y1,
+            fillcolor: idx % 2 === 0 ? 'rgba(255,255,255,0.018)' : 'rgba(255,255,255,0.01)',
+            line: { width: 0 },
+            layer: 'below'
+          },
+          {
+            type: 'line',
+            xref: 'x',
+            yref: 'y',
+            x0: months[0],
+            x1: months[months.length - 1],
+            y0: center,
+            y1: center,
+            line: { color: 'rgba(255,255,255,0.12)', width: 1 },
+            layer: 'below'
+          }
+        ];
+      });
+    }
+
+    function wrapWords(text, maxChars = 34) {
+      const words = String(text).split(/\s+/).filter(Boolean);
+      const lines = [];
+      let current = '';
+      words.forEach((word) => {
+        const next = current ? `${current} ${word}` : word;
+        if (next.length > maxChars && current) {
+          lines.push(current);
+          current = word;
+        } else {
+          current = next;
+        }
+      });
+      if (current) lines.push(current);
+      return lines.join('<br>');
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    const tooltipTopActivityCount = 3;
+
+    /** Plotly heatmap hovers only render a subset of HTML reliably (<b>, <br>) — no div/styles. */
+    function buildProjectRowHoverText(month, project, globalMonthIdx) {
+      const raw = (data.activityTopRows && data.activityTopRows[project] && data.activityTopRows[project][globalMonthIdx]) || [];
+      const rows = raw.slice(0, tooltipTopActivityCount);
+      const desc = data.descriptions[project] || '';
+      const e = escapeHtml;
+      const lines = [`<b>${e(month)}</b>`, e(project)];
+      if (rows.length) {
+        lines.push('Top activities');
+        rows.forEach(({ label, n }) => {
+          lines.push(`${e(label)} — ${e(String(n))}`);
+        });
+      }
+      if (desc) {
+        lines.push(e(desc));
+      }
+      return lines.join('<br>');
+    }
+
+    /** Fallback when activityTopRows missing: turn "Top activities: a 1, b 2" into stacked lines. */
+    function hintStringToStackedLines(hint) {
+      if (!hint) return '';
+      const prefix = 'Top activities: ';
+      if (hint.startsWith(prefix)) {
+        const rest = hint.slice(prefix.length);
+        const items = rest.split(', ').map((s) => escapeHtml(s.trim())).filter(Boolean).slice(0, tooltipTopActivityCount);
+        return ['Top activities', ...items].join('<br>');
+      }
+      return escapeHtml(hint);
+    }
+
+    const rowHeight = 28;
+    /** Plotly heatmap brick gaps (px): xgap = gutters between months; ygap = gutters between rows. */
+    const matrixHeatmapXGap = 2;
+    const matrixHeatmapYGap = 4;
+
+    const fullMonthCount = data.months.length;
+    const zoomCenterIdx = Math.floor((fullMonthCount - 1) / 2);
+    const minWindowCount = 1; // zoom-in minimum
+    const zoomMaxSteps = 240; // slider range (0..zoomMaxSteps) - higher = finer control
+
+    // Non-linear zoom curve:
+    // - zooming out (slider left) should expand toward full month range faster
+    // - zooming in (slider right) should still allow granular inspection
+    const zoomGamma = 2.25;
+
+    // Start mid-zoom: roughly show about half the timeline.
+    const defaultZoomVal = Math.round(zoomMaxSteps / 2);
+    let visibleCount = Math.max(
+      minWindowCount,
+      Math.round(
+        fullMonthCount -
+        (fullMonthCount - minWindowCount) * Math.pow(defaultZoomVal / zoomMaxSteps, zoomGamma)
+      )
+    );
+    let visibleStartIdx = 0;
+    let visibleEndIdx = 0;
+
+    function applyCenteredWindow(count) {
+      const c = Math.max(minWindowCount, Math.min(fullMonthCount, Math.round(count)));
+      let start = zoomCenterIdx - Math.floor((c - 1) / 2);
+      let end = start + c - 1;
+      if (start < 0) {
+        start = 0;
+        end = c - 1;
+      }
+      if (end > fullMonthCount - 1) {
+        end = fullMonthCount - 1;
+        start = end - c + 1;
+      }
+      visibleStartIdx = start;
+      visibleEndIdx = end;
+    }
+
+    applyCenteredWindow(visibleCount);
+
+    function makeMonthYearTickText(months) {
+      const monthAbbr = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+      let prevYear = null;
+      return months.map((m) => {
+        const s = String(m);
+        const year = s.length >= 4 ? s.slice(0, 4) : '';
+        let monthIdx = -1;
+        const dash = s.indexOf('-');
+        if (dash !== -1 && s.length >= dash + 3) {
+          monthIdx = parseInt(s.slice(dash + 1, dash + 3), 10) - 1;
+        }
+        const monthLabel = monthIdx >= 0 && monthIdx < 12 ? monthAbbr[monthIdx] : s;
+        const showYear = year && year !== prevYear;
+        prevYear = year || prevYear;
+        return `${showYear ? year : ''}<br>${monthLabel}`;
+      });
+    }
+
+    /** Scale counts within one activity row: peak month(s) for *that* row → 3 (not vs other activities). */
+    function activityIntensity(hitCount, rowMaxHit) {
+      if (hitCount <= 0) return 0;
+      if (rowMaxHit <= 1) return 3;
+      if (hitCount >= Math.max(3, Math.ceil(rowMaxHit * 0.66))) return 3;
+      if (hitCount >= Math.max(2, Math.ceil(rowMaxHit * 0.33))) return 2;
+      return 1;
+    }
+
+    function scopedActivitiesForProject(project, startIdx, endIdx) {
+      const projectIdx = data.rows.indexOf(project);
+      const visibleProjectIntensity = projectIdx >= 0 ? data.intensity[projectIdx].slice(startIdx, endIdx + 1) : [];
+      const activities = data.projectActivities[project] || [];
+
+      return activities
+        .map((activity) => {
+          const monthlyRaw = activity.monthly.slice(startIdx, endIdx + 1);
+          const monthly = monthlyRaw.map((value, idx) =>
+            (visibleProjectIntensity[idx] || 0) > 0 ? value : 0
+          );
+          const total = monthly.reduce((sum, value) => sum + value, 0);
+          const activeMonths = monthly.filter(value => value > 0).length;
+          return { ...activity, monthly, total, activeMonths };
+        })
+        .filter((activity) => activity.total > 0)
+        .sort((a, b) => (b.activeMonths - a.activeMonths) || (b.total - a.total));
+    }
+
+    function buildExpandedRows(selectedProject, startIdx, endIdx) {
+      const visibleMonths = data.months.slice(startIdx, endIdx + 1);
+      const activities = selectedProject ? scopedActivitiesForProject(selectedProject, startIdx, endIdx) : [];
+      const rows = [];
+
+      data.rows.forEach((project, rIdx) => {
+        const rowValues = data.intensity[rIdx].slice(startIdx, endIdx + 1);
+        rows.push({
+          key: project,
+          label: project,
+          type: 'project',
+          project,
+          values: rowValues,
+          hover: visibleMonths.map((month, localIdx) => {
+            const gi = startIdx + localIdx;
+            if (data.activityTopRows && data.activityTopRows[project]) {
+              return buildProjectRowHoverText(month, project, gi);
+            }
+            const activityHintsMap = data.activityHints || data.sectionHints || {};
+            const hint = (activityHintsMap[project] || [])[gi] || '';
+            const stackedHint = hintStringToStackedLines(hint);
+            const wrappedDescription = data.descriptions[project] ? wrapWords(data.descriptions[project], 48) : '';
+            const parts = [`<b>${escapeHtml(month)}</b>`, escapeHtml(project)];
+            if (stackedHint) parts.push(stackedHint);
+            if (wrappedDescription) parts.push(wrappedDescription);
+            return parts.join('<br>');
+          })
+        });
+
+        if (project === selectedProject) {
+          activities.forEach((activity) => {
+            const rowMax = Math.max(1, ...activity.monthly);
+            rows.push({
+              key: `${project}::${activity.name}`,
+              label: activity.name,
+              type: 'activity',
+              project,
+              values: activity.monthly.map(value => activityIntensity(value, rowMax)),
+              hover: visibleMonths.map((month, localIdx) => {
+                const n = activity.monthly[localIdx];
+                if (n <= 0) return '';
+                const q = n === 1 ? '1 line item' : `${n} line items`;
+                const e = escapeHtml;
+                return `<b>${e(month)}</b><br>${e(project)} · ${e(activity.name)}<br>${e(q)}`;
+              })
+            });
+          });
+        }
+      });
+
+      return rows;
+    }
+
+    function renderMatrix(selectedProject) {
+      const visibleMonths = data.months.slice(visibleStartIdx, visibleEndIdx + 1);
+      const visibleCount = visibleMonths.length;
+      const expandedRows = buildExpandedRows(selectedProject, visibleStartIdx, visibleEndIdx);
+
+      // Zoom should change cell width (via visibleCount), not fit-to-viewport.
+      // Keep chart width constant so scrolling remains the exploration mechanism.
+      const matrixScrollEl = document.getElementById('matrix-scroll');
+      const containerWidth = matrixScrollEl ? matrixScrollEl.clientWidth : data.heatWidth;
+
+      // Avoid a hard jump between "fits viewport" and "needs horizontal scroll".
+      // Near full zoom-out (missing only a few months), gradually interpolate width.
+      const missingMonths = fullMonthCount - visibleCount;
+      const smoothWindowMonths = 3; // tweak: larger = gentler transition
+      const t = Math.max(0, Math.min(1, (smoothWindowMonths - missingMonths) / smoothWindowMonths));
+      const plotWidth = Math.round(data.heatWidth * (1 - t) + containerWidth * t);
+      const projectZ = expandedRows.map(row =>
+        row.type === 'project' ? row.values : Array(visibleCount).fill(null)
+      );
+      const activityZ = expandedRows.map(row =>
+        row.type === 'activity' ? row.values : Array(visibleCount).fill(null)
+      );
+      const projectText = expandedRows.map(row =>
+        row.type === 'project' ? row.hover : Array(visibleCount).fill('')
+      );
+      const activityText = expandedRows.map(row =>
+        row.type === 'activity' ? row.hover : Array(visibleCount).fill('')
+      );
+
+      const matrixShapes = [...makeYearBandShapes(visibleMonths)];
+
+      if (selectedProject) {
+        const projectIndex = expandedRows.findIndex(row => row.type === 'project' && row.project === selectedProject);
+        const activityCount = expandedRows.filter(row => row.type === 'activity' && row.project === selectedProject).length;
+        if (projectIndex >= 0 && activityCount > 0) {
+          const totalRows = expandedRows.length;
+          const projectBottom = 1 - ((projectIndex + 1) / totalRows);
+          const activityBottom = 1 - ((projectIndex + 1 + activityCount) / totalRows);
+          matrixShapes.push(
+            {
+              type: 'rect',
+              xref: 'paper',
+              yref: 'paper',
+              x0: 0,
+              x1: 1,
+              y0: activityBottom,
+              y1: projectBottom,
+              fillcolor: 'rgba(255,255,255,0.02)',
+              line: { width: 0 },
+              layer: 'below'
+            },
+            {
+              type: 'line',
+              xref: 'paper',
+              yref: 'paper',
+              x0: 0,
+              x1: 1,
+              y0: projectBottom,
+              y1: projectBottom,
+              line: { color: 'rgba(255,255,255,0.22)', width: 2 },
+              layer: 'above'
+            }
+          );
+        }
+      }
+
+      const matrixChartEl = document.getElementById('matrix-chart');
+      if (matrixChartEl) {
+        matrixChartEl._matrixHoverBandKey = '';
+        matrixChartEl._matrixExpandedRows = expandedRows;
+        matrixChartEl._matrixVisibleMonths = visibleMonths;
+        matrixChartEl._matrixHoverBaseShapesJson = JSON.stringify(matrixShapes);
+      }
+
+      Plotly.newPlot('matrix-chart', [{
+        type: 'heatmap',
+        x: visibleMonths,
+        y: expandedRows.map(row => row.key),
+        z: activityZ,
+        zmin: 0,
+        zmax: 3,
+        colorscale: activityColorscale,
+        showscale: false,
+        text: activityText,
+        hovertemplate: '%{text}<extra></extra>',
+        xgap: matrixHeatmapXGap,
+        ygap: matrixHeatmapYGap
+      }, {
+        type: 'heatmap',
+        x: visibleMonths,
+        y: expandedRows.map(row => row.key),
+        z: projectZ,
+        zmin: 0,
+        zmax: 3,
+        colorscale: projectColorscale,
+        showscale: false,
+        text: projectText,
+        hovertemplate: '%{text}<extra></extra>',
+        xgap: matrixHeatmapXGap,
+        ygap: matrixHeatmapYGap
+      }], {
+        width: plotWidth,
+        height: Math.max(320, 82 + 52 + (expandedRows.length * rowHeight)),
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        margin: { l: 18, r: 18, t: 82, b: 52 },
+        shapes: matrixShapes,
+        hoverlabel: {
+          align: 'left',
+          bgcolor: 'rgba(58, 58, 58, 0.96)',
+          bordercolor: 'rgba(255,255,255,0.18)',
+          font: { size: 12, color: '#edf3fb' }
+        },
+        hovermode: 'closest',
+        font: { family: 'Manrope, sans-serif', size: 12, color: '#edf3fb' },
+        xaxis: {
+          type: 'category',
+          categoryorder: 'array',
+          categoryarray: visibleMonths,
+          tickmode: 'array',
+          tickvals: visibleMonths,
+          ticktext: makeMonthYearTickText(visibleMonths),
+          side: 'top',
+          tickfont: { size: 9 },
+          tickangle: 0,
+          showticklabels: true,
+          showgrid: false,
+          ticks: '',
+          ticklen: 0,
+          zeroline: false,
+          showspikes: false
+        },
+        yaxis: {
+          autorange: 'reversed', showticklabels: false, showgrid: false,
+          ticks: '', ticklen: 0, zeroline: false,
+          showspikes: false
+        }
+      }, { responsive: false, displayModeBar: false }).then(() => {
+        const chart = document.getElementById('matrix-chart');
+        chart._matrixExpandedRows = expandedRows;
+        // Plotly.newPlot purges prior listeners on the graph div; re-bind after every redraw
+        // (expand/collapse calls renderMatrix again). One-time dataset guards would leave no handlers.
+        chart.on('plotly_click', (event) => {
+          const point = event.points && event.points[0];
+          if (point && point.y && data.rows.includes(point.y)) setActiveProject(point.y);
+        });
+        chart.on('plotly_hover', (ev) => {
+          const rows = chart._matrixExpandedRows;
+          const ml = document.getElementById('matrix-labels');
+          if (!rows || !ml) return;
+          const pt = pickMatrixHoverPoint(ev.points);
+          if (!pt || pt.y == null || pt.x == null) return;
+          const yKey = typeof pt.y === 'string' ? pt.y : String(pt.y);
+          const xKey = typeof pt.x === 'string' ? pt.x : String(pt.x);
+          const idx = rows.findIndex(r => r.key === yKey || r.key === pt.y);
+          if (idx < 0) {
+            Array.from(ml.children).forEach(el => el.classList.remove('hover-row-affordance'));
+            chart._matrixHoverBandKey = '';
+            const j = chart._matrixHoverBaseShapesJson;
+            if (j) {
+              try {
+                Plotly.relayout(chart, { shapes: JSON.parse(j) });
+              } catch (e) { /* ignore */ }
+            }
+            return;
+          }
+          const kids = ml.children;
+          for (let i = 0; i < kids.length; i++) {
+            kids[i].classList.toggle('hover-row-affordance', i === idx);
+          }
+          const json = chart._matrixHoverBaseShapesJson;
+          if (!json) return;
+          const bandKey = `${idx}\0${xKey}`;
+          if (chart._matrixHoverBandKey === bandKey) return;
+          chart._matrixHoverBandKey = bandKey;
+          let base;
+          try {
+            base = JSON.parse(json);
+          } catch (e) {
+            chart._matrixHoverBandKey = '';
+            return;
+          }
+          const bands = matrixHoverBandShapes(idx, xKey, rows.length, chart, pt.bbox);
+          try {
+            Plotly.relayout(chart, { shapes: base.concat(bands) });
+          } catch (e) {
+            chart._matrixHoverBandKey = '';
+          }
+        });
+        chart.on('plotly_unhover', () => {
+          const ml = document.getElementById('matrix-labels');
+          if (!ml) return;
+          Array.from(ml.children).forEach(el => el.classList.remove('hover-row-affordance'));
+          const ch = document.getElementById('matrix-chart');
+          if (ch) ch._matrixHoverBandKey = '';
+          const j = ch && ch._matrixHoverBaseShapesJson;
+          if (!ch || !j) return;
+          try {
+            Plotly.relayout(ch, { shapes: JSON.parse(j) });
+          } catch (e) { /* ignore */ }
+        });
+      });
+
+      matrixLabels.style.gridTemplateRows = `repeat(${expandedRows.length}, ${rowHeight}px)`;
+      matrixLabels.innerHTML = expandedRows.map(row => {
+        if (row.type === 'project') {
+          const classes = ['fixed-label', 'project'];
+          if (row.project === selectedProject) classes.push('active', 'project-open');
+          return `<button type="button" class="${classes.join(' ')}" data-project="${escapeHtml(row.project)}"><span class="fixed-label-text">${escapeHtml(row.label)}</span></button>`;
+        }
+        return `<div class="fixed-label child"><span class="fixed-label-text">${escapeHtml(row.label)}</span></div>`;
+      }).join('');
+
+      Array.from(matrixLabels.querySelectorAll('[data-project]')).forEach(el => {
+        el.addEventListener('click', () => setActiveProject(el.dataset.project));
+      });
+
+      matrixScroll.scrollLeft = 0;
+    }
+
+    const mileSeries = { Prototype: data.strictProto, Presentation: data.strictPres, PDF: data.strictPdf };
+
+    function renderMilestones() {
+      const visibleMonths = data.months.slice(visibleStartIdx, visibleEndIdx + 1);
+      const visibleCount = visibleMonths.length;
+      const milestoneScrollEl = document.getElementById('milestone-scroll');
+      // Match the matrix: smooth-fit near the far-left extreme, fixed width otherwise.
+      const containerWidth = milestoneScrollEl ? milestoneScrollEl.clientWidth : data.mileWidth;
+
+      const missingMonths = fullMonthCount - visibleCount;
+      const smoothWindowMonths = 3; // keep consistent with matrix
+      const t = Math.max(0, Math.min(1, (smoothWindowMonths - missingMonths) / smoothWindowMonths));
+      const plotWidth = Math.round(data.mileWidth * (1 - t) + containerWidth * t);
+
+      const mileTraces = mileRows.map((row) => {
+        const x = [], y = [], customdata = [];
+        const milestoneBlurbs = {
+          Prototype: 'Summary text matches prototype / wireframe vocabulary.',
+          Presentation: 'Summary text matches presentation / slides vocabulary.',
+          PDF: 'Summary text mentions PDFs or .pdf.'
+        };
+        for (let i = 0; i < visibleCount; i++) {
+          const fullIdx = visibleStartIdx + i;
+          if (mileSeries[row][fullIdx]) {
+            x.push(visibleMonths[i]);
+            y.push(milestoneLaneCenters[row]);
+            customdata.push(`<b>${visibleMonths[i]}</b><br>${row}<br>${milestoneBlurbs[row]}`);
+          }
+        }
+        return {
+          type: 'scatter',
+          mode: 'markers',
+          x,
+          y,
+          marker: { size: 15, color: mileColors[row], line: { color: 'rgba(255,255,255,0.15)', width: 1.5 } },
+          customdata,
+          hovertemplate: '%{customdata}<extra></extra>'
+        };
+      });
+
+      Plotly.newPlot('milestone-chart', mileTraces, {
+        width: plotWidth,
+        height: 220,
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)',
+        margin: { l: 18, r: 18, t: 10, b: 16 },
+        shapes: [...makeYearBandShapes(visibleMonths), ...makeMilestoneLaneShapes(visibleMonths)],
+        hoverlabel: {
+          align: 'left',
+          bgcolor: 'rgba(58, 58, 58, 0.96)',
+          bordercolor: 'rgba(255,255,255,0.18)',
+          font: { size: 12, color: '#edf3fb' }
+        },
+        font: { family: 'Manrope, sans-serif', size: 12, color: '#edf3fb' },
+        xaxis: {
+          type: 'category',
+          categoryorder: 'array',
+          categoryarray: visibleMonths,
+          tickmode: 'array',
+          tickvals: visibleMonths,
+          ticktext: visibleMonths,
+          showticklabels: false,
+          showgrid: false,
+          ticks: '',
+          ticklen: 0,
+          zeroline: false
+        },
+        yaxis: {
+          range: [-0.5, 2.5],
+          showticklabels: false,
+          showgrid: false,
+          ticks: '',
+          ticklen: 0,
+          zeroline: false
+        },
+        showlegend: false
+      }, { responsive: false, displayModeBar: false });
+
+      // Ensure the filtered strip always starts at the left edge.
+      milestoneScrollEl.scrollLeft = 0;
+    }
+
+    renderMilestones();
+
+    const matrixLabels = document.getElementById('matrix-labels');
+    const milestoneLabels = document.getElementById('milestone-labels');
+    milestoneLabels.style.gridTemplateRows = `repeat(${mileRows.length}, 1fr)`;
+    milestoneLabels.innerHTML = mileRows.map(row => `<div class="fixed-label milestone">${row}</div>`).join('');
+
+    const matrixScroll = document.getElementById('matrix-scroll');
+    const milestoneScroll = document.getElementById('milestone-scroll');
+    let syncing = false;
+    function linkScroll(source, target) {
+      source.addEventListener('scroll', () => {
+        if (syncing) return;
+        syncing = true;
+        target.scrollLeft = source.scrollLeft;
+        requestAnimationFrame(() => { syncing = false; });
+      });
+    }
+    linkScroll(matrixScroll, milestoneScroll);
+    linkScroll(milestoneScroll, matrixScroll);
+
+    document.getElementById('stats').innerHTML = [
+      { value: data.summaryCount, label: 'Summary files' },
+      { value: data.rows.length, label: 'Project tags (rows)' },
+      { value: data.monthsWithMilestones, label: 'Months w/ milestone hints' }
+    ].map(item => `
+      <div class="stat"><span class="value">${item.value}</span><span class="label">${item.label}</span></div>
+    `).join('');
+
+    const covEl = document.getElementById('cov-range');
+    if (covEl && data.coverageStart && data.coverageEnd) {
+      covEl.textContent = `${data.coverageStart} to ${data.coverageEnd}`;
+    }
+    const ledeCount = document.getElementById('lede-summary-count');
+    if (ledeCount) ledeCount.textContent = String(data.summaryCount);
+
+    document.getElementById('runs').innerHTML = data.dominantRuns.map(run => `
+      <div class="run"><strong>${run[0]} -> ${run[1]}</strong><br>${run[2]}</div>
+    `).join('');
+
+    const detailTitle = document.getElementById('detail-title');
+    const detailCopy = document.getElementById('detail-copy');
+    const detailStats = document.getElementById('detail-stats');
+
+    let expandedProject = null;
+
+    // Zoom slider to filter the matrix + milestone strip.
+    const monthRangeLabel = document.getElementById('month-range-label');
+    const monthRangeSubLabel = document.getElementById('month-range-sub');
+    const monthZoomInput = document.getElementById('month-zoom');
+
+    const rangeCount = data.months.length;
+    monthZoomInput.min = '0';
+    monthZoomInput.max = String(zoomMaxSteps);
+    monthZoomInput.value = String(defaultZoomVal);
+
+    function updateMonthRangeUI() {
+      const startMonth = data.months[visibleStartIdx];
+      const endMonth = data.months[visibleEndIdx];
+      monthRangeSubLabel.textContent = `Visible: ${startMonth} -> ${endMonth}`;
+    }
+
+    let rangeRenderTimer = null;
+    function scheduleRangeRender() {
+      clearTimeout(rangeRenderTimer);
+      rangeRenderTimer = setTimeout(() => {
+        renderMatrix(expandedProject);
+        renderMilestones();
+      }, 60);
+    }
+
+    monthZoomInput.addEventListener('input', () => {
+      const zoomVal = Math.max(0, Math.min(zoomMaxSteps, parseInt(monthZoomInput.value, 10)));
+      visibleCount = Math.max(
+        minWindowCount,
+        Math.round(
+          fullMonthCount -
+          (fullMonthCount - minWindowCount) * Math.pow(zoomVal / zoomMaxSteps, zoomGamma)
+        )
+      );
+      applyCenteredWindow(visibleCount);
+      updateMonthRangeUI();
+      scheduleRangeRender();
+    });
+
+    updateMonthRangeUI();
+
+    function setActiveProject(project) {
+      expandedProject = expandedProject === project ? null : project;
+
+      if (!expandedProject) {
+        detailTitle.textContent = 'Selected Project';
+        detailCopy.textContent = 'Click a project row to expand description-based activity types (counts per month) inline in the matrix.';
+        detailStats.innerHTML = [
+          { value: data.summaryCount, label: 'Summary files' },
+          { value: data.rows.length, label: 'Project tags (rows)' },
+          { value: data.monthsWithMilestones, label: 'Months w/ milestone hints' }
+        ].map(item => `
+          <div class="stat"><span class="value">${item.value}</span><span class="label">${item.label}</span></div>
+        `).join('');
+        renderMatrix(null);
+        return;
+      }
+
+      const projectIdx = data.rows.indexOf(expandedProject);
+      const monthlyScores = (data.projectScores[expandedProject] || []).slice(visibleStartIdx, visibleEndIdx + 1);
+      const scopedActivities = scopedActivitiesForProject(expandedProject, visibleStartIdx, visibleEndIdx);
+      const activeMonths = monthlyScores.filter(v => v > 0).length;
+      const dominantMonths = data.intensity[projectIdx].slice(visibleStartIdx, visibleEndIdx + 1).filter(v => v === 3).length;
+      const totalSignal = monthlyScores.reduce((a, b) => a + b, 0);
+      const activitySignal = scopedActivities.reduce((sum, activity) => sum + activity.total, 0);
+
+      detailTitle.textContent = expandedProject;
+      detailCopy.textContent = data.descriptions[expandedProject];
+      detailStats.innerHTML = [
+        { value: activeMonths, label: 'Months with project signal' },
+        { value: dominantMonths, label: 'Dominant months' },
+        { value: activitySignal, label: 'Scoped activity hits' }
+      ].map(item => `
+        <div class="stat"><span class="value">${item.value}</span><span class="label">${item.label}</span></div>
+      `).join('');
+
+      renderMatrix(expandedProject);
+    }
+
+    // Start collapsed so the full project grid is visible; expand any row to drill in.
+    setActiveProject(null);
+  </script>
+</body>
+</html>

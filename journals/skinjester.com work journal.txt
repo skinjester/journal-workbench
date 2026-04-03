@@ -1,0 +1,1115 @@
+Skinjester.com Work Journal
+
+2013-01-23 02:33:37
+after much twisting of hair and messing around with parts of WP (the database) that I didnt want to, the site is sort of operational. Category icons are missing (expected) as the plugin hasnt yet been enabled. I am curious about what has changed since I last worked on this. Specifically, I remember image load callback functionality to be sort of flaky, although it did in fact work for me. The larger question is that once I get the site back online in full, what would I change?
+	1. UX may need to be relabeled STRATEGY
+	2. I am no longer convinced that chronological tagging is so useful, but maybe it is
+		- in any case the chronology should be from most recent to least recent
+		- the work categories should appear before the chronology
+	3. Horizontal scrolling should support touch
+	4. Work should be organized and re-evaluated for inclusion
+	5. New work 
+
+2013-01-23 02:42:59
+horizontal scroll is screwed up, not sure why
+
+2013-01-23 02:49:26
+there are a lot of duplicate entries in the custom fields that need to be cleaned up
+- looks like an SQL query can be run on the db, but each duplicated field name will need to be entered for each 
+
+2013-01-23 03:06:40
+cleaned up duplicate custom field entries
+
+2013-01-23 03:06:58
+page selection using the scroller is acting strangely
+
+2013-01-23 03:09:44
+putting maintenance page back up until these bugs are fixed
+
+2013-01-23 03:16:06
+updating wordpress to v3.5
+
+2013-01-23 09:13:44
+Flash of unstyled text before typekit rendering
+
+2013-01-23 09:14:15
+Flickr link is no longer valid. Replace with link to wank3r
+
+2013-01-23 22:59:56
+Installing to localhost to verify flaky carousel behavior
+
+2013-01-24 01:29:07
+flaky behavior verified, but I was creating some test posts and noticed that the custom field information may be malformed. When when entering project_name, that item doesnt appear in the prepopulated dropdown, and I am wondering if that is the root of the problem ?
+
+2013-01-24 01:43:20
+I checked the database for localhost as well as online and the missing key is in there, and yet it doesnt show up in the wordpress editor. could be something, could be nothing. The next course of action is to create a new database on local host. I will then add a series of posts from scratch using the same nomenclature as the existing site and will see if the flaky behavior persists. I wonder what it could be?
+
+2013-01-24 01:45:28
+I am also going to contact Laughing Squid. I'm no longer able to access the control panel from my old hosted account. It may be possible to get a backup of the database from them
+
+2013-01-24 02:14:45
+attempting to revert to the DNS servers that are still associated with the old hosting plan. I will see if that works, if not, I'll contact Laughing Squid, and as a last resort will reconstruct the posts by hand from a new database. whew
+
+2013-01-24 09:03:44
+pointing DNS server back to old host was successful. I'm exporting the database
+
+2013-01-24 22:23:34
+database exported successfully from old site with no errors and yet the page is not displaying the cladinblack theme. the default theme seems to work fine. sigh
+
+2013-01-24 23:13:34
+copy/pasted from skinjester.com_old to localhost root and the pages loaded correctly. However, the post carousel is back to its bad behavior and I'm noticing that some assets are being shown at the wrong size. wtf
+
+
+2013-01-25 02:16:01
+finally. after an exhaustive database export, which I parsed for transfer to local host using a php script designed for the purpose, and then an equally exhaustive FTP transfer directory by directory to my local machine, the site is running as designed :)
+
+2013-01-25 02:21:42
+I've noticed a couple of things while transferring files, mainly that the images stored in the wp-content/uploads folder are very disorganized. there are empty directories, and images are placed chronologically in directories based on the time they were uploaded.
+
+Next steps:
+- consolidate image assets by project
+- implement regular backup strategy for webhost
+	- is there a plugin to do this? I also want to backup the database
+- implement regular backup strategy for localhost on macbook
+	- is there a plugin to do this? I also want to backup the database
+- store media files on CDN?
+- typekit font processing is causing pages to flash w unstyled content before the fonts are delivered
+- explore google font options and cancel typekit subscription?
+- refactor CSS
+
+
+2013-01-25 02:32:23
+wtf. I updated to the latest version of wordpress and the madness began again. the carousel isnt smooth like it used to be and the indexing is weird. clearly some of my issues had to do with the update. I wonder if its possible to downgrade to a prior version? I did the same for the webhost and am seeing the scrolling happening less smoothly, although its not to the extent of what I'm seeing on localhost
+
+2013-01-25 02:43:16
+I attempted a downgrade to v3.4 and ended up with reduced functionality. no javascript
+
+2013-01-25 02:50:56
+could the problem with the wp upgrade have to do with the new version of jquery?
+
+its definitely a jQuery version problem. I wonder what changed. The original site used v1.6.1
+
+2013-01-25 03:28:36
+interesting. I reverted back to wordpress 3.2 (which uses jQuery 1.6.1) and the site behaves as expected.
+I should probably go to bed, but so curious. The wp dashboard screen is broken. It must rely on the current version of jquery. I suspect the only reason the webhost is working is due to the caching plugin thats running
+
+2013-01-25 03:37:15
+FACE.PALM.
+I found the bug. It has to do with the Google Analytics plugin being deactivated. When is turned off, the carousel behaves strangely. When is turned on, it behaves normally. Nothing to do with the version of WP or jquery (I think) I remember having written some kind of tracking system for analytics reporting to detect how the carousel was being used. That must be where the problem is happening.
+
+2013-01-26 01:43:12
+spent time tonight playing around with page load optimizations and trying to understand why the browser flashes white when a new page is loaded. I removed all prior transferred material from the new webhost including the database and will be re-transferring material to that destination from localhost. I'm looking through the scripting I did 2 years ago and trying to get my head around it and optimize it where I can. I also commented out the suspect custom google analytics code that appears to have been breaking the carousel nav
+
+2013-01-26 02:30:48
+just renewed typekit subscription but intend to look into a google font custom font instead
+
+2013-01-26 03:02:06
+it was indeed the custom tracking code I wrote that broke the site when the plugin was disabled. fixed a 2 yr old page-height glitch that had been forcing the browser window height to a ridiculous value. Have been doing some css tweaks in general. That stylesheet needs to be refactored.
+
+2013-01-26 03:56:41
+previously I had defined the cladinblack theme as a child theme of WP-Framework theme, but I dont know how much, if any of that is still valid. I will look into removing that dependency
+
+2013-01-26 12:52:52
+doing some directory cleanup on localhost prior so that new webhost install will be "tight"
+
+2013-01-26 13:00:40
+footer is inadequate for what I need it to do.
+
+
+2013-01-26 13:48:22
+back to mechanical labor cleaning up the chaff
+
+2013-01-26 14:04:48
+cleaned up twitter profile page
+
+2013-01-26 14:39:02
+finished removing chaff from theme directory (scripts and css)
+
+2013-01-26 14:45:43
+removing chaff from theme image directory
+
+
+2013-01-26 15:13:41
+playing around w animated gif bkg. sorta interesting on index page, less so elsewhere. if they were use d they'd need to screened back into the bkg to avoid busy. yeah tried that. not uninteresting. best used sparingly if at all
+
+2013-01-26 15:28:31
+replaced item thumbnail body & hover image w CSS
+
+2013-01-26 15:46:24
+continuing to cleanup chaff in theme image directory. noticing that I need to rewrite the image alt tags overall, which currently read "Permanent link to [postname]"
+
+2013-01-26 15:57:34
+finished cleaning up theme image folder
+
+2013-01-26 18:40:39
+attempting to remove deoendency on parent theme WP-Framework. Maybe I just did... checking. or no... When I remove the WP-Framework theme from the directory, WP admin states that cladinblack theme is broken
+
+2013-01-26 19:40:45
+removed dependency on WP-Framework, cladinblack is no longer defined as a child theme, in an attempt to optimize and reduce any overhead
+
+2013-01-26 19:54:44
+continuing with optimization research using YSlow for reference
+
+2013-01-26 20:14:50
+modified .htaccess to gzip static components
+
+2013-01-26 21:31:54
+optimized as much as I care to right now. one obvious area for further exploration is treating UI elements such as the brand logos and page nav as a single sprite sheet to reduce the number of http requests on page load
+
+2013-01-26 22:17:30
+created new db on new webhost and imported localhost db, then ran batch command to update URL references on new webhost. Verified good using temporary test page URL provided by Laughing Squid. Updated Network Solutions DNS record to point to new webhost
+
+2013-01-26 23:07:55
+need to look further into page load issues.
+that white flashing between page loads - its completely unclear why it should happen at all or if it can even be addressed. Every now and then I notice that unstyled font shows briefly before styled and that can probably be fixed. Perhaps more important than these technical issues are the content issues that seem apparent to me. The footer section needs to be designed for real needs. The work itself needs to be curated better. Some of the nomenclature - specifically "User Experience" needs to be replaced..
+
+2013-01-27 04:08:01
+the flashing between page loads is being caused by typekit javascript. I think its because typekit is loading (and non cached) before the page loads, hence the short delay. If its loading could be deferred of made asynchronous that might solve the problem. I think its also worth looking into a google font option. Not sure if this will simply replicate the behavior?
+
+2013-01-27 04:23:00
+It looks like its not just typekit - its a preloader function that also contributes to latency. Its being called on every page, no less, rather than once. The site looks better and feels more solid and responsive without that awful white flash I must say!
+
+2013-01-27 04:27:14
+The W3C Validator reveals a number of HTML errors that need to be fixed
+
+
+TODO: 
+- investigate google font solution
+- investigate asynchronous script loading solution
+- preload funtion is useful mainly for UI elements such as navigation and brand logos
+	- that material should be placed on a single spritesheet so there is only a single page load before those assets are cached
+- fix HTML errors reported by validator
+
+
+2013-01-27 20:44:14
+setup a backup job with Goodsync on MBP to transfer work done on localhost to webhost
+
+2013-01-27 21:12:10
+did some research into asynchronous script loading, the solution is really quite ingenious, and I'm wondering how to make it work for me. for the moment I'll deal with cleaning up the W3C validation errors that I noticed last night
+
+2013-01-27 22:40:10
+continuing to cleanup HTML. Added project name to link title on category & tab pages so they appear when hovering over the thumbnails
+
+2013-01-27 23:29:04
+finished HTML validation. finished CSS validation. uploading changes to webhost
+
+2013-01-28 09:10:46
+a quick test re-enabling typekit shows no flash of white on page load. was this the problem at all? I'm seeing asynchronous loading of scripts in chrome when I look at the timeline in the debugger. Perhaps the previously unvalidated HTML was the proble, after all? I changed the doctype so the browser reads the page as HTML5. Previously was using some sort of HTML 4.01 Transitional doctype. Was this the problem all along?
+
+2013-01-28 09:32:23
+spoke too soon. It is typekit. the white flash is still there. Typekit javascript loads appropriately. the slowdown happens when it is called on document ready. What if it was called afterwards, either by using a delay or by using another callback - perhaps $(window).load ?
+
+2013-01-28 09:51:01
+placing the call on $(window).load doesnt change anything. strange. I wonder why?
+
+2013-01-28 09:57:14
+interesting... when I place the typekit initialize function on $(document).click the page still flashes, even though everything has loaded and the browser is waiting around for something to do... this leaves me wondering if this is inherent to the typekit code, or if it has to do with the collection of CSS selectors that are being processed by the funtion. really need to get ready to head into the office.
+
+2013-01-28 15:32:54
+Did a bit more typekit research. Provided here so I remember.
+	New domain
+	The second change is that we’ve made all kits available at use.typekit.net in addition to use.typekit.com. These hostnames run on the same infrastructure and behave identically. The only difference is that the new domain does not have any cookies set on it, as recommended by both Google and Yahoo performance best practices.
+
+2013-01-29 00:06:50
+continuing to look into typekit issues. I dont see this same problem elsewhere. perhaps the problem lies in the way I am initializing typekit? I notice that whenever it gets called there is a delay of >100ms which for some reason causes the page to flash even when loaded. I will try using the asynchronous embed code and see if that makes a difference
+
+2013-01-29 00:41:30
+there are moments in life that you learn something new after hacking away at a problem for a while. as often as not, knowledge comes from removing a previously unquestioned assumption. it is a strange feeling when it happens - the feeling more profound than sex on the one hand, and the feeling of face.palm. The problem that I've been wrestling with for a couple of worksessions over the last couple of days was trivial in the end. there was a block of CSS embedded in the header-custom.php file (that is used on every page) using the typekit font state classes:
+	.wf-loading {visibility: hidden};
+	.wf-active {}
+	.wf-inactive {}
+
+the .wf-loading class was being applied to the <html> tag very briefly when typekit.load() was called, and then being unapplied when the fonts signaled they had loaded and the typekit active: event was fired. Causing. A. White. Flash. Problem Solved!
+
+2013-01-29 00:51:49
+The unforseen win is that as I dug around for solutions I came across mistakes I had made when I registered and enqued scripts in the function.php. So I'm cleaning that work up now
+
+2013-01-29 02:06:30
+experimentation with the text fade-in in initializeTypekit() has made doing a transition-in on page load seem very attractive. rather than including that functionality as part of typekit I'm creating a seperate function that gets called on document ready 
+
+2013-01-29 02:12:30
+k. that's working
+
+2013-01-29 03:22:33
+spent time working on transition when pages load - looks tight. has brought a certain life to the site. increased speed and changed easing for carousel slider. transferring work to webhost. well played. like a sir.
+
+2013-01-29 10:50:01
+noticed issues with unstyled font when reviewing last nights work on the machine in the office. Here is the sequence of events:
+	- browser loads the new page
+	- the new page renders using the default font and with the header and content blocks at their rest state
+	- The document.ready() function is called
+	- the typekit.load() is called and the default font visibly updates to the substitution font
+	- the header transition function is called and the header/content blocks jump to the start state and animate to rest state
+
+Here is the sequence of events as they should occur
+	- browser loads the new page
+	- the new page renders
+		- the default font is hidden
+		- the header/content blocks are hidden and placed in the animation start state
+		- the document ready() function is called
+		- the typekit load() function is called and the substitute font is enabled
+		- the substitute font is made visible
+		- the header transition function is called and the header/content blocks are made visible
+		- the header/content blocks animate to the rest state
+
+2013-01-29 22:31:25
+finishing cleanup of script & style enqueing in functions.php that I started last night
+
+2013-01-29 22:48:35
+noticing the odd CSS nomenclature in the page structure. There's a lot of stuff defined as a class that should properly be defined as an ID
+
+2013-01-29 23:40:33
+I couldnt stand looking at the sprawling mess of getTagNav() and getCatNav() in functions.php. After figuring out what they did, I rewrote them as a single combined function the_thumbnail_url(). The PHP used in the wordpress category.php and tag.php templates is hard on the eyes. I feel like I should clean that up as well. No good reason other than its hideous
+
+2013-01-30 02:02:49
+I still havent touched any of the font/transition debug stuff where I left off last night but am learning brand new things about how to debug PHP and wordpress itself using the built in functions
+
+*** IMPORTANT ***
+I COMMENTED OUT A CODE BLOCK IN WP-INCLUDES/FUNCTIONS.PHP FROM LINES 2953-2960 BECAUSE I WAS GETTING SPAMMED WITH A PHP NOTICE I DIDNT UNDERSTAND AND COULDNT DO ANYTHING ABOUT
+*** IMPORTANT ***
+
+
+2013-01-30 02:19:10
+this debugging workflow is pretty cool. already found and fixed a legacy bug in tag.php which I'd never have known about otherwise
+
+2013-01-30 04:27:05
+bedtime.seriously. very interesting work session. I had no idea wordpress could be logged this way. I didnt actually work on the problem I thought I would but gained a lot of knowledge, cleaned up some bugs, and in general had a great time. One thing I noticed and started looking into was that when I revert back to the wordpress version of jquery, the headline transition no longer works. have no idea why. switching back to google's version solves the problem. 
+
+2013-01-30 12:16:25
+jquery strangeness with animation function fadein(). clearly, something I'm overlooking. I thought it had something to do with the version of jquery that I was using (wp vs. google) but after a lot of testing, it seemed to have something to do with. ah fuck, I dunno.
+
+2013-01-30 22:55:56
+the jquery issue was resolved - fadeIn() doesnt work together with css opacity. that function is intended to be used with display:none, or hide(). I'm doing some further cleanup on the <head> section by removing the rss feed and enqueing the stylesheet from functions.php instead of including the <link> to it in custom-header.php. also wondering since this is no longer a child theme if custom-header.php can go back to being header.php? Ah... apparently so.
+
+2013-01-31 00:15:37
+still working on cleaning up redundancy in functions.php
+
+2013-01-31 02:01:07
+finished cleaning up redundant functionality in functions.php. The code just looks better now. Learned a lot more about the internal workings of wordpres and also have the beginnings of a nice development environment. Just need to get source control and it will be a great foundation for this project and future work
+
+2013-01-31 03:12:45
+I'm working on masking the typekit font load. I have a collection of all text that fades in when the page is loaded, but after looking at it when all page content faded in instead of just some of it, it seems like that was just smoother. I'm finishing this cigarette and going to bed.
+
+2013-01-31 03:27:51
+OK, so the typekit event handler is working as expected, but its clear that if there are images being displayed, they need to fade in as well. It feel awkward to see parts of the page fading in while others do not. what if the entire page body behaved like this? maybe 1 more cigarette before bed...
+
+2013-01-31 03:32:09
+no, notthe entire body. it feels smoother but loses an anchor
+
+2013-01-31 04:23:26
+I cant help myself I'm experimenting with the typography. now is not the time. I made a change to the tag cloud text and will post it to webhost and see how I feel in the morning. great work session. The transition appears to be working as expected. I took the tag cloud text out of the fontevnt handler. will see if that works out after a bit of QA on different machines
+
+2013-01-31 11:44:59
+everything is working as expected. There's significant performance degredation on my iPad. Looking into replacing jQuery animation with CSS3 equivalent
+
+2013-01-31 11:54:24
+modified stylesheet enqueing so it doesnt affect the admin page
+
+//	ONGOING QUALITY CONTROL ///////////////////////////////////////////////////
+
+Revise and consolidate tag names and assignments
+	- what is the difference between "concept" and "visual design"?
+	- relabel "user experience" as "strategy"
+	- chronological tags should be ordered from most recent to least recent
+	- consider placing the work tags before the chronology tags
+Provide touch support for carousel navigation
+Content audit
+	- Rate the value of portfolio assets
+		- What can be removed?
+	- Evaluate recent work 2011-2013
+		- make a list of candidate assets
+Background image
+Refactor layout structure
+	- Refactor CSS
+Typography exploration
+Hover behavior
+	- for text links
+	- for graphic links
+	- for asset thumbnail blocks
+Footer
+	- Bio
+	- Revise layout
+Server-side optimizations
+	- cacheing
+	- use CDN to serve media files
+
+//////////////////////////////////////////////////////////////////////////////
+
+2013-01-31 12:18:13
+researching CSS3 animation
+
+2013-01-31 16:07:00
+continuing work on implementing CSS3 anim
+
+2013-01-31 16:20:00
+its working. tweaking parameters
+
+2013-01-31 16:50:14
+the jquery easing function yields a more satisfying drifting effect, trying to achieve same w the CSS
+
+2013-01-31 17:06:37
+the level of control over the easing is fantastic. I'd have had to do math to accomplish similar in jQuery. Even nicer was the site I found that lets you tweak values and compare to other curves. nice.
+
+2013-01-31 17:15:34
+replacing font opacity transition with css equivalent. wait a second - not working yet in firefox. ah, now it is. but the smoothness is not there. I think it has to do with how the CSS layout is organized. I'll take a quick look and see if I can deal with it, if not I'll wait to do so when the layout & css have been refactored
+
+2013-01-31 21:38:19
+I replaced the opacity transition with CSS3. even on the desktop the overall transition (opacity + translation) is significantly smoother and feels very solid. Poting it to webhost and will see how it works on iPad. Ah - see some kind of css weirdness is happening now. the exit button position has shifted, although actually it doesnt look bad there. When I was inspecteding the page layoutto check into firefox issue, I didnt fully understand the setup I had made. This positioning error is no doubt related to that, so it looks like the next step is to refactor that layout & css setup
+
+2013-02-01 11:41:08
+Hmmm. despite the results I'm seeing at home, I'm still seeing FOUT issues here on my machine at work.
+
+2013-02-01 12:33:18
+- I enabled the WP-caching plugin and set to enable page cacheing and browser cacheing
+- I notice the difference in overall performace
+- I can see in the network logger that all page assets are coming from the cache
+- There is still something I am overlooking in the sequence of evelnts that happen on page load
+
+Basically, what I am seeing is that even when everything else is cached, if the HTML pageload isnt cached, I will see FOUT
+
+2013-02-01 14:30:24
+After exhaustive reading about it. Recommended next steps are:
+- use typekit css classes
+- use web font loader
+
+2013-02-01 22:31:02
+Revising (simplifying?) my approach to FOUT control
+
+2013-02-01 23:04:40
+TO-DO: before CSS/layout surgery, incorporate subversion into my workflow
+TO-DP: replace branding images with sprites so there's just a single HTTP request made for these
+
+2013-02-01 23:47:08
+remedial reading on CSS selectors
+
+2013-02-02 00:35:42
+purely CSS based solution probably eliminates all FOUT by explicitly setting all typekit styled font to visibility:hidden on page load, and using descendant selector from wf-active to set visibility:visible. will transfer to webhost to see how this appears in realworld conditions
+
+2013-02-02 01:14:40
+its looking good. I think this problem has been resolved. I'm sure I'll tweak the basic transition some more, but solid work overall
+
+2013-02-02 01:44:42
+great news, whatever flakiness I was seeing in firefox yesterday has disappeared, no doubt it had something to do with the font processing I was doing. Is very clean now. smooth. This takes the urgency away from refactoring the css/layout so I'm going to setup a subversion repository then go to bed
+
+2013-02-02 01:49:40
+disabling footer animation on carousel pages and will replace it with CSS3 transition 
+
+2013-02-02 19:39:53
+created SVN repository. I downloaded an OSX Subversion client called Versions. I dont really know any of the terminology. Figuring out the worklow. Installed a SVN plugin for Sublime Text that I'll look into next 
+
+2013-02-02 21:57:40
+read an amazing article about U2 guitarist The Edge's digital delay technique. The author analyzed it thoroughly and provided audio clip of himself playing un-effected riff then added the delay. For a song like Bad, which I've always thought was transcendent - it was wonderful to realize just how simple the actual guitar part really is. Wow... Meanwhile, working with demo SVN repository to get a feel for the workflow
+
+2013-02-02 23:08:02
+plying with the computer, not getting too much done, but I've got a good grasp of the basic subversion workflow. backing up my source files before adding to repository
+
+2013-02-02 23:42:27
+added cladinblack theme development and wp uploads folder to svn
+
+2013-02-03 00:07:59
+studying organization of style.css and testing out SVN
+
+2013-02-03 01:51:05
+So... one thing I've noticed after a bit of experimentation is that I have to use Versions in place of the Finder when I open files for editing. It works, but its a bit inconvenient, although really no different than my typical usage of P4. Turns out there's another tool available called SmartSVN which apparently is integrated into the Finder so I'm going to take a look at that.
+
+2013-02-03 03:28:51
+I took a look at SmartSVN. Its baffling and I couldnt get past the import files dialog. Interface was also sort of awful. For my purposes, Versions will be fine
+
+2013-02-03 08:58:37
+analyzing page layout structure
+
+// landing page
+
+body
+	div#container
+		div#header
+			div#dock
+				div#cat
+					div.cat-item
+						<a>
+					div.cat-item
+						<a> 
+					div.cat-item
+						<a> 
+					div.cat-item 
+						<a>
+					div.cat-item 
+						<a>
+					div.cat-item no-border
+						<a>
+					div.clearfix
+					div.entry-border topEdge
+				div#tag
+					ul.wp-tag-cloud
+						li
+							a
+						li
+							a
+						li
+							a
+						li
+							a
+						li
+							a
+						li
+							a
+						li
+							a
+						li
+							a
+						li
+							a
+						li
+							a
+						li
+							a
+			div.entry-border topEdge
+			div#headerslug
+				div#header-title
+		div.entry-border topEdge
+		div#primary.hfeed
+			div.metadata-wrapper
+				div.viewport meta
+					div.entry-title
+					div.entry-projectname
+					div.clearfix
+			div.metadata-wrapper
+				div.viewport meta
+					div.entry-description
+					div.clearfix
+		div#footer
+			div.entry-border topEdge
+			div.metadata-wrapper
+				div#viewport-icondock
+					a
+						img.icon-small meta
+					a
+						img.icon-small meta
+					a
+						img.icon-small meta
+					div.credits meta
+					img.icon-colophon meta
+					img.icon-colophon meta
+					img.icon-colophon meta
+					div.clearfix
+
+
+2013-02-03 12:05:22
+just noticed a setup issue with subversion, which is also why it seemd that edits I made in the finder werent registering in Versions.
+
+2013-02-03 15:14:22
+jeez - what am I missing here? not getting my head around this workflow at all
+
+
+2013-02-03 18:46:25
+I now have a version controlled working copy of wp-content
+
+2013-02-03 18:46:25
+setup a free account with RescueTime for tracking how I use time. I've sort of fucked around this weekend its true, but on the other hand I needed to get my head around workflow issues, which are a large investment. Anyway, back to work on that CSS!
+
+2013-02-03 19:01:05
+damn it. still having version control weirdness. locked files. something... wtf. doing some more reading on development environments
+
+2013-02-03 19:41:03
+OK I think I get it. There are 3 major use cases for version controlled wordpress development. version control entire install, version control wp-content folder, and version control the theme folder. All I really need to do is manage the theme folder, so I've set that up, and here goes!
+
+2013-02-03 21:36:20
+finished initial cleanup of style.css.
+- Need to look at how floats are being handled
+	- a style called .meta is being used as utility class to apply floats
+	- a style called .clearfix is used as a utility class to clear floats
+		- TODO: rename .meta -> .setFloat
+		- TODO: rename .clearfix -> .clearFloat
+	- an additional dummy element is being added to clear the float
+		- TODO: research and implement a cleaner method of clearing floats and remove dummy item
+	- horizontal rules are being applied with an empty div placed for that purpose
+		- TODO: replace empty divs and create horizontal rule with CSS border property
+	- each logo is a seperate CSS file, including the rollover state
+		- TODO: create spritesheet for logos
+		- TODO: modify layout to use spritesheet instead of multiple files
+	- font styling is intertwined with layout metrics
+		- TODO: seperate font definition from layout
+
+2013-02-03 22:56:29
+I'm noticing on the live site that when the landing page is cached, the testimonials don't randomize (because the page is cached). Why not make it into a carousel so that the end user can cycle through them? Treating those entities as posts takes them out of the PHP and provides a richer browsing experience from the start (rather than relying on randomness)
+
+2013-02-04 01:41:23
+employing new clear float method in header
+
+2013-02-04 12:12:45
+noticing that upon page load, there are items on the page (notably - the carousel nav widgets) that will appear briefly, then disappear, then re-appear as part of the page load transition. Is there a way that I can simulate latency on any network connection I wonder as some of these use cases arent immediately appaarent to me from my work ening environment
+
+2013-02-04 23:01:10
+doing some research on page load optimizations. I had little to no idea how to use the network solutions CNAME control panel to set up a "cookieless subdomain" so I am looking further into how to integrate Amazon's S3 CDN with my WP setup. I also downloaded an Apple tool that can simulate low bandwidth/low latency connections in order to understand how the site looks under different networking conditions. For example, I've noticed that my experience with the site at my work computer is somewhat different (more latency)  than my experience with it from home
+
+2013-02-04 23:41:38
+judging from what I'm reading a CDN saetup should be my last optimization step. The potential benefit is currently outweighed by the research and trial and error involved
+
+2013-02-05 00:28:48
+feeling tired going to bed early after a quick CSS test :)
+
+2013-02-05 01:13:23
+transition tweaks - dissolving #content while sliding the previously defined content up
+
+2013-02-05 08:47:35
+I used the network link conditioner to simulate a slow connection and analyze how page elements appear. modifying animation to accomodate
+
+2013-02-05 09:11:40
+need to include fallback condition for high latency/low bandwidth connection for a case when typekit fails to load
+
+2013-02-05 09:21:15
+testing with high latency/low bandwidth network reveals an edge case in which typekit font will always fail to load and will fire the inactive event on each page load. Because the entire page is hidden and transitions in upon typekit firing an active or inactive event, this creates a delay in which nothing is visible on the page until the event is heard. I think that if typekit fails to load the font on the first attempt, it shouldnt bother making the attempt for subsequent page loads. How would it be possible to know this though? I previously had a block of code that set and listened for a cookie. perhaps that could be used to set a flag (success/fail) If the cookie isnt set, then attempt to load typekit. set the cookie to reflect the state of the font load. On subsequent page loads check the cookie... except this creates further complication. what if I return to the page at a later time. the cookie is still set. or perhaps cookies have been disabled... thats not a good solution. Instead, I think typekit should attemptto load fonts asynchronously. How would that work though? Right now, everything is dependent upon the font being ready or not ready...
+
+2013-02-05 10:08:10
+take a look at how the border div in the footer behaves during pageload. compare that with the border underneath the header. the modifications I've made to optimize CSS preclude that cool behavior of the content underneath the footer. borders need to be placed such that by animating the padding-bottom property, content underneath the border is pushed down before it rises up, creating the "elastic" appearance that I'm liking in the footer
+
+2013-02-05 11:20:38
+the result of the changes I made this morning to custom font display need further refinement. The behavior I see here on my work machine in cases where material isnt cached is that:
+- unstyled content is immedately visible when the page loads
+- the headlineIn() function is executed
+
+2013-02-05 12:48:18
+modified style.css on the server to correct for the unstyled content behavior. The content simply does not become visible until the typekit active or inactive event is fired. This approach seems guaranteed to prevent the display of unstyled content. A sacrifice is made for low bandwidth/high latency connections however. Nothing is visible except for a black screen until typekit processing is completed. To solve for this edge case, I can start a timer upon page load. the timer is cleared when the typekit events fire. if the timer value > threshold value, a preloader text is shown. It would need to be animated (i.e. doing something) to indicate progress. In this way, I think the effect of waiting could be masked. However, there needs to be a delay before it appears so that it doesnt trigger spuriously.
+
+2013-02-05 13:57:17
+I began to wonder what should happen onClick.
+
+2013-02-05 15:41:35
+I have a working jquery anim transition out when a link is clicked. Might be a bit heavy handed as-is? Interesting teqchnique used to accomplish it. Revising code to use CSS anim
+
+2013-02-05 17:40:26
+I'm working out some ideas on a transition out using jquery anim (because the callback function that loads the new url is more straightforward) to see if this idea is an interesting one to explore further
+
+2013-02-05 17:56:45
+its interesting. different enough that I dont know if I like it or not. Would repeated exposure be annoying? 
+
+2013-02-05 18:43:35
+yes. it would be highly annoying. It looks like a terrible glitch, but what a technique. I had noidea it was even possible or what it would look like
+
+2013-02-05 18:56:33
+the onlything reallybothering me about this page load transitionhappens when the page being loaded isnt cached. The screen goes dark and then the transition begins. For the web, it doesnt really feel unnatural. My question is more - does it feel more or less unnatural when there's a transition out (simple dissolve) before the page load
+
+2013-02-07 23:40:47
+I'm back in San Francisco, working on getting my development environment set up. The desk itself is really dark. A desk lamp? A backlit keyboard? I already had Subversion setup on this machine, need to setup a repository and also remeber how to use it
+
+2013-02-08 06:23:44
+doing some more research on SCVN. The one part of SVN I'm nbot getting is the difference between the files you add to the repository and your working copy. It seems to me like you're mainting 3 "bibs" of the files under source control. The files you added to source control, the actual repository and the working copy. SVN seems to work just fine when you remove the original source, and yet I cant help feeling that doing so is doing it wrong? What is right then? If it works as I'm using it, what's the problem?
+
+2013-02-08 10:15:02
+I think I've learned as much about SVN as I need to for my purposes using a demo project. I'm going to add localhost to version control now
+
+2013-02-08 10:52:53
+ok its version controlled now. work environment is set up.
+
+2013-02-08 12:58:44
+I'm going to turn those logos into a spritesheet now
+
+2013-02-08 14:17:21
+created spritesheet graphic, figuring out how to integrate it into header.php. I was using the category icon to read categories and automatically apply the right graphic and wondering if I should continue to do so? I don't really need the system to be that dynamic. It would not be a big deal to hardcode that information...
+
+2013-02-08 15:04:28
+research & trial of iterating through a collection of wp category objects previously established for category icon display. Here's what I want to do for each category object in the collection:
+(1) filter out categories that aren't brands
+(2) assign a class to a div based on category name
+(3) create a link inside the div to the category page
+
+2013-02-08 16:53:25
+basic sprite display is accomplished. need to look at how this structure is setup though. rather than a collection of divs, this should be an unordered list. The original version had each logo falling on the left edge of a 60px block in order to conform to a grid. 
+
+2013-02-08 17:27:43
+I dunno if it needs to conform to a grid, the spacing is OK, however the structure does need to be an unordered list. because that's what it is - an unordered list
+
+2013-02-08 19:58:32
+making adjustments to CSS list styling
+
+2013-02-08 22:29:55
+adding hover states from spritesheet
+
+2013-02-08 22:45:00
+noticing a white flash betwen pages now. commiting changes and seeing if they appear in prior revision
+
+2013-02-08 23:36:01
+that white flash seems to have gone away, noticing some roughness on pageload though need to add links to category icons before thinking about that
+
+2013-02-09 00:53:56
+finished category icon revision
+
+2013-02-09 01:24:37
+TODO: Testimonials need to be repurposed as a carousel
+TODO: What if when a page was scrolled, the header & description block remained in place so just the image content scrolled.
+TODO: The thumbnail graphics need to be restyled as links so that the text and background fill dont behave independently.
+TODO: I'd like to do a unified transition in/out on hover. just a dissolve. for image links as well as text links. What would that involve?
+spritesheet
+text links
+image thumbnails (bkg color fill & text)
+
+2013-02-09 09:11:59
+that white flash... it comes and goes
+
+2013-02-09 10:10:19
+adding that lower border to #primary:after was a clever move, but it breaks the "drifty" effect of the transition in.
+
+2013-02-09 10:58:15
+and... still working on the transition in. just discovered css3 blur 
+
+2013-02-09 11:04:29
+the blur filter is extremely cool, but way to heavy for the transition in
+
+2013-02-09 11:10:39
+placing some placeholder content in the footer, cleared out the old stuff
+
+footer examples
+	jasonsantamaria.com
+	alistapart.com
+	jquery.com (very simple)
+
+You visited now what do I want you to do next?
+I want you to know who I am
+I want you to begin a conversation with me
+I want your money and resources
+- Who am I? (you wont give resources to someone you dont know)
+- How do you contact me?
+
+
+
+- who am I 
+	- possibly leads to dedicated "about me" page
+	- use amout.me as a reference
+- consulting opportunities (to filter out people who i dont want to work with)
+	- describe the kinds of projects i like to work on
+- recent projects (including articles)
+- skills/methods/lets work together (think of them as features that describe my work)
+- other destinations/connect (find me elsewhere demonstrates breadth of my interests and shows other design work)
+	- linked in
+	- follow me on twitter (expected but questionable unless I start being interesting on twitter)
+	- wank3r.com - photographed by Gary Boodhoo
+	- pinterest
+	- UX checklist blog (TBD)
+	- reading list (currently reading - can this information be pulled from kindle?)
+- buy me?? (monetization opportunities on society6)
+	- art prints
+	- t shirts
+- slogan
+	large graphical/typographical element to sit at bottom of page
+		- sci-fi/constructivist/themed for fun
+
+ideas
+	- instead of listing skills, consider treating them as icons
+	- what would it look like if everything down there was an icon?
+	- what would it look like if everything down there was a masonry grid?
+	- what would it look like if everything down there looked the same?
+
+About
+Social
+Copyright
+Contact
+
+or simplest possible case:
+
+EMAIL ME	
+LINKED IN
+
+
+THIS IS GARY BOODHOO ON TWITTER
+THIS IS GARY BOODHOO ON LINKED IN
+THIS IS MY EMAIL
+DESIGNED/BUILT BY GARY R BOODHOO (C) 2013
+
+2013-02-11 06:21:10
+working on CSS rransition for hovered links
+
+2013-02-11 06:33:01
+text based links are looking pretty good
+
+2013-02-11 07:56:36
+I am wondering if I can do a similar fade-in effect on the category links (spritesheet-based) as is happening on the text links
+
+2013-02-11 09:00:54
+basic setup for spritesheet hover is working. needs fine tuning, may be overly verbose in the CSS definition? Also wondering if the transition effect for text links is also being triggered at the same time.
+
+2013-02-11 09:16:35
+added "category" class to category links to prevent them from being targeted by default link transition
+
+2013-02-11 09:36:59
+other nav links on the page need to be filtered so they dont react to the fade transition the same way as text:
+prev/next/exit
+
+2013-02-11 09:55:14
+experimenting with different link rollover animations. Noticed something interesting, if a page load is triggered before an animation completes, there will be a white flash when the new page appears. Have not tested this observation definitively, but is seeming very plausible
+
+2013-02-11 10:24:12
+completed category icon hover transition
+
+2013-02-11 10:26:05
+need to look at layout of thumbnail gallery pages.
+(1) the border at the top, above the thumbnail images got broken during recent optimization pass
+(2) the structure of the thumbnails needs refactoring
+	- currently is possible to get a seperate mouseover behavior upon hover over thumbnail body or the text label
+(3) implement CSS transition in/out upon mouseover of each thumbnail
+
+
+<div #metadata-wrapper>
+	<div class="portfolioThumb">
+		<a class="thumbtitle">
+			<div class="preloader"></div>
+			<img class="attachment-post-thumbnail wp-post-image">
+			<div class="indexTitle"></div>
+		</a>
+	</div>
+</div>
+
+
+<ul>
+	<li class="portfolioThumb">
+		<a>
+			<div class="preloader"></div>
+			<img class="attachment-post-thumbnail wp-post-image">
+			<div class="indexTitle"></div>
+		</a>
+	</li>
+</ul>
+
+2013-02-11 15:16:27
+restructured thumbnail gallery page for tag.php, need to do the same for category.php. Some issues came up with pageload transition that I'm looking into
+
+2013-02-11 17:24:47
+restructuring category.php
+
+2013-02-11 17:44:09
+need to add hover transition to thumbnail gallery. ok did. simple.
+
+2013-02-11 17:48:51
+need to look at assetnav pages
+(1) layout errors having to do with restyled borders
+(2) redo navigation as spritesheet - prev, next, exit (use same file as category logos)
+(3) can the repeated carousel functionality be encapsulated into a single function?
+
+2013-02-11 20:10:21
+working with assetnav_userexperience. fixed border styling layout errors
+
+2013-02-11 21:51:27\
+finished for the day.
+need to:
+(1) redo assetnav prev/next/exit as spritesheet
+
+2013-02-22 16:20:39
+transferring work I did in SF to MBP under version control
+
+2013-02-22 19:25:04
+normalizing vertical spacing (thought it already was, but wasnt) and working on replacing prev/next nav with sprite gfx
+
+2013-02-22 20:07:51
+finished normalizing the heights of top sections. The difference is subtle, but noticeable. Is it desireable? I cant tell. Will stay with it for a while and see how I feel later
+
+
+2013-02-23 11:29:24
+looking through php templates and figuring next steps for turning carousel nav into spritesheet. step1. create the spritesheet!
+
+
+2013-02-23 20:30:58
+added nav gfx to spritesheet
+
+2013-02-24 15:36:10
+modified spritesheet to support nav hover & active transitions. maybe interesting as styled now. maybe not.
+
+2013-02-24 16:19:19
+refined carousel nav transityion to feel more "physical" is fun?
+
+2013-02-24 19:26:28
+finished carousel nav styling and transitions
+
+2013-02-25 00:07:23
+finished refining carousel nav transition. I spent hours on this today, making the movements simple and fluid. Its a significant change, feels good.
+
+2013-02-25 09:17:20
+the carousel nav transitions work well and add to the pageload transition to create a fluid experience. There's a physicality to ity that it previously lacked that I find beautiful, and I noticed that I no longer felt compelled to show the hit areas for the prev/next graphics. Ordinarily I would have thought these to be too small-ish or hard to target. If anything, with the attention paid to hover and selected states, the controls feel more solid, more physical
+
+2013-02-25 10:16:28
+I'm thinking about coipy/pasting my changes in assetnav_user experience.php to all the oither carousel pages. Its a weal setp. every one of those pages is identical. the only variable is that the index of the gallery thumbnail is passed to the page as part of the url, as so:
+http://localhost/skinjester/assetnav_userexperience/?i=0
+
+but what if I passed the tag/category name and the index to single template page
+http://localhost/skinjester/assetnav/?tag=user-experience&i=0
+
+there's some logic in functions.php that would need to be changed
+- instead of parsing a category or tag name and generating a reference to a dedicated template page, the reference would always be to the single carousel template page
+
+- the header text labeling scheme would need to be updated
+
+I would need to research how to pass and parse multiple variables from the permalink URL
+
+I would need to setup the single template so that it recieves the appropriate inputs from the permalink variables passed to it
+
+so... it is a complex task
+
+I think that the current solution to create carousels is clearly non-optimal, but also implemented and working. There are anumnber of dependencies in revising the scheme to use a different template that can be addressed independently of the content edits and other structural tasks. The best way to use my time is to consider the carousel update to come later
+
+
+2013-02-25 18:16:34
+transitions are looking great. lending a fluid, silky feel to the site navigation overall
+
+2013-02-25 18:17:11
+working on refactoring jquery anim in carousel nav as CSS3
+
+2013-02-26 00:09:32
+spent lots of time lookng at the carousel nav function. turns out I dont really understand how its working
+
+2013-02-26 12:48:20
+deconstructing carousel animation so I can understand how it works
+
+2013-02-27 00:27:55
+I've completed a standalone carousel with CSS3 animation support. As an added benefit, the scroll remains accurate independent of page scaling. I've noticed that in Safari on iOS the scrolling never seemed as fluid as it might, and I think part of this had to do with the viewport being resized by that browser
+
+2013-02-27 09:24:29
+success. carousel nav is now entirely css based, and as noticed previously - the carousel behavior is independent of the browser scaling factor. nice!
+
+2013-02-27 11:40:05
+taking a look at the effect of 4px padding from left edge, so that tag labels align cleanly with hover/select
+
+2013-02-27 17:24:37
+cleaned up/simplified all transitions 
+
+2013-03-01 11:00:42
+back to work after a brief diversion into Unity and photogrammetry! Next step is to indent the left edge of entry description to match revised left edges of everything else. I increased this value from 0 so that all link backgrounds, particularly the tags could have some room to breath rather than being flush lefgt Now that the macintosh is online, I am interested in using a shared repository so that I can work independently on either machine without doing file transfers over dropbok manually.
+
+2013-03-02 05:54:54
+finished setting up repository on dropbox and working copies on the macbook and Win8 machines. tested and verified a workflow to work independently on either machine. My one concern with it is that it isnt obvious when files have changed, and the working copy needs to be updated before usage to make sure the latest version is synced
+
+2013-03-02 14:40:29
+there is a flashing border on the footer during pageload (observed on osx)
+
+2013-03-04 07:21:16
+cleaning up CSS to gain better control over left edge and eliminate extraneous content wrappers
+
+/* anything assigned this class has a border offset from the left edge */
+.viewport
+
+
+2013-03-04 19:15:41
+I'm working on the footer playing with identities, just cracked open a beer. This is the part of a project that attract me like a moth to a bright light. What more could be added, how does it justify itself, how wonderful it is to find surprises in something I thought I knew so well. An about page. I feel more like that's something I need to add, but how? As a link? Or can I exploit scrolling to show an about section if you scroll down far enough on any page?
+
+2013-03-04 21:22:30
+Still working on the footer, have tried many variations and none of it was right. re-addressing the problemand looking at the footer area as a potential call to action ("follow") instead
+
+"Want to know more? Follow M4096xx+
+
+2013-03-05 13:31:55
+working on method of sticking footer to bottom of page
+
+2013-03-05 15:01:56
+sticky footer placement strategy pays off. interesting contribution to the way it feels 
+
+2013-03-05 19:51:58
+adding icons from spritesheet to footer links
+
+2013-03-06 11:59:53
+I'm looking into a more functional approach to the footer. I was giving attention to abunch of stuff that doesnt immediately solve user needs. 
+2 ways to look at this:
+
+The footer is visual weight used to anchor the content to the page
+The footer is a control panel that exposes a behavior relevant to u
+The most important behavior expected from the footer is the ability to scroll to the top of the page
+	Is it? What about for short pages. The functionality becomes irrelevant there
+	Having access to this control only at the bottom of the page is less usefull than having the functionality available at any place on the page while scrolling
+that same functionality could be made available at any time by attaching a floating control absolutely positioned to the edge of the browser window
+
+2013-03-07 10:05:12
+finished implementing new footer. much better. noticing some UX issues with the idea of returning to top of page, so will abandon that idea. the better solution is using a fixed header that is always available, or that collapses upon scrolling and expands under mouseover. in any case not relevant to current workflow.
+
+2013-03-07 13:26:21
+I need to make the page a bit wider so that I can apply border styling to images in posts
+
+2013-03-07 17:22:55
+transferring current work to web host
+
+2013-03-08 14:16:32
+added revised favion & identity graphics, replaced most basic font specification with general purpose type classes, cleaned up vertical spacing underneath tag hover states
+
+2013-04-01 10:48:35
+adding new categories and icons for RealU and Rumble work. I'm so glad I took the time to clean up the code
+
+2013-04-01 12:11:54
+running into odd problem where I cant go to the media library when trying to add media. looking into it. seems that it has to do with using google hosted jquery. defaulting to the wp hosted version works fine
+
+2013-04-01 12:39:04
+adding additional tags has broken the layout. need to reorganize those tabs and reduce the count and maybe modify the layout
+concept & visual design can be merged into "concept"
+Heads-Up-Display can be removed
+
+2013-04-01 17:02:39
+renaming UX category as "Systems"
+
+2013-04-02 14:57:52
+added new category icons. Looking at the CSS I'm not clear why I set it up that way. It clearly works, but I'm redoing that interaction anyway and will need to be looked at. Also, there are some indexing problems that need to be debugged
+
+2013-04-02 14:59:45
+the names and order of the tags needs to be looked at. maybe the ordering is fine, but curious to see how it would feel in an unfamiliar order
+
+2013-04-02 18:58:02
+WTF. why cant I add new pages?
+
+2013-04-02 20:05:54
+seriously. wtf
+
+2013-04-02 20:45:31
+some progress being made. not sure why, but setting each blank WP page to use the corresponding assetnav_xxxx.php file as a template seems to be a step in the right direction
+
+2013-04-02 21:21:24
+seem to be moving forward. added support for 2012, 2013 and re-enabled support for Prototype
+
+
+2013-04-02 22:41:59
+noticing that the experiment background that I included for logged-on state is doing interesting things on page load transitions
+
+2013-04-02 22:55:26
+making the category icons behave like the footer icons
+
+2013-04-03 18:22:40
+working on bkg gfx texture
+
+2013-04-03 20:07:19
+background looks awesome. can probably be optimized
+
+2013-04-05 14:22:32
+Real U posts are looking good. almost ready to transfer database to webhost
+
+2013-04-05 21:25:34
+revised typography overall. looks better
+
+2013-04-06 00:32:49
+added credits custom fields and layout
+
+2013-04-10 18:48:56
+adding credits to LucasArts posts
+
+
+2013-04-12 17:36:10
+going to experimemnt with removing chronological tags and increasing the font size of the iteme in the tag area (which will state: Graphics, Research, Systems )
+
+2013-04-12 17:47:46
+updated database on win8 machine
+
+2013-04-12 19:03:55
+experimenting with typography
+
+2013-04-12 20:59:22
+modified tag cloud order
+Graphics, Systems, Research
+
+2013-04-12 21:08:50
+updated carousel transition tu use translate3D. definitely smoother looks good
+
+2013-04-12 21:37:02
+carousel performance on ipad significantly improved. the transition is pretty fluid, but some bizzare glitches happening. not sure why
+
+2013-04-12 23:25:25
+spent time looking further into the problem. not sure why the carousel misbehaves like that on iPad.
+
+2015-11-08 13:52:17
+Speaking from the future and looking back at this, Everything I did here was cool and effective. Moved to localhost on new configuration and figuring out how everything works again. I want to add some new content - the deepdreaming material locally and submit thhose changes to the web. Thea and I worked through this all day yesterday.
+
+2015-11-08 13:55:32
+-	does the database have to be recreated each time?
+
+2015-11-08 14:26:24
+creating test wp install locally and on the web 
+
+2015-11-08 15:23:12
+changed skinjester.com wp-config file to use new path to db, previous path worked but was deprecated
+
+2015-11-09 19:59:34
+have figured out workflow to push from localhost to webhost using Duplicator plugin
+
+2015-11-09 20:49:34
+ACCESS
+https://docs.google.com/document/d/1VGSbz_P9Z2oZOKanF_UclTm3NCfLfeg0GR2SVVUR4A4/edit
+
+
+CONTROL PANEL
+
+control panel: https://www.websitesettings.com/
+username: transmogrifant
+password: CtXDy82d
+
+FTP INFORMATION
+
+FTP server: ftp2.ftptoyoursite.com
+username: transmogrifant
+password: CtXDy82d
+FTP path: /www.skinjester.com/web/content/
+port: 22
+
+DOMAIN RECORD
+
+You'll need to login to your account at the domain registrar where your domain is currently registered and update the domain record to change the primary and secondary name servers to the following:
+dns1.stabletransit.com
+dns2.stabletransit.com
+
+DOMAIN REGISTRAR
+
+Network Solutions
+username: garyboodhoo
+password: UFijudsHFCkKPpub
+
+WORDPRESS DATABASE
+
+database name
+437254_skinjester_db
+
+database username
+437254_gboodhoo
+
+database password
+Skinjester4
+
+database hostname
+mysql51-020.wc1.dfw1.stabletransit.com
+
+DATABASE MANAGEMENT
+
+PHPMYADMIN
+https://mysql.dfw1-1.websitesettings.com/
+
+database username
+437254_gboodhoo
+
+database password
+Skinjester4
+
+
+2015-11-09 21:34:46
+arghhhh]
+fucked up the live database during import
+the Duplicator plugin can't handle the large file export,
+fixing it
+
+
+http://localhost/skinjester
+http://skinjester.com
+
+2015-11-09 22:02:23
+fixed
+
+2016-03-31 12:50:06
+fixed (hacked) a rendering issue in Chrome where the 2 scrim elements weren't filling the page correctly. Is apparently a known bug
+
+2016-03-31 13:37:31
+wtf the site is not even showing up in IE11. Just a black screen. I think there's an issue with the typekit initialization actually. This has probably been an issue for many months. May as well take a look at it now
+
+2016-12-13 16:22:30
+reconnecting with this project
+- add Deep Dream Vision Quest
+	-	need to post link + CTA on front page
+	-	writeup as blogpost
+	-	investigate exposing tagged posts in loop on front page
+- how to incorporate GIT into this wordpress project
+	-	staging on local host
+	-	deploying to web
+-	ESO
+	-	which subjects to cover?
+-	Redesign
+	-	New audience
+	-	New goals
+	-	Reimplement using a commercial WP theme
+
+	

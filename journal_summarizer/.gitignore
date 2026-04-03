@@ -1,0 +1,23 @@
+# Generated summaries directory
+summaries/
+
+# Python virtual environment
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Configuration (if it contains API keys)
+config.local.yaml
