@@ -15,6 +15,14 @@ For **editorial** synthesis (concise bullets, merged themes, closing paragraph),
 - Path: `summaries/YYYY-MM.md`
 - Sections in order: `Goals`, `Workstream`, `Artifacts Delivered`, `Key Decisions`, `Open Questions / Follow Ups`, `People Involved`, then `---`, then one short closing paragraph in *italics*.
 
+## Closing paragraph style
+
+- Write the final italicized paragraph in plain spoken English, as if explaining the month to another person.
+- Keep it grounded in what actually happened that month.
+- Prefer 1-2 direct sentences.
+- Avoid poetic framing, metaphors, and vague mood-setting language.
+- Do not repeat the bullet wording verbatim, but do summarize the main throughline of the month clearly.
+
 ## Bullet format
 
 Every bullet under the first five sections must be exactly:
@@ -75,4 +83,4 @@ Heuristic tagging for bulk updates lives in `scripts/tag_artifacts_deliv.py`.
 
 ---
 
-Ask Cursor: *Synthesize this dump into `summaries/YYYY-MM.md` following the rules above.*
+Ask Cursor: *Synthesize this dump into `summaries/YYYY-MM.md` following the rules above, and make the closing paragraph plain spoken and direct.*
