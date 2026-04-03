@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/journal_summarizer/visualizations/project-matrix-all-summaries.html"
+    }
+  ]
+}

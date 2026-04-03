@@ -16,6 +16,7 @@ Each bullet line must look like: - **[TAG]** ... where TAG is in ALLOWED_PROJECT
 from __future__ import annotations
 
 import argparse
+import html
 import json
 import re
 import sys
@@ -91,6 +92,7 @@ DESCRIPTIONS = {
 }
 
 TAG_LINE = re.compile(r"^\s*-\s*\*\*\[([^\]]+)\]\*\*\s*(.*)$")
+SECTION_LINE = re.compile(r"^\s*###\s+(.*?)\s*$")
 
 PROTO_RE = re.compile(
     r"\b(prototype|prototyping|wireframe|wireframes|mockup|mock-up|sketchbox)\b",
@@ -182,17 +184,41 @@ def classify_activity(project_tag: str, description: str) -> str:
     return "General & planning"
 
 
-def parse_month_file(path: Path) -> Tuple[str, Counter, Dict[str, Counter]]:
+def markdown_inline_to_tooltip_html(text: str) -> str:
+    """Translate a small markdown subset to escaped HTML."""
+    escaped = html.escape(text.strip(), quote=False)
+    escaped = re.sub(r"\*\*([^*]+)\*\*", r"<b>\1</b>", escaped)
+    escaped = re.sub(r"`([^`]+)`", r"\1", escaped)
+    escaped = re.sub(r"\*([^*]+)\*", r"\1", escaped)
+    return escaped
+
+
+def markdown_bullet_to_tooltip_html(text: str) -> str:
+    """Wrap one markdown bullet as structured HTML for the custom tooltip."""
+    body = markdown_inline_to_tooltip_html(text)
+    if not body:
+        return ""
+    return f'<div class="tt-bullet">{body}</div>'
+
+
+def parse_month_file(path: Path) -> Tuple[str, Counter, Dict[str, Counter], Dict[str, str]]:
     """
-    Returns (month_key, tag_totals, per_tag_activity_counts).
+    Returns (month_key, tag_totals, per_tag_activity_counts, per_tag_summary_html).
     Each tagged bullet increments one activity bucket from classify_activity (section headers ignored).
     """
     stem = path.stem
     text = path.read_text(encoding="utf-8", errors="replace")
     tag_totals: Counter = Counter()
     tag_activity: Dict[str, Counter] = defaultdict(Counter)
+    tag_summary_lines: Dict[str, List[str]] = defaultdict(list)
+    last_section_for_tag: Dict[str, str] = {}
+    current_section = ""
 
     for line in text.splitlines():
+        sm = SECTION_LINE.match(line)
+        if sm:
+            current_section = sm.group(1).strip()
+            continue
         tm = TAG_LINE.match(line)
         if not tm:
             continue
@@ -203,8 +229,14 @@ def parse_month_file(path: Path) -> Tuple[str, Counter, Dict[str, Counter]]:
         tag_totals[raw_tag] += 1
         bucket = classify_activity(raw_tag, desc)
         tag_activity[raw_tag][bucket] += 1
+        if current_section and last_section_for_tag.get(raw_tag) != current_section:
+            tag_summary_lines[raw_tag].append(
+                f'<div class="tt-section-title">{html.escape(current_section)}</div>'
+            )
+            last_section_for_tag[raw_tag] = current_section
+        tag_summary_lines[raw_tag].append(markdown_bullet_to_tooltip_html(desc))
 
-    return stem, tag_totals, dict(tag_activity)
+    return stem, tag_totals, dict(tag_activity), {k: "".join(v) for k, v in tag_summary_lines.items()}
 
 
 def _count_to_intensity(s: int, max_s: int) -> int:
@@ -316,6 +348,7 @@ def build_payload(summaries_dir: Path, intensity_mode: str = "volume") -> Dict[s
     months: List[str] = []
     per_month_tags: List[Dict[str, Counter]] = []
     per_month_activities: List[Dict[str, Dict[str, int]]] = []
+    per_month_summary_html: List[Dict[str, str]] = []
     strict_proto: List[int] = []
     strict_pres: List[int] = []
     strict_pdf: List[int] = []
@@ -323,10 +356,11 @@ def build_payload(summaries_dir: Path, intensity_mode: str = "volume") -> Dict[s
     grand_totals: Counter = Counter()
 
     for path in files:
-        month, tag_totals, tag_act = parse_month_file(path)
+        month, tag_totals, tag_act, tag_summary_html = parse_month_file(path)
         months.append(month)
         per_month_tags.append(tag_totals)
         per_month_activities.append({k: dict(v) for k, v in tag_act.items()})
+        per_month_summary_html.append(tag_summary_html)
         grand_totals.update(tag_totals)
         text = path.read_text(encoding="utf-8", errors="replace")
         p, r, d = strict_flags_for_text(text)
@@ -342,6 +376,7 @@ def build_payload(summaries_dir: Path, intensity_mode: str = "volume") -> Dict[s
     project_scores: Dict[str, List[int]] = {p: [0] * n for p in projects}
     activity_hints: Dict[str, List[str]] = {p: [""] * n for p in projects}
     activity_top_rows: Dict[str, List[List[Dict[str, Any]]]] = {p: [[] for _ in range(n)] for p in projects}
+    project_summary_html: Dict[str, List[str]] = {p: [""] * n for p in projects}
     month_notes: Dict[str, str] = {}
 
     for mi, month in enumerate(months):
@@ -351,6 +386,7 @@ def build_payload(summaries_dir: Path, intensity_mode: str = "volume") -> Dict[s
             act_map = per_month_activities[mi].get(p, {})
             activity_hints[p][mi] = format_top_activities(act_map)
             activity_top_rows[p][mi] = top_activity_rows(act_map)
+            project_summary_html[p][mi] = per_month_summary_html[mi].get(p, "")
         month_notes[month] = month_activity_label(month_scores, projects)
 
     intensity: List[List[int]] = []
@@ -423,6 +459,7 @@ def build_payload(summaries_dir: Path, intensity_mode: str = "volume") -> Dict[s
         "projectActivities": {DISPLAY_NAMES[p]: project_activities[p] for p in projects},
         "activityHints": {DISPLAY_NAMES[p]: activity_hints[p] for p in projects},
         "activityTopRows": {DISPLAY_NAMES[p]: activity_top_rows[p] for p in projects},
+        "projectSummaryHtml": {DISPLAY_NAMES[p]: project_summary_html[p] for p in projects},
         "xticks": months[:: max(1, n // 12)] if n else [],
         "xticktext": months[:: max(1, n // 12)] if n else [],
         "heatWidth": heat_w,
