@@ -94,6 +94,30 @@ DESCRIPTIONS = {
 TAG_LINE = re.compile(r"^\s*-\s*\*\*\[([^\]]+)\]\*\*\s*(.*)$")
 SECTION_LINE = re.compile(r"^\s*###\s+(.*?)\s*$")
 
+# Summary section headings → keys for tooltip radar / counts (must match monthly template).
+SUMMARY_SECTION_KEYS: Tuple[str, ...] = (
+    "goals",
+    "workstream",
+    "artifacts",
+    "decisions",
+    "openQuestions",
+)
+
+
+def _empty_section_counts() -> Dict[str, int]:
+    return {k: 0 for k in SUMMARY_SECTION_KEYS}
+
+
+def section_heading_to_key(title: str) -> str | None:
+    t = title.strip()
+    return {
+        "Goals": "goals",
+        "Workstream": "workstream",
+        "Artifacts Delivered": "artifacts",
+        "Key Decisions": "decisions",
+        "Open Questions / Follow Ups": "openQuestions",
+    }.get(t)
+
 PROTO_RE = re.compile(
     r"\b(prototype|prototyping|wireframe|wireframes|mockup|mock-up|sketchbox)\b",
     re.I,
@@ -204,18 +228,26 @@ def extract_closing_paragraph_html(text: str) -> str:
     return f'<div class="tt-closing">{markdown_inline_to_tooltip_html(blocks[-1])}</div>'
 
 
-def parse_month_file(path: Path) -> Tuple[str, Counter, Dict[str, Counter], str]:
+def parse_month_file(
+    path: Path,
+) -> Tuple[str, Counter, Dict[str, Counter], str, Dict[str, Dict[str, int]]]:
     """
-    Returns (month_key, tag_totals, per_tag_activity_counts, closing_paragraph_html).
-    Each tagged bullet increments one activity bucket from classify_activity (section headers ignored).
+    Returns (month_key, tag_totals, per_tag_activity_counts, closing_paragraph_html, per_tag_section_counts).
+    Section counts attribute each tagged bullet to the current ### heading when matched.
     """
     stem = path.stem
     text = path.read_text(encoding="utf-8", errors="replace")
     tag_totals: Counter = Counter()
     tag_activity: Dict[str, Counter] = defaultdict(Counter)
+    tag_sections: Dict[str, Dict[str, int]] = defaultdict(_empty_section_counts)
     closing_paragraph_html = extract_closing_paragraph_html(text)
+    current_section_key: str | None = None
 
     for line in text.splitlines():
+        sm = SECTION_LINE.match(line)
+        if sm:
+            current_section_key = section_heading_to_key(sm.group(1))
+            continue
         tm = TAG_LINE.match(line)
         if not tm:
             continue
@@ -226,8 +258,10 @@ def parse_month_file(path: Path) -> Tuple[str, Counter, Dict[str, Counter], str]
         tag_totals[raw_tag] += 1
         bucket = classify_activity(raw_tag, desc)
         tag_activity[raw_tag][bucket] += 1
+        if current_section_key:
+            tag_sections[raw_tag][current_section_key] += 1
 
-    return stem, tag_totals, dict(tag_activity), closing_paragraph_html
+    return stem, tag_totals, dict(tag_activity), closing_paragraph_html, dict(tag_sections)
 
 
 def _count_to_intensity(s: int, max_s: int) -> int:
@@ -340,6 +374,7 @@ def build_payload(summaries_dir: Path, intensity_mode: str = "volume") -> Dict[s
     per_month_tags: List[Dict[str, Counter]] = []
     per_month_activities: List[Dict[str, Dict[str, int]]] = []
     month_closing_html: List[str] = []
+    per_month_tag_sections: List[Dict[str, Dict[str, int]]] = []
     strict_proto: List[int] = []
     strict_pres: List[int] = []
     strict_pdf: List[int] = []
@@ -347,11 +382,12 @@ def build_payload(summaries_dir: Path, intensity_mode: str = "volume") -> Dict[s
     grand_totals: Counter = Counter()
 
     for path in files:
-        month, tag_totals, tag_act, closing_html = parse_month_file(path)
+        month, tag_totals, tag_act, closing_html, tag_sec = parse_month_file(path)
         months.append(month)
         per_month_tags.append(tag_totals)
         per_month_activities.append({k: dict(v) for k, v in tag_act.items()})
         month_closing_html.append(closing_html)
+        per_month_tag_sections.append(tag_sec)
         grand_totals.update(tag_totals)
         text = path.read_text(encoding="utf-8", errors="replace")
         p, r, d = strict_flags_for_text(text)
@@ -368,6 +404,9 @@ def build_payload(summaries_dir: Path, intensity_mode: str = "volume") -> Dict[s
     activity_hints: Dict[str, List[str]] = {p: [""] * n for p in projects}
     activity_top_rows: Dict[str, List[List[Dict[str, Any]]]] = {p: [[] for _ in range(n)] for p in projects}
     month_notes: Dict[str, str] = {}
+    project_section_counts: Dict[str, List[Dict[str, int]]] = {
+        DISPLAY_NAMES[p]: [_empty_section_counts() for _ in range(n)] for p in projects
+    }
 
     for mi, month in enumerate(months):
         month_scores = {p: int(per_month_tags[mi].get(p, 0)) for p in projects}
@@ -376,6 +415,11 @@ def build_payload(summaries_dir: Path, intensity_mode: str = "volume") -> Dict[s
             act_map = per_month_activities[mi].get(p, {})
             activity_hints[p][mi] = format_top_activities(act_map)
             activity_top_rows[p][mi] = top_activity_rows(act_map)
+            sec_src = per_month_tag_sections[mi].get(p)
+            if sec_src:
+                dest = project_section_counts[DISPLAY_NAMES[p]][mi]
+                for k in SUMMARY_SECTION_KEYS:
+                    dest[k] = int(sec_src.get(k, 0))
         month_notes[month] = month_activity_label(month_scores, projects)
 
     intensity: List[List[int]] = []
@@ -449,6 +493,15 @@ def build_payload(summaries_dir: Path, intensity_mode: str = "volume") -> Dict[s
         "activityHints": {DISPLAY_NAMES[p]: activity_hints[p] for p in projects},
         "activityTopRows": {DISPLAY_NAMES[p]: activity_top_rows[p] for p in projects},
         "monthClosingHtml": month_closing_html,
+        "projectSectionCounts": {DISPLAY_NAMES[p]: project_section_counts[DISPLAY_NAMES[p]] for p in projects},
+        "sectionRadarOrder": list(SUMMARY_SECTION_KEYS),
+        "sectionRadarLabels": {
+            "goals": "Goals",
+            "workstream": "Workstream",
+            "artifacts": "Artifacts",
+            "decisions": "Decisions",
+            "openQuestions": "Open Q",
+        },
         "xticks": months[:: max(1, n // 12)] if n else [],
         "xticktext": months[:: max(1, n // 12)] if n else [],
         "heatWidth": heat_w,
