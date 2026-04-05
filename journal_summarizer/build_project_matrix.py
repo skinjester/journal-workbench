@@ -11,6 +11,9 @@ Usage (from repo root or this directory):
 Each bullet line must look like: - **[TAG]** ... where TAG is in ALLOWED_PROJECT_TAGS
 (keep in sync with categorizer.py). Expand rows bucket **line items by description**
 (keyword/heuristic activity types), not by summary section headings (### Goals, etc.).
+
+Matrix rows are ordered by **first month with any activity** for that project (earlier starts
+higher on the y-axis). Projects that first appear in the same month keep `ROW_ORDER` as tie-breaker.
 """
 
 from __future__ import annotations
@@ -22,7 +25,7 @@ import re
 import sys
 from collections import Counter, defaultdict
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Set, Tuple
 
 # Mirror categorizer.ALLOWED_PROJECT_TAGS / SYNTHESIS_SECTION_ORDER (avoid importing yaml chain).
 ALLOWED_PROJECT_TAGS = frozenset(
@@ -58,6 +61,14 @@ ROW_ORDER = [
     "iveda",
     "RPVR",
 ]
+
+def first_activity_month_index(project: str, per_month_tags: List[Dict[str, Counter]]) -> int:
+    """Index of the first month where `project` has at least one tagged line (0-based)."""
+    for mi, tags in enumerate(per_month_tags):
+        if int(tags.get(project, 0)) > 0:
+            return mi
+    return len(per_month_tags)
+
 
 DISPLAY_NAMES = {
     "ESO": "ESO",
@@ -175,6 +186,68 @@ PRES_RE = re.compile(
 PDF_RE = re.compile(r"(\.pdf\b|\bpdf\b)", re.I)
 
 DELIV_RE = re.compile(r"`deliv:([a-z0-9_-]+)`", re.I)
+
+# Timeline rows (order = top → bottom in the chart). Aligns with CURSOR_SYNTHESIS_INSTRUCTIONS deliv slugs + pdf.
+DELIV_MILESTONE_SLUGS: Tuple[str, ...] = (
+    "audit",
+    "documentation",
+    "design-system",
+    "visuals",
+    "prototype",
+    "presentation",
+    "operations",
+    "pdf",
+)
+
+DELIV_MILESTONE_LABELS: Dict[str, str] = {
+    "audit": "Audit",
+    "documentation": "Documentation",
+    "design-system": "Design system",
+    "visuals": "Visuals",
+    "prototype": "Prototype",
+    "presentation": "Presentation",
+    "operations": "Operations",
+    "pdf": "PDF",
+}
+
+DELIV_MILESTONE_HOVER: Dict[str, str] = {
+    "audit": "Month includes <code>deliv:audit</code> (audits, comparisons, capture reviews, surveys).",
+    "documentation": "Month includes <code>deliv:documentation</code> (specs, Confluence, diagrams-as-spec, handoff).",
+    "design-system": "Month includes <code>deliv:design-system</code> (styleguides, UI kits, pattern libraries).",
+    "visuals": "Month includes <code>deliv:visuals</code> (stills/motion, comps, exports, non-interactive visuals).",
+    "prototype": "Month includes <code>deliv:prototype</code> or prototype/wireframe vocabulary (legacy cue).",
+    "presentation": "Month includes <code>deliv:presentation</code> or deck/slides vocabulary (legacy cue).",
+    "operations": "Month includes <code>deliv:operations</code> (infra, DNS, rack, invoices, migrations).",
+    "pdf": "Month includes <code>deliv:pdf</code> or mentions PDF / <code>.pdf</code> (legacy cue).",
+}
+
+
+def deliv_milestone_hits_per_month(
+    per_month_full_text: List[str],
+    strict_proto: List[int],
+    strict_pres: List[int],
+    strict_pdf: List[int],
+) -> Dict[str, List[int]]:
+    """One row per deliverable slug: 1 if that month’s summary has the tag (or merged legacy cues)."""
+    n = len(per_month_full_text)
+    slugs = DELIV_MILESTONE_SLUGS
+    hits: Dict[str, List[int]] = {s: [0] * n for s in slugs}
+    for i, text in enumerate(per_month_full_text):
+        seen: Set[str] = set()
+        for m in DELIV_RE.finditer(text):
+            key = m.group(1).lower().replace("_", "-")
+            if key in hits:
+                seen.add(key)
+        for k in seen:
+            hits[k][i] = 1
+        if strict_proto[i]:
+            hits["prototype"][i] = 1
+        if strict_pres[i]:
+            hits["presentation"][i] = 1
+        if strict_pdf[i]:
+            hits["pdf"][i] = 1
+    return hits
+
 
 # Ordered (name, patterns): first regex match wins. Tuned for journal summary vocabulary.
 _DELIV_BUCKET = {
@@ -472,9 +545,20 @@ def build_payload(summaries_dir: Path, intensity_mode: str = "volume") -> Dict[s
         strict_pres.append(r)
         strict_pdf.append(d)
 
+    deliv_milestone_hits = deliv_milestone_hits_per_month(
+        per_month_full_text, strict_proto, strict_pres, strict_pdf
+    )
+
     projects = [p for p in ROW_ORDER if p in ALLOWED_PROJECT_TAGS and grand_totals[p] > 0]
     if not projects:
         projects = [p for p in ROW_ORDER if p in ALLOWED_PROJECT_TAGS]
+    row_order_rank = {p: i for i, p in enumerate(ROW_ORDER)}
+    projects.sort(
+        key=lambda p: (
+            first_activity_month_index(p, per_month_tags),
+            row_order_rank.get(p, 10**6),
+        )
+    )
 
     n = len(months)
     project_scores: Dict[str, List[int]] = {p: [0] * n for p in projects}
@@ -575,6 +659,10 @@ def build_payload(summaries_dir: Path, intensity_mode: str = "volume") -> Dict[s
         "strictProto": strict_proto,
         "strictPres": strict_pres,
         "strictPdf": strict_pdf,
+        "delivMilestoneSlugs": list(DELIV_MILESTONE_SLUGS),
+        "delivMilestoneLabels": DELIV_MILESTONE_LABELS,
+        "delivMilestoneHits": deliv_milestone_hits,
+        "delivMilestoneHover": DELIV_MILESTONE_HOVER,
         "monthNotes": month_notes,
         "descriptions": descriptions,
         "projectScores": {DISPLAY_NAMES[p]: project_scores[p] for p in projects},
@@ -602,7 +690,9 @@ def build_payload(summaries_dir: Path, intensity_mode: str = "volume") -> Dict[s
         "summaryCount": len(files),
         "monthsWithEffort": sum(1 for e in efforts if e is not None),
         "monthsWithMilestones": sum(
-            1 for i in range(n) if strict_proto[i] or strict_pres[i] or strict_pdf[i]
+            1
+            for i in range(n)
+            if any(deliv_milestone_hits[s][i] for s in DELIV_MILESTONE_SLUGS)
         ),
         "dominantRuns": dom,
         "defaultProject": DISPLAY_NAMES[best_proj],
@@ -624,9 +714,13 @@ def splice_html(
     if start < 0:
         raise SystemExit(f"Could not find `const data =` in {html_path}")
     start += len("const data = ")
-    end = text.find(";\n    const mileRows", start)
+    # Must be the block *after* provenanceData — not `const mileRows` (that line follows
+    # `mileSlugs` and its `];` also ends with `;`, so find() would strip `mileSlugs` every run).
+    end = text.find(";\n    const mileSlugs", start)
     if end < 0:
-        raise SystemExit(f"Could not find splice end marker in {html_path}")
+        raise SystemExit(
+            f"Could not find splice end marker `;\\n    const mileSlugs` in {html_path}"
+        )
     json_blob = json.dumps(payload, separators=(",", ":"), ensure_ascii=False)
     prov_insert = ""
     if provenance is not None:

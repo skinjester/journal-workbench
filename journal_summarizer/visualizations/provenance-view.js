@@ -1,5 +1,6 @@
 /**
  * Shared cell provenance UI: monthly summary markdown → HTML with per-line highlights.
+ * `hoverSummary`: hover tooltip only — kicker/title/meta plus a matching-line count (no full body).
  * Matrix overlay (`matchesOnly`): same ### sections as the month file, only lines relevant
  * to the selected activity (no highlight styling). Full page view keeps the whole summary.
  * Depends on global `marked` (https://marked.js.org) loaded before this script.
@@ -408,6 +409,14 @@
 
     if (!source) {
       bodyEl.innerHTML = '<span class="empty">No summary text found for this month.</span>';
+      return { ok: true };
+    }
+
+    if (Boolean(options.hoverSummary)) {
+      var hn = highlights.length;
+      var hlabel =
+        hn === 0 ? 'No matching items' : hn === 1 ? '1 matching item' : hn + ' matching items';
+      bodyEl.innerHTML = '<p class="prov-hover-count">' + escapeHtml(hlabel) + '</p>';
       return { ok: true };
     }
 
