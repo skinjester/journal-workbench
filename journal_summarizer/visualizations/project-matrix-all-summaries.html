@@ -139,13 +139,12 @@
       padding: var(--matrix-plot-margin-top, 82px) 12px 52px 0;
       align-self: start;
     }
-    /* Matches Plotly deliverables margin.t (set in renderMilestones as --milestone-plot-margin-top); ticks are hidden so gutter stays small. */
+    /* One vertical offset only (matrix tick band vs label grid); heading uses normal rhythm — avoid duplicating margin-bottom + this padding. */
     .fixed-labels.milestones {
-      padding-top: var(--milestone-plot-margin-top, 10px);
+      padding-top: max(0px, calc(var(--matrix-plot-margin-top, 82px) - var(--matrix-heading-stack)));
       padding-bottom: 52px;
       align-self: stretch;
     }
-    /* Do not stack the old matrix tick offset here *and* on .milestones — that doubled the gap under the title. */
     .deliverables-section > .chart-panel-section-heading {
       margin-bottom: var(--sp-2);
     }
@@ -2112,20 +2111,18 @@
       });
 
       syncMilestoneScrollWidth();
-      renderMilestones(matrixMarginBottom);
+      renderMilestones(matrixMarginTop, matrixMarginBottom);
       const scrollTarget = preserveScroll ? savedScrollLeft : 0;
       matrixScroll.scrollLeft = scrollTarget;
       if (milestoneScroll) milestoneScroll.scrollLeft = scrollTarget;
     }
 
-    function renderMilestones(matrixMarginBottom) {
+    function renderMilestones(matrixMarginTop, matrixMarginBottom) {
       const visibleMonths = data.months.slice(visibleStartIdx, visibleEndIdx + 1);
       const visibleCount = visibleMonths.length;
       const nMile = mileRows.length;
       if (nMile === 0) return;
-      /* Small top margin: x-axis ticks are off; full matrix margin.t here duplicated CSS padding and left a large void under "Deliverables". */
-      const mileMt = 10;
-      document.querySelector('.panel.chart-panel')?.style.setProperty('--milestone-plot-margin-top', `${mileMt}px`);
+      const mileMt = Number(matrixMarginTop) || 82;
       const mileMb = Number(matrixMarginBottom) || 52;
       const containerWidth = getMatrixChartContainerWidth();
 
@@ -2336,6 +2333,24 @@
     }
     linkScroll(matrixScroll, milestoneScroll);
     linkScroll(milestoneScroll, matrixScroll);
+
+    /** Vertical wheel over timeline strips scrolls the page (Plotly would otherwise eat wheel). Horizontal / shift-pan still scrolls the strip. */
+    (function bindTimelineWheelPageScroll() {
+      const strips = [matrixScroll, milestoneScroll].filter(Boolean);
+      const opts = { passive: false, capture: true };
+      for (const strip of strips) {
+        strip.addEventListener('wheel', (e) => {
+          if (e.ctrlKey) return;
+          const absY = Math.abs(e.deltaY);
+          const absX = Math.abs(e.deltaX);
+          const mostlyVertical = absY >= absX;
+          if (!mostlyVertical) return;
+          if (e.shiftKey) return; /* shift+wheel: let browser map to horizontal strip scroll when applicable */
+          e.preventDefault();
+          window.scrollBy({ top: e.deltaY, behavior: 'auto' });
+        }, opts);
+      }
+    })();
 
     document.getElementById('stats').innerHTML = [
       { value: data.summaryCount, label: 'Summary files' },
