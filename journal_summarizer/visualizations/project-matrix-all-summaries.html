@@ -936,17 +936,39 @@
     }
 
     /**
-     * Plotly sets hover bbox using trace pixels + gd.offsetTop/Left (offsetParent space), not viewport.
-     * Scroll inside .matrix-shell does not change offsetTop, so fixed UI must remap via getBoundingClientRect.
+     * Plotly hover bbox uses the same origin as matrixPaperColumnXFromHoverBbox (offset + client edges),
+     * not raw viewport — see gLeft in matrixPaperColumnXFromHoverBbox. Remap with getBoundingClientRect
+     * so fixed UI stays correct when scroll ancestors move the plot.
+     * Optional rowAnchor: milestone heatmap hover bbox Y is often misaligned (short plot + reversed y);
+     * use paper row bands matching matrixHoverBandShapes.
      */
-    function plotlyHoverBboxToViewport(gd, bbox) {
+    function plotlyHoverBboxToViewport(gd, bbox, rowAnchor) {
       if (!gd || !bbox) return null;
       const r = gd.getBoundingClientRect();
+      const gLeft = gd.offsetLeft + gd.clientLeft;
+      const gTop = gd.offsetTop + gd.clientTop;
+      let y0 = r.top + bbox.y0 - gTop;
+      let y1 = r.top + bbox.y1 - gTop;
+      if (
+        rowAnchor &&
+        rowAnchor.rowCount > 0 &&
+        rowAnchor.rowIndex >= 0 &&
+        gd._fullLayout &&
+        gd._fullLayout._size
+      ) {
+        const gs = gd._fullLayout._size;
+        const n = rowAnchor.rowCount;
+        const ri = rowAnchor.rowIndex;
+        const paperYTop = 1 - ri / n;
+        const paperYBottom = 1 - (ri + 1) / n;
+        y0 = r.top + gs.t + (1 - paperYTop) * gs.h;
+        y1 = r.top + gs.t + (1 - paperYBottom) * gs.h;
+      }
       return {
-        x0: r.left + bbox.x0 - gd.offsetLeft,
-        x1: r.left + bbox.x1 - gd.offsetLeft,
-        y0: r.top + bbox.y0 - gd.offsetTop,
-        y1: r.top + bbox.y1 - gd.offsetTop
+        x0: r.left + bbox.x0 - gLeft,
+        x1: r.left + bbox.x1 - gLeft,
+        y0,
+        y1
       };
     }
 
@@ -1999,7 +2021,7 @@
 
     /** Milestone / deliverables heatmap: same #chart-tooltip shell + deferred heavy body as matrix project rows. */
     function showMilestoneHeatmapTooltip(payload) {
-      const { month, rowLabel, heavyHtml, bbox, gd, pointerEvent, gridHint } = payload;
+      const { month, rowLabel, heavyHtml, bbox, gd, pointerEvent, gridHint, rowIndex, rowCount } = payload;
       if (!chartTooltip || month == null || !rowLabel || !heavyHtml) return;
       const po = document.getElementById('provenance-overlay');
       if (po && !po.hidden && po.classList.contains('provenance-overlay--hover')) {
@@ -2016,7 +2038,9 @@
       const applyLayout = () => {
         const pad = 12;
         const chartRect = gd && gd.getBoundingClientRect ? gd.getBoundingClientRect() : null;
-        const vb = bbox && gd ? plotlyHoverBboxToViewport(gd, bbox) : null;
+        const rowAnchor =
+          rowCount > 0 && rowIndex >= 0 ? { rowIndex, rowCount } : undefined;
+        const vb = bbox && gd ? plotlyHoverBboxToViewport(gd, bbox, rowAnchor) : null;
         let left = vb ? (vb.x1 + 14) : (chartRect ? chartRect.right + 14 : pad);
         let top = vb ? (vb.y0 - 2) : (chartRect ? chartRect.top : pad);
         const tipRect = chartTooltip.getBoundingClientRect();
@@ -2900,6 +2924,8 @@
             bbox: pt.bbox,
             gd: mileChart,
             pointerEvent,
+            rowIndex: rowIdx,
+            rowCount: nMile,
             gridHint: localMonthIdx >= 0 ? { m: localMonthIdx, r: rowIdx } : undefined
           };
           if (mileChart._milestoneHoverBandKey === bandKey) {
