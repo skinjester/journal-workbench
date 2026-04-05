@@ -25,16 +25,10 @@
     .panel { border: 1px solid var(--line); border-radius: 18px; background: linear-gradient(180deg, rgba(255,255,255,0.018), rgba(255,255,255,0.01)); box-shadow: 0 20px 56px var(--shadow); overflow: hidden; }
     .chart-panel { padding: clamp(var(--sp-3), 2.5vw, var(--sp-4)); margin-top: 0; }
     /* Sticky provenance column needs a non-clipping ancestor (see #provenance-inspector). */
-    .panel.chart-panel { overflow: visible; }
-    .panel-head { margin-bottom: var(--sp-4); padding-bottom: var(--sp-3); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
-    .panel-head h2 {
-      margin: 0;
-      font-family: "Cormorant Garamond", Georgia, serif;
-      font-size: clamp(1.35rem, 2.2vw, 1.65rem);
-      font-weight: 600;
-      letter-spacing: -0.02em;
-      text-transform: none;
-      color: var(--text);
+    .panel.chart-panel {
+      overflow: visible;
+      /* Shared by matrix label grid + Deliverables heading offset (see renderMatrix --matrix-plot-margin-top). */
+      --matrix-heading-stack: calc(1.2 * clamp(1.05rem, 1.6vw, 1.2rem) + var(--sp-1));
     }
     .meta-panel h2, .detail-panel h2 {
       margin: 0 0 var(--sp-2);
@@ -45,7 +39,37 @@
       text-transform: none;
       color: var(--text);
     }
-    .matrix-shell, .milestone-shell { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 0; align-items: start; }
+    .matrix-shell, .milestone-shell { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 0; }
+    .matrix-shell { align-items: start; }
+    .milestone-shell { align-items: stretch; }
+    /*
+     * Title sits in the label column (same left edge as before). Spacing under the title matches
+     * Deliverables (margin-bottom var(--sp-1)); only the label grid gets top padding so row 1 still
+     * lines up with the heatmap (Plotly margin.t minus the space consumed by the heading stack).
+     */
+    .fixed-labels.fixed-labels--matrix-headed {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      padding: 0 12px 52px 0;
+    }
+    .fixed-labels.fixed-labels--matrix-headed > .chart-panel-section-heading {
+      margin: 0 0 var(--sp-1);
+      flex-shrink: 0;
+    }
+    .fixed-labels.fixed-labels--matrix-headed > .fixed-labels-grid {
+      padding-top: max(0px, calc(var(--matrix-plot-margin-top, 82px) - var(--matrix-heading-stack)));
+    }
+    .matrix-chart-stack {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      align-self: start;
+    }
+    .matrix-chart-stack > .scroll-area {
+      width: 100%;
+      min-width: 0;
+    }
     /* Two siblings in one row: main (flex 1) + inspector (fixed basis). Hidden inspector → display:none → main is sole flex child and fills width. */
     .matrix-workbench-row {
       display: flex;
@@ -53,7 +77,7 @@
       align-items: flex-start;
       width: 100%;
       min-width: 0;
-      margin-bottom: var(--sp-4);
+      margin-bottom: var(--sp-1);
       gap: 0;
     }
     .matrix-workbench-row > .matrix-shell {
@@ -63,6 +87,37 @@
     }
     .matrix-workbench-row:has(#provenance-inspector:not([hidden])) {
       gap: var(--sp-2);
+    }
+    /* Mirror matrix + inspector row so Deliverables chart column lines up with the heatmap (not full panel width). */
+    .deliverables-workbench-row {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      width: 100%;
+      min-width: 0;
+    }
+    .deliverables-chart-slot {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+    .deliverables-inspector-spacer {
+      flex: 0 0 0;
+      width: 0;
+      min-width: 0;
+      max-width: 0;
+      overflow: hidden;
+      pointer-events: none;
+      visibility: hidden;
+    }
+    .chart-panel:has(#provenance-inspector:not([hidden])) .deliverables-workbench-row {
+      gap: var(--sp-2);
+    }
+    .chart-panel:has(#provenance-inspector:not([hidden])) .deliverables-inspector-spacer {
+      flex: 0 0 min(360px, 38%);
+      min-width: 260px;
+      max-width: min(360px, 100%);
+      width: auto;
+      align-self: stretch;
     }
     #provenance-inspector:not([hidden]) {
       position: sticky;
@@ -84,7 +139,21 @@
       padding: var(--matrix-plot-margin-top, 82px) 12px 52px 0;
       align-self: start;
     }
-    .fixed-labels.milestones { padding-top: 10px; padding-bottom: 46px; }
+    /* Padding mirrors Plotly milestone margin.t / margin.b so label rows match the figure box. */
+    .fixed-labels.milestones { padding-top: 4px; padding-bottom: 16px; align-self: stretch; }
+    /* Same vertical offset under the title as the matrix (sp-1 + label-grid top pad); milestone chart stays aligned. */
+    .deliverables-section > .chart-panel-section-heading {
+      margin-bottom: calc(var(--sp-1) + max(0px, calc(var(--matrix-plot-margin-top, 82px) - var(--matrix-heading-stack))));
+    }
+    .chart-panel-section-heading {
+      margin: 0 0 var(--sp-1);
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: clamp(1.05rem, 1.6vw, 1.2rem);
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--text);
+      line-height: 1.2;
+    }
     /* Must match JS rowHeight; Plotly ygap draws gutters inside each row bin (labels still align). */
     .fixed-labels-grid {
       display: grid;
@@ -169,7 +238,21 @@
       color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
       background: transparent; cursor: default;
     }
-    .scroll-area { overflow-x: auto; overflow-y: hidden; border-radius: 0; padding-bottom: 0; }
+    .scroll-area {
+      overflow-x: auto;
+      overflow-y: hidden;
+      border-radius: 0;
+      padding-bottom: 0;
+      scrollbar-gutter: stable;
+    }
+    /* Width set from #matrix-scroll so Deliverables aligns with the heatmap column (panel-wide row vs matrix+inspector row). */
+    #milestone-scroll { justify-self: start; min-width: 0; }
+    /* Plotly defaults to horizontal centering when the figure is narrower than the scroll viewport; heatmap + deliverables must stay left-aligned and same width. */
+    #matrix-scroll .js-plotly-plot,
+    #milestone-scroll .js-plotly-plot {
+      margin-left: 0 !important;
+      margin-right: auto !important;
+    }
     /* Project-row tooltip and activity overview (provenance dialog) share one width. */
     :root {
       --matrix-tooltip-panel-width: min(360px, calc(100vw - var(--sp-3)));
@@ -287,7 +370,7 @@
     #chart-tooltip .chart-tooltip__body .tt-closing { margin-top: var(--sp-2); font-size: var(--text-xs); color: #9dabbc; line-height: var(--lh-snug); }
     /* Let Plotly set height exactly = margins + rows*rowHeight (no min-height drift vs labels). */
     #matrix-chart { min-height: 0; }
-    #milestone-chart { min-height: 220px; margin-top: var(--sp-2); }
+    #milestone-chart { min-height: 0; margin-top: 0; }
     .lower-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.85fr); gap: var(--sp-3); margin-top: var(--sp-6); align-items: start; }
     .detail-panel, .meta-panel { padding: clamp(var(--sp-3), 2.5vw, calc(var(--sp-2) + var(--sp-3))); }
     .detail-head { display: flex; flex-wrap: wrap; gap: var(--sp-2); align-items: baseline; justify-content: space-between; }
@@ -339,6 +422,10 @@
         max-height: calc(100vh - var(--sp-4) - var(--sp-2));
         max-height: calc(100dvh - var(--sp-4) - var(--sp-2));
         z-index: 3;
+      }
+      /* Inspector is stacked below the matrix; do not reserve a right column under Deliverables. */
+      .chart-panel:has(#provenance-inspector:not([hidden])) .deliverables-inspector-spacer {
+        display: none;
       }
     }
 
@@ -647,13 +734,15 @@
 <body>
   <div class="wrap">
     <section class="panel chart-panel">
-      <div class="panel-head">
-        <h2>Project Activity Map</h2>
-      </div>
       <div class="matrix-workbench-row" id="matrix-workbench-row">
         <div class="matrix-shell">
-          <div class="fixed-labels"><div class="fixed-labels-grid" id="matrix-labels"></div></div>
-          <div class="scroll-area" id="matrix-scroll"><div id="matrix-chart"></div></div>
+          <div class="fixed-labels fixed-labels--matrix-headed">
+            <h3 class="chart-panel-section-heading">Project Activity Map</h3>
+            <div class="fixed-labels-grid" id="matrix-labels"></div>
+          </div>
+          <div class="matrix-chart-stack">
+            <div class="scroll-area" id="matrix-scroll"><div id="matrix-chart"></div></div>
+          </div>
         </div>
         <aside id="provenance-inspector" class="provenance-inspector" hidden aria-hidden="true" aria-labelledby="prov-inspector-title">
           <div class="provenance-inspector__toolbar">
@@ -667,9 +756,17 @@
           </div>
         </aside>
       </div>
-      <div class="milestone-shell">
-        <div class="fixed-labels milestones"><div class="fixed-labels-grid" id="milestone-labels"></div></div>
-        <div class="scroll-area" id="milestone-scroll"><div id="milestone-chart"></div></div>
+      <div class="deliverables-section">
+        <h3 class="chart-panel-section-heading">Deliverables</h3>
+        <div class="deliverables-workbench-row">
+          <div class="deliverables-chart-slot">
+            <div class="milestone-shell">
+              <div class="fixed-labels milestones"><div class="fixed-labels-grid" id="milestone-labels"></div></div>
+              <div class="scroll-area" id="milestone-scroll"><div id="milestone-chart"></div></div>
+            </div>
+          </div>
+          <div class="deliverables-inspector-spacer" aria-hidden="true"></div>
+        </div>
       </div>
     </section>
 
@@ -690,7 +787,7 @@
             <div class="legend-item"><span class="swatch" style="background: var(--track-2);"></span><span><strong>2</strong> active secondary thread</span></div>
             <div class="legend-item"><span class="swatch" style="background: var(--track-3);"></span><span><strong>3</strong> peak for that project row (volume) or monthly winner (dominance)</span></div>
             <div class="legend-item"><span class="swatch" style="background: var(--track-2);"></span><span>Expanded: closed project rows use a dim scale; activity rows use the same 0–3 intensity rules and blues as the main matrix</span></div>
-            <div class="legend-item"><span class="swatch" style="background: linear-gradient(90deg,#f07178,#6cb6ff,#d2a8ff,#56d4dd,#80e2a2,#ffba68,#adb5bd,#d29aff);"></span><span>Deliverable timeline: one row per <code>deliv:*</code> type in monthly summaries; dots mark months with that tag (prototype/presentation/PDF rows also pick up legacy vocabulary when tags are absent)</span></div>
+            <div class="legend-item"><span class="swatch" style="background: linear-gradient(90deg,#f07178,#6cb6ff,#d2a8ff,#56d4dd,#80e2a2,#ffba68,#adb5bd,#d29aff);"></span><span>Deliverable timeline: one row per <code>deliv:*</code> type in monthly summaries; heatmap cells mark months with that tag (same layout as the project matrix; prototype/presentation/PDF rows also pick up legacy vocabulary when tags are absent)</span></div>
           </div>
         </section>
 
@@ -747,10 +844,6 @@
       else if (slug === 'presentation') mileSeries[lab] = data.strictPres;
       else if (slug === 'pdf') mileSeries[lab] = data.strictPdf;
       else mileSeries[lab] = (data.months || []).map(() => 0);
-    });
-    const milestoneLaneCenters = {};
-    mileRows.forEach((lab, i) => {
-      milestoneLaneCenters[lab] = mileRows.length - 1 - i;
     });
 
     function navigateProvenancePage(month, project, activity) {
@@ -903,13 +996,12 @@
     }
 
     function scheduleMatrixChartResize() {
-      const el = document.getElementById('matrix-chart');
-      if (!el || typeof Plotly === 'undefined') return;
+      if (typeof Plotly === 'undefined') return;
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          try {
-            Plotly.Plots.resize(el);
-          } catch (e) { /* ignore */ }
+          // Rebuild both figures from the same plotWidth math. Plotly.Plots.resize() on the heatmap alone
+          // can stretch it to the scroll viewport while the milestone chart keeps fixed layout — margins then diverge.
+          renderMatrix(expandedProject, { preserveScroll: true });
         });
       });
     }
@@ -1086,13 +1178,13 @@
     /* Same blue hue: activity layer always uses full intensity; project aggregate layer is dim only when another project is expanded. */
     const intensityBluescale = [
       [0.0, '#0d1117'],
-      [0.3333, '#1c2b41'],
+      [0.3333, '#2a4564'],
       [0.6666, '#316dca'],
       [1.0, '#79c0ff']
     ];
     const projectDimBluescale = [
       [0.0, '#050608'],
-      [0.3333, '#0c131c'],
+      [0.3333, '#1a2838'],
       [0.6666, '#1a4772'],
       [1.0, '#3d6f9e']
     ];
@@ -1236,19 +1328,21 @@
       const withZ = points.find(hasZ);
       return withZ || points[0];
     }
-    function makeMilestoneLaneShapes(months) {
-      if (!months || months.length === 0) return [];
+    /** Row bands + midlines in paper y so they track categorical heatmap rows (same idea as matrix row tints). */
+    function makeMilestoneLaneShapes() {
+      const n = mileRows.length;
+      if (n === 0) return [];
       return mileRows.flatMap((row, idx) => {
-        const center = milestoneLaneCenters[row];
-        const y0 = center - 0.5;
-        const y1 = center + 0.5;
+        const y1 = 1 - idx / n;
+        const y0 = 1 - (idx + 1) / n;
+        const mid = (y0 + y1) / 2;
         return [
           {
             type: 'rect',
-            xref: 'x',
-            yref: 'y',
-            x0: months[0],
-            x1: months[months.length - 1],
+            xref: 'paper',
+            yref: 'paper',
+            x0: 0,
+            x1: 1,
             y0,
             y1,
             fillcolor: idx % 2 === 0 ? 'rgba(255,255,255,0.018)' : 'rgba(255,255,255,0.01)',
@@ -1257,12 +1351,12 @@
           },
           {
             type: 'line',
-            xref: 'x',
-            yref: 'y',
-            x0: months[0],
-            x1: months[months.length - 1],
-            y0: center,
-            y1: center,
+            xref: 'paper',
+            yref: 'paper',
+            x0: 0,
+            x1: 1,
+            y0: mid,
+            y1: mid,
             line: { color: 'rgba(255,255,255,0.12)', width: 1 },
             layer: 'below'
           }
@@ -1448,33 +1542,25 @@
     }
 
     const rowHeight = 28;
+    const milestoneLabelsEl = document.getElementById('milestone-labels');
+    milestoneLabelsEl.style.gridTemplateRows = `repeat(${mileRows.length}, ${rowHeight}px)`;
+    milestoneLabelsEl.innerHTML = mileRows.map((row) => `<div class="fixed-label milestone">${escapeHtml(String(row))}</div>`).join('');
+
     /** Plotly heatmap brick gaps (px): xgap = gutters between months; ygap = gutters between rows. */
     const matrixHeatmapXGap = 2;
     const matrixHeatmapYGap = 4;
 
     const fullMonthCount = data.months.length;
-    const zoomCenterIdx = Math.floor((fullMonthCount - 1) / 2);
-    const minWindowCount = 1;
     let visibleStartIdx = 0;
-    let visibleEndIdx = 0;
+    let visibleEndIdx = Math.max(0, fullMonthCount - 1);
 
-    function applyCenteredWindow(count) {
-      const c = Math.max(minWindowCount, Math.min(fullMonthCount, Math.round(count)));
-      let start = zoomCenterIdx - Math.floor((c - 1) / 2);
-      let end = start + c - 1;
-      if (start < 0) {
-        start = 0;
-        end = c - 1;
-      }
-      if (end > fullMonthCount - 1) {
-        end = fullMonthCount - 1;
-        start = end - c + 1;
-      }
-      visibleStartIdx = start;
-      visibleEndIdx = end;
+    /** Keep the heatmap x-domain equal to data.months (full series in view). Future zoom can reassign these. */
+    function setVisibleMonthWindowToFull() {
+      visibleStartIdx = 0;
+      visibleEndIdx = Math.max(0, fullMonthCount - 1);
     }
 
-    applyCenteredWindow(fullMonthCount);
+    setVisibleMonthWindowToFull();
 
     const MONTH_ABBR = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
 
@@ -1688,22 +1774,59 @@
       return rows;
     }
 
-    function renderMatrix(selectedProject) {
+    /** Shared L/R inset with Deliverables heatmap; must match buildMatrixXAxisTickConfig inner width math. */
+    const MATRIX_PLOT_MARGIN_LR = { l: 18, r: 18 };
+
+    function getMatrixChartContainerWidth() {
+      const el = document.getElementById('matrix-scroll');
+      if (el && el.clientWidth > 0) return el.clientWidth;
+      const shell = document.querySelector('.matrix-shell');
+      if (shell) {
+        const r = shell.getBoundingClientRect();
+        const w = Math.floor(r.width - 240);
+        if (w > 64) return w;
+      }
+      const panel = document.querySelector('.chart-panel');
+      if (panel && panel.clientWidth > 0) {
+        const w = Math.floor(panel.clientWidth - 240 - 48);
+        if (w > 64) return w;
+      }
+      return Math.max(320, Math.min(data.heatWidth, Math.floor(window.innerWidth * 0.9) - 280));
+    }
+
+    /** Deliverables lives in a full-width row; matrix chart is only as wide as matrix-shell — pin strip to that column. */
+    function syncMilestoneScrollWidth() {
+      const ms = document.getElementById('matrix-scroll');
+      const mls = document.getElementById('milestone-scroll');
+      if (!ms || !mls) return;
+      const w = ms.clientWidth;
+      if (w > 0) {
+        mls.style.width = `${w}px`;
+        mls.style.maxWidth = `${w}px`;
+      }
+    }
+
+    function renderMatrix(selectedProject, options = {}) {
+      const preserveScroll = options.preserveScroll === true;
+      const savedScrollLeft = preserveScroll && matrixScroll ? matrixScroll.scrollLeft : 0;
       hideChartTooltip();
       const visibleMonths = data.months.slice(visibleStartIdx, visibleEndIdx + 1);
       const visibleCount = visibleMonths.length;
       const expandedRows = buildExpandedRows(selectedProject, visibleStartIdx, visibleEndIdx);
 
       // With full month range, plotWidth tracks matrix column width (see missingMonths / t blend below).
-      const matrixScrollEl = document.getElementById('matrix-scroll');
-      const containerWidth = matrixScrollEl ? matrixScrollEl.clientWidth : data.heatWidth;
+      const containerWidth = getMatrixChartContainerWidth();
 
       // Avoid a hard jump between "fits viewport" and "needs horizontal scroll".
       // Near full zoom-out (missing only a few months), gradually interpolate width.
       const missingMonths = fullMonthCount - visibleCount;
       const smoothWindowMonths = 3; // tweak: larger = gentler transition
       const t = Math.max(0, Math.min(1, (smoothWindowMonths - missingMonths) / smoothWindowMonths));
-      const plotWidth = Math.round(data.heatWidth * (1 - t) + containerWidth * t);
+      // Full month range: always fit the scroll viewport so the entire timeline is visible without horizontal scroll.
+      const plotWidth =
+        missingMonths === 0
+          ? Math.max(1, Math.round(containerWidth))
+          : Math.round(data.heatWidth * (1 - t) + containerWidth * t);
       const projectZ = expandedRows.map(row =>
         row.type === 'project' ? row.values : Array(visibleCount).fill(null)
       );
@@ -1723,11 +1846,10 @@
         ...matrixRowBandShapes(expandedRows, Boolean(selectedProject))
       ];
 
-      const matrixMarginLR = { l: 18, r: 18 };
       const matrixMarginBottom = 52;
-      const xTickCfg = buildMatrixXAxisTickConfig(visibleMonths, plotWidth, matrixMarginLR);
+      const xTickCfg = buildMatrixXAxisTickConfig(visibleMonths, plotWidth, MATRIX_PLOT_MARGIN_LR);
       const matrixMarginTop = xTickCfg.marginTop;
-      document.querySelector('.matrix-shell')?.style.setProperty('--matrix-plot-margin-top', `${matrixMarginTop}px`);
+      document.querySelector('.panel.chart-panel')?.style.setProperty('--matrix-plot-margin-top', `${matrixMarginTop}px`);
 
       if (selectedProject) {
         const projectIndex = expandedRows.findIndex(row => row.type === 'project' && row.project === selectedProject);
@@ -1788,7 +1910,7 @@
         height: Math.max(320, matrixMarginTop + matrixMarginBottom + (expandedRows.length * rowHeight)),
         paper_bgcolor: 'rgba(0,0,0,0)',
         plot_bgcolor: 'rgba(0,0,0,0)',
-        margin: { l: matrixMarginLR.l, r: matrixMarginLR.r, t: matrixMarginTop, b: matrixMarginBottom },
+        margin: { l: MATRIX_PLOT_MARGIN_LR.l, r: MATRIX_PLOT_MARGIN_LR.r, t: matrixMarginTop, b: matrixMarginBottom },
         shapes: matrixShapes,
         hoverlabel: {
           align: 'left',
@@ -1802,9 +1924,6 @@
           type: 'category',
           categoryorder: 'array',
           categoryarray: visibleMonths,
-          tickmode: 'array',
-          tickvals: visibleMonths,
-          ticktext: xTickCfg.ticktext,
           side: 'top',
           tickfont: xTickCfg.tickfont,
           tickangle: xTickCfg.tickangle,
@@ -1820,7 +1939,7 @@
           ticks: '', ticklen: 0, zeroline: false,
           showspikes: false
         }
-      }, { responsive: false, displayModeBar: false }).then(() => {
+      }, { responsive: false, displayModeBar: false, scrollZoom: false, doubleClick: false }).then(() => {
         const chart = document.getElementById('matrix-chart');
         chart._matrixExpandedRows = expandedRows;
         // Plotly.newPlot purges prior listeners on the graph div; re-bind after every redraw
@@ -1922,52 +2041,74 @@
         el.addEventListener('click', () => setActiveProject(el.dataset.project));
       });
 
-      matrixScroll.scrollLeft = 0;
+      syncMilestoneScrollWidth();
+      renderMilestones();
+      const scrollTarget = preserveScroll ? savedScrollLeft : 0;
+      matrixScroll.scrollLeft = scrollTarget;
+      if (milestoneScroll) milestoneScroll.scrollLeft = scrollTarget;
     }
 
     function renderMilestones() {
       const visibleMonths = data.months.slice(visibleStartIdx, visibleEndIdx + 1);
       const visibleCount = visibleMonths.length;
       const milestoneScrollEl = document.getElementById('milestone-scroll');
-      // Match the matrix: smooth-fit near the far-left extreme, fixed width otherwise.
-      const containerWidth = milestoneScrollEl ? milestoneScrollEl.clientWidth : data.mileWidth;
+      // Same viewport width as matrix (not full panel): scroll container is synced to #matrix-scroll in CSS/JS.
+      const containerWidth = getMatrixChartContainerWidth();
 
       const missingMonths = fullMonthCount - visibleCount;
       const smoothWindowMonths = 3; // keep consistent with matrix
       const t = Math.max(0, Math.min(1, (smoothWindowMonths - missingMonths) / smoothWindowMonths));
-      const plotWidth = Math.round(data.mileWidth * (1 - t) + containerWidth * t);
+      const plotWidth =
+        missingMonths === 0
+          ? Math.max(1, Math.round(containerWidth))
+          : Math.round(data.heatWidth * (1 - t) + containerWidth * t);
 
       const mileTraces = mileRows.map((row, rowIdx) => {
         const slug = mileSlugs[rowIdx];
-        const x = [], y = [], customdata = [];
+        const color = mileColorsBySlug[slug] || '#9dabbc';
         const blurb = (data.delivMilestoneHover && data.delivMilestoneHover[slug]) || `Month includes a <code>deliv:${escapeHtml(slug)}</code> line in the summary.`;
+        const zRow = [];
+        const textRow = [];
         for (let i = 0; i < visibleCount; i++) {
           const fullIdx = visibleStartIdx + i;
-          if (mileSeries[row][fullIdx]) {
-            x.push(visibleMonths[i]);
-            y.push(milestoneLaneCenters[row]);
-            customdata.push(`<b>${visibleMonths[i]}</b><br>${row}<br>${blurb}`);
-          }
+          const hit = Boolean(mileSeries[row][fullIdx]);
+          zRow.push(hit ? 1 : null);
+          textRow.push(
+            hit
+              ? `<b>${escapeHtml(visibleMonths[i])}</b><br>${escapeHtml(row)}<br>${blurb}`
+              : ''
+          );
         }
         return {
-          type: 'scatter',
-          mode: 'markers',
-          x,
-          y,
-          marker: { size: 15, color: mileColorsBySlug[slug] || '#9dabbc', line: { color: 'rgba(255,255,255,0.15)', width: 1.5 } },
-          customdata,
-          hovertemplate: '%{customdata}<extra></extra>'
+          type: 'heatmap',
+          x: visibleMonths,
+          y: [row],
+          z: [zRow],
+          zmin: 0,
+          zmax: 1,
+          colorscale: [
+            [0, 'rgba(0,0,0,0)'],
+            [1, color]
+          ],
+          showscale: false,
+          xgap: matrixHeatmapXGap,
+          ygap: matrixHeatmapYGap,
+          zsmooth: false,
+          text: [textRow],
+          hovertemplate: '%{text}<extra></extra>'
         };
       });
 
-      const milestonePlotHeight = Math.max(220, 20 * mileRows.length + 120);
+      const mileMt = 4;
+      const mileMb = 16;
+      const milestonePlotHeight = mileMt + mileMb + mileRows.length * rowHeight;
       Plotly.newPlot('milestone-chart', mileTraces, {
         width: plotWidth,
         height: milestonePlotHeight,
         paper_bgcolor: 'rgba(0,0,0,0)',
         plot_bgcolor: 'rgba(0,0,0,0)',
-        margin: { l: 18, r: 18, t: 10, b: 16 },
-        shapes: [...makeYearBandShapes(visibleMonths), ...makeMilestoneLaneShapes(visibleMonths)],
+        margin: { l: MATRIX_PLOT_MARGIN_LR.l, r: MATRIX_PLOT_MARGIN_LR.r, t: mileMt, b: mileMb },
+        shapes: [...makeYearBandShapes(visibleMonths), ...makeMilestoneLaneShapes()],
         hoverlabel: {
           align: 'left',
           bgcolor: 'rgba(58, 58, 58, 0.96)',
@@ -1979,9 +2120,6 @@
           type: 'category',
           categoryorder: 'array',
           categoryarray: visibleMonths,
-          tickmode: 'array',
-          tickvals: visibleMonths,
-          ticktext: visibleMonths,
           showticklabels: false,
           showgrid: false,
           ticks: '',
@@ -1989,7 +2127,10 @@
           zeroline: false
         },
         yaxis: {
-          range: [-0.5, Math.max(2, mileRows.length - 1) + 0.5],
+          type: 'category',
+          categoryorder: 'array',
+          categoryarray: mileRows,
+          autorange: 'reversed',
           showticklabels: false,
           showgrid: false,
           ticks: '',
@@ -1997,18 +2138,15 @@
           zeroline: false
         },
         showlegend: false
-      }, { responsive: false, displayModeBar: false });
-
-      // Ensure the filtered strip always starts at the left edge.
-      milestoneScrollEl.scrollLeft = 0;
+      }, {
+        responsive: false,
+        displayModeBar: false,
+        scrollZoom: false,
+        doubleClick: false
+      });
     }
 
-    renderMilestones();
-
     const matrixLabels = document.getElementById('matrix-labels');
-    const milestoneLabels = document.getElementById('milestone-labels');
-    milestoneLabels.style.gridTemplateRows = `repeat(${mileRows.length}, 1fr)`;
-    milestoneLabels.innerHTML = mileRows.map(row => `<div class="fixed-label milestone">${row}</div>`).join('');
 
     const matrixScroll = document.getElementById('matrix-scroll');
     const milestoneScroll = document.getElementById('milestone-scroll');
@@ -2082,6 +2220,20 @@
 
     // Start collapsed so the full project grid is visible; expand any row to drill in.
     setActiveProject(null);
+
+    (function bindMatrixScrollResizeObserver() {
+      const el = document.getElementById('matrix-scroll');
+      if (!el || typeof ResizeObserver === 'undefined') return;
+      let debounce = null;
+      const ro = new ResizeObserver(() => {
+        if (debounce) clearTimeout(debounce);
+        debounce = setTimeout(() => {
+          debounce = null;
+          renderMatrix(expandedProject, { preserveScroll: true });
+        }, 60);
+      });
+      ro.observe(el);
+    })();
   </script>
 </body>
 </html>
