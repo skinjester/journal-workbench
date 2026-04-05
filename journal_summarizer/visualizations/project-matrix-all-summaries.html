@@ -1663,6 +1663,35 @@
       }
     }
 
+    function clearTooltipVelocityStillTimer(tt) {
+      if (!tt || !tt._tooltipVelStillTimer) return;
+      window.clearTimeout(tt._tooltipVelStillTimer);
+      tt._tooltipVelStillTimer = null;
+    }
+
+    /** After TOOLTIP_STILL_MS with no new samples, re-run band logic so full opacity applies without another mousemove. */
+    function scheduleTooltipVelocityStillRefresh(tt) {
+      if (!tt) return;
+      clearTooltipVelocityStillTimer(tt);
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      if (tt.style.display !== 'block' || !tt._matrixTooltipMotion) return;
+      const delay = TOOLTIP_STILL_MS + 1;
+      tt._tooltipVelStillTimer = window.setTimeout(() => {
+        tt._tooltipVelStillTimer = null;
+        if (!tt || tt.style.display !== 'block' || !tt._matrixTooltipMotion) return;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        const surface = getChartTooltipSurface(tt);
+        if (!surface) return;
+        if (
+          surface.classList.contains('chart-tooltip__surface--muted') ||
+          surface.classList.contains('chart-tooltip__surface--leaving')
+        ) {
+          return;
+        }
+        updateTooltipVelocityBand(tt);
+      }, delay);
+    }
+
     function onChartTooltipGlobalPointerMove(e) {
       const tt = chartTooltip;
       if (!tt || tt.style.display !== 'block' || !tt._matrixTooltipMotion) return;
@@ -1678,6 +1707,7 @@
       tt._ptrY = e.clientY;
       tt._ptrT = now;
       updateTooltipVelocityBand(tt);
+      scheduleTooltipVelocityStillRefresh(tt);
     }
 
     function ensureChartTooltipMotionListener() {
@@ -1721,6 +1751,7 @@
       tt._ptrY = ev.clientY;
       tt._ptrT = now;
       updateTooltipVelocityBand(tt);
+      scheduleTooltipVelocityStillRefresh(tt);
     }
 
     function effectiveTooltipPointerSpeed(tt) {
@@ -1756,6 +1787,7 @@
       const tt = chartTooltip;
       if (!tt || tt.style.display !== 'block') return;
       if (tt._pendingHeavyCellKey !== expectedKey) return;
+      updateTooltipVelocityBand(tt);
       const v = effectiveTooltipPointerSpeed(tt);
       if (v > TOOLTIP_V_MAX_PX_PER_MS) {
         tt._heavyCommitTimer = window.setTimeout(() => tryCommitMatrixProjectHeavy(expectedKey), TOOLTIP_HEAVY_RETRY_MS);
@@ -1836,6 +1868,7 @@
       if (sameCell) {
         applyLayout();
         updateTooltipVelocityBand(chartTooltip);
+        scheduleTooltipVelocityStillRefresh(chartTooltip);
         return;
       }
 
@@ -1849,6 +1882,7 @@
           prevSurface.classList.remove('chart-tooltip__surface--muted', 'chart-tooltip__surface--leaving');
         }
         chartTooltip._tooltipVelBand = undefined;
+        clearTooltipVelocityStillTimer(chartTooltip);
         resetChartTooltipPointerState(chartTooltip);
         chartTooltip.innerHTML = buildProjectRowTooltipShell(month, project, TOOLTIP_HEAVY_PLACEHOLDER);
         const heavyEl = chartTooltip.querySelector('.chart-tooltip__heavy');
@@ -1867,6 +1901,7 @@
           requestAnimationFrame(() => {
             if (surfaceEl) surfaceEl.classList.remove('chart-tooltip__surface--muted');
             updateTooltipVelocityBand(chartTooltip);
+            scheduleTooltipVelocityStillRefresh(chartTooltip);
           });
         });
         scheduleMatrixProjectHeavyCommit(cellKey, heavyHtml, gridHint);
@@ -1887,6 +1922,7 @@
       chartTooltip._matrixTooltipCellKey = cellKey;
       applyLayout();
       updateTooltipVelocityBand(chartTooltip);
+      scheduleTooltipVelocityStillRefresh(chartTooltip);
       scheduleMatrixProjectHeavyCommit(cellKey, heavyHtml, gridHint);
     }
 
@@ -1897,6 +1933,7 @@
         chartTooltip._tooltipSwapOnOut = null;
       }
       clearMatrixProjectHeavyTimer();
+      clearTooltipVelocityStillTimer(chartTooltip);
       removeChartTooltipMotionListener();
       chartTooltip._matrixTooltipMotion = false;
       chartTooltip._matrixTooltipCellKey = undefined;
@@ -1934,6 +1971,7 @@
         hideChartTooltip();
         return;
       }
+      clearTooltipVelocityStillTimer(chartTooltip);
       surface.classList.add('chart-tooltip__surface--leaving');
       let settled = false;
       const finish = () => {
