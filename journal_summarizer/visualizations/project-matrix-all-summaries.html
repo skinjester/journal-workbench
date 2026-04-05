@@ -139,15 +139,15 @@
       padding: var(--matrix-plot-margin-top, 82px) 12px 52px 0;
       align-self: start;
     }
-    /* First label row lines up with matrix grid (Deliverables h3 + margin consumes the heading stack like Project Map title). */
+    /* Matches Plotly deliverables margin.t (set in renderMilestones as --milestone-plot-margin-top); ticks are hidden so gutter stays small. */
     .fixed-labels.milestones {
-      padding-top: max(0px, calc(var(--matrix-plot-margin-top, 82px) - var(--matrix-heading-stack)));
+      padding-top: var(--milestone-plot-margin-top, 10px);
       padding-bottom: 52px;
       align-self: stretch;
     }
-    /* Same vertical offset under the title as the matrix (sp-1 + label-grid top pad); milestone chart stays aligned. */
+    /* Do not stack the old matrix tick offset here *and* on .milestones — that doubled the gap under the title. */
     .deliverables-section > .chart-panel-section-heading {
-      margin-bottom: calc(var(--sp-1) + max(0px, calc(var(--matrix-plot-margin-top, 82px) - var(--matrix-heading-stack))));
+      margin-bottom: var(--sp-2);
     }
     .chart-panel-section-heading {
       margin: 0 0 var(--sp-1);
@@ -2112,18 +2112,20 @@
       });
 
       syncMilestoneScrollWidth();
-      renderMilestones(matrixMarginTop, matrixMarginBottom);
+      renderMilestones(matrixMarginBottom);
       const scrollTarget = preserveScroll ? savedScrollLeft : 0;
       matrixScroll.scrollLeft = scrollTarget;
       if (milestoneScroll) milestoneScroll.scrollLeft = scrollTarget;
     }
 
-    function renderMilestones(matrixMarginTop, matrixMarginBottom) {
+    function renderMilestones(matrixMarginBottom) {
       const visibleMonths = data.months.slice(visibleStartIdx, visibleEndIdx + 1);
       const visibleCount = visibleMonths.length;
       const nMile = mileRows.length;
       if (nMile === 0) return;
-      const mileMt = Number(matrixMarginTop) || 82;
+      /* Small top margin: x-axis ticks are off; full matrix margin.t here duplicated CSS padding and left a large void under "Deliverables". */
+      const mileMt = 10;
+      document.querySelector('.panel.chart-panel')?.style.setProperty('--milestone-plot-margin-top', `${mileMt}px`);
       const mileMb = Number(matrixMarginBottom) || 52;
       const containerWidth = getMatrixChartContainerWidth();
 
