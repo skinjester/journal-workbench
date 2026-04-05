@@ -426,6 +426,10 @@
     /* Let Plotly set height exactly = margins + rows*rowHeight (no min-height drift vs labels). */
     #matrix-chart { min-height: 0; }
     #milestone-chart { min-height: 0; margin-top: 0; }
+    /* Deliverables heatmap uses #chart-tooltip; hide Plotly’s native hover label only. */
+    #milestone-chart .hovertext {
+      display: none !important;
+    }
     .lower-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.85fr); gap: var(--sp-3); margin-top: var(--sp-6); align-items: start; }
     .detail-panel, .meta-panel { padding: clamp(var(--sp-3), 2.5vw, calc(var(--sp-2) + var(--sp-3))); }
     .detail-head { display: flex; flex-wrap: wrap; gap: var(--sp-2); align-items: baseline; justify-content: space-between; }
@@ -599,6 +603,26 @@
       border: 1px solid rgba(255, 255, 255, 0.12);
       background: rgba(20, 24, 31, 0.97);
       box-shadow: 0 18px 42px rgba(0, 0, 0, 0.4);
+    }
+    .provenance-overlay.provenance-overlay--hover .provenance-overlay__dialog {
+      transition: opacity 0.18s ease;
+      opacity: 1;
+    }
+    .provenance-overlay.provenance-overlay--hover .provenance-overlay__dialog:not(.chart-tooltip__surface--leaving).chart-tooltip__surface--vel-fast {
+      opacity: 0.28;
+    }
+    .provenance-overlay.provenance-overlay--hover .provenance-overlay__dialog:not(.chart-tooltip__surface--leaving).chart-tooltip__surface--vel-med {
+      opacity: 0.52;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .provenance-overlay.provenance-overlay--hover .provenance-overlay__dialog {
+        transition: none;
+        opacity: 1 !important;
+      }
+      .provenance-overlay.provenance-overlay--hover .provenance-overlay__dialog.chart-tooltip__surface--vel-fast,
+      .provenance-overlay.provenance-overlay--hover .provenance-overlay__dialog.chart-tooltip__surface--vel-med {
+        opacity: 1 !important;
+      }
     }
     .provenance-overlay__close {
       position: absolute; top: var(--sp-1); right: var(--sp-1);
@@ -995,6 +1019,11 @@
       }
     }
 
+    function isProvenanceHoverOpen() {
+      const po = document.getElementById('provenance-overlay');
+      return Boolean(po && !po.hidden && po.classList.contains('provenance-overlay--hover'));
+    }
+
     function shouldDeferMatrixHoverExitCleanup() {
       const cx = lastPointerClientX;
       const cy = lastPointerClientY;
@@ -1093,10 +1122,11 @@
     }
 
     /** Floating tooltip only (activity hover). Clicks use openProvenanceInspector. */
-    function openProvenanceOverlay(month, project, activity, bbox, fallbackRect) {
+    function openProvenanceOverlay(month, project, activity, bbox, fallbackRect, pointerEvent) {
       const root = document.getElementById('provenance-overlay');
       const chart = document.getElementById('matrix-chart');
       const dialog = root && root.querySelector('.provenance-overlay__dialog');
+      const ct = document.getElementById('chart-tooltip');
       const prov = typeof provenanceData !== 'undefined' ? provenanceData : null;
       if (!root || typeof ProvenanceView === 'undefined' || !prov || !prov.monthSources) {
         navigateProvenancePage(month, project, activity);
@@ -1112,6 +1142,14 @@
         chart._provenanceOpenKey === cellKey
       ) {
         requestAnimationFrame(() => positionProvenanceDialog(bbox, fallbackRect, chart));
+        if (ct && dialog) {
+          ct._velocityOverlaySurface = dialog;
+          ct._matrixTooltipMotion = true;
+          ensureChartTooltipMotionListener();
+          recordChartTooltipPointerFromEvent(ct, pointerEvent);
+          updateTooltipVelocityBand(ct);
+          scheduleTooltipVelocityStillRefresh(ct);
+        }
         return;
       }
       if (typeof marked !== 'undefined') {
@@ -1134,6 +1172,16 @@
         bodyEl: document.getElementById('prov-overlay-body'),
       });
       requestAnimationFrame(() => positionProvenanceDialog(bbox, fallbackRect, chart));
+      if (ct && dialog) {
+        ct._velocityOverlaySurface = dialog;
+        ct._matrixTooltipMotion = true;
+        ct._tooltipVelBand = undefined;
+        clearTooltipVelocityClasses(dialog);
+        ensureChartTooltipMotionListener();
+        recordChartTooltipPointerFromEvent(ct, pointerEvent);
+        updateTooltipVelocityBand(ct);
+        scheduleTooltipVelocityStillRefresh(ct);
+      }
     }
 
     function openProvenanceInspector(month, project, activity) {
@@ -1192,6 +1240,17 @@
       const chart = document.getElementById('matrix-chart');
       if (!root) return;
       const dialog = root.querySelector('.provenance-overlay__dialog');
+      const ct = document.getElementById('chart-tooltip');
+      if (ct && dialog && ct._velocityOverlaySurface === dialog) {
+        clearTooltipVelocityClasses(dialog);
+        ct._velocityOverlaySurface = null;
+        ct._tooltipVelBand = undefined;
+        clearTooltipVelocityStillTimer(ct);
+        if (ct.style.display !== 'block') {
+          ct._matrixTooltipMotion = false;
+          removeChartTooltipMotionListener();
+        }
+      }
       if (dialog) {
         dialog.style.left = '';
         dialog.style.top = '';
@@ -1630,15 +1689,23 @@
       return tt && tt.querySelector ? tt.querySelector('.chart-tooltip__surface') : null;
     }
 
+    /** When set (provenance hover), velocity bands apply to this element instead of the matrix tooltip surface. */
+    function getVelocityBandSurface(tt) {
+      if (!tt) return null;
+      if (tt._velocityOverlaySurface) return tt._velocityOverlaySurface;
+      return getChartTooltipSurface(tt);
+    }
+
     function clearTooltipVelocityClasses(surface) {
       if (!surface) return;
       surface.classList.remove('chart-tooltip__surface--vel-fast', 'chart-tooltip__surface--vel-med');
     }
 
     function updateTooltipVelocityBand(tt) {
-      if (!tt || tt.style.display !== 'block' || !tt._matrixTooltipMotion) return;
+      if (!tt || !tt._matrixTooltipMotion) return;
+      if (!tt._velocityOverlaySurface && tt.style.display !== 'block') return;
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      const surface = getChartTooltipSurface(tt);
+      const surface = getVelocityBandSurface(tt);
       if (!surface) return;
       if (
         surface.classList.contains('chart-tooltip__surface--muted') ||
@@ -1674,13 +1741,15 @@
       if (!tt) return;
       clearTooltipVelocityStillTimer(tt);
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      if (tt.style.display !== 'block' || !tt._matrixTooltipMotion) return;
+      if (!tt._velocityOverlaySurface && tt.style.display !== 'block') return;
+      if (!tt._matrixTooltipMotion) return;
       const delay = TOOLTIP_STILL_MS + 1;
       tt._tooltipVelStillTimer = window.setTimeout(() => {
         tt._tooltipVelStillTimer = null;
-        if (!tt || tt.style.display !== 'block' || !tt._matrixTooltipMotion) return;
+        if (!tt || !tt._matrixTooltipMotion) return;
+        if (!tt._velocityOverlaySurface && tt.style.display !== 'block') return;
         if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-        const surface = getChartTooltipSurface(tt);
+        const surface = getVelocityBandSurface(tt);
         if (!surface) return;
         if (
           surface.classList.contains('chart-tooltip__surface--muted') ||
@@ -1694,7 +1763,8 @@
 
     function onChartTooltipGlobalPointerMove(e) {
       const tt = chartTooltip;
-      if (!tt || tt.style.display !== 'block' || !tt._matrixTooltipMotion) return;
+      if (!tt || !tt._matrixTooltipMotion) return;
+      if (!tt._velocityOverlaySurface && tt.style.display !== 'block') return;
       const now = performance.now();
       const lx = tt._ptrX;
       const ly = tt._ptrY;
@@ -1819,6 +1889,7 @@
     function showMatrixProjectTooltip(payload) {
       const { month, project, globalMonthIdx, bbox, gd, pointerEvent, gridHint } = payload;
       if (!chartTooltip || month == null || !project || globalMonthIdx < 0) return;
+      chartTooltip._velocityOverlaySurface = null;
       const existingSurface = getChartTooltipSurface(chartTooltip);
       if (existingSurface) {
         existingSurface.classList.remove('chart-tooltip__surface--leaving');
@@ -1926,6 +1997,121 @@
       scheduleMatrixProjectHeavyCommit(cellKey, heavyHtml, gridHint);
     }
 
+    /** Milestone / deliverables heatmap: same #chart-tooltip shell + deferred heavy body as matrix project rows. */
+    function showMilestoneHeatmapTooltip(payload) {
+      const { month, rowLabel, heavyHtml, bbox, gd, pointerEvent, gridHint } = payload;
+      if (!chartTooltip || month == null || !rowLabel || !heavyHtml) return;
+      const po = document.getElementById('provenance-overlay');
+      if (po && !po.hidden && po.classList.contains('provenance-overlay--hover')) {
+        closeProvenanceOverlay();
+      }
+      chartTooltip._velocityOverlaySurface = null;
+      const existingSurface = getChartTooltipSurface(chartTooltip);
+      if (existingSurface) {
+        existingSurface.classList.remove('chart-tooltip__surface--leaving');
+      }
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const cellKey = `milestone:\0${month}\0${rowLabel}`;
+
+      const applyLayout = () => {
+        const pad = 12;
+        const chartRect = gd && gd.getBoundingClientRect ? gd.getBoundingClientRect() : null;
+        const vb = bbox && gd ? plotlyHoverBboxToViewport(gd, bbox) : null;
+        let left = vb ? (vb.x1 + 14) : (chartRect ? chartRect.right + 14 : pad);
+        let top = vb ? (vb.y0 - 2) : (chartRect ? chartRect.top : pad);
+        const tipRect = chartTooltip.getBoundingClientRect();
+        if (left + tipRect.width > window.innerWidth - pad) {
+          left = vb ? (vb.x0 - tipRect.width - 14) : (window.innerWidth - tipRect.width - pad);
+        }
+        if (left < pad) left = pad;
+        if (top + tipRect.height > window.innerHeight - pad) {
+          top = window.innerHeight - tipRect.height - pad;
+        }
+        if (top < pad) top = pad;
+        chartTooltip.style.left = `${Math.round(left)}px`;
+        chartTooltip.style.top = `${Math.round(top)}px`;
+      };
+
+      const wasVisible =
+        chartTooltip.style.display === 'block' && chartTooltip.querySelector('.chart-tooltip__surface .chart-tooltip__kicker');
+      const prevCellKey = chartTooltip._matrixTooltipCellKey;
+      const sameCell = wasVisible && prevCellKey === cellKey;
+
+      if (reducedMotion) {
+        clearMatrixProjectHeavyTimer();
+        chartTooltip.innerHTML = buildProjectRowTooltipShell(month, rowLabel, heavyHtml);
+        chartTooltip.style.display = 'block';
+        chartTooltip.setAttribute('aria-hidden', 'false');
+        chartTooltip._matrixTooltipCellKey = cellKey;
+        applyLayout();
+        return;
+      }
+
+      chartTooltip._matrixTooltipMotion = true;
+      ensureChartTooltipMotionListener();
+      recordChartTooltipPointerFromEvent(chartTooltip, pointerEvent);
+
+      if (sameCell) {
+        applyLayout();
+        updateTooltipVelocityBand(chartTooltip);
+        scheduleTooltipVelocityStillRefresh(chartTooltip);
+        return;
+      }
+
+      if (!wasVisible) {
+        if (chartTooltip._tooltipSwapOnOut) {
+          chartTooltip.removeEventListener('transitionend', chartTooltip._tooltipSwapOnOut);
+          chartTooltip._tooltipSwapOnOut = null;
+        }
+        const prevSurface = getChartTooltipSurface(chartTooltip);
+        if (prevSurface) {
+          prevSurface.classList.remove('chart-tooltip__surface--muted', 'chart-tooltip__surface--leaving');
+        }
+        chartTooltip._tooltipVelBand = undefined;
+        clearTooltipVelocityStillTimer(chartTooltip);
+        resetChartTooltipPointerState(chartTooltip);
+        chartTooltip.innerHTML = buildProjectRowTooltipShell(month, rowLabel, TOOLTIP_HEAVY_PLACEHOLDER);
+        const heavyEl = chartTooltip.querySelector('.chart-tooltip__heavy');
+        if (heavyEl) {
+          heavyEl.classList.remove('chart-tooltip__heavy--instant');
+          heavyEl.classList.add('chart-tooltip__heavy--pending');
+        }
+        const surfaceEl = getChartTooltipSurface(chartTooltip);
+        if (surfaceEl) surfaceEl.classList.add('chart-tooltip__surface--muted');
+        chartTooltip.style.display = 'block';
+        chartTooltip.setAttribute('aria-hidden', 'false');
+        chartTooltip._matrixTooltipCellKey = cellKey;
+        applyLayout();
+        updateTooltipVelocityBand(chartTooltip);
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            if (surfaceEl) surfaceEl.classList.remove('chart-tooltip__surface--muted');
+            updateTooltipVelocityBand(chartTooltip);
+            scheduleTooltipVelocityStillRefresh(chartTooltip);
+          });
+        });
+        scheduleMatrixProjectHeavyCommit(cellKey, heavyHtml, gridHint);
+        return;
+      }
+
+      clearMatrixProjectHeavyTimer();
+      const kicker = chartTooltip.querySelector('.chart-tooltip__kicker');
+      const title = chartTooltip.querySelector('.chart-tooltip__title');
+      const heavy = chartTooltip.querySelector('.chart-tooltip__heavy');
+      if (kicker) kicker.textContent = month;
+      if (title) title.textContent = rowLabel;
+      if (heavy) {
+        heavy.classList.remove('chart-tooltip__heavy--instant', 'chart-tooltip__heavy--muted');
+        heavy.classList.add('chart-tooltip__heavy--pending');
+        heavy.innerHTML = TOOLTIP_HEAVY_PLACEHOLDER;
+      }
+      chartTooltip._matrixTooltipCellKey = cellKey;
+      applyLayout();
+      updateTooltipVelocityBand(chartTooltip);
+      scheduleTooltipVelocityStillRefresh(chartTooltip);
+      scheduleMatrixProjectHeavyCommit(cellKey, heavyHtml, gridHint);
+    }
+
     function hideChartTooltip() {
       if (!chartTooltip) return;
       if (chartTooltip._tooltipSwapOnOut) {
@@ -1933,12 +2119,16 @@
         chartTooltip._tooltipSwapOnOut = null;
       }
       clearMatrixProjectHeavyTimer();
-      clearTooltipVelocityStillTimer(chartTooltip);
-      removeChartTooltipMotionListener();
-      chartTooltip._matrixTooltipMotion = false;
+      const provHover = isProvenanceHoverOpen();
+      if (!provHover) {
+        clearTooltipVelocityStillTimer(chartTooltip);
+        removeChartTooltipMotionListener();
+        chartTooltip._matrixTooltipMotion = false;
+        chartTooltip._tooltipVelBand = undefined;
+        chartTooltip._velocityOverlaySurface = null;
+      }
       chartTooltip._matrixTooltipCellKey = undefined;
       chartTooltip._lastMatrixGridHint = undefined;
-      chartTooltip._tooltipVelBand = undefined;
       const s = getChartTooltipSurface(chartTooltip);
       if (s) {
         s.classList.remove(
@@ -2514,12 +2704,12 @@
           const row = rows[idx];
           const localMonthIdx = visibleMonths.indexOf(xKey);
           const globalMonthIdx = localMonthIdx >= 0 ? (visibleStartIdx + localMonthIdx) : -1;
+          const pointerEvent = (ev && ev.event) || undefined;
           if (row.type === 'project' && globalMonthIdx >= 0) {
             const po = document.getElementById('provenance-overlay');
             if (po && !po.hidden && po.classList.contains('provenance-overlay--hover')) {
               closeProvenanceOverlay();
             }
-            const pointerEvent = (ev && ev.event) || undefined;
             showMatrixProjectTooltip({
               month: xKey,
               project: row.project,
@@ -2530,7 +2720,7 @@
               gridHint: { m: localMonthIdx, r: idx }
             });
           } else if (row.type === 'activity' && localMonthIdx >= 0) {
-            openProvenanceOverlay(xKey, row.project, row.label, pt.bbox, chart.getBoundingClientRect());
+            openProvenanceOverlay(xKey, row.project, row.label, pt.bbox, chart.getBoundingClientRect(), pointerEvent);
           }
           const json = chart._matrixHoverBaseShapesJson;
           if (!json) return;
@@ -2605,11 +2795,7 @@
           const fullIdx = visibleStartIdx + i;
           const hit = Boolean(mileSeries[row][fullIdx]);
           zr.push(hit ? (ri + 0.5) / Math.max(1, nMile) : null);
-          tr.push(
-            hit
-              ? `<b>${escapeHtml(visibleMonths[i])}</b><br>${escapeHtml(row)}<br>${blurb}`
-              : ''
-          );
+          tr.push(hit ? blurb : '');
         }
         z.push(zr);
         text.push(tr);
@@ -2693,13 +2879,33 @@
         mileChart.on('plotly_hover', (ev) => {
           const pt = ev.points && ev.points[0];
           if (!pt || pt.x == null || pt.y == null) return;
-          cancelMatrixHoverExit();
           const xKey = typeof pt.x === 'string' ? pt.x : String(pt.x);
           const yKey = typeof pt.y === 'string' ? pt.y : String(pt.y);
           const rowIdx = mileRows.indexOf(yKey);
           if (rowIdx < 0) return;
+          const heavyHtml = pt.text != null ? String(pt.text).trim() : '';
+          if (!heavyHtml) return;
+          cancelMatrixHoverExit();
+          const provRoot = document.getElementById('provenance-overlay');
+          if (provRoot && !provRoot.hidden && provRoot.classList.contains('provenance-overlay--hover')) {
+            closeProvenanceOverlay();
+          }
           const bandKey = `${rowIdx}\0${xKey}`;
-          if (mileChart._milestoneHoverBandKey === bandKey) return;
+          const pointerEvent = (ev && ev.event) || undefined;
+          const localMonthIdx = visibleMonths.indexOf(xKey);
+          const tipPayload = {
+            month: xKey,
+            rowLabel: yKey,
+            heavyHtml,
+            bbox: pt.bbox,
+            gd: mileChart,
+            pointerEvent,
+            gridHint: localMonthIdx >= 0 ? { m: localMonthIdx, r: rowIdx } : undefined
+          };
+          if (mileChart._milestoneHoverBandKey === bandKey) {
+            showMilestoneHeatmapTooltip(tipPayload);
+            return;
+          }
           mileChart._milestoneHoverBandKey = bandKey;
           let base;
           try {
@@ -2750,6 +2956,7 @@
               kids[i].classList.toggle('hover-row-affordance', i === rowIdx);
             }
           }
+          showMilestoneHeatmapTooltip(tipPayload);
         });
         mileChart.on('plotly_unhover', () => {
           const mj = mileChart._milestoneBaseShapesJson;
@@ -2771,6 +2978,7 @@
             }
             mch._matrixHoverBandKey = '';
           }
+          scheduleMatrixHoverExit();
         });
       });
     }
