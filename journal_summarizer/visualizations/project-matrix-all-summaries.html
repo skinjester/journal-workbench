@@ -39,7 +39,7 @@
     /* Sticky provenance column needs a non-clipping ancestor (see #provenance-inspector). */
     .panel.chart-panel {
       overflow: visible;
-      /* Shared by matrix label grid + Deliverables heading offset (see renderMatrix --matrix-plot-margin-top). */
+      /* Deliverables milestone label column: top padding vs Plotly margin.t (see renderMatrix --matrix-plot-margin-top). */
       --matrix-heading-stack: calc(1.2 * clamp(1.05rem, 1.6vw, 1.2rem) + var(--sp-1));
     }
     .meta-panel h2, .detail-panel h2 {
@@ -54,28 +54,17 @@
     .matrix-shell, .milestone-shell { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 0; }
     .matrix-shell { align-items: start; }
     .milestone-shell { align-items: stretch; }
-    /*
-     * Title sits in the label column (same left edge as before). Spacing under the title matches
-     * Deliverables (margin-bottom var(--sp-1)); only the label grid gets top padding so row 1 still
-     * lines up with the heatmap (Plotly margin.t minus the space consumed by the heading stack).
-     */
-    .fixed-labels.fixed-labels--matrix-headed {
+    /* Heading sits above the grid + horizontal scroll so the chart never runs under the title. */
+    .matrix-map-section {
+      flex: 1 1 auto;
+      min-width: 0;
       display: flex;
       flex-direction: column;
       align-items: stretch;
-      padding: 0 12px 52px 0;
     }
-    .fixed-labels.fixed-labels--matrix-headed > .chart-panel-section-heading {
+    .matrix-map-section > .chart-panel-section-heading {
       margin: 0 0 var(--sp-1);
       flex-shrink: 0;
-      position: sticky;
-      top: 0;
-      z-index: 5;
-      background: var(--bg);
-      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06);
-    }
-    .fixed-labels.fixed-labels--matrix-headed > .fixed-labels-grid {
-      padding-top: max(0px, calc(var(--matrix-plot-margin-top, 82px) - var(--matrix-heading-stack)));
     }
     .matrix-chart-stack {
       display: flex;
@@ -97,7 +86,7 @@
       margin-bottom: var(--sp-1);
       gap: 0;
     }
-    .matrix-workbench-row > .matrix-shell {
+    .matrix-workbench-row > .matrix-map-section {
       margin-bottom: 0;
       flex: 1 1 auto;
       min-width: 0;
@@ -293,7 +282,10 @@
       pointer-events: none;
       display: none;
       opacity: 1;
-      transition: opacity 0.2s ease;
+      transition: opacity 0.18s ease;
+    }
+    #chart-tooltip.chart-tooltip.chart-tooltip--muted {
+      opacity: 0;
     }
     #chart-tooltip.chart-tooltip.chart-tooltip--leaving {
       opacity: 0;
@@ -357,6 +349,25 @@
     #chart-tooltip .chart-tooltip__body strong { color: #ffffff; font-weight: 700; }
     #chart-tooltip .chart-tooltip__body .tt-section-viz { margin-top: var(--sp-0-5); }
     #chart-tooltip .chart-tooltip__body .tt-section-empty { margin: var(--sp-1) 0 0; font-size: var(--text-xs); color: #9dabbc; font-style: italic; }
+    #chart-tooltip .chart-tooltip__heavy.chart-tooltip__body {
+      transition: opacity 0.16s ease;
+      min-height: 1.2em;
+    }
+    #chart-tooltip .chart-tooltip__heavy.chart-tooltip__body.chart-tooltip__heavy--muted {
+      opacity: 0;
+    }
+    #chart-tooltip .chart-tooltip__heavy-placeholder {
+      margin: 0;
+      font-size: var(--text-xs);
+      line-height: var(--lh-snug);
+      color: #8a9bab;
+      font-style: italic;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #chart-tooltip .chart-tooltip__heavy.chart-tooltip__body {
+        transition: none;
+      }
+    }
     #chart-tooltip .tt-life-row--explore .tt-bar-fill { background: linear-gradient(90deg, #4a5c6e, #6b7d8f); }
     #chart-tooltip .tt-life-row--design .tt-bar-fill { background: linear-gradient(90deg, #254d8f, #316dca); }
     #chart-tooltip .tt-life-row--prototype .tt-bar-fill { background: linear-gradient(90deg, #5e3fa8, #8957e5); }
@@ -426,7 +437,7 @@
       .matrix-workbench-row:has(#provenance-inspector:not([hidden])) {
         flex-direction: column;
       }
-      .matrix-workbench-row:has(#provenance-inspector:not([hidden])) > .matrix-shell {
+      .matrix-workbench-row:has(#provenance-inspector:not([hidden])) > .matrix-map-section {
         flex: 0 1 auto;
       }
       .matrix-workbench-row:has(#provenance-inspector:not([hidden])) #provenance-inspector {
@@ -755,13 +766,15 @@
   <div class="wrap">
     <section class="panel chart-panel">
       <div class="matrix-workbench-row" id="matrix-workbench-row">
-        <div class="matrix-shell timeline-pane">
-          <div class="fixed-labels fixed-labels--matrix-headed">
-            <h3 class="chart-panel-section-heading">Project Activity Map</h3>
-            <div class="fixed-labels-grid" id="matrix-labels"></div>
-          </div>
-          <div class="matrix-chart-stack">
-            <div class="scroll-area" id="matrix-scroll"><div id="matrix-chart"></div></div>
+        <div class="matrix-map-section">
+          <h3 class="chart-panel-section-heading">Project Activity Map</h3>
+          <div class="matrix-shell timeline-pane">
+            <div class="fixed-labels">
+              <div class="fixed-labels-grid" id="matrix-labels"></div>
+            </div>
+            <div class="matrix-chart-stack">
+              <div class="scroll-area" id="matrix-scroll"><div id="matrix-chart"></div></div>
+            </div>
           </div>
         </div>
         <aside id="provenance-inspector" class="provenance-inspector" hidden aria-hidden="true" aria-labelledby="prov-inspector-title">
@@ -874,14 +887,30 @@
       window.location.href = url.toString();
     }
 
-    /** Same anchor + clamp rules as showChartTooltip — large “tooltip” beside the cell. */
-    function computeProvenancePosition(panelW, panelH, bbox, fallbackRect) {
+    /**
+     * Plotly sets hover bbox using trace pixels + gd.offsetTop/Left (offsetParent space), not viewport.
+     * Scroll inside .matrix-shell does not change offsetTop, so fixed UI must remap via getBoundingClientRect.
+     */
+    function plotlyHoverBboxToViewport(gd, bbox) {
+      if (!gd || !bbox) return null;
+      const r = gd.getBoundingClientRect();
+      return {
+        x0: r.left + bbox.x0 - gd.offsetLeft,
+        x1: r.left + bbox.x1 - gd.offsetLeft,
+        y0: r.top + bbox.y0 - gd.offsetTop,
+        y1: r.top + bbox.y1 - gd.offsetTop
+      };
+    }
+
+    /** Same anchor + clamp rules as matrix project tooltip — large “tooltip” beside the cell. */
+    function computeProvenancePosition(panelW, panelH, bbox, fallbackRect, gd) {
       const pad = 12;
-      const rect = fallbackRect || { left: pad, right: pad, top: pad, bottom: pad };
-      let left = bbox ? (bbox.x1 - window.scrollX + 14) : (rect.right + 14);
-      let top = bbox ? (bbox.y0 - window.scrollY - 2) : rect.top;
+      const rect = fallbackRect || (gd && gd.getBoundingClientRect ? gd.getBoundingClientRect() : null) || { left: pad, right: pad, top: pad, bottom: pad };
+      const vb = bbox && gd ? plotlyHoverBboxToViewport(gd, bbox) : null;
+      let left = vb ? (vb.x1 + 14) : (rect.right + 14);
+      let top = vb ? (vb.y0 - 2) : rect.top;
       if (left + panelW > window.innerWidth - pad) {
-        left = bbox ? (bbox.x0 - window.scrollX - panelW - 14) : (window.innerWidth - panelW - pad);
+        left = vb ? (vb.x0 - panelW - 14) : (window.innerWidth - panelW - pad);
       }
       if (left < pad) left = pad;
       if (top + panelH > window.innerHeight - pad) {
@@ -891,11 +920,11 @@
       return { left: Math.round(left), top: Math.round(top) };
     }
 
-    function positionProvenanceDialog(bbox, fallbackRect) {
+    function positionProvenanceDialog(bbox, fallbackRect, gd) {
       const dialog = document.querySelector('#provenance-overlay .provenance-overlay__dialog');
       if (!dialog) return;
       const r = dialog.getBoundingClientRect();
-      const pos = computeProvenancePosition(r.width, r.height, bbox, fallbackRect);
+      const pos = computeProvenancePosition(r.width, r.height, bbox, fallbackRect, gd);
       dialog.style.left = `${pos.left}px`;
       dialog.style.top = `${pos.top}px`;
     }
@@ -1058,7 +1087,7 @@
         root.classList.contains('provenance-overlay--hover') &&
         chart._provenanceOpenKey === cellKey
       ) {
-        requestAnimationFrame(() => positionProvenanceDialog(bbox, fallbackRect));
+        requestAnimationFrame(() => positionProvenanceDialog(bbox, fallbackRect, chart));
         return;
       }
       if (typeof marked !== 'undefined') {
@@ -1080,7 +1109,7 @@
         metaEl: document.getElementById('prov-overlay-meta'),
         bodyEl: document.getElementById('prov-overlay-body'),
       });
-      requestAnimationFrame(() => positionProvenanceDialog(bbox, fallbackRect));
+      requestAnimationFrame(() => positionProvenanceDialog(bbox, fallbackRect, chart));
     }
 
     function openProvenanceInspector(month, project, activity) {
@@ -1531,7 +1560,7 @@
       return [`<b>${e(month)}</b>`, `<b>${e(project)}</b>`, e(q)].join('<br>');
     }
 
-    function buildProjectRowTooltipHtml(month, project, globalMonthIdx) {
+    function buildProjectRowTooltipHeavyHtml(project, globalMonthIdx) {
       const viz = buildLifecycleViz(project, globalMonthIdx);
       const monthSummaryHtml = (data.monthClosingHtml && data.monthClosingHtml[globalMonthIdx]) || '';
       const closingPlain = stripHtmlToText(monthSummaryHtml);
@@ -1541,19 +1570,252 @@
       const fallbackDesc = !closingPlain && (data.descriptions[project] || '')
         ? `<p class="tt-closing">${escapeHtml(data.descriptions[project])}</p>`
         : '';
+      return `${viz}${closingBlock || fallbackDesc}`;
+    }
+
+    function buildProjectRowTooltipShell(month, project, heavyInnerHtml) {
       return `
         <div class="chart-tooltip__kicker">${escapeHtml(month)}</div>
         <div class="chart-tooltip__title">${escapeHtml(project)}</div>
-        <div class="chart-tooltip__body">
-          ${viz}
-          ${closingBlock || fallbackDesc}
-        </div>
+        <div class="chart-tooltip__heavy chart-tooltip__body">${heavyInnerHtml}</div>
       `;
+    }
+
+    function buildProjectRowTooltipHtml(month, project, globalMonthIdx) {
+      return buildProjectRowTooltipShell(month, project, buildProjectRowTooltipHeavyHtml(project, globalMonthIdx));
+    }
+
+    const TOOLTIP_DWELL_MS = 160;
+    const TOOLTIP_ADJ_CELL_DWELL_EXTRA_MS = 56;
+    const TOOLTIP_V_MAX_PX_PER_MS = 0.85;
+    const TOOLTIP_STILL_MS = 90;
+    const TOOLTIP_HEAVY_RETRY_MS = 48;
+    const TOOLTIP_HEAVY_PLACEHOLDER =
+      '<p class="chart-tooltip__heavy-placeholder">Hold steady to see lifecycle and month notes.</p>';
+
+    let chartTooltipMotionListenerOn = false;
+
+    function onChartTooltipGlobalPointerMove(e) {
+      const tt = chartTooltip;
+      if (!tt || tt.style.display !== 'block' || !tt._matrixTooltipMotion) return;
+      const now = performance.now();
+      const lx = tt._ptrX;
+      const ly = tt._ptrY;
+      const lt = tt._ptrT;
+      if (lx != null && lt != null && now - lt > 0.4) {
+        const d = Math.hypot(e.clientX - lx, e.clientY - ly);
+        tt._lastPointerSpeed = d / Math.max(now - lt, 0.5);
+      }
+      tt._ptrX = e.clientX;
+      tt._ptrY = e.clientY;
+      tt._ptrT = now;
+    }
+
+    function ensureChartTooltipMotionListener() {
+      if (chartTooltipMotionListenerOn) return;
+      chartTooltipMotionListenerOn = true;
+      document.addEventListener('mousemove', onChartTooltipGlobalPointerMove, { passive: true });
+    }
+
+    function removeChartTooltipMotionListener() {
+      if (!chartTooltipMotionListenerOn) return;
+      chartTooltipMotionListenerOn = false;
+      document.removeEventListener('mousemove', onChartTooltipGlobalPointerMove);
+    }
+
+    function clearMatrixProjectHeavyTimer() {
+      if (chartTooltip && chartTooltip._heavyCommitTimer) {
+        window.clearTimeout(chartTooltip._heavyCommitTimer);
+        chartTooltip._heavyCommitTimer = null;
+      }
+    }
+
+    function resetChartTooltipPointerState(tt) {
+      if (!tt) return;
+      tt._ptrX = undefined;
+      tt._ptrY = undefined;
+      tt._ptrT = undefined;
+      tt._lastPointerSpeed = 0;
+    }
+
+    function recordChartTooltipPointerFromEvent(tt, ev) {
+      if (!tt || !ev || ev.clientX == null || ev.clientY == null) return;
+      const now = performance.now();
+      const lx = tt._ptrX;
+      const ly = tt._ptrY;
+      const lt = tt._ptrT;
+      if (lx != null && lt != null && now - lt > 0.4) {
+        const d = Math.hypot(ev.clientX - lx, ev.clientY - ly);
+        tt._lastPointerSpeed = d / Math.max(now - lt, 0.5);
+      }
+      tt._ptrX = ev.clientX;
+      tt._ptrY = ev.clientY;
+      tt._ptrT = now;
+    }
+
+    function effectiveTooltipPointerSpeed(tt) {
+      const now = performance.now();
+      if (!tt || tt._ptrT == null) return 0;
+      if (now - tt._ptrT > TOOLTIP_STILL_MS) return 0;
+      return Number(tt._lastPointerSpeed) || 0;
+    }
+
+    function applyMatrixProjectHeavyContent(html, useBodyFade) {
+      const tt = chartTooltip;
+      if (!tt) return;
+      const heavy = tt.querySelector('.chart-tooltip__heavy');
+      if (!heavy) return;
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      heavy.classList.remove('chart-tooltip__heavy--pending');
+      if (!useBodyFade || reducedMotion) {
+        heavy.classList.remove('chart-tooltip__heavy--muted');
+        heavy.innerHTML = html;
+        return;
+      }
+      heavy.classList.add('chart-tooltip__heavy--muted');
+      requestAnimationFrame(() => {
+        heavy.innerHTML = html;
+        requestAnimationFrame(() => {
+          heavy.classList.remove('chart-tooltip__heavy--muted');
+        });
+      });
+    }
+
+    function tryCommitMatrixProjectHeavy(expectedKey) {
+      const tt = chartTooltip;
+      if (!tt || tt.style.display !== 'block') return;
+      if (tt._pendingHeavyCellKey !== expectedKey) return;
+      const v = effectiveTooltipPointerSpeed(tt);
+      if (v > TOOLTIP_V_MAX_PX_PER_MS) {
+        tt._heavyCommitTimer = window.setTimeout(() => tryCommitMatrixProjectHeavy(expectedKey), TOOLTIP_HEAVY_RETRY_MS);
+        return;
+      }
+      tt._heavyCommitTimer = null;
+      applyMatrixProjectHeavyContent(tt._pendingHeavyHtml, true);
+    }
+
+    function scheduleMatrixProjectHeavyCommit(cellKey, heavyHtml, gridHint) {
+      const tt = chartTooltip;
+      if (!tt) return;
+      clearMatrixProjectHeavyTimer();
+      tt._pendingHeavyCellKey = cellKey;
+      tt._pendingHeavyHtml = heavyHtml;
+      let dwell = TOOLTIP_DWELL_MS;
+      if (gridHint && tt._lastMatrixGridHint) {
+        const dist =
+          Math.abs(gridHint.m - tt._lastMatrixGridHint.m) + Math.abs(gridHint.r - tt._lastMatrixGridHint.r);
+        if (dist <= 1) dwell += TOOLTIP_ADJ_CELL_DWELL_EXTRA_MS;
+      }
+      if (gridHint) tt._lastMatrixGridHint = gridHint;
+      tt._heavyCommitTimer = window.setTimeout(() => tryCommitMatrixProjectHeavy(cellKey), dwell);
+    }
+
+    /**
+     * Project-row matrix tooltip: light chrome updates every hover; heavy body after dwell + low pointer speed.
+     */
+    function showMatrixProjectTooltip(payload) {
+      const { month, project, globalMonthIdx, bbox, gd, pointerEvent, gridHint } = payload;
+      if (!chartTooltip || month == null || !project || globalMonthIdx < 0) return;
+      chartTooltip.classList.remove('chart-tooltip--leaving');
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const cellKey = `${month}\0${project}\0${globalMonthIdx}`;
+      const heavyHtml = buildProjectRowTooltipHeavyHtml(project, globalMonthIdx);
+
+      const applyLayout = () => {
+        const pad = 12;
+        const chartRect = gd && gd.getBoundingClientRect ? gd.getBoundingClientRect() : null;
+        const vb = bbox && gd ? plotlyHoverBboxToViewport(gd, bbox) : null;
+        let left = vb ? (vb.x1 + 14) : (chartRect ? chartRect.right + 14 : pad);
+        let top = vb ? (vb.y0 - 2) : (chartRect ? chartRect.top : pad);
+        const tipRect = chartTooltip.getBoundingClientRect();
+        if (left + tipRect.width > window.innerWidth - pad) {
+          left = vb ? (vb.x0 - tipRect.width - 14) : (window.innerWidth - tipRect.width - pad);
+        }
+        if (left < pad) left = pad;
+        if (top + tipRect.height > window.innerHeight - pad) {
+          top = window.innerHeight - tipRect.height - pad;
+        }
+        if (top < pad) top = pad;
+        chartTooltip.style.left = `${Math.round(left)}px`;
+        chartTooltip.style.top = `${Math.round(top)}px`;
+      };
+
+      const wasVisible = chartTooltip.style.display === 'block' && chartTooltip.querySelector('.chart-tooltip__kicker');
+      const prevCellKey = chartTooltip._matrixTooltipCellKey;
+      const sameCell = wasVisible && prevCellKey === cellKey;
+
+      if (reducedMotion) {
+        clearMatrixProjectHeavyTimer();
+        chartTooltip.innerHTML = buildProjectRowTooltipShell(month, project, heavyHtml);
+        chartTooltip.style.display = 'block';
+        chartTooltip.setAttribute('aria-hidden', 'false');
+        chartTooltip._matrixTooltipCellKey = cellKey;
+        applyLayout();
+        return;
+      }
+
+      chartTooltip._matrixTooltipMotion = true;
+      ensureChartTooltipMotionListener();
+      recordChartTooltipPointerFromEvent(chartTooltip, pointerEvent);
+
+      if (sameCell) {
+        applyLayout();
+        return;
+      }
+
+      if (!wasVisible) {
+        if (chartTooltip._tooltipSwapOnOut) {
+          chartTooltip.removeEventListener('transitionend', chartTooltip._tooltipSwapOnOut);
+          chartTooltip._tooltipSwapOnOut = null;
+        }
+        chartTooltip.classList.remove('chart-tooltip--muted');
+        resetChartTooltipPointerState(chartTooltip);
+        chartTooltip.innerHTML = buildProjectRowTooltipShell(month, project, TOOLTIP_HEAVY_PLACEHOLDER);
+        const heavyEl = chartTooltip.querySelector('.chart-tooltip__heavy');
+        if (heavyEl) heavyEl.classList.add('chart-tooltip__heavy--pending');
+        chartTooltip.style.display = 'block';
+        chartTooltip.setAttribute('aria-hidden', 'false');
+        chartTooltip.classList.add('chart-tooltip--muted');
+        chartTooltip._matrixTooltipCellKey = cellKey;
+        applyLayout();
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            chartTooltip.classList.remove('chart-tooltip--muted');
+          });
+        });
+        scheduleMatrixProjectHeavyCommit(cellKey, heavyHtml, gridHint);
+        return;
+      }
+
+      clearMatrixProjectHeavyTimer();
+      const kicker = chartTooltip.querySelector('.chart-tooltip__kicker');
+      const title = chartTooltip.querySelector('.chart-tooltip__title');
+      const heavy = chartTooltip.querySelector('.chart-tooltip__heavy');
+      if (kicker) kicker.textContent = month;
+      if (title) title.textContent = project;
+      if (heavy) {
+        heavy.classList.add('chart-tooltip__heavy--pending');
+        heavy.classList.remove('chart-tooltip__heavy--muted');
+        heavy.innerHTML = TOOLTIP_HEAVY_PLACEHOLDER;
+      }
+      chartTooltip._matrixTooltipCellKey = cellKey;
+      applyLayout();
+      scheduleMatrixProjectHeavyCommit(cellKey, heavyHtml, gridHint);
     }
 
     function hideChartTooltip() {
       if (!chartTooltip) return;
-      chartTooltip.classList.remove('chart-tooltip--leaving');
+      if (chartTooltip._tooltipSwapOnOut) {
+        chartTooltip.removeEventListener('transitionend', chartTooltip._tooltipSwapOnOut);
+        chartTooltip._tooltipSwapOnOut = null;
+      }
+      clearMatrixProjectHeavyTimer();
+      removeChartTooltipMotionListener();
+      chartTooltip._matrixTooltipMotion = false;
+      chartTooltip._matrixTooltipCellKey = undefined;
+      chartTooltip._lastMatrixGridHint = undefined;
+      chartTooltip.classList.remove('chart-tooltip--leaving', 'chart-tooltip--muted');
+      chartTooltip._swapToken = (chartTooltip._swapToken || 0) + 1;
       chartTooltip.style.display = 'none';
       chartTooltip.innerHTML = '';
       chartTooltip.setAttribute('aria-hidden', 'true');
@@ -1587,32 +1849,6 @@
       window.setTimeout(finish, 400);
     }
 
-    function showChartTooltip(html, bbox, fallbackRect) {
-      if (!chartTooltip || !html) return;
-      chartTooltip.classList.remove('chart-tooltip--leaving');
-      chartTooltip.innerHTML = html;
-      chartTooltip.style.display = 'block';
-      chartTooltip.setAttribute('aria-hidden', 'false');
-
-      const pad = 12;
-      const rect = fallbackRect || { left: pad, right: pad, top: pad, bottom: pad };
-      let left = bbox ? (bbox.x1 - window.scrollX + 14) : (rect.right + 14);
-      let top = bbox ? (bbox.y0 - window.scrollY - 2) : rect.top;
-
-      const tipRect = chartTooltip.getBoundingClientRect();
-      if (left + tipRect.width > window.innerWidth - pad) {
-        left = bbox ? (bbox.x0 - window.scrollX - tipRect.width - 14) : (window.innerWidth - tipRect.width - pad);
-      }
-      if (left < pad) left = pad;
-      if (top + tipRect.height > window.innerHeight - pad) {
-        top = window.innerHeight - tipRect.height - pad;
-      }
-      if (top < pad) top = pad;
-
-      chartTooltip.style.left = `${Math.round(left)}px`;
-      chartTooltip.style.top = `${Math.round(top)}px`;
-    }
-
     /** Fallback when activityTopRows missing: turn "Top activities: a 1, b 2" into stacked lines. */
     function hintStringToStackedLines(hint) {
       if (!hint) return '';
@@ -1634,6 +1870,12 @@
 
     /** Plotly heatmap brick gaps (px): xgap = gutters between months; ygap = gutters between rows. */
     const matrixHeatmapXGap = 2;
+    /** Narrow mode (min-width floor / horizontal scroll): tighter x gap so 1px cells stay readable. */
+    const MATRIX_HEATMAP_X_GAP_MIN = 1;
+    /** Minimum brick width (px) when enforcing full-range min plot width. */
+    const MATRIX_CELL_MIN_PX = 1;
+    /** Hide matrix x-axis tick labels when columns are still too narrow after the floor. */
+    const MATRIX_PX_PER_COL_HIDE_TICKS = 8;
     const matrixHeatmapYGap = 4;
 
     const fullMonthCount = data.months.length;
@@ -1863,6 +2105,13 @@
     /** Shared L/R inset with Deliverables heatmap; must match buildMatrixXAxisTickConfig inner width math. */
     const MATRIX_PLOT_MARGIN_LR = { l: 18, r: 18 };
 
+    /** Min layout width so each month column can be at least MATRIX_CELL_MIN_PX with xGap between bricks. */
+    function matrixMinPlotWidthForFullRange(monthCount, marginLR, xGap) {
+      const n = Math.max(1, monthCount);
+      const inner = n * MATRIX_CELL_MIN_PX + Math.max(0, n - 1) * xGap;
+      return Math.ceil(inner + marginLR.l + marginLR.r);
+    }
+
     function getMatrixChartContainerWidth() {
       const el = document.getElementById('matrix-scroll');
       if (el && el.clientWidth > 0) return el.clientWidth;
@@ -1897,21 +2146,19 @@
       if (!projectName || typeof projectName !== 'string') return;
       requestAnimationFrame(() => {
         const pane = document.querySelector('.matrix-shell.timeline-pane');
-        const heading = pane?.querySelector('.fixed-labels--matrix-headed > .chart-panel-section-heading');
         let btn;
         try {
           btn = pane?.querySelector(`button[data-project="${CSS.escape(projectName)}"]`);
         } catch (e) {
           return;
         }
-        if (!pane || !heading || !btn) return;
+        if (!pane || !btn) return;
         const tol = 3;
-        const hRect = heading.getBoundingClientRect();
         const btnRect = btn.getBoundingClientRect();
         const paneRect = pane.getBoundingClientRect();
-        /* Already fully visible below sticky title and above pane bottom — avoid jumpy scroll. */
-        if (btnRect.top >= hRect.bottom - tol && btnRect.bottom <= paneRect.bottom + tol) return;
-        const delta = btnRect.top - hRect.bottom - 1;
+        /* Title is above the scroll pane; keep the row inside the visible viewport. */
+        if (btnRect.top >= paneRect.top - tol && btnRect.bottom <= paneRect.bottom + tol) return;
+        const delta = btnRect.top - paneRect.top - 1;
         const maxScroll = Math.max(0, pane.scrollHeight - pane.clientHeight);
         pane.scrollTop = Math.max(0, Math.min(maxScroll, pane.scrollTop + delta));
       });
@@ -1933,11 +2180,23 @@
       const missingMonths = fullMonthCount - visibleCount;
       const smoothWindowMonths = 3; // tweak: larger = gentler transition
       const t = Math.max(0, Math.min(1, (smoothWindowMonths - missingMonths) / smoothWindowMonths));
-      // Full month range: always fit the scroll viewport so the entire timeline is visible without horizontal scroll.
+      const minPlotWFull =
+        missingMonths === 0
+          ? matrixMinPlotWidthForFullRange(visibleCount, MATRIX_PLOT_MARGIN_LR, MATRIX_HEATMAP_X_GAP_MIN)
+          : 0;
       const plotWidth =
         missingMonths === 0
-          ? Math.max(1, Math.round(containerWidth))
+          ? Math.max(1, Math.round(Math.max(containerWidth, minPlotWFull)))
           : Math.round(data.heatWidth * (1 - t) + containerWidth * t);
+      const matrixUsesNarrowXGap =
+        missingMonths === 0 &&
+        (Math.round(plotWidth) > Math.round(containerWidth) || plotWidth <= minPlotWFull + 1);
+      const matrixXGapTrace = matrixUsesNarrowXGap ? MATRIX_HEATMAP_X_GAP_MIN : matrixHeatmapXGap;
+      const matrixInnerW = Math.max(1, plotWidth - MATRIX_PLOT_MARGIN_LR.l - MATRIX_PLOT_MARGIN_LR.r);
+      const matrixPxPerCol = matrixInnerW / Math.max(1, visibleCount);
+      /* Min-width + horizontal scroll: pxPerCol can stay small; still show tiered ticks. Hide only when squeezed into viewport without that mode. */
+      const hideMatrixXTickLabels =
+        !matrixUsesNarrowXGap && matrixPxPerCol < MATRIX_PX_PER_COL_HIDE_TICKS;
       const projectZ = expandedRows.map(row =>
         row.type === 'project' ? row.values : Array(visibleCount).fill(null)
       );
@@ -1959,7 +2218,13 @@
 
       const matrixMarginBottom = 52;
       const xTickCfg = buildMatrixXAxisTickConfig(visibleMonths, plotWidth, MATRIX_PLOT_MARGIN_LR);
-      const matrixMarginTop = xTickCfg.marginTop;
+      const matrixXTickText =
+        xTickCfg.ticktext.length === visibleMonths.length
+          ? xTickCfg.ticktext
+          : visibleMonths.map((_, i) => xTickCfg.ticktext[i] ?? '');
+      const matrixMarginTop = hideMatrixXTickLabels
+        ? Math.min(xTickCfg.marginTop, 40)
+        : xTickCfg.marginTop;
       const chartPanel = document.querySelector('.panel.chart-panel');
       chartPanel?.style.setProperty('--matrix-plot-margin-top', `${matrixMarginTop}px`);
       if (chartPanel) {
@@ -2007,7 +2272,7 @@
         showscale: false,
         text: activityText,
         hoverinfo: 'none',
-        xgap: matrixHeatmapXGap,
+        xgap: matrixXGapTrace,
         ygap: matrixHeatmapYGap
       }, {
         type: 'heatmap',
@@ -2020,7 +2285,7 @@
         showscale: false,
         text: projectText,
         hoverinfo: 'none',
-        xgap: matrixHeatmapXGap,
+        xgap: matrixXGapTrace,
         ygap: matrixHeatmapYGap
       }], {
         width: plotWidth,
@@ -2041,10 +2306,13 @@
           type: 'category',
           categoryorder: 'array',
           categoryarray: visibleMonths,
+          tickmode: 'array',
+          tickvals: visibleMonths,
+          ticktext: matrixXTickText,
           side: 'top',
           tickfont: xTickCfg.tickfont,
           tickangle: xTickCfg.tickangle,
-          showticklabels: true,
+          showticklabels: !hideMatrixXTickLabels,
           showgrid: false,
           ticks: '',
           ticklen: 0,
@@ -2107,18 +2375,23 @@
           const row = rows[idx];
           const localMonthIdx = visibleMonths.indexOf(xKey);
           const globalMonthIdx = localMonthIdx >= 0 ? (visibleStartIdx + localMonthIdx) : -1;
-          let tooltipHtml = '';
           if (row.type === 'project' && globalMonthIdx >= 0) {
             const po = document.getElementById('provenance-overlay');
             if (po && !po.hidden && po.classList.contains('provenance-overlay--hover')) {
               closeProvenanceOverlay();
             }
-            tooltipHtml = buildProjectRowTooltipHtml(xKey, row.project, globalMonthIdx);
+            const pointerEvent = (ev && ev.event) || undefined;
+            showMatrixProjectTooltip({
+              month: xKey,
+              project: row.project,
+              globalMonthIdx,
+              bbox: pt.bbox,
+              gd: chart,
+              pointerEvent,
+              gridHint: { m: localMonthIdx, r: idx }
+            });
           } else if (row.type === 'activity' && localMonthIdx >= 0) {
             openProvenanceOverlay(xKey, row.project, row.label, pt.bbox, chart.getBoundingClientRect());
-          }
-          if (tooltipHtml) {
-            showChartTooltip(tooltipHtml, pt.bbox, chart.getBoundingClientRect());
           }
           const json = chart._matrixHoverBaseShapesJson;
           if (!json) return;
@@ -2163,30 +2436,23 @@
       });
 
       syncMilestoneScrollWidth();
-      renderMilestones(matrixMarginTop, matrixMarginBottom);
+      renderMilestones(matrixMarginTop, matrixMarginBottom, plotWidth, matrixXGapTrace);
       const scrollTarget = preserveScroll ? savedScrollLeft : 0;
       matrixScroll.scrollLeft = scrollTarget;
       if (milestoneScroll) milestoneScroll.scrollLeft = scrollTarget;
     }
 
-    function renderMilestones(matrixMarginTop, matrixMarginBottom) {
+    function renderMilestones(matrixMarginTop, matrixMarginBottom, plotWidth, heatmapXGap) {
       const visibleMonths = data.months.slice(visibleStartIdx, visibleEndIdx + 1);
       const visibleCount = visibleMonths.length;
       const nMile = mileRows.length;
       if (nMile === 0) return;
       const mileMt = Number(matrixMarginTop) || 82;
       const mileMb = Number(matrixMarginBottom) || 52;
-      const containerWidth = getMatrixChartContainerWidth();
+      const pw = Math.max(1, Math.round(Number(plotWidth) || 0));
+      const xg = Number.isFinite(heatmapXGap) && heatmapXGap >= 0 ? heatmapXGap : matrixHeatmapXGap;
 
-      const missingMonths = fullMonthCount - visibleCount;
-      const smoothWindowMonths = 3;
-      const t = Math.max(0, Math.min(1, (smoothWindowMonths - missingMonths) / smoothWindowMonths));
-      const plotWidth =
-        missingMonths === 0
-          ? Math.max(1, Math.round(containerWidth))
-          : Math.round(data.heatWidth * (1 - t) + containerWidth * t);
-
-      const xTickCfgM = buildMatrixXAxisTickConfig(visibleMonths, plotWidth, MATRIX_PLOT_MARGIN_LR);
+      const xTickCfgM = buildMatrixXAxisTickConfig(visibleMonths, pw, MATRIX_PLOT_MARGIN_LR);
 
       const z = [];
       const text = [];
@@ -2230,13 +2496,13 @@
         zmax: 1,
         colorscale: buildMilestoneDeliverableColorscale(nMile),
         showscale: false,
-        xgap: matrixHeatmapXGap,
+        xgap: xg,
         ygap: matrixHeatmapYGap,
         zsmooth: false,
         text,
         hovertemplate: '%{text}<extra></extra>'
       }], {
-        width: plotWidth,
+        width: pw,
         height: Math.max(120, milestonePlotHeight),
         paper_bgcolor: 'rgba(0,0,0,0)',
         plot_bgcolor: 'rgba(0,0,0,0)',
