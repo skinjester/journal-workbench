@@ -23,7 +23,19 @@
     }
     .wrap { max-width: min(1320px, 100%); margin: 0 auto; padding: var(--sp-4) clamp(var(--sp-3), 4vw, var(--sp-5)) var(--sp-6); }
     .panel { border: 1px solid var(--line); border-radius: 18px; background: linear-gradient(180deg, rgba(255,255,255,0.018), rgba(255,255,255,0.01)); box-shadow: 0 20px 56px var(--shadow); overflow: hidden; }
-    .chart-panel { padding: clamp(var(--sp-3), 2.5vw, var(--sp-4)); margin-top: 0; }
+    .chart-panel {
+      padding: clamp(var(--sp-3), 2.5vw, var(--sp-4)); margin-top: 0;
+      /* JS sets --timeline-pane-max-height (~12 heatmap rows + margins); fallback until first renderMatrix. */
+      --timeline-pane-max-height: min(85vh, 520px);
+    }
+    .matrix-shell.timeline-pane,
+    .milestone-shell.timeline-pane {
+      max-height: var(--timeline-pane-max-height);
+      overflow-y: auto;
+      overflow-x: hidden;
+      overscroll-behavior-y: contain;
+      scrollbar-gutter: stable;
+    }
     /* Sticky provenance column needs a non-clipping ancestor (see #provenance-inspector). */
     .panel.chart-panel {
       overflow: visible;
@@ -56,6 +68,11 @@
     .fixed-labels.fixed-labels--matrix-headed > .chart-panel-section-heading {
       margin: 0 0 var(--sp-1);
       flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: var(--bg);
+      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06);
     }
     .fixed-labels.fixed-labels--matrix-headed > .fixed-labels-grid {
       padding-top: max(0px, calc(var(--matrix-plot-margin-top, 82px) - var(--matrix-heading-stack)));
@@ -738,7 +755,7 @@
   <div class="wrap">
     <section class="panel chart-panel">
       <div class="matrix-workbench-row" id="matrix-workbench-row">
-        <div class="matrix-shell">
+        <div class="matrix-shell timeline-pane">
           <div class="fixed-labels fixed-labels--matrix-headed">
             <h3 class="chart-panel-section-heading">Project Activity Map</h3>
             <div class="fixed-labels-grid" id="matrix-labels"></div>
@@ -763,7 +780,7 @@
         <h3 class="chart-panel-section-heading">Deliverables</h3>
         <div class="deliverables-workbench-row">
           <div class="deliverables-chart-slot">
-            <div class="milestone-shell">
+            <div class="milestone-shell timeline-pane">
               <div class="fixed-labels milestones"><div class="fixed-labels-grid" id="milestone-labels"></div></div>
               <div class="scroll-area" id="milestone-scroll"><div id="milestone-chart"></div></div>
             </div>
@@ -789,7 +806,7 @@
             <div class="legend-item"><span class="swatch" style="background: var(--track-1);"></span><span><strong>1</strong> trace signal</span></div>
             <div class="legend-item"><span class="swatch" style="background: var(--track-2);"></span><span><strong>2</strong> active secondary thread</span></div>
             <div class="legend-item"><span class="swatch" style="background: var(--track-3);"></span><span><strong>3</strong> peak for that project row (volume) or monthly winner (dominance)</span></div>
-            <div class="legend-item"><span class="swatch" style="background: var(--track-2);"></span><span>Expanded: closed project rows use a dim scale; activity rows use the same 0–3 intensity rules and blues as the main matrix</span></div>
+            <div class="legend-item"><span class="swatch" style="background: var(--track-2);"></span><span>Expanded: other project rows use a dim scale; activity rows use the same 0–3 rules and blues; scroll inside the map viewport to move through rows</span></div>
             <div class="legend-item"><span class="swatch" style="background: linear-gradient(90deg,#f07178,#6cb6ff,#d2a8ff,#56d4dd,#80e2a2,#ffba68,#adb5bd,#d29aff);"></span><span>Deliverable timeline: one row per <code>deliv:*</code> type in monthly summaries; heatmap cells mark months with that tag (same layout as the project matrix; prototype/presentation/PDF rows also pick up legacy vocabulary when tags are absent)</span></div>
           </div>
         </section>
@@ -1191,7 +1208,7 @@
       operations: '#adb5bd',
       pdf: '#d29aff'
     };
-    /* Same blue hue: activity layer always uses full intensity; project aggregate layer is dim only when another project is expanded. */
+    /* Activity layer always full intensity; project aggregate uses dim blues when another row is expanded. */
     const intensityBluescale = [
       [0.0, '#0d1117'],
       [0.3333, '#2a4564'],
@@ -1204,7 +1221,6 @@
       [0.6666, '#1a4772'],
       [1.0, '#3d6f9e']
     ];
-
     /**
      * Row bands under heatmaps. Strong project-vs-activity contrast only when a project is expanded;
      * default (collapsed) uses a light uniform band so the matrix stays full brightness.
@@ -1610,6 +1626,8 @@
     }
 
     const rowHeight = 28;
+    /** Visible heatmap row bins in timeline panes before inner vertical scroll (~12). */
+    const TIMELINE_PANE_VISIBLE_ROW_COUNT = 12;
     const milestoneLabelsEl = document.getElementById('milestone-labels');
     milestoneLabelsEl.style.gridTemplateRows = `repeat(${mileRows.length}, ${rowHeight}px)`;
     milestoneLabelsEl.innerHTML = mileRows.map((row) => `<div class="fixed-label milestone">${escapeHtml(String(row))}</div>`).join('');
@@ -1917,7 +1935,13 @@
       const matrixMarginBottom = 52;
       const xTickCfg = buildMatrixXAxisTickConfig(visibleMonths, plotWidth, MATRIX_PLOT_MARGIN_LR);
       const matrixMarginTop = xTickCfg.marginTop;
-      document.querySelector('.panel.chart-panel')?.style.setProperty('--matrix-plot-margin-top', `${matrixMarginTop}px`);
+      const chartPanel = document.querySelector('.panel.chart-panel');
+      chartPanel?.style.setProperty('--matrix-plot-margin-top', `${matrixMarginTop}px`);
+      if (chartPanel) {
+        const rawPane = matrixMarginTop + TIMELINE_PANE_VISIBLE_ROW_COUNT * rowHeight + matrixMarginBottom;
+        const capPx = Math.floor(window.innerHeight * 0.85);
+        chartPanel.style.setProperty('--timeline-pane-max-height', `${Math.min(rawPane, capPx)}px`);
+      }
 
       if (selectedProject) {
         const projectIndex = expandedRows.findIndex(row => row.type === 'project' && row.project === selectedProject);
@@ -2334,8 +2358,22 @@
     linkScroll(matrixScroll, milestoneScroll);
     linkScroll(milestoneScroll, matrixScroll);
 
-    /** Vertical wheel over timeline strips scrolls the page (Plotly would otherwise eat wheel). Horizontal / shift-pan still scrolls the strip. */
-    (function bindTimelineWheelPageScroll() {
+    (function bindTimelinePaneHoverWheelCapture() {
+      document.querySelectorAll('.timeline-pane').forEach((pane) => {
+        pane.addEventListener('pointerenter', () => {
+          pane.dataset.timelineWheelCapture = '1';
+        });
+        pane.addEventListener('pointerleave', () => {
+          delete pane.dataset.timelineWheelCapture;
+        });
+        pane.addEventListener('pointercancel', () => {
+          delete pane.dataset.timelineWheelCapture;
+        });
+      });
+    })();
+
+    /** Vertical wheel over the heatmap scrolls the pane only while pointer is over that pane (Plotly capture). */
+    (function bindTimelinePaneWheelScroll() {
       const strips = [matrixScroll, milestoneScroll].filter(Boolean);
       const opts = { passive: false, capture: true };
       for (const strip of strips) {
@@ -2345,9 +2383,12 @@
           const absX = Math.abs(e.deltaX);
           const mostlyVertical = absY >= absX;
           if (!mostlyVertical) return;
-          if (e.shiftKey) return; /* shift+wheel: let browser map to horizontal strip scroll when applicable */
+          if (e.shiftKey) return;
+          const scrollPane = strip.closest('.timeline-pane');
+          if (!scrollPane || scrollPane.dataset.timelineWheelCapture !== '1') return;
+          if (scrollPane.scrollHeight <= scrollPane.clientHeight + 1) return;
           e.preventDefault();
-          window.scrollBy({ top: e.deltaY, behavior: 'auto' });
+          scrollPane.scrollTop += e.deltaY;
         }, opts);
       }
     })();
