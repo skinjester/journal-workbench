@@ -1905,8 +1905,12 @@
           return;
         }
         if (!pane || !heading || !btn) return;
+        const tol = 3;
         const hRect = heading.getBoundingClientRect();
         const btnRect = btn.getBoundingClientRect();
+        const paneRect = pane.getBoundingClientRect();
+        /* Already fully visible below sticky title and above pane bottom — avoid jumpy scroll. */
+        if (btnRect.top >= hRect.bottom - tol && btnRect.bottom <= paneRect.bottom + tol) return;
         const delta = btnRect.top - hRect.bottom - 1;
         const maxScroll = Math.max(0, pane.scrollHeight - pane.clientHeight);
         pane.scrollTop = Math.max(0, Math.min(maxScroll, pane.scrollTop + delta));
