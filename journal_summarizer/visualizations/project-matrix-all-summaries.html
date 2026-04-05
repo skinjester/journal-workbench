@@ -139,8 +139,12 @@
       padding: var(--matrix-plot-margin-top, 82px) 12px 52px 0;
       align-self: start;
     }
-    /* Padding mirrors Plotly milestone margin.t / margin.b so label rows match the figure box. */
-    .fixed-labels.milestones { padding-top: 4px; padding-bottom: 16px; align-self: stretch; }
+    /* First label row lines up with matrix grid (Deliverables h3 + margin consumes the heading stack like Project Map title). */
+    .fixed-labels.milestones {
+      padding-top: max(0px, calc(var(--matrix-plot-margin-top, 82px) - var(--matrix-heading-stack)));
+      padding-bottom: 52px;
+      align-self: stretch;
+    }
     /* Same vertical offset under the title as the matrix (sp-1 + label-grid top pad); milestone chart stays aligned. */
     .deliverables-section > .chart-panel-section-heading {
       margin-bottom: calc(var(--sp-1) + max(0px, calc(var(--matrix-plot-margin-top, 82px) - var(--matrix-heading-stack))));
@@ -930,7 +934,9 @@
         const el = document.elementFromPoint(cx, cy);
         if (el) {
           if (el.closest('#matrix-chart')) return true;
+          if (el.closest('#milestone-chart')) return true;
           if (el.closest('#matrix-labels')) return true;
+          if (el.closest('#milestone-labels')) return true;
           if (el.closest('#chart-tooltip')) return true;
           if (el.closest('.provenance-overlay__dialog')) return true;
           if (el.closest('#provenance-inspector')) return true;
@@ -984,6 +990,17 @@
         try {
           Plotly.relayout(ch, { shapes: JSON.parse(j) });
         } catch (e) { /* ignore */ }
+      }
+      const ms = document.getElementById('milestone-chart');
+      if (ms) {
+        ms._milestoneHoverColKey = '';
+        ms._milestoneHoverBandKey = '';
+        const mj = ms._milestoneBaseShapesJson;
+        if (mj) {
+          try {
+            Plotly.relayout(ms, { shapes: JSON.parse(mj) });
+          } catch (e) { /* ignore */ }
+        }
       }
     }
 
@@ -1292,7 +1309,7 @@
         layer: 'above'
       };
       const layout = gd && gd._fullLayout;
-      const months = gd && gd._matrixVisibleMonths;
+      const months = gd && (gd._milestoneVisibleMonths || gd._matrixVisibleMonths);
       let colX = matrixPaperColumnXFromHoverBbox(gd, hoverBbox);
       if (!colX && months && layout && layout._size) {
         const gs = layout._size;
@@ -1316,6 +1333,58 @@
         layer: 'above'
       };
       return [rowRect, colRect];
+    }
+
+    /** z in (0,1) band per row so discrete row colors map cleanly on one heatmap. */
+    function buildMilestoneDeliverableColorscale(nRows) {
+      if (nRows <= 0) return [[0, 'rgba(0,0,0,0)'], [1, 'rgba(0,0,0,0)']];
+      const scale = [];
+      for (let ri = 0; ri < nRows; ri++) {
+        const t0 = ri / nRows;
+        const t1 = (ri + 1) / nRows;
+        const c = mileColorsBySlug[mileSlugs[ri]] || '#9dabbc';
+        scale.push([t0, c]);
+        if (ri < nRows - 1) scale.push([t1 - 1e-9, c]);
+      }
+      scale.push([1, mileColorsBySlug[mileSlugs[nRows - 1]] || '#9dabbc']);
+      return scale;
+    }
+
+    function relayoutMilestoneColumnHighlight(matrixGd, monthKey, hoverBbox) {
+      const ms = document.getElementById('milestone-chart');
+      if (!ms || !ms._milestoneBaseShapesJson) return;
+      const months = matrixGd && matrixGd._matrixVisibleMonths;
+      let colX = matrixPaperColumnXFromHoverBbox(matrixGd, hoverBbox);
+      if (!colX && months && monthKey != null && matrixGd._fullLayout && matrixGd._fullLayout._size) {
+        const mi = months.indexOf(monthKey);
+        const ncols = Math.max(1, months.length);
+        if (mi >= 0) colX = { x0: mi / ncols, x1: (mi + 1) / ncols };
+      }
+      if (!colX) return;
+      const dedupe = `${monthKey}\0${colX.x0}\0${colX.x1}`;
+      if (ms._milestoneHoverColKey === dedupe) return;
+      ms._milestoneHoverColKey = dedupe;
+      let base;
+      try {
+        base = JSON.parse(ms._milestoneBaseShapesJson);
+      } catch (e) {
+        return;
+      }
+      const colRect = {
+        type: 'rect',
+        xref: 'paper',
+        yref: 'paper',
+        x0: colX.x0,
+        x1: colX.x1,
+        y0: 0,
+        y1: 1,
+        fillcolor: 'rgba(140, 195, 255, 0.12)',
+        line: { width: 0 },
+        layer: 'above'
+      };
+      try {
+        Plotly.relayout(ms, { shapes: base.concat([colRect]) });
+      } catch (e) { /* ignore */ }
     }
 
     /** Prefer the heatmap trace that has a real z at this cell (dual project/activity layers). */
@@ -2021,6 +2090,7 @@
           } catch (e) {
             chart._matrixHoverBandKey = '';
           }
+          relayoutMilestoneColumnHighlight(chart, xKey, pt.bbox);
         });
         chart.on('plotly_unhover', () => {
           scheduleMatrixHoverExit();
@@ -2042,89 +2112,106 @@
       });
 
       syncMilestoneScrollWidth();
-      renderMilestones();
+      renderMilestones(matrixMarginTop, matrixMarginBottom);
       const scrollTarget = preserveScroll ? savedScrollLeft : 0;
       matrixScroll.scrollLeft = scrollTarget;
       if (milestoneScroll) milestoneScroll.scrollLeft = scrollTarget;
     }
 
-    function renderMilestones() {
+    function renderMilestones(matrixMarginTop, matrixMarginBottom) {
       const visibleMonths = data.months.slice(visibleStartIdx, visibleEndIdx + 1);
       const visibleCount = visibleMonths.length;
-      const milestoneScrollEl = document.getElementById('milestone-scroll');
-      // Same viewport width as matrix (not full panel): scroll container is synced to #matrix-scroll in CSS/JS.
+      const nMile = mileRows.length;
+      if (nMile === 0) return;
+      const mileMt = Number(matrixMarginTop) || 82;
+      const mileMb = Number(matrixMarginBottom) || 52;
       const containerWidth = getMatrixChartContainerWidth();
 
       const missingMonths = fullMonthCount - visibleCount;
-      const smoothWindowMonths = 3; // keep consistent with matrix
+      const smoothWindowMonths = 3;
       const t = Math.max(0, Math.min(1, (smoothWindowMonths - missingMonths) / smoothWindowMonths));
       const plotWidth =
         missingMonths === 0
           ? Math.max(1, Math.round(containerWidth))
           : Math.round(data.heatWidth * (1 - t) + containerWidth * t);
 
-      const mileTraces = mileRows.map((row, rowIdx) => {
-        const slug = mileSlugs[rowIdx];
-        const color = mileColorsBySlug[slug] || '#9dabbc';
+      const xTickCfgM = buildMatrixXAxisTickConfig(visibleMonths, plotWidth, MATRIX_PLOT_MARGIN_LR);
+
+      const z = [];
+      const text = [];
+      for (let ri = 0; ri < nMile; ri++) {
+        const row = mileRows[ri];
+        const slug = mileSlugs[ri];
         const blurb = (data.delivMilestoneHover && data.delivMilestoneHover[slug]) || `Month includes a <code>deliv:${escapeHtml(slug)}</code> line in the summary.`;
-        const zRow = [];
-        const textRow = [];
+        const zr = [];
+        const tr = [];
         for (let i = 0; i < visibleCount; i++) {
           const fullIdx = visibleStartIdx + i;
           const hit = Boolean(mileSeries[row][fullIdx]);
-          zRow.push(hit ? 1 : null);
-          textRow.push(
+          zr.push(hit ? (ri + 0.5) / Math.max(1, nMile) : null);
+          tr.push(
             hit
               ? `<b>${escapeHtml(visibleMonths[i])}</b><br>${escapeHtml(row)}<br>${blurb}`
               : ''
           );
         }
-        return {
-          type: 'heatmap',
-          x: visibleMonths,
-          y: [row],
-          z: [zRow],
-          zmin: 0,
-          zmax: 1,
-          colorscale: [
-            [0, 'rgba(0,0,0,0)'],
-            [1, color]
-          ],
-          showscale: false,
-          xgap: matrixHeatmapXGap,
-          ygap: matrixHeatmapYGap,
-          zsmooth: false,
-          text: [textRow],
-          hovertemplate: '%{text}<extra></extra>'
-        };
-      });
+        z.push(zr);
+        text.push(tr);
+      }
 
-      const mileMt = 4;
-      const mileMb = 16;
-      const milestonePlotHeight = mileMt + mileMb + mileRows.length * rowHeight;
-      Plotly.newPlot('milestone-chart', mileTraces, {
+      const milestonePlotHeight = mileMt + mileMb + nMile * rowHeight;
+      const mileShapes = [...makeYearBandShapes(visibleMonths), ...makeMilestoneLaneShapes()];
+
+      const mileChartEl = document.getElementById('milestone-chart');
+      if (mileChartEl) {
+        mileChartEl._milestoneHoverColKey = '';
+        mileChartEl._milestoneHoverBandKey = '';
+        mileChartEl._milestoneVisibleMonths = visibleMonths;
+        mileChartEl._milestoneBaseShapesJson = JSON.stringify(mileShapes);
+      }
+
+      Plotly.newPlot('milestone-chart', [{
+        type: 'heatmap',
+        x: visibleMonths,
+        y: mileRows,
+        z,
+        zmin: 0,
+        zmax: 1,
+        colorscale: buildMilestoneDeliverableColorscale(nMile),
+        showscale: false,
+        xgap: matrixHeatmapXGap,
+        ygap: matrixHeatmapYGap,
+        zsmooth: false,
+        text,
+        hovertemplate: '%{text}<extra></extra>'
+      }], {
         width: plotWidth,
-        height: milestonePlotHeight,
+        height: Math.max(120, milestonePlotHeight),
         paper_bgcolor: 'rgba(0,0,0,0)',
         plot_bgcolor: 'rgba(0,0,0,0)',
         margin: { l: MATRIX_PLOT_MARGIN_LR.l, r: MATRIX_PLOT_MARGIN_LR.r, t: mileMt, b: mileMb },
-        shapes: [...makeYearBandShapes(visibleMonths), ...makeMilestoneLaneShapes()],
+        shapes: mileShapes,
         hoverlabel: {
           align: 'left',
           bgcolor: 'rgba(58, 58, 58, 0.96)',
           bordercolor: 'rgba(255,255,255,0.18)',
           font: { size: 11, color: '#edf3fb' }
         },
+        hovermode: 'closest',
         font: { family: 'Manrope, sans-serif', size: 12, color: '#edf3fb' },
         xaxis: {
           type: 'category',
           categoryorder: 'array',
           categoryarray: visibleMonths,
+          side: 'top',
+          tickfont: xTickCfgM.tickfont,
+          tickangle: xTickCfgM.tickangle,
           showticklabels: false,
           showgrid: false,
           ticks: '',
           ticklen: 0,
-          zeroline: false
+          zeroline: false,
+          showspikes: false
         },
         yaxis: {
           type: 'category',
@@ -2135,7 +2222,8 @@
           showgrid: false,
           ticks: '',
           ticklen: 0,
-          zeroline: false
+          zeroline: false,
+          showspikes: false
         },
         showlegend: false
       }, {
@@ -2143,6 +2231,91 @@
         displayModeBar: false,
         scrollZoom: false,
         doubleClick: false
+      }).then(() => {
+        const mileChart = document.getElementById('milestone-chart');
+        if (!mileChart) return;
+        mileChart.on('plotly_hover', (ev) => {
+          const pt = ev.points && ev.points[0];
+          if (!pt || pt.x == null || pt.y == null) return;
+          cancelMatrixHoverExit();
+          const xKey = typeof pt.x === 'string' ? pt.x : String(pt.x);
+          const yKey = typeof pt.y === 'string' ? pt.y : String(pt.y);
+          const rowIdx = mileRows.indexOf(yKey);
+          if (rowIdx < 0) return;
+          const bandKey = `${rowIdx}\0${xKey}`;
+          if (mileChart._milestoneHoverBandKey === bandKey) return;
+          mileChart._milestoneHoverBandKey = bandKey;
+          let base;
+          try {
+            base = JSON.parse(mileChart._milestoneBaseShapesJson);
+          } catch (e) {
+            mileChart._milestoneHoverBandKey = '';
+            return;
+          }
+          const bands = matrixHoverBandShapes(rowIdx, xKey, nMile, mileChart, pt.bbox);
+          try {
+            Plotly.relayout(mileChart, { shapes: base.concat(bands) });
+          } catch (e) {
+            mileChart._milestoneHoverBandKey = '';
+          }
+          const mch = document.getElementById('matrix-chart');
+          const mb = mch && mch._matrixHoverBaseShapesJson;
+          if (mch && mb) {
+            try {
+              const mbase = JSON.parse(mb);
+              let colX = matrixPaperColumnXFromHoverBbox(mileChart, pt.bbox);
+              if (!colX) {
+                const mi = visibleMonths.indexOf(xKey);
+                const nc = Math.max(1, visibleMonths.length);
+                if (mi >= 0) colX = { x0: mi / nc, x1: (mi + 1) / nc };
+              }
+              const colOnly = colX
+                ? [{
+                  type: 'rect',
+                  xref: 'paper',
+                  yref: 'paper',
+                  x0: colX.x0,
+                  x1: colX.x1,
+                  y0: 0,
+                  y1: 1,
+                  fillcolor: 'rgba(140, 195, 255, 0.12)',
+                  line: { width: 0 },
+                  layer: 'above'
+                }]
+                : [];
+              Plotly.relayout(mch, { shapes: mbase.concat(colOnly) });
+              mch._matrixHoverBandKey = `milestone:\0${xKey}`;
+            } catch (e) { /* ignore */ }
+          }
+          const mll = document.getElementById('milestone-labels');
+          if (mll) {
+            const kids = mll.children;
+            for (let i = 0; i < kids.length; i++) {
+              kids[i].classList.toggle('hover-row-affordance', i === rowIdx);
+            }
+          }
+        });
+        mileChart.on('plotly_unhover', () => {
+          const mj = mileChart._milestoneBaseShapesJson;
+          if (mj) {
+            try {
+              Plotly.relayout(mileChart, { shapes: JSON.parse(mj) });
+            } catch (e) { /* ignore */ }
+          }
+          mileChart._milestoneHoverBandKey = '';
+          const mll = document.getElementById('milestone-labels');
+          if (mll) Array.from(mll.children).forEach((el) => el.classList.remove('hover-row-affordance'));
+          const mch = document.getElementById('matrix-chart');
+          if (mch && typeof mch._matrixHoverBandKey === 'string' && mch._matrixHoverBandKey.startsWith('milestone:')) {
+            const mbase = mch._matrixHoverBaseShapesJson;
+            if (mbase) {
+              try {
+                Plotly.relayout(mch, { shapes: JSON.parse(mbase) });
+              } catch (e) { /* ignore */ }
+            }
+            mch._matrixHoverBandKey = '';
+          }
+        });
       });
     }
 
