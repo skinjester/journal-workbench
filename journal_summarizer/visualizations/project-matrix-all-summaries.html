@@ -297,10 +297,10 @@
       opacity: 0;
     }
     #chart-tooltip .chart-tooltip__surface:not(.chart-tooltip__surface--muted):not(.chart-tooltip__surface--leaving).chart-tooltip__surface--vel-fast {
-      opacity: 0.45;
+      opacity: 0.28;
     }
     #chart-tooltip .chart-tooltip__surface:not(.chart-tooltip__surface--muted):not(.chart-tooltip__surface--leaving).chart-tooltip__surface--vel-med {
-      opacity: 0.72;
+      opacity: 0.52;
     }
     @media (prefers-reduced-motion: reduce) {
       #chart-tooltip .chart-tooltip__surface {
@@ -375,11 +375,15 @@
     #chart-tooltip .chart-tooltip__body .tt-section-viz { margin-top: var(--sp-0-5); }
     #chart-tooltip .chart-tooltip__body .tt-section-empty { margin: var(--sp-1) 0 0; font-size: var(--text-xs); color: #9dabbc; font-style: italic; }
     #chart-tooltip .chart-tooltip__heavy.chart-tooltip__body {
-      transition: opacity 0.16s ease;
+      opacity: 1;
+      transition: opacity 0.26s ease-out;
       min-height: 1.2em;
     }
     #chart-tooltip .chart-tooltip__heavy.chart-tooltip__body.chart-tooltip__heavy--muted {
       opacity: 0;
+    }
+    #chart-tooltip .chart-tooltip__heavy.chart-tooltip__body.chart-tooltip__heavy--instant {
+      transition: none !important;
     }
     #chart-tooltip .chart-tooltip__heavy-placeholder {
       margin: 0;
@@ -1607,18 +1611,18 @@
       return buildProjectRowTooltipShell(month, project, buildProjectRowTooltipHeavyHtml(project, globalMonthIdx));
     }
 
-    const TOOLTIP_DWELL_MS = 160;
-    const TOOLTIP_ADJ_CELL_DWELL_EXTRA_MS = 56;
-    const TOOLTIP_V_MAX_PX_PER_MS = 0.85;
-    const TOOLTIP_STILL_MS = 90;
-    const TOOLTIP_HEAVY_RETRY_MS = 48;
+    const TOOLTIP_DWELL_MS = 95;
+    const TOOLTIP_ADJ_CELL_DWELL_EXTRA_MS = 28;
+    const TOOLTIP_V_MAX_PX_PER_MS = 1.05;
+    const TOOLTIP_STILL_MS = 65;
+    const TOOLTIP_HEAVY_RETRY_MS = 28;
     const TOOLTIP_HEAVY_PLACEHOLDER =
       '<p class="chart-tooltip__heavy-placeholder">Hold steady to see lifecycle and month notes.</p>';
 
-    const TT_VEL_ENTER_FAST = 1.05;
-    const TT_VEL_EXIT_FAST = 0.78;
-    const TT_VEL_ENTER_MED = 0.42;
-    const TT_VEL_EXIT_MED = 0.24;
+    const TT_VEL_ENTER_FAST = 0.88;
+    const TT_VEL_EXIT_FAST = 0.65;
+    const TT_VEL_ENTER_MED = 0.32;
+    const TT_VEL_EXIT_MED = 0.18;
 
     let chartTooltipMotionListenerOn = false;
 
@@ -1734,16 +1738,17 @@
       const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       heavy.classList.remove('chart-tooltip__heavy--pending');
       if (!useBodyFade || reducedMotion) {
-        heavy.classList.remove('chart-tooltip__heavy--muted');
+        heavy.classList.remove('chart-tooltip__heavy--muted', 'chart-tooltip__heavy--instant');
         heavy.innerHTML = html;
         return;
       }
-      heavy.classList.add('chart-tooltip__heavy--muted');
+      /* Snap hidden without animating placeholder out; then fade in new HTML only. */
+      heavy.classList.add('chart-tooltip__heavy--instant', 'chart-tooltip__heavy--muted');
+      heavy.innerHTML = html;
+      void heavy.offsetHeight;
+      heavy.classList.remove('chart-tooltip__heavy--instant');
       requestAnimationFrame(() => {
-        heavy.innerHTML = html;
-        requestAnimationFrame(() => {
-          heavy.classList.remove('chart-tooltip__heavy--muted');
-        });
+        heavy.classList.remove('chart-tooltip__heavy--muted');
       });
     }
 
@@ -1847,7 +1852,10 @@
         resetChartTooltipPointerState(chartTooltip);
         chartTooltip.innerHTML = buildProjectRowTooltipShell(month, project, TOOLTIP_HEAVY_PLACEHOLDER);
         const heavyEl = chartTooltip.querySelector('.chart-tooltip__heavy');
-        if (heavyEl) heavyEl.classList.add('chart-tooltip__heavy--pending');
+        if (heavyEl) {
+          heavyEl.classList.remove('chart-tooltip__heavy--instant');
+          heavyEl.classList.add('chart-tooltip__heavy--pending');
+        }
         const surfaceEl = getChartTooltipSurface(chartTooltip);
         if (surfaceEl) surfaceEl.classList.add('chart-tooltip__surface--muted');
         chartTooltip.style.display = 'block';
@@ -1872,8 +1880,8 @@
       if (kicker) kicker.textContent = month;
       if (title) title.textContent = project;
       if (heavy) {
+        heavy.classList.remove('chart-tooltip__heavy--instant', 'chart-tooltip__heavy--muted');
         heavy.classList.add('chart-tooltip__heavy--pending');
-        heavy.classList.remove('chart-tooltip__heavy--muted');
         heavy.innerHTML = TOOLTIP_HEAVY_PLACEHOLDER;
       }
       chartTooltip._matrixTooltipCellKey = cellKey;
