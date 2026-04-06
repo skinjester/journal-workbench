@@ -305,9 +305,9 @@
     #chart-tooltip .chart-tooltip__surface {
       padding: var(--sp-1);
       border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(20, 24, 31, 0.97);
-      box-shadow: 0 18px 42px rgba(0,0,0,0.4);
+      border: 1px solid var(--matrix-tooltip-border, rgba(190, 155, 110, 0.5));
+      background: var(--matrix-tooltip-surface-bg, rgba(22, 18, 15, 0.98));
+      box-shadow: var(--matrix-tooltip-shadow, 0 18px 42px rgba(0, 0, 0, 0.42), 0 0 0 1px rgba(255, 186, 120, 0.08));
       opacity: 1;
       transition: opacity 0.18s ease;
     }
@@ -343,30 +343,30 @@
       font-weight: 700;
       letter-spacing: 0.05em;
       text-transform: uppercase;
-      color: #b7c5d8;
+      color: var(--matrix-tooltip-kicker, #c9a67e);
     }
     #chart-tooltip .chart-tooltip__title {
       margin: 0 0 var(--sp-1);
       font-size: var(--text-md);
       line-height: var(--lh-tight);
       font-weight: 800;
-      color: #f5f9ff;
+      color: var(--matrix-tooltip-title, #fff6eb);
     }
     #chart-tooltip .chart-tooltip__meta {
       margin: 0 0 var(--sp-1);
       font-size: var(--text-sm);
       line-height: 1.3;
       font-weight: 600;
-      color: #c8d8ee;
+      color: var(--matrix-tooltip-meta, #d4b896);
     }
     #chart-tooltip .chart-tooltip__body {
       font-size: var(--text-sm);
       line-height: 1.45;
-      color: #d8e3f1;
+      color: var(--matrix-tooltip-body, #e9ded0);
     }
     #chart-tooltip .chart-tooltip__body .tt-closing {
       margin: 0;
-      color: #d8e3f1;
+      color: var(--matrix-tooltip-body, #e9ded0);
     }
     #chart-tooltip .chart-tooltip__body .tt-section-title {
       margin: var(--sp-2) 0 var(--sp-0-5);
@@ -375,7 +375,7 @@
       font-weight: 800;
       letter-spacing: 0.05em;
       text-transform: uppercase;
-      color: #f1f6fd;
+      color: var(--matrix-tooltip-section-title, #ffe8cc);
     }
     #chart-tooltip .chart-tooltip__body .tt-section-title:first-child { margin-top: 0; }
     #chart-tooltip .chart-tooltip__body .tt-bullet {
@@ -388,13 +388,13 @@
       margin: var(--sp-2) 0 0;
       font-size: var(--text-2xs);
       line-height: var(--lh-snug);
-      color: #8a9bab;
+      color: var(--matrix-tooltip-hint, #8c7d6a);
       font-weight: 500;
     }
     #chart-tooltip .chart-tooltip__body b,
-    #chart-tooltip .chart-tooltip__body strong { color: #ffffff; font-weight: 700; }
+    #chart-tooltip .chart-tooltip__body strong { color: var(--matrix-tooltip-strong, #ffffff); font-weight: 700; }
     #chart-tooltip .chart-tooltip__body .tt-section-viz { margin-top: var(--sp-0-5); }
-    #chart-tooltip .chart-tooltip__body .tt-section-empty { margin: var(--sp-1) 0 0; font-size: var(--text-xs); color: #9dabbc; font-style: italic; }
+    #chart-tooltip .chart-tooltip__body .tt-section-empty { margin: var(--sp-1) 0 0; font-size: var(--text-xs); color: var(--matrix-tooltip-muted, #9d8f7c); font-style: italic; }
     #chart-tooltip .chart-tooltip__heavy.chart-tooltip__body {
       opacity: 1;
       transition: opacity 0.26s ease-out;
@@ -410,7 +410,7 @@
       margin: 0;
       font-size: var(--text-xs);
       line-height: var(--lh-snug);
-      color: #8a9bab;
+      color: var(--matrix-tooltip-hint, #8c7d6a);
       font-style: italic;
     }
     #chart-tooltip .tt-life-row--explore .tt-bar-fill { background: linear-gradient(90deg, #4a5c6e, #6b7d8f); }
@@ -420,10 +420,10 @@
     #chart-tooltip .tt-life-row--ship .tt-bar-fill { background: linear-gradient(90deg, #1a7f37, #3fb950); }
     #chart-tooltip .tt-bars { margin-top: var(--sp-0-5); display: flex; flex-direction: column; gap: var(--sp-0-5); }
     #chart-tooltip .tt-bar-row { display: grid; grid-template-columns: minmax(0, 72px) 1fr 20px; align-items: center; gap: var(--sp-1) var(--sp-0-5); font-size: var(--text-2xs); }
-    #chart-tooltip .tt-bar-label { color: #b7c5d8; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    #chart-tooltip .tt-bar-track { height: 5px; background: rgba(255, 255, 255, 0.08); border-radius: 3px; overflow: hidden; }
-    #chart-tooltip .tt-bar-fill { height: 100%; background: linear-gradient(90deg, #316dca, #79c0ff); border-radius: 3px; max-width: 100%; }
-    #chart-tooltip .tt-bar-n { text-align: right; color: #d8e3f1; font-variant-numeric: tabular-nums; }
+    #chart-tooltip .tt-bar-label { color: var(--matrix-tooltip-bar-label, #c4b09a); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    #chart-tooltip .tt-bar-track { height: 5px; background: var(--matrix-tooltip-bar-track, rgba(255, 194, 140, 0.14)); border-radius: 3px; overflow: hidden; }
+    #chart-tooltip .tt-bar-fill { height: 100%; background: var(--matrix-tooltip-bar-fill-default, linear-gradient(90deg, #8f6238, #d9a066)); border-radius: 3px; max-width: 100%; }
+    #chart-tooltip .tt-bar-n { text-align: right; color: var(--matrix-tooltip-bar-n, #dcc4a8); font-variant-numeric: tabular-nums; }
     #chart-tooltip .tt-life-bars .tt-bar-row { margin-bottom: 1px; }
     #chart-tooltip .chart-tooltip__body .tt-life-bars .tt-bar-row {
       font-size: var(--text-2xs);
@@ -433,7 +433,7 @@
     }
     #chart-tooltip .chart-tooltip__body .tt-life-bars .tt-bar-label {
       font-weight: 700;
-      color: #b7c5d8;
+      color: var(--matrix-tooltip-bar-label, #c4b09a);
       min-width: 0;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -441,9 +441,9 @@
     }
     #chart-tooltip .chart-tooltip__body .tt-life-bars .tt-bar-n {
       font-size: var(--text-2xs);
-      color: #9dabbc;
+      color: var(--matrix-tooltip-muted, #9d8f7c);
     }
-    #chart-tooltip .chart-tooltip__body .tt-closing { margin-top: var(--sp-2); font-size: var(--text-xs); color: #9dabbc; line-height: var(--lh-snug); }
+    #chart-tooltip .chart-tooltip__body .tt-closing { margin-top: var(--sp-2); font-size: var(--text-xs); color: var(--matrix-tooltip-muted, #9d8f7c); line-height: var(--lh-snug); }
     /* Let Plotly set height exactly = margins + rows*rowHeight (no min-height drift vs labels). */
     #matrix-chart { min-height: 0; }
     #milestone-chart { min-height: 0; margin-top: 0; }
@@ -960,16 +960,48 @@
       milestoneColFill: 'rgba(255, 186, 120, 0.2)',
       labelBg: 'rgba(255, 186, 120, 0.16)',
       labelBgProject: 'rgba(255, 165, 88, 0.24)',
-      labelChildBorder: 'rgba(255, 205, 145, 0.62)'
+      labelChildBorder: 'rgba(255, 205, 145, 0.62)',
+      /** #chart-tooltip + deliverables: same warm hue family as matrix crosshair */
+      tooltipSurfaceBg: 'rgba(22, 18, 15, 0.98)',
+      tooltipBorder: 'rgba(190, 155, 110, 0.5)',
+      tooltipShadow: '0 18px 42px rgba(0, 0, 0, 0.42), 0 0 0 1px rgba(255, 186, 120, 0.08)',
+      tooltipKicker: '#c9a67e',
+      tooltipTitle: '#fff6eb',
+      tooltipMeta: '#d4b896',
+      tooltipBody: '#e9ded0',
+      tooltipSectionTitle: '#ffe8cc',
+      tooltipMuted: '#9d8f7c',
+      tooltipHint: '#8c7d6a',
+      tooltipBarLabel: '#c4b09a',
+      tooltipBarTrack: 'rgba(255, 194, 140, 0.14)',
+      tooltipBarFillDefault: 'linear-gradient(90deg, #8f6238, #d9a066)',
+      tooltipBarN: '#dcc4a8',
+      tooltipStrong: '#ffffff'
     };
     (function applyMatrixHoverTokensToCss() {
       const r = document.documentElement;
-      r.style.setProperty('--matrix-hover-cross-fill', MATRIX_HOVER_TOKENS.crossFill);
-      r.style.setProperty('--matrix-hover-dim-veil', MATRIX_HOVER_TOKENS.dimVeil);
-      r.style.setProperty('--matrix-hover-rule-color', MATRIX_HOVER_TOKENS.ruleColor);
-      r.style.setProperty('--matrix-hover-label-bg', MATRIX_HOVER_TOKENS.labelBg);
-      r.style.setProperty('--matrix-hover-label-bg-project', MATRIX_HOVER_TOKENS.labelBgProject);
-      r.style.setProperty('--matrix-hover-label-child-border', MATRIX_HOVER_TOKENS.labelChildBorder);
+      const T = MATRIX_HOVER_TOKENS;
+      r.style.setProperty('--matrix-hover-cross-fill', T.crossFill);
+      r.style.setProperty('--matrix-hover-dim-veil', T.dimVeil);
+      r.style.setProperty('--matrix-hover-rule-color', T.ruleColor);
+      r.style.setProperty('--matrix-hover-label-bg', T.labelBg);
+      r.style.setProperty('--matrix-hover-label-bg-project', T.labelBgProject);
+      r.style.setProperty('--matrix-hover-label-child-border', T.labelChildBorder);
+      r.style.setProperty('--matrix-tooltip-surface-bg', T.tooltipSurfaceBg);
+      r.style.setProperty('--matrix-tooltip-border', T.tooltipBorder);
+      r.style.setProperty('--matrix-tooltip-shadow', T.tooltipShadow);
+      r.style.setProperty('--matrix-tooltip-kicker', T.tooltipKicker);
+      r.style.setProperty('--matrix-tooltip-title', T.tooltipTitle);
+      r.style.setProperty('--matrix-tooltip-meta', T.tooltipMeta);
+      r.style.setProperty('--matrix-tooltip-body', T.tooltipBody);
+      r.style.setProperty('--matrix-tooltip-section-title', T.tooltipSectionTitle);
+      r.style.setProperty('--matrix-tooltip-muted', T.tooltipMuted);
+      r.style.setProperty('--matrix-tooltip-hint', T.tooltipHint);
+      r.style.setProperty('--matrix-tooltip-bar-label', T.tooltipBarLabel);
+      r.style.setProperty('--matrix-tooltip-bar-track', T.tooltipBarTrack);
+      r.style.setProperty('--matrix-tooltip-bar-fill-default', T.tooltipBarFillDefault);
+      r.style.setProperty('--matrix-tooltip-bar-n', T.tooltipBarN);
+      r.style.setProperty('--matrix-tooltip-strong', T.tooltipStrong);
     })();
     const mileSeries = {};
     mileSlugs.forEach((slug, i) => {
