@@ -39,8 +39,6 @@
     /* Sticky provenance column needs a non-clipping ancestor (see #provenance-inspector). */
     .panel.chart-panel {
       overflow: visible;
-      /* Deliverables milestone label column: top padding vs Plotly margin.t (see renderMatrix --matrix-plot-margin-top). */
-      --matrix-heading-stack: calc(1.2 * clamp(1.05rem, 1.6vw, 1.2rem) + var(--sp-1));
     }
     .meta-panel h2, .detail-panel h2 {
       margin: 0 0 var(--sp-2);
@@ -83,7 +81,7 @@
       align-items: flex-start;
       width: 100%;
       min-width: 0;
-      margin-bottom: var(--sp-1);
+      margin-bottom: 0;
       gap: 0;
     }
     .matrix-workbench-row > .matrix-map-section {
@@ -145,14 +143,14 @@
       padding: var(--matrix-plot-margin-top, 82px) 12px 52px 0;
       align-self: start;
     }
-    /* One vertical offset only (matrix tick band vs label grid); heading uses normal rhythm — avoid duplicating margin-bottom + this padding. */
     .fixed-labels.milestones {
-      padding-top: max(0px, calc(var(--matrix-plot-margin-top, 82px) - var(--matrix-heading-stack)));
+      padding-top: var(--matrix-plot-margin-top, 82px);
       padding-bottom: 52px;
       align-self: stretch;
     }
-    .deliverables-section > .chart-panel-section-heading {
-      margin-bottom: var(--sp-2);
+    .deliverables-section {
+      margin-top: 0;
+      padding-top: 0;
     }
     .chart-panel-section-heading {
       margin: 0 0 var(--sp-1);
@@ -838,7 +836,6 @@
         </aside>
       </div>
       <div class="deliverables-section">
-        <h3 class="chart-panel-section-heading">Deliverables</h3>
         <div class="deliverables-workbench-row">
           <div class="deliverables-chart-slot">
             <div class="milestone-shell timeline-pane">
@@ -1012,6 +1009,44 @@
       }
     }
 
+    /** Horizontally scroll matrix + milestone strips so month `globalMonthIdx` is centered in #matrix-scroll. */
+    function scrollMatrixToCenterMonth(chart, globalMonthIdx) {
+      const scrollEl = document.getElementById('matrix-scroll');
+      const ms = document.getElementById('milestone-scroll');
+      if (!scrollEl || !chart) return;
+      const geom = chart._matrixColGeom;
+      if (!geom || geom.nCols <= 0) return;
+      const localIdx = globalMonthIdx - visibleStartIdx;
+      if (localIdx < 0 || localIdx >= geom.nCols) return;
+      const { marginL, innerW, nCols, xgap } = geom;
+      const cw = (innerW - Math.max(0, nCols - 1) * xgap) / Math.max(1, nCols);
+      const colCenter = marginL + localIdx * (cw + xgap) + cw / 2;
+      const maxSL = Math.max(0, scrollEl.scrollWidth - scrollEl.clientWidth);
+      const target = chart.offsetLeft + colCenter - scrollEl.clientWidth / 2;
+      const sl = Math.max(0, Math.min(maxSL, target));
+      scrollEl.scrollLeft = sl;
+      if (ms) ms.scrollLeft = sl;
+    }
+
+    /** Scroll the matrix timeline pane so row `idx` is visible (label heights match heatmap rows). */
+    function scrollMatrixPaneToRowIndex(idx) {
+      if (idx == null || idx < 0) return;
+      requestAnimationFrame(() => {
+        const pane = document.querySelector('.matrix-shell.timeline-pane');
+        const ml = document.getElementById('matrix-labels');
+        if (!pane || !ml) return;
+        const rowEl = ml.children[idx];
+        if (!rowEl) return;
+        const tol = 3;
+        const rowRect = rowEl.getBoundingClientRect();
+        const paneRect = pane.getBoundingClientRect();
+        if (rowRect.top >= paneRect.top - tol && rowRect.bottom <= paneRect.bottom + tol) return;
+        const delta = rowRect.top - paneRect.top - 1;
+        const maxScroll = Math.max(0, pane.scrollHeight - pane.clientHeight);
+        pane.scrollTop = Math.max(0, Math.min(maxScroll, pane.scrollTop + delta));
+      });
+    }
+
     /** Leaving the heatmap (gap before the floating panel) fires plotly_unhover immediately; defer cleanup
      *  so the pointer can reach #chart-tooltip or the provenance dialog. */
     const MATRIX_HOVER_EXIT_MS = 250;
@@ -1132,13 +1167,13 @@
       }, MATRIX_HOVER_EXIT_MS);
     }
 
-    function scheduleMatrixChartResize() {
+    function scheduleMatrixChartResize(renderOpts) {
       if (typeof Plotly === 'undefined') return;
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           // Rebuild both figures from the same plotWidth math. Plotly.Plots.resize() on the heatmap alone
           // can stretch it to the scroll viewport while the milestone chart keeps fixed layout — margins then diverge.
-          renderMatrix(expandedProject, { preserveScroll: true });
+          renderMatrix(expandedProject, renderOpts || { preserveScroll: true });
         });
       });
     }
@@ -1206,11 +1241,12 @@
       }
     }
 
-    function openProvenanceInspector(month, project, activity) {
+    function openProvenanceInspector(month, project, activity, focusMeta) {
       const root = document.getElementById('provenance-inspector');
       const chart = document.getElementById('matrix-chart');
       const prov = typeof provenanceData !== 'undefined' ? provenanceData : null;
       if (!root || typeof ProvenanceView === 'undefined' || !prov || !prov.monthSources) {
+        if (chart) chart._inspectorCellFocus = null;
         navigateProvenancePage(month, project, activity);
         return;
       }
@@ -1224,7 +1260,33 @@
       }
       root.removeAttribute('hidden');
       root.setAttribute('aria-hidden', 'false');
-      if (chart) chart._provenanceOpenKey = cellKey;
+      if (chart) {
+        chart._provenanceOpenKey = cellKey;
+        if (focusMeta && focusMeta.rowKey != null && focusMeta.rowIndex != null && focusMeta.rowIndex >= 0) {
+          chart._inspectorCellFocus = {
+            month,
+            rowKey: focusMeta.rowKey,
+            rowIndex: focusMeta.rowIndex,
+            project,
+            activity
+          };
+          const g = data.months.indexOf(month);
+          if (g >= 0) {
+            if (!matrixInspectorLayoutActive) {
+              matrixInspectorSaved = {
+                visibleStartIdx,
+                visibleEndIdx,
+                matrixScrollLeft: document.getElementById('matrix-scroll')?.scrollLeft ?? 0,
+                milestoneScrollLeft: document.getElementById('milestone-scroll')?.scrollLeft ?? 0
+              };
+            }
+            matrixInspectorLayoutActive = true;
+            applyInspectorVisibleMonthWindowForMonthKey(month);
+          }
+        } else {
+          chart._inspectorCellFocus = null;
+        }
+      }
       ProvenanceView.render({
         month,
         project,
@@ -1238,7 +1300,7 @@
       });
       const closeBtn = document.getElementById('prov-inspector-close');
       if (closeBtn) closeBtn.tabIndex = 0;
-      requestAnimationFrame(() => scheduleMatrixChartResize());
+      requestAnimationFrame(() => scheduleMatrixChartResize({ preserveScroll: false }));
     }
 
     function closeProvenanceInspector() {
@@ -1252,8 +1314,24 @@
       if (!root) return;
       root.setAttribute('hidden', '');
       root.setAttribute('aria-hidden', 'true');
-      if (chart) chart._provenanceOpenKey = '';
-      scheduleMatrixChartResize();
+      const saved = matrixInspectorSaved;
+      matrixInspectorLayoutActive = false;
+      matrixInspectorSaved = null;
+      if (saved) {
+        visibleStartIdx = saved.visibleStartIdx;
+        visibleEndIdx = saved.visibleEndIdx;
+      }
+      if (chart) {
+        chart._provenanceOpenKey = '';
+        chart._inspectorCellFocus = null;
+      }
+      requestAnimationFrame(() =>
+        scheduleMatrixChartResize({
+          preserveScroll: false,
+          restoredMatrixScrollLeft: saved?.matrixScrollLeft,
+          restoredMilestoneScrollLeft: saved?.milestoneScrollLeft
+        })
+      );
     }
 
     function closeProvenanceOverlay() {
@@ -2234,6 +2312,9 @@
     const fullMonthCount = data.months.length;
     let visibleStartIdx = 0;
     let visibleEndIdx = Math.max(0, fullMonthCount - 1);
+    let matrixInspectorLayoutActive = false;
+    /** Saved when entering inspector layout; restored on close. */
+    let matrixInspectorSaved = null;
 
     /** Keep the heatmap x-domain equal to data.months (full series in view). Future zoom can reassign these. */
     function setVisibleMonthWindowToFull() {
@@ -2458,6 +2539,44 @@
     /** Shared L/R inset with Deliverables heatmap; must match buildMatrixXAxisTickConfig inner width math. */
     const MATRIX_PLOT_MARGIN_LR = { l: 18, r: 18 };
 
+    /** Inspector month strip: target minimum brick width (inner width budget = matrix column viewport minus margins). */
+    const MATRIX_INSPECTOR_MIN_PX_PER_COL = 16;
+
+    function maxInspectorMonthColsForInnerWidth(innerBudget, minPxPerCol, xGap) {
+      return Math.max(1, Math.floor((innerBudget + xGap) / (minPxPerCol + xGap)));
+    }
+
+    function centeredMonthWindowAround(globalIdx, span, fullCount) {
+      if (fullCount <= 0) return { start: 0, end: 0 };
+      const n = Math.min(Math.max(1, span), fullCount);
+      const half = Math.floor(n / 2);
+      let start = globalIdx - half;
+      let end = start + n - 1;
+      if (start < 0) {
+        start = 0;
+        end = n - 1;
+      }
+      if (end > fullCount - 1) {
+        end = fullCount - 1;
+        start = Math.max(0, end - n + 1);
+      }
+      return { start, end };
+    }
+
+    /** Narrow visible month slice for inspector; viewport inner width caps how many months stay ≥ min px/col. */
+    function applyInspectorVisibleMonthWindowForMonthKey(monthKey) {
+      const g = data.months.indexOf(monthKey);
+      if (g < 0) return false;
+      const containerWidth = getMatrixChartContainerWidth();
+      const innerBudget = Math.max(1, containerWidth - MATRIX_PLOT_MARGIN_LR.l - MATRIX_PLOT_MARGIN_LR.r);
+      const xGap = MATRIX_HEATMAP_X_GAP_MIN;
+      const span = maxInspectorMonthColsForInnerWidth(innerBudget, MATRIX_INSPECTOR_MIN_PX_PER_COL, xGap);
+      const { start, end } = centeredMonthWindowAround(g, span, fullMonthCount);
+      visibleStartIdx = start;
+      visibleEndIdx = end;
+      return true;
+    }
+
     /** Min layout width so each month column can be at least MATRIX_CELL_MIN_PX with xGap between bricks. */
     function matrixMinPlotWidthForFullRange(monthCount, marginLR, xGap) {
       const n = Math.max(1, monthCount);
@@ -2519,32 +2638,53 @@
 
     function renderMatrix(selectedProject, options = {}) {
       const preserveScroll = options.preserveScroll === true;
+      const rMat = options.restoredMatrixScrollLeft;
+      const rMil = options.restoredMilestoneScrollLeft;
       const savedScrollLeft = preserveScroll && matrixScroll ? matrixScroll.scrollLeft : 0;
+      let scrollTarget;
+      if (rMat != null && Number.isFinite(Number(rMat))) {
+        scrollTarget = Math.max(0, Number(rMat));
+      } else if (preserveScroll) {
+        scrollTarget = savedScrollLeft;
+      } else {
+        scrollTarget = 0;
+      }
       hideChartTooltip();
       const visibleMonths = data.months.slice(visibleStartIdx, visibleEndIdx + 1);
       const visibleCount = visibleMonths.length;
       const expandedRows = buildExpandedRows(selectedProject, visibleStartIdx, visibleEndIdx);
 
-      // With full month range, plotWidth tracks matrix column width (see missingMonths / t blend below).
       const containerWidth = getMatrixChartContainerWidth();
 
-      // Avoid a hard jump between "fits viewport" and "needs horizontal scroll".
-      // Near full zoom-out (missing only a few months), gradually interpolate width.
-      const missingMonths = fullMonthCount - visibleCount;
-      const smoothWindowMonths = 3; // tweak: larger = gentler transition
-      const t = Math.max(0, Math.min(1, (smoothWindowMonths - missingMonths) / smoothWindowMonths));
-      const minPlotWFull =
-        missingMonths === 0
-          ? matrixMinPlotWidthForFullRange(visibleCount, MATRIX_PLOT_MARGIN_LR, MATRIX_HEATMAP_X_GAP_MIN)
-          : 0;
-      const plotWidth =
-        missingMonths === 0
-          ? Math.max(1, Math.round(Math.max(containerWidth, minPlotWFull)))
-          : Math.round(data.heatWidth * (1 - t) + containerWidth * t);
-      const matrixUsesNarrowXGap =
-        missingMonths === 0 &&
-        (Math.round(plotWidth) > Math.round(containerWidth) || plotWidth <= minPlotWFull + 1);
-      const matrixXGapTrace = matrixUsesNarrowXGap ? MATRIX_HEATMAP_X_GAP_MIN : matrixHeatmapXGap;
+      let plotWidth;
+      let matrixUsesNarrowXGap;
+      let matrixXGapTrace;
+
+      if (matrixInspectorLayoutActive) {
+        matrixXGapTrace = MATRIX_HEATMAP_X_GAP_MIN;
+        const innerTarget =
+          visibleCount * MATRIX_INSPECTOR_MIN_PX_PER_COL + Math.max(0, visibleCount - 1) * matrixXGapTrace;
+        plotWidth = Math.max(1, Math.round(MATRIX_PLOT_MARGIN_LR.l + MATRIX_PLOT_MARGIN_LR.r + innerTarget));
+        matrixUsesNarrowXGap = true;
+      } else {
+        // With full month range, plotWidth tracks matrix column width (see missingMonths / t blend below).
+        // Avoid a hard jump between "fits viewport" and "needs horizontal scroll".
+        const missingMonths = fullMonthCount - visibleCount;
+        const smoothWindowMonths = 3; // tweak: larger = gentler transition
+        const t = Math.max(0, Math.min(1, (smoothWindowMonths - missingMonths) / smoothWindowMonths));
+        const minPlotWFull =
+          missingMonths === 0
+            ? matrixMinPlotWidthForFullRange(visibleCount, MATRIX_PLOT_MARGIN_LR, MATRIX_HEATMAP_X_GAP_MIN)
+            : 0;
+        plotWidth =
+          missingMonths === 0
+            ? Math.max(1, Math.round(Math.max(containerWidth, minPlotWFull)))
+            : Math.round(data.heatWidth * (1 - t) + containerWidth * t);
+        matrixUsesNarrowXGap =
+          missingMonths === 0 &&
+          (Math.round(plotWidth) > Math.round(containerWidth) || plotWidth <= minPlotWFull + 1);
+        matrixXGapTrace = matrixUsesNarrowXGap ? MATRIX_HEATMAP_X_GAP_MIN : matrixHeatmapXGap;
+      }
       const matrixInnerW = Math.max(1, plotWidth - MATRIX_PLOT_MARGIN_LR.l - MATRIX_PLOT_MARGIN_LR.r);
       const matrixPxPerCol = matrixInnerW / Math.max(1, visibleCount);
       /* Min-width + horizontal scroll: pxPerCol can stay small; still show tiered ticks. Hide only when squeezed into viewport without that mode. */
@@ -2612,6 +2752,12 @@
         matrixChartEl._matrixExpandedRows = expandedRows;
         matrixChartEl._matrixVisibleMonths = visibleMonths;
         matrixChartEl._matrixHoverBaseShapesJson = JSON.stringify(matrixShapes);
+        matrixChartEl._matrixColGeom = {
+          marginL: MATRIX_PLOT_MARGIN_LR.l,
+          innerW: matrixInnerW,
+          nCols: visibleCount,
+          xgap: matrixXGapTrace
+        };
       }
 
       Plotly.newPlot('matrix-chart', [{
@@ -2692,15 +2838,19 @@
             setActiveProject(yKey);
             return;
           }
-          const row = rows.find((r) => r.key === yKey);
+          const rowIdx = rows.findIndex((r) => r.key === yKey);
+          const row = rowIdx >= 0 ? rows[rowIdx] : null;
           if (row && row.type === 'activity') {
-            openProvenanceInspector(xKey, row.project, row.label);
+            openProvenanceInspector(xKey, row.project, row.label, { rowIndex: rowIdx, rowKey: yKey });
           }
         });
         chart.on('plotly_hover', (ev) => {
           const rows = chart._matrixExpandedRows;
           const ml = document.getElementById('matrix-labels');
           if (!rows || !ml) return;
+          /* Inspector locks a single cell; hover tooltips/bands would show a different month/row and read as wrong. */
+          const inspPanel = document.getElementById('provenance-inspector');
+          if (inspPanel && !inspPanel.hidden) return;
           const pt = pickMatrixHoverPoint(ev.points);
           if (!pt || pt.y == null || pt.x == null) return;
           const yKey = typeof pt.y === 'string' ? pt.y : String(pt.y);
@@ -2759,8 +2909,9 @@
             return;
           }
           const bands = matrixHoverBandShapes(idx, xKey, rows.length, chart, pt.bbox);
+          const merged = base.concat(bands);
           try {
-            Plotly.relayout(chart, { shapes: base.concat(bands) });
+            Plotly.relayout(chart, { shapes: merged });
           } catch (e) {
             chart._matrixHoverBandKey = '';
           }
@@ -2771,6 +2922,19 @@
         });
         if (selectedProject && !preserveScroll) {
           scrollMatrixPaneToExpandedProject(selectedProject);
+        }
+        const insp = document.getElementById('provenance-inspector');
+        const focus = chart._inspectorCellFocus;
+        if (insp && !insp.hidden && focus && focus.month && focus.rowKey != null) {
+          const g = data.months.indexOf(focus.month);
+          const monthOk = g >= 0 && visibleMonths.includes(focus.month);
+          const rowOk = expandedRows.some((r) => r.key === focus.rowKey);
+          if (monthOk && rowOk) {
+            requestAnimationFrame(() => {
+              scrollMatrixPaneToRowIndex(expandedRows.findIndex((r) => r.key === focus.rowKey));
+              requestAnimationFrame(() => scrollMatrixToCenterMonth(chart, g));
+            });
+          }
         }
       });
 
@@ -2790,9 +2954,11 @@
 
       syncMilestoneScrollWidth();
       renderMilestones(matrixMarginTop, matrixMarginBottom, plotWidth, matrixXGapTrace);
-      const scrollTarget = preserveScroll ? savedScrollLeft : 0;
       matrixScroll.scrollLeft = scrollTarget;
-      if (milestoneScroll) milestoneScroll.scrollLeft = scrollTarget;
+      if (milestoneScroll) {
+        milestoneScroll.scrollLeft =
+          rMil != null && Number.isFinite(Number(rMil)) ? Math.max(0, Number(rMil)) : scrollTarget;
+      }
     }
 
     function renderMilestones(matrixMarginTop, matrixMarginBottom, plotWidth, heatmapXGap) {
@@ -2901,6 +3067,8 @@
         const mileChart = document.getElementById('milestone-chart');
         if (!mileChart) return;
         mileChart.on('plotly_hover', (ev) => {
+          const inspPanel = document.getElementById('provenance-inspector');
+          if (inspPanel && !inspPanel.hidden) return;
           const pt = ev.points && ev.points[0];
           if (!pt || pt.x == null || pt.y == null) return;
           const xKey = typeof pt.x === 'string' ? pt.x : String(pt.x);
