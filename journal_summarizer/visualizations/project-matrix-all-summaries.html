@@ -68,11 +68,15 @@
       display: flex;
       flex-direction: column;
       min-width: 0;
+      max-width: 100%;
       align-self: start;
+      /* Prevent grid min-content from growing to plot width — keeps #matrix-scroll a real horizontal scrollport. */
+      overflow: hidden;
     }
     .matrix-chart-stack > .scroll-area {
       width: 100%;
       min-width: 0;
+      max-width: 100%;
     }
     /* Two siblings in one row: main (flex 1) + inspector (fixed basis). Hidden inspector → display:none → main is sole flex child and fills width. */
     .matrix-workbench-row {
@@ -251,9 +255,28 @@
       border-radius: 0;
       padding-bottom: 0;
       scrollbar-gutter: stable;
+      touch-action: pan-x pan-y;
     }
     /* Width set from #matrix-scroll so Deliverables aligns with the heatmap column (panel-wide row vs matrix+inspector row). */
+    #matrix-scroll,
+    #milestone-scroll {
+      min-width: 0;
+      max-width: 100%;
+    }
     #milestone-scroll { justify-self: start; min-width: 0; }
+    /* Inspector: leading spacer so scrollLeft can reserve MATRIX_INSPECTOR_LEFT_COL_MARGIN brick widths left of early months. */
+    .matrix-scroll-inner {
+      display: inline-flex;
+      flex-direction: row;
+      align-items: stretch;
+      min-width: min-content;
+    }
+    .matrix-scroll-leading-gutter {
+      flex: 0 0 auto;
+      width: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
     /* Plotly defaults to horizontal centering when the figure is narrower than the scroll viewport; heatmap + deliverables must stay left-aligned and same width. */
     #matrix-scroll .js-plotly-plot,
     #milestone-scroll .js-plotly-plot {
@@ -819,7 +842,12 @@
               <div class="fixed-labels-grid" id="matrix-labels"></div>
             </div>
             <div class="matrix-chart-stack">
-              <div class="scroll-area" id="matrix-scroll"><div id="matrix-chart"></div></div>
+              <div class="scroll-area" id="matrix-scroll">
+                <div class="matrix-scroll-inner">
+                  <div id="matrix-scroll-leading-gutter" class="matrix-scroll-leading-gutter" aria-hidden="true"></div>
+                  <div id="matrix-chart"></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -840,7 +868,12 @@
           <div class="deliverables-chart-slot">
             <div class="milestone-shell timeline-pane">
               <div class="fixed-labels milestones"><div class="fixed-labels-grid" id="milestone-labels"></div></div>
-              <div class="scroll-area" id="milestone-scroll"><div id="milestone-chart"></div></div>
+              <div class="scroll-area" id="milestone-scroll">
+                <div class="matrix-scroll-inner">
+                  <div id="milestone-scroll-leading-gutter" class="matrix-scroll-leading-gutter" aria-hidden="true"></div>
+                  <div id="milestone-chart"></div>
+                </div>
+              </div>
             </div>
           </div>
           <div class="deliverables-inspector-spacer" aria-hidden="true"></div>
@@ -1009,7 +1042,10 @@
       }
     }
 
-    /** Horizontally scroll matrix + milestone strips so month `globalMonthIdx` is centered in #matrix-scroll. */
+    /** Horizontally scroll matrix + milestone strips so month `globalMonthIdx` is visible in #matrix-scroll.
+     *  Places the selected column’s **left edge** `MATRIX_INSPECTOR_LEFT_COL_MARGIN` brick widths from the scrollport’s
+     *  left (xgap-aware cw). With inspector open, `#matrix-scroll-leading-gutter` adds 2× brick width so early months
+     *  can still scroll to that margin; gutter is 0 when inspector is closed. */
     function scrollMatrixToCenterMonth(chart, globalMonthIdx) {
       const scrollEl = document.getElementById('matrix-scroll');
       const ms = document.getElementById('milestone-scroll');
@@ -1018,14 +1054,90 @@
       if (!geom || geom.nCols <= 0) return;
       const localIdx = globalMonthIdx - visibleStartIdx;
       if (localIdx < 0 || localIdx >= geom.nCols) return;
-      const { marginL, innerW, nCols, xgap } = geom;
-      const cw = (innerW - Math.max(0, nCols - 1) * xgap) / Math.max(1, nCols);
-      const colCenter = marginL + localIdx * (cw + xgap) + cw / 2;
+      const nCols = geom.nCols;
+      const xgap =
+        Number.isFinite(Number(geom.xgap)) && Number(geom.xgap) >= 0 ? Number(geom.xgap) : 0;
+      const cr = chart.getBoundingClientRect();
+      const layoutW =
+        chart._fullLayout && chart._fullLayout.width > 0 ? chart._fullLayout.width : cr.width;
+      const scale = cr.width / Math.max(1, layoutW);
+      const gs = chart._fullLayout && chart._fullLayout._size;
+      let colLeftLayoutPx;
+      let cwLayout = layoutW / Math.max(1, nCols);
+      if (gs && Number(gs.w) > 0 && typeof gs.l === 'number') {
+        const innerW = gs.w;
+        const cw = (innerW - Math.max(0, nCols - 1) * xgap) / Math.max(1, nCols);
+        if (cw > 0 && Number.isFinite(cw)) {
+          colLeftLayoutPx = gs.l + localIdx * (cw + xgap);
+          cwLayout = cw;
+        } else {
+          const innerNominal = innerW / Math.max(1, nCols);
+          colLeftLayoutPx = gs.l + localIdx * innerNominal;
+          cwLayout = innerNominal;
+        }
+      } else {
+        const slotW = layoutW / Math.max(1, nCols);
+        colLeftLayoutPx = ((localIdx + 0.5) / nCols) * layoutW - slotW / 2;
+        cwLayout = slotW;
+      }
+      const colLeftCssPx = colLeftLayoutPx * scale;
+      const chartLeftInContent =
+        scrollEl.scrollLeft + cr.left - scrollEl.getBoundingClientRect().left;
+      const cellLeftInContent = chartLeftInContent + colLeftCssPx;
+      const cwCss = cwLayout * scale;
+      const marginPx = MATRIX_INSPECTOR_LEFT_COL_MARGIN * cwCss;
       const maxSL = Math.max(0, scrollEl.scrollWidth - scrollEl.clientWidth);
-      const target = chart.offsetLeft + colCenter - scrollEl.clientWidth / 2;
-      const sl = Math.max(0, Math.min(maxSL, target));
+      const target = cellLeftInContent - marginPx;
+      const sl = Math.max(0, Math.min(maxSL, Math.round(target)));
       scrollEl.scrollLeft = sl;
       if (ms) ms.scrollLeft = sl;
+    }
+
+    /** After inspector opens + matrix replot: vertical row center, then horizontal month reveal (left margin) with retries
+     *  so flex/scrollbar layout can settle (avoids one-frame stale `getBoundingClientRect` / `_size`). */
+    function runInspectorMatrixScrollFocus(chart, globalMonthIdx, rowIdx) {
+      requestAnimationFrame(() => {
+        scrollMatrixPaneToCenterRowIndex(rowIdx);
+        const bump = () => {
+          updateInspectorScrollLeadingGutters(chart);
+          scrollMatrixToCenterMonth(chart, globalMonthIdx);
+        };
+        bump();
+        requestAnimationFrame(bump);
+        requestAnimationFrame(() => requestAnimationFrame(bump));
+        setTimeout(bump, 0);
+        setTimeout(bump, 48);
+      });
+    }
+
+    /** Inspector-only: spacer before matrix + milestone charts so scrollLeft can reserve left-column margin for month 0+. */
+    function updateInspectorScrollLeadingGutters(matrixGd) {
+      const mg = document.getElementById('matrix-scroll-leading-gutter');
+      const mileG = document.getElementById('milestone-scroll-leading-gutter');
+      if (!mg || !mileG) return;
+      let wPx = 0;
+      if (matrixInspectorLayoutActive && matrixGd && matrixGd._matrixColGeom && matrixGd._fullLayout) {
+        const geom = matrixGd._matrixColGeom;
+        const nCols = geom.nCols;
+        if (nCols > 0) {
+          const xgap =
+            Number.isFinite(Number(geom.xgap)) && Number(geom.xgap) >= 0 ? Number(geom.xgap) : 0;
+          const cr = matrixGd.getBoundingClientRect();
+          const layoutW =
+            matrixGd._fullLayout.width > 0 ? matrixGd._fullLayout.width : cr.width;
+          const scale = cr.width / Math.max(1, layoutW);
+          const gs = matrixGd._fullLayout._size;
+          let cwLayout = layoutW / Math.max(1, nCols);
+          if (gs && Number(gs.w) > 0) {
+            const cw = (gs.w - Math.max(0, nCols - 1) * xgap) / Math.max(1, nCols);
+            if (cw > 0 && Number.isFinite(cw)) cwLayout = cw;
+          }
+          const cwCss = cwLayout * scale;
+          wPx = Math.max(0, Math.round(MATRIX_INSPECTOR_LEFT_COL_MARGIN * cwCss));
+        }
+      }
+      mg.style.width = `${wPx}px`;
+      mileG.style.width = `${wPx}px`;
     }
 
     /** Scroll the matrix timeline pane so row `idx` is visible (label heights match heatmap rows). */
@@ -1042,6 +1154,25 @@
         const paneRect = pane.getBoundingClientRect();
         if (rowRect.top >= paneRect.top - tol && rowRect.bottom <= paneRect.bottom + tol) return;
         const delta = rowRect.top - paneRect.top - 1;
+        const maxScroll = Math.max(0, pane.scrollHeight - pane.clientHeight);
+        pane.scrollTop = Math.max(0, Math.min(maxScroll, pane.scrollTop + delta));
+      });
+    }
+
+    /** Vertically center row `idx` in the matrix timeline pane (pairs with scrollMatrixToCenterMonth for inspector). */
+    function scrollMatrixPaneToCenterRowIndex(idx) {
+      if (idx == null || idx < 0) return;
+      requestAnimationFrame(() => {
+        const pane = document.querySelector('.matrix-shell.timeline-pane');
+        const ml = document.getElementById('matrix-labels');
+        if (!pane || !ml) return;
+        const rowEl = ml.children[idx];
+        if (!rowEl) return;
+        const rowRect = rowEl.getBoundingClientRect();
+        const paneRect = pane.getBoundingClientRect();
+        const rowCenter = (rowRect.top + rowRect.bottom) / 2;
+        const paneCenter = (paneRect.top + paneRect.bottom) / 2;
+        const delta = rowCenter - paneCenter;
         const maxScroll = Math.max(0, pane.scrollHeight - pane.clientHeight);
         pane.scrollTop = Math.max(0, Math.min(maxScroll, pane.scrollTop + delta));
       });
@@ -1274,14 +1405,11 @@
           if (g >= 0) {
             if (!matrixInspectorLayoutActive) {
               matrixInspectorSaved = {
-                visibleStartIdx,
-                visibleEndIdx,
                 matrixScrollLeft: document.getElementById('matrix-scroll')?.scrollLeft ?? 0,
                 milestoneScrollLeft: document.getElementById('milestone-scroll')?.scrollLeft ?? 0
               };
             }
             matrixInspectorLayoutActive = true;
-            applyInspectorVisibleMonthWindowForMonthKey(month);
           }
         } else {
           chart._inspectorCellFocus = null;
@@ -1304,6 +1432,8 @@
     }
 
     function closeProvenanceInspector() {
+      const ov = document.getElementById('provenance-overlay');
+      if (ov && !ov.hidden) closeProvenanceOverlay();
       const root = document.getElementById('provenance-inspector');
       const chart = document.getElementById('matrix-chart');
       const closeBtn = document.getElementById('prov-inspector-close');
@@ -1317,10 +1447,6 @@
       const saved = matrixInspectorSaved;
       matrixInspectorLayoutActive = false;
       matrixInspectorSaved = null;
-      if (saved) {
-        visibleStartIdx = saved.visibleStartIdx;
-        visibleEndIdx = saved.visibleEndIdx;
-      }
       if (chart) {
         chart._provenanceOpenKey = '';
         chart._inspectorCellFocus = null;
@@ -1560,6 +1686,28 @@
         layer: 'above'
       };
       return [rowRect, colRect];
+    }
+
+    /** Provenance inspector: outline selected cell (paper coords; matches hover column fallback). */
+    function inspectorFocusCellOutlineShapes(focus, expandedRows, visibleMonths) {
+      if (!focus || focus.month == null || focus.rowKey == null) return [];
+      const mi = visibleMonths.indexOf(focus.month);
+      const ri = expandedRows.findIndex((r) => r.key === focus.rowKey);
+      if (mi < 0 || ri < 0) return [];
+      const nr = Math.max(1, expandedRows.length);
+      const nc = Math.max(1, visibleMonths.length);
+      return [{
+        type: 'rect',
+        xref: 'paper',
+        yref: 'paper',
+        x0: mi / nc,
+        x1: (mi + 1) / nc,
+        y0: 1 - (ri + 1) / nr,
+        y1: 1 - ri / nr,
+        fillcolor: 'rgba(0,0,0,0)',
+        line: { color: 'rgba(186, 230, 253, 0.95)', width: 2.5 },
+        layer: 'above'
+      }];
     }
 
     /** z in (0,1) band per row so discrete row colors map cleanly on one heatmap. */
@@ -2313,7 +2461,7 @@
     let visibleStartIdx = 0;
     let visibleEndIdx = Math.max(0, fullMonthCount - 1);
     let matrixInspectorLayoutActive = false;
-    /** Saved when entering inspector layout; restored on close. */
+    /** Horizontal scroll positions saved on first inspector open; restored on close (month range stays full dataset). */
     let matrixInspectorSaved = null;
 
     /** Keep the heatmap x-domain equal to data.months (full series in view). Future zoom can reassign these. */
@@ -2539,43 +2687,10 @@
     /** Shared L/R inset with Deliverables heatmap; must match buildMatrixXAxisTickConfig inner width math. */
     const MATRIX_PLOT_MARGIN_LR = { l: 18, r: 18 };
 
-    /** Inspector month strip: target minimum brick width (inner width budget = matrix column viewport minus margins). */
+    /** Inspector-open plot: floor for min brick width in max() with proportional heatWidth (full dataset stays in view). */
     const MATRIX_INSPECTOR_MIN_PX_PER_COL = 16;
-
-    function maxInspectorMonthColsForInnerWidth(innerBudget, minPxPerCol, xGap) {
-      return Math.max(1, Math.floor((innerBudget + xGap) / (minPxPerCol + xGap)));
-    }
-
-    function centeredMonthWindowAround(globalIdx, span, fullCount) {
-      if (fullCount <= 0) return { start: 0, end: 0 };
-      const n = Math.min(Math.max(1, span), fullCount);
-      const half = Math.floor(n / 2);
-      let start = globalIdx - half;
-      let end = start + n - 1;
-      if (start < 0) {
-        start = 0;
-        end = n - 1;
-      }
-      if (end > fullCount - 1) {
-        end = fullCount - 1;
-        start = Math.max(0, end - n + 1);
-      }
-      return { start, end };
-    }
-
-    /** Narrow visible month slice for inspector; viewport inner width caps how many months stay ≥ min px/col. */
-    function applyInspectorVisibleMonthWindowForMonthKey(monthKey) {
-      const g = data.months.indexOf(monthKey);
-      if (g < 0) return false;
-      const containerWidth = getMatrixChartContainerWidth();
-      const innerBudget = Math.max(1, containerWidth - MATRIX_PLOT_MARGIN_LR.l - MATRIX_PLOT_MARGIN_LR.r);
-      const xGap = MATRIX_HEATMAP_X_GAP_MIN;
-      const span = maxInspectorMonthColsForInnerWidth(innerBudget, MATRIX_INSPECTOR_MIN_PX_PER_COL, xGap);
-      const { start, end } = centeredMonthWindowAround(g, span, fullMonthCount);
-      visibleStartIdx = start;
-      visibleEndIdx = end;
-      return true;
-    }
+    /** Brick widths from #matrix-scroll left edge to the selected column’s left (inspector horizontal focus). */
+    const MATRIX_INSPECTOR_LEFT_COL_MARGIN = 2;
 
     /** Min layout width so each month column can be at least MATRIX_CELL_MIN_PX with xGap between bricks. */
     function matrixMinPlotWidthForFullRange(monthCount, marginLR, xGap) {
@@ -2664,7 +2779,14 @@
         matrixXGapTrace = MATRIX_HEATMAP_X_GAP_MIN;
         const innerTarget =
           visibleCount * MATRIX_INSPECTOR_MIN_PX_PER_COL + Math.max(0, visibleCount - 1) * matrixXGapTrace;
-        plotWidth = Math.max(1, Math.round(MATRIX_PLOT_MARGIN_LR.l + MATRIX_PLOT_MARGIN_LR.r + innerTarget));
+        const inspectorIntrinsic = Math.round(MATRIX_PLOT_MARGIN_LR.l + MATRIX_PLOT_MARGIN_LR.r + innerTarget);
+        const heatW = Number(data.heatWidth);
+        const proportionalW =
+          Number.isFinite(heatW) && heatW > 0 && fullMonthCount > 0
+            ? Math.round((heatW * visibleCount) / fullMonthCount)
+            : 0;
+        /* Wider than column so #matrix-scroll can scroll; proportional slice matches full-timeline heatWidth density. */
+        plotWidth = Math.max(1, Math.max(inspectorIntrinsic, proportionalW, containerWidth + 1));
         matrixUsesNarrowXGap = true;
       } else {
         // With full month range, plotWidth tracks matrix column width (see missingMonths / t blend below).
@@ -2676,6 +2798,7 @@
           missingMonths === 0
             ? matrixMinPlotWidthForFullRange(visibleCount, MATRIX_PLOT_MARGIN_LR, MATRIX_HEATMAP_X_GAP_MIN)
             : 0;
+        /* Inspector closed: scale full timeline into the column (viewport-fill), not data.heatWidth. */
         plotWidth =
           missingMonths === 0
             ? Math.max(1, Math.round(Math.max(containerWidth, minPlotWFull)))
@@ -2686,10 +2809,12 @@
         matrixXGapTrace = matrixUsesNarrowXGap ? MATRIX_HEATMAP_X_GAP_MIN : matrixHeatmapXGap;
       }
       const matrixInnerW = Math.max(1, plotWidth - MATRIX_PLOT_MARGIN_LR.l - MATRIX_PLOT_MARGIN_LR.r);
-      const matrixPxPerCol = matrixInnerW / Math.max(1, visibleCount);
-      /* Min-width + horizontal scroll: pxPerCol can stay small; still show tiered ticks. Hide only when squeezed into viewport without that mode. */
-      const hideMatrixXTickLabels =
-        !matrixUsesNarrowXGap && matrixPxPerCol < MATRIX_PX_PER_COL_HIDE_TICKS;
+      /* Tick visibility + margin.t follow *viewport* column density. Inspector uses a wide plot (scroll) so
+       * per-column width in the figure is large; old logic showed ticks only when matrixUsesNarrowXGap — huge
+       * margin.t vs compact closed view and a visible vertical jump with the sidebar. */
+      const containerInnerW = Math.max(1, containerWidth - MATRIX_PLOT_MARGIN_LR.l - MATRIX_PLOT_MARGIN_LR.r);
+      const containerPxPerCol = containerInnerW / Math.max(1, visibleCount);
+      const hideMatrixXTickLabels = containerPxPerCol < MATRIX_PX_PER_COL_HIDE_TICKS;
       const projectZ = expandedRows.map(row =>
         row.type === 'project' ? row.values : Array(visibleCount).fill(null)
       );
@@ -2744,6 +2869,13 @@
             layer: 'above'
           });
         }
+      }
+
+      const inspPanel = document.getElementById('provenance-inspector');
+      const chartPre = document.getElementById('matrix-chart');
+      const cellFocus = chartPre && chartPre._inspectorCellFocus;
+      if (inspPanel && !inspPanel.hidden && cellFocus) {
+        matrixShapes.push(...inspectorFocusCellOutlineShapes(cellFocus, expandedRows, visibleMonths));
       }
 
       const matrixChartEl = document.getElementById('matrix-chart');
@@ -2825,6 +2957,7 @@
         }
       }, { responsive: false, displayModeBar: false, scrollZoom: false, doubleClick: false }).then(() => {
         const chart = document.getElementById('matrix-chart');
+        updateInspectorScrollLeadingGutters(chart);
         chart._matrixExpandedRows = expandedRows;
         // Plotly.newPlot purges prior listeners on the graph div; re-bind after every redraw
         // (expand/collapse calls renderMatrix again). One-time dataset guards would leave no handlers.
@@ -2930,10 +3063,8 @@
           const monthOk = g >= 0 && visibleMonths.includes(focus.month);
           const rowOk = expandedRows.some((r) => r.key === focus.rowKey);
           if (monthOk && rowOk) {
-            requestAnimationFrame(() => {
-              scrollMatrixPaneToRowIndex(expandedRows.findIndex((r) => r.key === focus.rowKey));
-              requestAnimationFrame(() => scrollMatrixToCenterMonth(chart, g));
-            });
+            const ri = expandedRows.findIndex((r) => r.key === focus.rowKey);
+            runInspectorMatrixScrollFocus(chart, g, ri);
           }
         }
       });
@@ -2954,10 +3085,19 @@
 
       syncMilestoneScrollWidth();
       renderMilestones(matrixMarginTop, matrixMarginBottom, plotWidth, matrixXGapTrace);
-      matrixScroll.scrollLeft = scrollTarget;
-      if (milestoneScroll) {
-        milestoneScroll.scrollLeft =
-          rMil != null && Number.isFinite(Number(rMil)) ? Math.max(0, Number(rMil)) : scrollTarget;
+      let skipHScrollForInspectorFocus = false;
+      if (inspPanel && !inspPanel.hidden && cellFocus && cellFocus.month != null && cellFocus.rowKey != null) {
+        const gFocus = data.months.indexOf(cellFocus.month);
+        const monthOkFocus = gFocus >= 0 && visibleMonths.includes(cellFocus.month);
+        const rowOkFocus = expandedRows.some((r) => r.key === cellFocus.rowKey);
+        skipHScrollForInspectorFocus = monthOkFocus && rowOkFocus;
+      }
+      if (!skipHScrollForInspectorFocus) {
+        matrixScroll.scrollLeft = scrollTarget;
+        if (milestoneScroll) {
+          milestoneScroll.scrollLeft =
+            rMil != null && Number.isFinite(Number(rMil)) ? Math.max(0, Number(rMil)) : scrollTarget;
+        }
       }
     }
 
@@ -3207,7 +3347,7 @@
       });
     })();
 
-    /** Vertical wheel over the heatmap scrolls the pane only while pointer is over that pane (Plotly capture). */
+    /** Wheel over matrix/milestone strips: apply deltaX to strip when it overflows; vertical → timeline pane (capture so Plotly cannot eat X). */
     (function bindTimelinePaneWheelScroll() {
       const strips = [matrixScroll, milestoneScroll].filter(Boolean);
       const opts = { passive: false, capture: true };
@@ -3216,10 +3356,25 @@
           if (e.ctrlKey) return;
           const absY = Math.abs(e.deltaY);
           const absX = Math.abs(e.deltaX);
+          const canHScroll = strip.scrollWidth > strip.clientWidth + 1;
+          const scrollPane = strip.closest('.timeline-pane');
+          const maxSL = () => Math.max(0, strip.scrollWidth - strip.clientWidth);
+
+          if (canHScroll && e.shiftKey && absY > 0) {
+            e.preventDefault();
+            strip.scrollLeft = Math.max(0, Math.min(maxSL(), strip.scrollLeft + e.deltaY));
+            return;
+          }
+
+          /* Horizontal component scrolls the strip; require absX > 0.5*absY so vertical swipes are not jittered by tiny deltaX. */
+          if (canHScroll && e.deltaX !== 0 && absX > absY * 0.5) {
+            e.preventDefault();
+            strip.scrollLeft = Math.max(0, Math.min(maxSL(), strip.scrollLeft + e.deltaX));
+            if (absX >= absY) return;
+          }
+
           const mostlyVertical = absY >= absX;
           if (!mostlyVertical) return;
-          if (e.shiftKey) return;
-          const scrollPane = strip.closest('.timeline-pane');
           if (!scrollPane || scrollPane.dataset.timelineWheelCapture !== '1') return;
           if (scrollPane.scrollHeight <= scrollPane.clientHeight + 1) return;
           e.preventDefault();
@@ -3250,6 +3405,12 @@
       expandedProject = expandedProject === project ? null : project;
 
       if (!expandedProject) {
+        const insp = document.getElementById('provenance-inspector');
+        if (insp && !insp.hidden) closeProvenanceInspector();
+        else {
+          const po = document.getElementById('provenance-overlay');
+          if (po && !po.hidden) closeProvenanceOverlay();
+        }
         detailTitle.textContent = 'Selected Project';
         detailCopy.textContent = 'Click a project row to expand description-based activity types (counts per month) inline in the matrix.';
         detailStats.innerHTML = [
