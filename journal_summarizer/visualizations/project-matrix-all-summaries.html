@@ -1042,11 +1042,83 @@
       }
     }
 
+    let inspScrollRafH = null;
+    let inspScrollRafV = null;
+
+    function stopInspScrollAnim() {
+      if (inspScrollRafH) cancelAnimationFrame(inspScrollRafH);
+      if (inspScrollRafV) cancelAnimationFrame(inspScrollRafV);
+      inspScrollRafH = null;
+      inspScrollRafV = null;
+    }
+
+    function easeInOutCubic(t) {
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+
+    /** Custom eased scroll (longer / gentler than native `behavior: 'smooth'`). Uses `MATRIX_INSPECTOR_SCROLL_DURATION_MS`. */
+    function animateScrollLeftPair(scrollEl, ms, targetLeft, durationMs, onDone) {
+      const dur = Number(durationMs);
+      const fromLeft = scrollEl.scrollLeft;
+      const d = targetLeft - fromLeft;
+      const finish = () => {
+        if (typeof onDone === 'function') queueMicrotask(onDone);
+      };
+      if (!Number.isFinite(dur) || dur <= 0 || Math.abs(d) < 0.5) {
+        scrollEl.scrollLeft = targetLeft;
+        if (ms) ms.scrollLeft = targetLeft;
+        finish();
+        return;
+      }
+      const t0 = performance.now();
+      function tick(now) {
+        const u = Math.min(1, (now - t0) / dur);
+        const v = Math.round(fromLeft + d * easeInOutCubic(u));
+        scrollEl.scrollLeft = v;
+        if (ms) ms.scrollLeft = v;
+        if (u < 1) inspScrollRafH = requestAnimationFrame(tick);
+        else {
+          inspScrollRafH = null;
+          scrollEl.scrollLeft = targetLeft;
+          if (ms) ms.scrollLeft = targetLeft;
+          finish();
+        }
+      }
+      inspScrollRafH = requestAnimationFrame(tick);
+    }
+
+    function animatePaneScrollTop(pane, targetTop, durationMs, onDone) {
+      const dur = Number(durationMs);
+      const from = pane.scrollTop;
+      const d = targetTop - from;
+      const finish = () => {
+        if (typeof onDone === 'function') queueMicrotask(onDone);
+      };
+      if (!Number.isFinite(dur) || dur <= 0 || Math.abs(d) < 0.5) {
+        pane.scrollTop = targetTop;
+        finish();
+        return;
+      }
+      const t0 = performance.now();
+      function tick(now) {
+        const u = Math.min(1, (now - t0) / dur);
+        pane.scrollTop = Math.round(from + d * easeInOutCubic(u));
+        if (u < 1) inspScrollRafV = requestAnimationFrame(tick);
+        else {
+          inspScrollRafV = null;
+          pane.scrollTop = targetTop;
+          finish();
+        }
+      }
+      inspScrollRafV = requestAnimationFrame(tick);
+    }
+
     /** Horizontally scroll matrix + milestone strips so month `globalMonthIdx` is visible in #matrix-scroll.
      *  Places the selected column’s **left edge** `MATRIX_INSPECTOR_LEFT_COL_MARGIN` brick widths from the scrollport’s
      *  left (xgap-aware cw). With inspector open, `#matrix-scroll-leading-gutter` adds 2× brick width so early months
      *  can still scroll to that margin; gutter is 0 when inspector is closed. */
-    function scrollMatrixToCenterMonth(chart, globalMonthIdx) {
+    function scrollMatrixToCenterMonth(chart, globalMonthIdx, options = {}) {
+      const smooth = options.behavior === 'smooth';
       const scrollEl = document.getElementById('matrix-scroll');
       const ms = document.getElementById('milestone-scroll');
       if (!scrollEl || !chart) return;
@@ -1089,24 +1161,38 @@
       const maxSL = Math.max(0, scrollEl.scrollWidth - scrollEl.clientWidth);
       const target = cellLeftInContent - marginPx;
       const sl = Math.max(0, Math.min(maxSL, Math.round(target)));
-      scrollEl.scrollLeft = sl;
-      if (ms) ms.scrollLeft = sl;
+      const after = options.onAfterScroll;
+      if (smooth) {
+        animateScrollLeftPair(scrollEl, ms, sl, MATRIX_INSPECTOR_SCROLL_DURATION_MS, after);
+      } else {
+        scrollEl.scrollLeft = sl;
+        if (ms) ms.scrollLeft = sl;
+        if (typeof after === 'function') queueMicrotask(after);
+      }
     }
 
     /** After inspector opens + matrix replot: vertical row center, then horizontal month reveal (left margin) with retries
      *  so flex/scrollbar layout can settle (avoids one-frame stale `getBoundingClientRect` / `_size`). */
     function runInspectorMatrixScrollFocus(chart, globalMonthIdx, rowIdx) {
       requestAnimationFrame(() => {
-        scrollMatrixPaneToCenterRowIndex(rowIdx);
-        const bump = () => {
+        stopInspScrollAnim();
+        const nudgeHover = () => scheduleMatrixChartHoverNudgeFromPointer(56);
+        scrollMatrixPaneToCenterRowIndex(rowIdx, { behavior: 'smooth', onDone: nudgeHover });
+        const bumpInstant = () => {
           updateInspectorScrollLeadingGutters(chart);
-          scrollMatrixToCenterMonth(chart, globalMonthIdx);
+          scrollMatrixToCenterMonth(chart, globalMonthIdx, { behavior: 'auto' });
         };
-        bump();
-        requestAnimationFrame(bump);
-        requestAnimationFrame(() => requestAnimationFrame(bump));
-        setTimeout(bump, 0);
-        setTimeout(bump, 48);
+        bumpInstant();
+        requestAnimationFrame(bumpInstant);
+        requestAnimationFrame(() => requestAnimationFrame(bumpInstant));
+        setTimeout(bumpInstant, 0);
+        setTimeout(() => {
+          updateInspectorScrollLeadingGutters(chart);
+          scrollMatrixToCenterMonth(chart, globalMonthIdx, {
+            behavior: 'smooth',
+            onAfterScroll: nudgeHover
+          });
+        }, 110);
       });
     }
 
@@ -1159,22 +1245,45 @@
       });
     }
 
-    /** Vertically center row `idx` in the matrix timeline pane (pairs with scrollMatrixToCenterMonth for inspector). */
-    function scrollMatrixPaneToCenterRowIndex(idx) {
+    /** Vertically center row `idx` in the matrix timeline pane (inspector). Skips when the row is already
+     *  fully visible so horizontal-only cell changes do not re-run vertical easing. */
+    function scrollMatrixPaneToCenterRowIndex(idx, options = {}) {
       if (idx == null || idx < 0) return;
+      const smooth = options.behavior === 'smooth';
+      const onDone = options.onDone;
+      const done = () => {
+        if (typeof onDone === 'function') queueMicrotask(onDone);
+      };
       requestAnimationFrame(() => {
         const pane = document.querySelector('.matrix-shell.timeline-pane');
         const ml = document.getElementById('matrix-labels');
-        if (!pane || !ml) return;
+        if (!pane || !ml) {
+          done();
+          return;
+        }
         const rowEl = ml.children[idx];
-        if (!rowEl) return;
+        if (!rowEl) {
+          done();
+          return;
+        }
+        const tol = 4;
         const rowRect = rowEl.getBoundingClientRect();
         const paneRect = pane.getBoundingClientRect();
+        if (rowRect.top >= paneRect.top - tol && rowRect.bottom <= paneRect.bottom + tol) {
+          done();
+          return;
+        }
         const rowCenter = (rowRect.top + rowRect.bottom) / 2;
         const paneCenter = (paneRect.top + paneRect.bottom) / 2;
         const delta = rowCenter - paneCenter;
         const maxScroll = Math.max(0, pane.scrollHeight - pane.clientHeight);
-        pane.scrollTop = Math.max(0, Math.min(maxScroll, pane.scrollTop + delta));
+        const targetTop = Math.max(0, Math.min(maxScroll, pane.scrollTop + delta));
+        if (smooth) {
+          animatePaneScrollTop(pane, targetTop, MATRIX_INSPECTOR_SCROLL_DURATION_MS, onDone);
+        } else {
+          pane.scrollTop = targetTop;
+          done();
+        }
       });
     }
 
@@ -1199,6 +1308,80 @@
       window.addEventListener('pointermove', rec, { passive: true, capture: true });
       window.addEventListener('pointerdown', rec, { passive: true, capture: true });
     })();
+
+    let matrixInspectorHoverNudgeTimer = null;
+
+    function scheduleMatrixChartHoverNudgeFromPointer(delayMs) {
+      const d = Math.max(0, Number(delayMs) || 0);
+      if (matrixInspectorHoverNudgeTimer) clearTimeout(matrixInspectorHoverNudgeTimer);
+      matrixInspectorHoverNudgeTimer = setTimeout(() => {
+        matrixInspectorHoverNudgeTimer = null;
+        matrixChartHoverNudgeFromPointer();
+      }, d);
+    }
+
+    function dispatchSyntheticPointerMoveOnElement(el, cx, cy) {
+      if (!el) return;
+      const init = { bubbles: true, cancelable: true, clientX: cx, clientY: cy, view: window };
+      try {
+        el.dispatchEvent(new MouseEvent('mousemove', init));
+      } catch (e) { /* ignore */ }
+      try {
+        if (typeof PointerEvent !== 'undefined') {
+          el.dispatchEvent(
+            new PointerEvent('pointermove', {
+              bubbles: true,
+              cancelable: true,
+              clientX: cx,
+              clientY: cy,
+              pointerId: 1,
+              pointerType: 'mouse',
+              isPrimary: true
+            })
+          );
+        }
+      } catch (e) { /* ignore */ }
+    }
+
+    /** Plotly does not refresh hover after scroll; window-level synthetic moves never reach the graph div. Hit-test + sync bands, or dispatch on the plot surface. */
+    function matrixChartHoverNudgeFromPointer() {
+      const cx = lastPointerClientX;
+      const cy = lastPointerClientY;
+      if (cx < 0 || cy < 0) return;
+      const chart = document.getElementById('matrix-chart');
+      const topEl = document.elementFromPoint(cx, cy);
+      if (chart && topEl && chart.contains(topEl)) {
+        const months = chart._matrixVisibleMonths;
+        const rows = chart._matrixExpandedRows;
+        const hit = matrixHitTestCellFromClientXY(chart, cx, cy);
+        if (hit && months && rows && months.length && rows.length) {
+          syncMatrixHoverToCell(chart, rows, months, hit.idx, hit.xKey, hit.bbox, undefined, {
+            forceShapes: true
+          });
+          return;
+        }
+        const layerTargets = [
+          topEl,
+          chart,
+          chart.querySelector('.nsewdrag'),
+          chart.querySelector('.svg-container')
+        ];
+        const seen = new Set();
+        for (const el of layerTargets) {
+          if (!el || !chart.contains(el) || seen.has(el)) continue;
+          seen.add(el);
+          dispatchSyntheticPointerMoveOnElement(el, cx, cy);
+        }
+        return;
+      }
+      const mileGd = document.getElementById('milestone-chart');
+      if (mileGd && topEl && mileGd.contains(topEl)) {
+        dispatchSyntheticPointerMoveOnElement(topEl, cx, cy);
+        dispatchSyntheticPointerMoveOnElement(mileGd, cx, cy);
+        const drag = mileGd.querySelector('.nsewdrag');
+        if (drag) dispatchSyntheticPointerMoveOnElement(drag, cx, cy);
+      }
+    }
 
     function cancelMatrixHoverExit() {
       if (matrixHoverExitTimer != null) {
@@ -1646,7 +1829,8 @@
      * Row tint uses paper y fractions (same math as expanded-project strip).
      * Column tint prefers hover bbox (exact cell bounds); falls back to uniform inner width if missing.
      */
-    function matrixHoverBandShapes(rowIndex, monthKey, rowCount, gd, hoverBbox) {
+    /** `visibleMonthsOverride`: use when `gd` has no layout yet (e.g. inspector base shapes during renderMatrix). */
+    function matrixHoverBandShapes(rowIndex, monthKey, rowCount, gd, hoverBbox, visibleMonthsOverride) {
       if (rowIndex < 0 || rowCount <= 0 || monthKey == null || monthKey === '') return [];
       const fill = 'rgba(140, 195, 255, 0.12)';
       const rowRect = {
@@ -1661,16 +1845,15 @@
         line: { width: 0 },
         layer: 'above'
       };
-      const layout = gd && gd._fullLayout;
-      const months = gd && (gd._milestoneVisibleMonths || gd._matrixVisibleMonths);
+      const months =
+        (visibleMonthsOverride && visibleMonthsOverride.length)
+          ? visibleMonthsOverride
+          : (gd && (gd._milestoneVisibleMonths || gd._matrixVisibleMonths));
       let colX = matrixPaperColumnXFromHoverBbox(gd, hoverBbox);
-      if (!colX && months && layout && layout._size) {
-        const gs = layout._size;
+      if (!colX && months) {
         const mi = months.indexOf(monthKey);
         const ncols = Math.max(1, months.length);
-        if (mi >= 0 && gs.w > 0) {
-          colX = { x0: mi / ncols, x1: (mi + 1) / ncols };
-        }
+        if (mi >= 0) colX = { x0: mi / ncols, x1: (mi + 1) / ncols };
       }
       if (!colX) return [rowRect];
       const colRect = {
@@ -1685,29 +1868,21 @@
         line: { width: 0 },
         layer: 'above'
       };
-      return [rowRect, colRect];
-    }
-
-    /** Provenance inspector: outline selected cell (paper coords; matches hover column fallback). */
-    function inspectorFocusCellOutlineShapes(focus, expandedRows, visibleMonths) {
-      if (!focus || focus.month == null || focus.rowKey == null) return [];
-      const mi = visibleMonths.indexOf(focus.month);
-      const ri = expandedRows.findIndex((r) => r.key === focus.rowKey);
-      if (mi < 0 || ri < 0) return [];
-      const nr = Math.max(1, expandedRows.length);
-      const nc = Math.max(1, visibleMonths.length);
-      return [{
+      const y0 = 1 - (rowIndex + 1) / rowCount;
+      const y1 = 1 - rowIndex / rowCount;
+      const cellOutline = {
         type: 'rect',
         xref: 'paper',
         yref: 'paper',
-        x0: mi / nc,
-        x1: (mi + 1) / nc,
-        y0: 1 - (ri + 1) / nr,
-        y1: 1 - ri / nr,
+        x0: colX.x0,
+        x1: colX.x1,
+        y0,
+        y1,
         fillcolor: 'rgba(0,0,0,0)',
-        line: { color: 'rgba(186, 230, 253, 0.95)', width: 2.5 },
+        line: { color: 'rgba(255, 255, 255, 0.9)', width: 2 },
         layer: 'above'
-      }];
+      };
+      return [rowRect, colRect, cellOutline];
     }
 
     /** z in (0,1) band per row so discrete row colors map cleanly on one heatmap. */
@@ -1771,6 +1946,134 @@
       };
       const withZ = points.find(hasZ);
       return withZ || points[0];
+    }
+
+    /**
+     * Map viewport coordinates to heatmap cell using _fullLayout._size + xgap-aware columns (same lattice as scroll math).
+     * Bbox uses the same space as Plotly hover bbox (see matrixPaperColumnXFromHoverBbox / plotlyHoverBboxToViewport).
+     */
+    function matrixHitTestCellFromClientXY(gd, clientX, clientY) {
+      if (!gd || !gd._fullLayout) return null;
+      const gs = gd._fullLayout._size;
+      if (!gs || !(gs.w > 0) || !(gs.h > 0)) return null;
+      const r = gd.getBoundingClientRect();
+      const figX = clientX - r.left;
+      const figY = clientY - r.top;
+      if (figX < gs.l || figX > gs.l + gs.w || figY < gs.t || figY > gs.t + gs.h) return null;
+      const rows = gd._matrixExpandedRows;
+      const months = gd._matrixVisibleMonths;
+      if (!rows || !rows.length || !months || !months.length) return null;
+      const n = rows.length;
+      const ncols = months.length;
+      const t = Math.max(0, Math.min(1, (figY - gs.t) / gs.h));
+      const idx = Math.min(n - 1, Math.max(0, Math.floor(t * n)));
+      const lx = figX - gs.l;
+      const geom = gd._matrixColGeom;
+      const xgap =
+        geom && Number.isFinite(Number(geom.xgap)) && Number(geom.xgap) >= 0 ? Number(geom.xgap) : 0;
+      const cw = (gs.w - Math.max(0, ncols - 1) * xgap) / Math.max(1, ncols);
+      let colIndex = 0;
+      let lx0;
+      let lx1;
+      if (cw > 0) {
+        colIndex = -1;
+        for (let i = 0; i < ncols; i++) {
+          const x0 = i * (cw + xgap);
+          const x1 = x0 + cw;
+          if (lx >= x0 && lx < x1) {
+            colIndex = i;
+            break;
+          }
+        }
+        if (colIndex < 0) {
+          const slot = lx / (cw + xgap);
+          colIndex = Math.min(ncols - 1, Math.max(0, Math.round(slot)));
+        }
+        lx0 = gs.l + colIndex * (cw + xgap);
+        lx1 = lx0 + cw;
+      } else {
+        const slotW = gs.w / Math.max(1, ncols);
+        colIndex = Math.min(ncols - 1, Math.max(0, Math.floor((lx / gs.w) * ncols)));
+        lx0 = gs.l + colIndex * slotW;
+        lx1 = lx0 + slotW;
+      }
+      const xKey = months[colIndex];
+      const gLeft = gd.offsetLeft + gd.clientLeft;
+      const gTop = gd.offsetTop + gd.clientTop;
+      const paperYTop = 1 - idx / n;
+      const paperYBottom = 1 - (idx + 1) / n;
+      const fy0 = gs.t + (1 - paperYTop) * gs.h;
+      const fy1 = gs.t + (1 - paperYBottom) * gs.h;
+      const bbox = { x0: lx0 + gLeft, y0: fy0 + gTop, x1: lx1 + gLeft, y1: fy1 + gTop };
+      return { idx, xKey, bbox };
+    }
+
+    /**
+     * One place for matrix hover visuals (row affordance, shapes, milestone column, tooltips when inspector closed).
+     * @param {{ forceShapes?: boolean }} [opts] — after programmatic scroll, pass { forceShapes: true } so bands relayout even if cell key unchanged.
+     */
+    function syncMatrixHoverToCell(chart, rows, visibleMonths, idx, xKey, bbox, pointerEvent, opts) {
+      const ml = document.getElementById('matrix-labels');
+      if (!chart || !rows || !ml) return;
+      const inspPanel = document.getElementById('provenance-inspector');
+      const inspectorOpen = Boolean(inspPanel && !inspPanel.hidden);
+      cancelMatrixHoverExit();
+      if (bbox) {
+        chart._lastMatrixCellBboxPage = {
+          x0: bbox.x0,
+          y0: bbox.y0,
+          x1: bbox.x1,
+          y1: bbox.y1
+        };
+      } else {
+        chart._lastMatrixCellBboxPage = null;
+      }
+      const kids = ml.children;
+      for (let i = 0; i < kids.length; i++) {
+        kids[i].classList.toggle('hover-row-affordance', i === idx);
+      }
+      const row = rows[idx];
+      if (!row) return;
+      const localMonthIdx = visibleMonths.indexOf(xKey);
+      const globalMonthIdx = localMonthIdx >= 0 ? (visibleStartIdx + localMonthIdx) : -1;
+      if (!inspectorOpen && row.type === 'project' && globalMonthIdx >= 0) {
+        const po = document.getElementById('provenance-overlay');
+        if (po && !po.hidden && po.classList.contains('provenance-overlay--hover')) {
+          closeProvenanceOverlay();
+        }
+        showMatrixProjectTooltip({
+          month: xKey,
+          project: row.project,
+          globalMonthIdx,
+          bbox,
+          gd: chart,
+          pointerEvent,
+          gridHint: { m: localMonthIdx, r: idx }
+        });
+      } else if (!inspectorOpen && row.type === 'activity' && localMonthIdx >= 0) {
+        openProvenanceOverlay(xKey, row.project, row.label, bbox, chart.getBoundingClientRect(), pointerEvent);
+      }
+      const json = chart._matrixHoverBaseShapesJson;
+      if (!json) return;
+      const bandKey = `${idx}\0${xKey}`;
+      const forceShapes = Boolean(opts && opts.forceShapes);
+      if (!forceShapes && chart._matrixHoverBandKey === bandKey) return;
+      chart._matrixHoverBandKey = bandKey;
+      let base;
+      try {
+        base = JSON.parse(json);
+      } catch (e) {
+        chart._matrixHoverBandKey = '';
+        return;
+      }
+      const bands = matrixHoverBandShapes(idx, xKey, rows.length, chart, bbox);
+      const merged = base.concat(bands);
+      try {
+        Plotly.relayout(chart, { shapes: merged });
+      } catch (e) {
+        chart._matrixHoverBandKey = '';
+      }
+      relayoutMilestoneColumnHighlight(chart, xKey, bbox);
     }
     /** Row bands + midlines in paper y so they track categorical heatmap rows (same idea as matrix row tints). */
     function makeMilestoneLaneShapes() {
@@ -2691,6 +2994,8 @@
     const MATRIX_INSPECTOR_MIN_PX_PER_COL = 16;
     /** Brick widths from #matrix-scroll left edge to the selected column’s left (inspector horizontal focus). */
     const MATRIX_INSPECTOR_LEFT_COL_MARGIN = 2;
+    /** Eased inspector scroll duration (ms); custom animation — slower than native `smooth`. */
+    const MATRIX_INSPECTOR_SCROLL_DURATION_MS = 520;
 
     /** Min layout width so each month column can be at least MATRIX_CELL_MIN_PX with xGap between bricks. */
     function matrixMinPlotWidthForFullRange(monthCount, marginLR, xGap) {
@@ -2874,8 +3179,13 @@
       const inspPanel = document.getElementById('provenance-inspector');
       const chartPre = document.getElementById('matrix-chart');
       const cellFocus = chartPre && chartPre._inspectorCellFocus;
-      if (inspPanel && !inspPanel.hidden && cellFocus) {
-        matrixShapes.push(...inspectorFocusCellOutlineShapes(cellFocus, expandedRows, visibleMonths));
+      if (inspPanel && !inspPanel.hidden && cellFocus && cellFocus.month != null && cellFocus.rowKey != null) {
+        const riSel = expandedRows.findIndex((r) => r.key === cellFocus.rowKey);
+        if (riSel >= 0 && visibleMonths.includes(cellFocus.month)) {
+          matrixShapes.push(
+            ...matrixHoverBandShapes(riSel, cellFocus.month, expandedRows.length, chartPre, null, visibleMonths)
+          );
+        }
       }
 
       const matrixChartEl = document.getElementById('matrix-chart');
@@ -2981,9 +3291,6 @@
           const rows = chart._matrixExpandedRows;
           const ml = document.getElementById('matrix-labels');
           if (!rows || !ml) return;
-          /* Inspector locks a single cell; hover tooltips/bands would show a different month/row and read as wrong. */
-          const inspPanel = document.getElementById('provenance-inspector');
-          if (inspPanel && !inspPanel.hidden) return;
           const pt = pickMatrixHoverPoint(ev.points);
           if (!pt || pt.y == null || pt.x == null) return;
           const yKey = typeof pt.y === 'string' ? pt.y : String(pt.y);
@@ -2993,62 +3300,7 @@
             scheduleMatrixHoverExit();
             return;
           }
-          cancelMatrixHoverExit();
-          if (pt.bbox) {
-            chart._lastMatrixCellBboxPage = {
-              x0: pt.bbox.x0,
-              y0: pt.bbox.y0,
-              x1: pt.bbox.x1,
-              y1: pt.bbox.y1
-            };
-          } else {
-            chart._lastMatrixCellBboxPage = null;
-          }
-          const kids = ml.children;
-          for (let i = 0; i < kids.length; i++) {
-            kids[i].classList.toggle('hover-row-affordance', i === idx);
-          }
-          const row = rows[idx];
-          const localMonthIdx = visibleMonths.indexOf(xKey);
-          const globalMonthIdx = localMonthIdx >= 0 ? (visibleStartIdx + localMonthIdx) : -1;
-          const pointerEvent = (ev && ev.event) || undefined;
-          if (row.type === 'project' && globalMonthIdx >= 0) {
-            const po = document.getElementById('provenance-overlay');
-            if (po && !po.hidden && po.classList.contains('provenance-overlay--hover')) {
-              closeProvenanceOverlay();
-            }
-            showMatrixProjectTooltip({
-              month: xKey,
-              project: row.project,
-              globalMonthIdx,
-              bbox: pt.bbox,
-              gd: chart,
-              pointerEvent,
-              gridHint: { m: localMonthIdx, r: idx }
-            });
-          } else if (row.type === 'activity' && localMonthIdx >= 0) {
-            openProvenanceOverlay(xKey, row.project, row.label, pt.bbox, chart.getBoundingClientRect(), pointerEvent);
-          }
-          const json = chart._matrixHoverBaseShapesJson;
-          if (!json) return;
-          const bandKey = `${idx}\0${xKey}`;
-          if (chart._matrixHoverBandKey === bandKey) return;
-          chart._matrixHoverBandKey = bandKey;
-          let base;
-          try {
-            base = JSON.parse(json);
-          } catch (e) {
-            chart._matrixHoverBandKey = '';
-            return;
-          }
-          const bands = matrixHoverBandShapes(idx, xKey, rows.length, chart, pt.bbox);
-          const merged = base.concat(bands);
-          try {
-            Plotly.relayout(chart, { shapes: merged });
-          } catch (e) {
-            chart._matrixHoverBandKey = '';
-          }
-          relayoutMilestoneColumnHighlight(chart, xKey, pt.bbox);
+          syncMatrixHoverToCell(chart, rows, visibleMonths, idx, xKey, pt.bbox, (ev && ev.event) || undefined);
         });
         chart.on('plotly_unhover', () => {
           scheduleMatrixHoverExit();
@@ -3208,7 +3460,7 @@
         if (!mileChart) return;
         mileChart.on('plotly_hover', (ev) => {
           const inspPanel = document.getElementById('provenance-inspector');
-          if (inspPanel && !inspPanel.hidden) return;
+          const inspectorOpen = Boolean(inspPanel && !inspPanel.hidden);
           const pt = ev.points && ev.points[0];
           if (!pt || pt.x == null || pt.y == null) return;
           const xKey = typeof pt.x === 'string' ? pt.x : String(pt.x);
@@ -3237,7 +3489,7 @@
             gridHint: localMonthIdx >= 0 ? { m: localMonthIdx, r: rowIdx } : undefined
           };
           if (mileChart._milestoneHoverBandKey === bandKey) {
-            showMilestoneHeatmapTooltip(tipPayload);
+            if (!inspectorOpen) showMilestoneHeatmapTooltip(tipPayload);
             return;
           }
           mileChart._milestoneHoverBandKey = bandKey;
@@ -3290,7 +3542,7 @@
               kids[i].classList.toggle('hover-row-affordance', i === rowIdx);
             }
           }
-          showMilestoneHeatmapTooltip(tipPayload);
+          if (!inspectorOpen) showMilestoneHeatmapTooltip(tipPayload);
         });
         mileChart.on('plotly_unhover', () => {
           const mj = mileChart._milestoneBaseShapesJson;
