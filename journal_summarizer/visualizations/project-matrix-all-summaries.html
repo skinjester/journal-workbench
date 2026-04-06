@@ -234,16 +234,16 @@
     .fixed-label.project-open {
       background: rgba(95, 146, 214, 0.1);
     }
-    /* Matrix hover: sync with Plotly spikes so the row label matches the cell under the cursor. */
+    /* Matrix hover: warm accent (--matrix-hover-* set from MATRIX_HOVER_TOKENS in script). */
     .fixed-label.hover-row-affordance {
-      background: rgba(140, 195, 255, 0.1);
+      background: var(--matrix-hover-label-bg, rgba(255, 186, 120, 0.16));
     }
     .fixed-label.project.hover-row-affordance {
-      background: rgba(95, 146, 214, 0.16);
+      background: var(--matrix-hover-label-bg-project, rgba(255, 165, 88, 0.24));
     }
     .fixed-label.child.hover-row-affordance {
-      background: rgba(140, 195, 255, 0.1);
-      border-left-color: rgba(186, 220, 255, 0.55);
+      background: var(--matrix-hover-label-bg, rgba(255, 186, 120, 0.16));
+      border-left-color: var(--matrix-hover-label-child-border, rgba(255, 205, 145, 0.62));
     }
     .fixed-label.milestone {
       color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
@@ -946,6 +946,31 @@
       const fb = { prototype: 'Prototype', presentation: 'Presentation', pdf: 'PDF' };
       return fb[s] || s;
     });
+    /**
+     * Matrix crosshair / hover: warm accent + dim veil so navigation reads separately from blue heatmap data.
+     * Values are mirrored onto :root for CSS row labels (see .fixed-label.hover-row-affordance).
+     */
+    const MATRIX_HOVER_TOKENS = {
+      crossFill: 'rgba(255, 186, 120, 0.2)',
+      dimVeil: 'rgba(4, 8, 14, 0.2)',
+      ruleColor: 'rgba(200, 165, 118, 0.58)',
+      ruleWidth: 1.35,
+      cellOutline: 'rgba(255, 255, 255, 0.82)',
+      cellOutlineWidth: 2,
+      milestoneColFill: 'rgba(255, 186, 120, 0.2)',
+      labelBg: 'rgba(255, 186, 120, 0.16)',
+      labelBgProject: 'rgba(255, 165, 88, 0.24)',
+      labelChildBorder: 'rgba(255, 205, 145, 0.62)'
+    };
+    (function applyMatrixHoverTokensToCss() {
+      const r = document.documentElement;
+      r.style.setProperty('--matrix-hover-cross-fill', MATRIX_HOVER_TOKENS.crossFill);
+      r.style.setProperty('--matrix-hover-dim-veil', MATRIX_HOVER_TOKENS.dimVeil);
+      r.style.setProperty('--matrix-hover-rule-color', MATRIX_HOVER_TOKENS.ruleColor);
+      r.style.setProperty('--matrix-hover-label-bg', MATRIX_HOVER_TOKENS.labelBg);
+      r.style.setProperty('--matrix-hover-label-bg-project', MATRIX_HOVER_TOKENS.labelBgProject);
+      r.style.setProperty('--matrix-hover-label-child-border', MATRIX_HOVER_TOKENS.labelChildBorder);
+    })();
     const mileSeries = {};
     mileSlugs.forEach((slug, i) => {
       const lab = mileRows[i];
@@ -1730,17 +1755,18 @@
       pdf: '#d29aff'
     };
     /* Activity layer always full intensity; project aggregate uses dim blues when another row is expanded. */
+    /* Slightly muted mids / peaks so warm crosshair overlay is easier to read over busy cells. */
     const intensityBluescale = [
       [0.0, '#0d1117'],
-      [0.3333, '#2a4564'],
-      [0.6666, '#316dca'],
-      [1.0, '#79c0ff']
+      [0.3333, '#283d55'],
+      [0.6666, '#2d6494'],
+      [1.0, '#68ace8']
     ];
     const projectDimBluescale = [
       [0.0, '#050608'],
-      [0.3333, '#1a2838'],
-      [0.6666, '#1a4772'],
-      [1.0, '#3d6f9e']
+      [0.3333, '#1e2d3d'],
+      [0.6666, '#1c5286'],
+      [1.0, '#3a6fa3']
     ];
     /**
      * Row bands under heatmaps. Strong project-vs-activity contrast only when a project is expanded;
@@ -1829,18 +1855,70 @@
      * Row tint uses paper y fractions (same math as expanded-project strip).
      * Column tint prefers hover bbox (exact cell bounds); falls back to uniform inner width if missing.
      */
+    /** Dim plot regions outside the hovered row/column cross (paper coords). */
+    function matrixHoverDimOutsideCrossShapes(rowIndex, rowCount, colX) {
+      const veil = MATRIX_HOVER_TOKENS.dimVeil;
+      const layer = 'above';
+      const n = rowCount;
+      const y0 = 1 - (rowIndex + 1) / n;
+      const y1 = 1 - rowIndex / n;
+      if (!colX) {
+        return [
+          { type: 'rect', xref: 'paper', yref: 'paper', x0: 0, x1: 1, y0: 0, y1: y0, fillcolor: veil, line: { width: 0 }, layer },
+          { type: 'rect', xref: 'paper', yref: 'paper', x0: 0, x1: 1, y0: y1, y1: 1, fillcolor: veil, line: { width: 0 }, layer }
+        ];
+      }
+      const x0 = colX.x0;
+      const x1 = colX.x1;
+      return [
+        { type: 'rect', xref: 'paper', yref: 'paper', x0: 0, x1: 1, y0: 0, y1: y0, fillcolor: veil, line: { width: 0 }, layer },
+        { type: 'rect', xref: 'paper', yref: 'paper', x0: 0, x1: x0, y0: y1, y1: 1, fillcolor: veil, line: { width: 0 }, layer },
+        { type: 'rect', xref: 'paper', yref: 'paper', x0: x1, x1: 1, y0: y1, y1: 1, fillcolor: veil, line: { width: 0 }, layer },
+        { type: 'rect', xref: 'paper', yref: 'paper', x0: 0, x1: x0, y0, y1, fillcolor: veil, line: { width: 0 }, layer },
+        { type: 'rect', xref: 'paper', yref: 'paper', x0: x1, x1: 1, y0, y1, fillcolor: veil, line: { width: 0 }, layer }
+      ];
+    }
+
+    /** Full-span row/column guide lines at the cross edges (paper coords). */
+    function matrixHoverCrossRuleLineShapes(rowIndex, rowCount, colX) {
+      const T = MATRIX_HOVER_TOKENS;
+      const n = rowCount;
+      const y0 = 1 - (rowIndex + 1) / n;
+      const y1 = 1 - rowIndex / n;
+      const lc = T.ruleColor;
+      const lw = T.ruleWidth;
+      const layer = 'above';
+      const seg = (x0, x1, ys0, ys1) => ({
+        type: 'line',
+        xref: 'paper',
+        yref: 'paper',
+        x0,
+        x1,
+        y0: ys0,
+        y1: ys1,
+        line: { color: lc, width: lw },
+        layer
+      });
+      const horiz = [seg(0, 1, y1, y1), seg(0, 1, y0, y0)];
+      if (!colX) return horiz;
+      return [...horiz, seg(colX.x0, colX.x0, 0, 1), seg(colX.x1, colX.x1, 0, 1)];
+    }
+
     /** `visibleMonthsOverride`: use when `gd` has no layout yet (e.g. inspector base shapes during renderMatrix). */
     function matrixHoverBandShapes(rowIndex, monthKey, rowCount, gd, hoverBbox, visibleMonthsOverride) {
       if (rowIndex < 0 || rowCount <= 0 || monthKey == null || monthKey === '') return [];
-      const fill = 'rgba(140, 195, 255, 0.12)';
+      const T = MATRIX_HOVER_TOKENS;
+      const fill = T.crossFill;
+      const ry0 = 1 - (rowIndex + 1) / rowCount;
+      const ry1 = 1 - rowIndex / rowCount;
       const rowRect = {
         type: 'rect',
         xref: 'paper',
         yref: 'paper',
         x0: 0,
         x1: 1,
-        y0: 1 - (rowIndex + 1) / rowCount,
-        y1: 1 - rowIndex / rowCount,
+        y0: ry0,
+        y1: ry1,
         fillcolor: fill,
         line: { width: 0 },
         layer: 'above'
@@ -1855,7 +1933,11 @@
         const ncols = Math.max(1, months.length);
         if (mi >= 0) colX = { x0: mi / ncols, x1: (mi + 1) / ncols };
       }
-      if (!colX) return [rowRect];
+      const dim = matrixHoverDimOutsideCrossShapes(rowIndex, rowCount, colX);
+      const rules = matrixHoverCrossRuleLineShapes(rowIndex, rowCount, colX);
+      if (!colX) {
+        return dim.concat(rowRect, rules);
+      }
       const colRect = {
         type: 'rect',
         xref: 'paper',
@@ -1868,21 +1950,19 @@
         line: { width: 0 },
         layer: 'above'
       };
-      const y0 = 1 - (rowIndex + 1) / rowCount;
-      const y1 = 1 - rowIndex / rowCount;
       const cellOutline = {
         type: 'rect',
         xref: 'paper',
         yref: 'paper',
         x0: colX.x0,
         x1: colX.x1,
-        y0,
-        y1,
+        y0: ry0,
+        y1: ry1,
         fillcolor: 'rgba(0,0,0,0)',
-        line: { color: 'rgba(255, 255, 255, 0.9)', width: 2 },
+        line: { color: T.cellOutline, width: T.cellOutlineWidth },
         layer: 'above'
       };
-      return [rowRect, colRect, cellOutline];
+      return dim.concat(rowRect, colRect, rules, cellOutline);
     }
 
     /** z in (0,1) band per row so discrete row colors map cleanly on one heatmap. */
@@ -1928,7 +2008,7 @@
         x1: colX.x1,
         y0: 0,
         y1: 1,
-        fillcolor: 'rgba(140, 195, 255, 0.12)',
+        fillcolor: MATRIX_HOVER_TOKENS.milestoneColFill,
         line: { width: 0 },
         layer: 'above'
       };
@@ -3526,7 +3606,7 @@
                   x1: colX.x1,
                   y0: 0,
                   y1: 1,
-                  fillcolor: 'rgba(140, 195, 255, 0.12)',
+                  fillcolor: MATRIX_HOVER_TOKENS.milestoneColFill,
                   line: { width: 0 },
                   layer: 'above'
                 }]
