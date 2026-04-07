@@ -197,12 +197,19 @@
     .chart-panel:has(.provenance-inspector-collapsed-slot:not([hidden])) .deliverables-workbench-row {
       gap: var(--sp-2);
     }
-    .chart-panel:has(#provenance-inspector:not([hidden])) .deliverables-inspector-spacer,
-    .chart-panel:has(.provenance-inspector-collapsed-slot:not([hidden])) .deliverables-inspector-spacer {
+    .chart-panel:has(#provenance-inspector:not([hidden])) .deliverables-inspector-spacer {
       flex: 0 0 min(360px, 38%);
       min-width: 260px;
       max-width: min(360px, 100%);
       width: auto;
+      align-self: stretch;
+    }
+    /* Strip only (inspector closed): match 40px rail so Deliverables stays aligned with the heatmap column. */
+    .chart-panel:has(.provenance-inspector-collapsed-slot:not([hidden])):not(:has(#provenance-inspector:not([hidden]))) .deliverables-inspector-spacer {
+      flex: 0 0 40px;
+      min-width: 40px;
+      max-width: 40px;
+      width: 40px;
       align-self: stretch;
     }
     .provenance-inspector-collapsed-slot {
@@ -690,7 +697,7 @@
       }
       /* Inspector is stacked below the matrix; do not reserve a right column under Deliverables. */
       .chart-panel:has(#provenance-inspector:not([hidden])) .deliverables-inspector-spacer,
-      .chart-panel:has(.provenance-inspector-collapsed-slot:not([hidden])) .deliverables-inspector-spacer {
+      .chart-panel:has(.provenance-inspector-collapsed-slot:not([hidden])):not(:has(#provenance-inspector:not([hidden]))) .deliverables-inspector-spacer {
         display: none;
       }
     }
@@ -1134,7 +1141,7 @@
             <div class="legend-item"><span class="swatch" style="background: var(--track-1);"></span><span><strong>1</strong> trace signal</span></div>
             <div class="legend-item"><span class="swatch" style="background: var(--track-2);"></span><span><strong>2</strong> active secondary thread</span></div>
             <div class="legend-item"><span class="swatch" style="background: var(--track-3);"></span><span><strong>3</strong> peak for that project row (volume) or monthly winner (dominance)</span></div>
-            <div class="legend-item"><span class="swatch" style="background: var(--track-2);"></span><span>Open a project to show only that project’s aggregate row plus activity sub-rows (full blues). Use <strong>All projects</strong> above the list or click the project row again to return to the full grid; scroll inside the map viewport to move through rows</span></div>
+            <div class="legend-item"><span class="swatch" style="background: var(--track-2);"></span><span>Click a <strong>heatmap</strong> cell to open the sidebar for that month (project row = full summary, activity row = matching lines). Click a <strong>project name</strong> in the list to drill to that project’s aggregate row plus activity sub-rows. Use <strong>All projects</strong> or the same name again to return to the full grid; scroll inside the map viewport to move through rows.</span></div>
             <div class="legend-item"><span class="swatch" style="background: linear-gradient(90deg,#f07178,#6cb6ff,#d2a8ff,#56d4dd,#80e2a2,#ffba68,#adb5bd,#d29aff);"></span><span>Deliverable timeline: one row per <code>deliv:*</code> type in monthly summaries; heatmap cells mark months with that tag (same layout as the project matrix; prototype/presentation/PDF rows also pick up legacy vocabulary when tags are absent)</span></div>
           </div>
         </section>
@@ -1442,6 +1449,79 @@
         if (ms) ms.scrollLeft = sl;
         if (typeof after === 'function') queueMicrotask(after);
       }
+    }
+
+    /**
+     * Left/right edges of heatmap column `localIdx` (0..nCols-1) in #matrix-scroll content coordinates.
+     * Must match scrollMatrixToCenterMonth (xgap-aware column width).
+     */
+    function getMatrixMonthColumnContentBounds(chart, localIdx) {
+      const scrollEl = document.getElementById('matrix-scroll');
+      if (!scrollEl || !chart) return null;
+      const geom = chart._matrixColGeom;
+      if (!geom || geom.nCols <= 0 || localIdx < 0 || localIdx >= geom.nCols) return null;
+      const nCols = geom.nCols;
+      const xgap =
+        Number.isFinite(Number(geom.xgap)) && Number(geom.xgap) >= 0 ? Number(geom.xgap) : 0;
+      const cr = chart.getBoundingClientRect();
+      const layoutW =
+        chart._fullLayout && chart._fullLayout.width > 0 ? chart._fullLayout.width : cr.width;
+      const scale = cr.width / Math.max(1, layoutW);
+      const gs = chart._fullLayout && chart._fullLayout._size;
+      let colLeftLayoutPx;
+      let cwLayout = layoutW / Math.max(1, nCols);
+      if (gs && Number(gs.w) > 0 && typeof gs.l === 'number') {
+        const innerW = gs.w;
+        const cw = (innerW - Math.max(0, nCols - 1) * xgap) / Math.max(1, nCols);
+        if (cw > 0 && Number.isFinite(cw)) {
+          colLeftLayoutPx = gs.l + localIdx * (cw + xgap);
+          cwLayout = cw;
+        } else {
+          const innerNominal = innerW / Math.max(1, nCols);
+          colLeftLayoutPx = gs.l + localIdx * innerNominal;
+          cwLayout = innerNominal;
+        }
+      } else {
+        const slotW = layoutW / Math.max(1, nCols);
+        colLeftLayoutPx = ((localIdx + 0.5) / nCols) * layoutW - slotW / 2;
+        cwLayout = slotW;
+      }
+      const colLeftCssPx = colLeftLayoutPx * scale;
+      const chartLeftInContent =
+        scrollEl.scrollLeft + cr.left - scrollEl.getBoundingClientRect().left;
+      const cellLeftInContent = chartLeftInContent + colLeftCssPx;
+      const cwCss = cwLayout * scale;
+      return { left: cellLeftInContent, right: cellLeftInContent + cwCss };
+    }
+
+    /**
+     * True if the focused row label and month column already intersect the matrix viewports (no scroll-to-pin needed).
+     * Used when the sidebar stayed open: avoid re-running the inspector horizontal “pin” when the user picks another in-view cell.
+     */
+    function matrixInspectorFocusSelectionInViewport(chart, globalMonthIdx, rowIdx, visibleMonths) {
+      if (rowIdx == null || rowIdx < 0 || !visibleMonths || !visibleMonths.length) return false;
+      const monthKey = data.months[globalMonthIdx];
+      if (!monthKey || !visibleMonths.includes(monthKey)) return false;
+      const localIdx = visibleMonths.indexOf(monthKey);
+      const pane = document.querySelector('.matrix-shell.timeline-pane');
+      const ml = document.getElementById('matrix-labels');
+      if (!pane || !ml) return false;
+      const rowEl = ml.children[rowIdx];
+      if (!rowEl) return false;
+      const vTol = 3;
+      const rowRect = rowEl.getBoundingClientRect();
+      const paneRect = pane.getBoundingClientRect();
+      if (rowRect.top < paneRect.top - vTol || rowRect.bottom > paneRect.bottom + vTol) return false;
+
+      const scrollEl = document.getElementById('matrix-scroll');
+      if (!scrollEl) return false;
+      const bounds = getMatrixMonthColumnContentBounds(chart, localIdx);
+      if (!bounds) return false;
+      const viewL = scrollEl.scrollLeft;
+      const viewR = scrollEl.scrollLeft + scrollEl.clientWidth;
+      const hTol = 2;
+      if (bounds.right <= viewL + hTol || bounds.left >= viewR - hTol) return false;
+      return true;
     }
 
     /** After inspector opens + matrix replot: only scroll vertically if the row is off-screen (instant), then horizontal month reveal.
@@ -1816,7 +1896,7 @@
       const btn = document.getElementById('prov-inspector-show-collapsed');
       if (!slot || !insp) return;
       const inspOpen = !insp.hasAttribute('hidden');
-      const show = Boolean(provenanceInspectorLastOpen) && !inspOpen;
+      const show = !inspOpen;
       if (show) {
         slot.removeAttribute('hidden');
         slot.setAttribute('aria-hidden', 'false');
@@ -1832,12 +1912,38 @@
       }
     }
 
+    /** When the strip is opened with no prior cell, pick a visible month and the first project row (or first activity row). */
+    function openProvenanceInspectorDefaultCell() {
+      const chart = document.getElementById('matrix-chart');
+      const rows = chart && chart._matrixExpandedRows;
+      const visible = data.months.slice(visibleStartIdx, visibleEndIdx + 1);
+      if (!rows || rows.length === 0 || visible.length === 0) return;
+      const month = visible[Math.min(visible.length - 1, Math.floor(visible.length / 2))];
+      const projectRow = rows.find((r) => r.type === 'project') || rows[0];
+      const rowIdx = rows.indexOf(projectRow);
+      if (projectRow.type === 'project') {
+        openProvenanceInspector(month, projectRow.project, '', {
+          projectOverview: true,
+          rowIndex: rowIdx,
+          rowKey: projectRow.key
+        });
+      } else if (projectRow.type === 'activity') {
+        openProvenanceInspector(month, projectRow.project, projectRow.label, {
+          rowIndex: rowIdx,
+          rowKey: projectRow.key
+        });
+      }
+    }
+
     function reopenCollapsedProvenanceInspector() {
-      const s = provenanceInspectorLastOpen;
-      if (!s) return;
       const insp = document.getElementById('provenance-inspector');
       if (insp && !insp.hasAttribute('hidden')) return;
-      openProvenanceInspector(s.month, s.project, s.activity, s.focusMeta || undefined);
+      if (provenanceInspectorLastOpen) {
+        const s = provenanceInspectorLastOpen;
+        openProvenanceInspector(s.month, s.project, s.activity, s.focusMeta || undefined);
+        return;
+      }
+      openProvenanceInspectorDefaultCell();
     }
 
     function scheduleSyncProvenanceInspectorAlignment() {
@@ -1870,22 +1976,30 @@
       const root = document.getElementById('provenance-inspector');
       const chart = document.getElementById('matrix-chart');
       const prov = typeof provenanceData !== 'undefined' ? provenanceData : null;
+      const projectOverview = Boolean(focusMeta && focusMeta.projectOverview);
+      const wasInspectorAlreadyOpen = Boolean(root && !root.hasAttribute('hidden'));
+      const wasLayoutAlreadyActive = matrixInspectorLayoutActive;
       if (!root || typeof ProvenanceView === 'undefined' || !prov || !prov.monthSources) {
         if (chart) chart._inspectorCellFocus = null;
-        navigateProvenancePage(month, project, activity);
+        navigateProvenancePage(month, project, projectOverview ? 'overview' : activity);
         return;
       }
       closeProvenanceOverlay();
       clearMatrixHoverBands(chart);
       cancelMatrixHoverExit();
       hideChartTooltip();
-      const cellKey = `${month}\0${project}\0${activity}`;
+      const cellKey = `${month}\0${project}\0${projectOverview ? '__overview__' : activity}`;
       if (typeof marked !== 'undefined') {
         marked.setOptions({ gfm: true, breaks: false });
       }
       root.removeAttribute('hidden');
       root.setAttribute('aria-hidden', 'false');
       if (chart) {
+        const willScrollFocus =
+          Boolean(focusMeta && focusMeta.rowKey != null && focusMeta.rowIndex != null && focusMeta.rowIndex >= 0) &&
+          data.months.indexOf(month) >= 0;
+        chart._skipInspectorScrollIfInView =
+          willScrollFocus && wasInspectorAlreadyOpen && wasLayoutAlreadyActive;
         chart._provenanceOpenKey = cellKey;
         if (focusMeta && focusMeta.rowKey != null && focusMeta.rowIndex != null && focusMeta.rowIndex >= 0) {
           chart._inspectorCellFocus = {
@@ -1893,7 +2007,7 @@
             rowKey: focusMeta.rowKey,
             rowIndex: focusMeta.rowIndex,
             project,
-            activity
+            activity: projectOverview ? '' : activity
           };
           const g = data.months.indexOf(month);
           if (g >= 0) {
@@ -1912,9 +2026,10 @@
       ProvenanceView.render({
         month,
         project,
-        activity,
+        activity: projectOverview ? '' : activity,
+        projectOverview,
         provenanceData: prov,
-        matchesOnly: true,
+        matchesOnly: !projectOverview,
         kickerEl: document.getElementById('prov-inspector-kicker'),
         titleEl: document.getElementById('prov-inspector-title'),
         metaEl: document.getElementById('prov-inspector-meta'),
@@ -1923,10 +2038,14 @@
       provenanceInspectorLastOpen = {
         month,
         project,
-        activity,
+        activity: projectOverview ? '' : activity,
         focusMeta:
           focusMeta && focusMeta.rowKey != null && focusMeta.rowIndex != null && focusMeta.rowIndex >= 0
-            ? { rowKey: focusMeta.rowKey, rowIndex: focusMeta.rowIndex }
+            ? {
+                rowKey: focusMeta.rowKey,
+                rowIndex: focusMeta.rowIndex,
+                projectOverview: Boolean(projectOverview)
+              }
             : null
       };
       syncProvenanceInspectorCollapsedSlotVisibility();
@@ -1959,6 +2078,7 @@
       if (chart) {
         chart._provenanceOpenKey = '';
         chart._inspectorCellFocus = null;
+        delete chart._skipInspectorScrollIfInView;
       }
       requestAnimationFrame(() =>
         scheduleMatrixChartResize({
@@ -3761,7 +3881,12 @@
           const xKey = typeof point.x === 'string' ? point.x : String(point.x);
           const rows = chart._matrixExpandedRows || [];
           if (data.rows.includes(yKey)) {
-            setActiveProject(yKey);
+            const rowIdx = rows.findIndex((r) => r.key === yKey);
+            const fm =
+              rowIdx >= 0
+                ? { projectOverview: true, rowIndex: rowIdx, rowKey: yKey }
+                : { projectOverview: true };
+            openProvenanceInspector(xKey, yKey, '', fm);
             return;
           }
           const rowIdx = rows.findIndex((r) => r.key === yKey);
@@ -3793,16 +3918,23 @@
         }
         const insp = document.getElementById('provenance-inspector');
         const focus = chart._inspectorCellFocus;
+        const skipScrollIfInView = chart._skipInspectorScrollIfInView === true;
+        delete chart._skipInspectorScrollIfInView;
         if (insp && !insp.hidden && focus && focus.month && focus.rowKey != null) {
           const g = data.months.indexOf(focus.month);
           const monthOk = g >= 0 && visibleMonths.includes(focus.month);
           const rowOk = expandedRows.some((r) => r.key === focus.rowKey);
           if (monthOk && rowOk) {
             const ri = expandedRows.findIndex((r) => r.key === focus.rowKey);
-            runInspectorMatrixScrollFocus(chart, g, ri);
+            const alreadyInView =
+              skipScrollIfInView && matrixInspectorFocusSelectionInViewport(chart, g, ri, visibleMonths);
+            if (!alreadyInView) {
+              runInspectorMatrixScrollFocus(chart, g, ri);
+            }
           }
         }
         scheduleSyncProvenanceInspectorAlignment();
+        syncProvenanceInspectorCollapsedSlotVisibility();
       });
 
       const matrixLabelShell = document.querySelector('.matrix-shell .fixed-labels');

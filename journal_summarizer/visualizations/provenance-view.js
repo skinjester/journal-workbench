@@ -380,15 +380,17 @@
     const bodyEl = options.bodyEl;
     const provenanceData = options.provenanceData || {};
     const matchesOnly = Boolean(options.matchesOnly);
+    const projectOverview = Boolean(options.projectOverview);
 
     if (!bodyEl) return { ok: false, error: 'Missing body element' };
 
-    if (!month || !project || !activity) {
+    if (!month || !project || (!projectOverview && !activity)) {
       if (kickerEl) kickerEl.textContent = '';
       if (titleEl) titleEl.textContent = 'Missing parameters';
       if (metaEl) {
-        metaEl.innerHTML =
-          '<span class="err">Use <code>?month=YYYY-MM&project=…&activity=…</code> (open from the matrix by clicking a subcategory cell).</span>';
+        metaEl.innerHTML = projectOverview
+          ? ''
+          : '<span class="err">Use <code>?month=YYYY-MM&project=…&activity=…</code> (open from the matrix by clicking a subcategory cell).</span>';
       }
       bodyEl.textContent = '';
       return { ok: false, error: 'missing-params' };
@@ -397,6 +399,29 @@
     const months = provenanceData.months || [];
     const mi = months.indexOf(month);
     const source = (provenanceData.monthSources && provenanceData.monthSources[month]) || '';
+
+    if (projectOverview) {
+      if (kickerEl) kickerEl.textContent = month;
+      if (titleEl) titleEl.textContent = project;
+      if (metaEl) metaEl.textContent = 'Project overview';
+      if (!source) {
+        bodyEl.innerHTML = '<span class="empty">No summary text found for this month.</span>';
+        return { ok: true };
+      }
+      if (Boolean(options.hoverSummary)) {
+        bodyEl.innerHTML = '<p class="prov-hover-count">Full month summary</p>';
+        return { ok: true };
+      }
+      renderSummaryBody(bodyEl, source, new Set());
+      const firstOv = bodyEl.querySelector('.summary-block--hl, .people-chip--hl');
+      if (firstOv && typeof firstOv.scrollIntoView === 'function') {
+        requestAnimationFrame(function () {
+          firstOv.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        });
+      }
+      return { ok: true };
+    }
+
     const prov = provenanceData.activityProvenance && provenanceData.activityProvenance[project];
     const series = prov && prov[activity];
     const rawHl = series && mi >= 0 && mi < series.length ? series[mi] : null;
