@@ -2056,15 +2056,21 @@
       } catch (e) { /* ignore */ }
     }
 
-    /** Prefer the heatmap trace that has a real z at this cell (dual project/activity layers). */
+    /**
+     * Dual heatmaps: prefer the topmost trace that has a real z at this cell (activity layer is drawn last).
+     * When the upper trace is null for a cell, Plotly may only list a null-z point first — still scan all traces.
+     */
     function pickMatrixHoverPoint(points) {
       if (!points || !points.length) return null;
       const hasZ = (p) => {
         const z = p.z;
         return z !== undefined && z !== null && !(typeof z === 'number' && Number.isNaN(z));
       };
-      const withZ = points.find(hasZ);
-      return withZ || points[0];
+      const sorted = [...points].sort((a, b) => (b.curveNumber || 0) - (a.curveNumber || 0));
+      for (let i = 0; i < sorted.length; i++) {
+        if (hasZ(sorted[i])) return sorted[i];
+      }
+      return sorted[0];
     }
 
     /**
@@ -2128,14 +2134,13 @@
     }
 
     /**
-     * One place for matrix hover visuals (row affordance, shapes, milestone column, tooltips when inspector closed).
+     * One place for matrix hover visuals (row affordance, shapes, milestone column, #chart-tooltip).
+     * Tooltips show in drill view even when the provenance inspector is open; entering the inspector still dismisses them via its pointer handler.
      * @param {{ forceShapes?: boolean }} [opts] — after programmatic scroll, pass { forceShapes: true } so bands relayout even if cell key unchanged.
      */
     function syncMatrixHoverToCell(chart, rows, visibleMonths, idx, xKey, bbox, pointerEvent, opts) {
       const ml = document.getElementById('matrix-labels');
       if (!chart || !rows || !ml) return;
-      const inspPanel = document.getElementById('provenance-inspector');
-      const inspectorOpen = Boolean(inspPanel && !inspPanel.hidden);
       cancelMatrixHoverExit();
       if (bbox) {
         chart._lastMatrixCellBboxPage = {
@@ -2153,15 +2158,16 @@
       }
       const row = rows[idx];
       if (!row) return;
-      const localMonthIdx = visibleMonths.indexOf(xKey);
+      const xKeyStr = xKey == null ? '' : String(xKey);
+      const localMonthIdx = visibleMonths.findIndex((m) => String(m) === xKeyStr);
       const globalMonthIdx = localMonthIdx >= 0 ? (visibleStartIdx + localMonthIdx) : -1;
-      if (!inspectorOpen && row.type === 'project' && globalMonthIdx >= 0) {
+      if (row.type === 'project' && globalMonthIdx >= 0) {
         const po = document.getElementById('provenance-overlay');
         if (po && !po.hidden && po.classList.contains('provenance-overlay--hover')) {
           closeProvenanceOverlay();
         }
         showMatrixProjectTooltip({
-          month: xKey,
+          month: xKeyStr || xKey,
           project: row.project,
           globalMonthIdx,
           bbox,
@@ -2169,13 +2175,13 @@
           pointerEvent,
           gridHint: { m: localMonthIdx, r: idx }
         });
-      } else if (!inspectorOpen && row.type === 'activity' && localMonthIdx >= 0) {
+      } else if (row.type === 'activity' && localMonthIdx >= 0) {
         const po = document.getElementById('provenance-overlay');
         if (po && !po.hidden && po.classList.contains('provenance-overlay--hover')) {
           closeProvenanceOverlay();
         }
         showMatrixActivityOverviewTooltip({
-          month: xKey,
+          month: xKeyStr || xKey,
           project: row.project,
           activity: row.label,
           bbox,
@@ -2186,7 +2192,8 @@
       }
       const json = chart._matrixHoverBaseShapesJson;
       if (!json) return;
-      const bandKey = `${idx}\0${xKey}`;
+      const monthKeyForBands = xKeyStr || xKey;
+      const bandKey = `${idx}\0${monthKeyForBands}`;
       const forceShapes = Boolean(opts && opts.forceShapes);
       if (!forceShapes && chart._matrixHoverBandKey === bandKey) return;
       chart._matrixHoverBandKey = bandKey;
@@ -2197,14 +2204,14 @@
         chart._matrixHoverBandKey = '';
         return;
       }
-      const bands = matrixHoverBandShapes(idx, xKey, rows.length, chart, bbox);
+      const bands = matrixHoverBandShapes(idx, monthKeyForBands, rows.length, chart, bbox);
       const merged = base.concat(bands);
       try {
         Plotly.relayout(chart, { shapes: merged });
       } catch (e) {
         chart._matrixHoverBandKey = '';
       }
-      relayoutMilestoneColumnHighlight(chart, xKey, bbox);
+      relayoutMilestoneColumnHighlight(chart, monthKeyForBands, bbox);
     }
     /** Row bands + midlines in paper y so they track categorical heatmap rows (same idea as matrix row tints). */
     function makeMilestoneLaneShapes() {
@@ -3518,23 +3525,11 @@
         };
       }
 
-      Plotly.newPlot('matrix-chart', [{
+      const matrixY = expandedRows.map(row => row.key);
+      const matrixTraceProject = {
         type: 'heatmap',
         x: visibleMonths,
-        y: expandedRows.map(row => row.key),
-        z: activityZ,
-        zmin: 0,
-        zmax: 3,
-        colorscale: intensityBluescale,
-        showscale: false,
-        text: activityText,
-        hoverinfo: 'none',
-        xgap: matrixXGapTrace,
-        ygap: matrixHeatmapYGap
-      }, {
-        type: 'heatmap',
-        x: visibleMonths,
-        y: expandedRows.map(row => row.key),
+        y: matrixY,
         z: projectZ,
         zmin: 0,
         zmax: 3,
@@ -3544,7 +3539,27 @@
         hoverinfo: 'none',
         xgap: matrixXGapTrace,
         ygap: matrixHeatmapYGap
-      }], {
+      };
+      const matrixTraceActivity = {
+        type: 'heatmap',
+        x: visibleMonths,
+        y: matrixY,
+        z: activityZ,
+        zmin: 0,
+        zmax: 3,
+        colorscale: intensityBluescale,
+        showscale: false,
+        text: activityText,
+        hoverinfo: 'none',
+        xgap: matrixXGapTrace,
+        ygap: matrixHeatmapYGap
+      };
+      /* Drill: project underlay + activity on top (tooltips/hover hit activity cells). Collapsed: project only — no all-null layer blocking the grid. */
+      const matrixChartTraces = expandedRows.some((r) => r.type === 'activity')
+        ? [matrixTraceProject, matrixTraceActivity]
+        : [matrixTraceProject];
+
+      Plotly.newPlot('matrix-chart', matrixChartTraces, {
         width: plotWidth,
         height: Math.max(320, matrixMarginTop + matrixMarginBottom + (expandedRows.length * rowHeight)),
         paper_bgcolor: 'rgba(0,0,0,0)',
@@ -3588,7 +3603,7 @@
         // Plotly.newPlot purges prior listeners on the graph div; re-bind after every redraw
         // (expand/collapse calls renderMatrix again). One-time dataset guards would leave no handlers.
         chart.on('plotly_click', (event) => {
-          const point = event.points && event.points[0];
+          const point = pickMatrixHoverPoint(event.points);
           if (!point || point.y == null || point.x == null) return;
           const yKey = typeof point.y === 'string' ? point.y : String(point.y);
           const xKey = typeof point.x === 'string' ? point.x : String(point.x);
