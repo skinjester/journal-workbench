@@ -168,7 +168,8 @@
       flex: 1 1 auto;
       min-width: 0;
     }
-    .matrix-workbench-row:has(#provenance-inspector:not([hidden])) {
+    .matrix-workbench-row:has(#provenance-inspector:not([hidden])),
+    .matrix-workbench-row:has(.provenance-inspector-collapsed-slot:not([hidden])) {
       gap: var(--sp-2);
     }
     /* Mirror matrix + inspector row so Deliverables chart column lines up with the heatmap (not full panel width). */
@@ -192,15 +193,35 @@
       pointer-events: none;
       visibility: hidden;
     }
-    .chart-panel:has(#provenance-inspector:not([hidden])) .deliverables-workbench-row {
+    .chart-panel:has(#provenance-inspector:not([hidden])) .deliverables-workbench-row,
+    .chart-panel:has(.provenance-inspector-collapsed-slot:not([hidden])) .deliverables-workbench-row {
       gap: var(--sp-2);
     }
-    .chart-panel:has(#provenance-inspector:not([hidden])) .deliverables-inspector-spacer {
+    .chart-panel:has(#provenance-inspector:not([hidden])) .deliverables-inspector-spacer,
+    .chart-panel:has(.provenance-inspector-collapsed-slot:not([hidden])) .deliverables-inspector-spacer {
       flex: 0 0 min(360px, 38%);
       min-width: 260px;
       max-width: min(360px, 100%);
       width: auto;
       align-self: stretch;
+    }
+    .provenance-inspector-collapsed-slot {
+      flex: 0 0 40px;
+      width: 40px;
+      min-width: 40px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 2px 0 0;
+      position: sticky;
+      top: var(--sp-3);
+      align-self: flex-start;
+      z-index: 3;
+      border-left: 1px solid rgba(255, 255, 255, 0.055);
+    }
+    .provenance-inspector-collapsed-slot[hidden] {
+      display: none !important;
     }
     #provenance-inspector:not([hidden]) {
       position: sticky;
@@ -212,6 +233,9 @@
       max-height: calc(100vh - var(--sp-4) - var(--sp-3));
       max-height: calc(100dvh - var(--sp-4) - var(--sp-3));
       z-index: 3;
+      /* Subtle edge vs chart column (page chrome, not Plotly). */
+      border-left: 1px solid rgba(255, 255, 255, 0.055);
+      box-sizing: border-box;
     }
     .fixed-labels {
       position: sticky; left: 0; z-index: 2;
@@ -630,10 +654,12 @@
     @media (max-width: 1180px) {
       .lower-grid { grid-template-columns: 1fr; }
       .detail-layout { grid-template-columns: 1fr; }
-      .matrix-workbench-row:has(#provenance-inspector:not([hidden])) {
+      .matrix-workbench-row:has(#provenance-inspector:not([hidden])),
+      .matrix-workbench-row:has(.provenance-inspector-collapsed-slot:not([hidden])) {
         flex-direction: column;
       }
-      .matrix-workbench-row:has(#provenance-inspector:not([hidden])) > .matrix-map-section {
+      .matrix-workbench-row:has(#provenance-inspector:not([hidden])) > .matrix-map-section,
+      .matrix-workbench-row:has(.provenance-inspector-collapsed-slot:not([hidden])) > .matrix-map-section {
         flex: 0 1 auto;
       }
       .matrix-workbench-row:has(#provenance-inspector:not([hidden])) #provenance-inspector {
@@ -644,14 +670,27 @@
         min-width: 0;
         align-self: stretch;
         border-left: 0;
-        border-top: 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
         min-height: min(50vh, 420px);
         max-height: calc(100vh - var(--sp-4) - var(--sp-2));
         max-height: calc(100dvh - var(--sp-4) - var(--sp-2));
         z-index: 3;
       }
+      .matrix-workbench-row:has(.provenance-inspector-collapsed-slot:not([hidden])) .provenance-inspector-collapsed-slot {
+        position: sticky;
+        top: var(--sp-2);
+        align-self: flex-end;
+        flex: 0 0 auto;
+        width: 40px;
+        min-width: 40px;
+        border-left: 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        padding-top: var(--sp-1);
+        padding-bottom: var(--sp-1);
+      }
       /* Inspector is stacked below the matrix; do not reserve a right column under Deliverables. */
-      .chart-panel:has(#provenance-inspector:not([hidden])) .deliverables-inspector-spacer {
+      .chart-panel:has(#provenance-inspector:not([hidden])) .deliverables-inspector-spacer,
+      .chart-panel:has(.provenance-inspector-collapsed-slot:not([hidden])) .deliverables-inspector-spacer {
         display: none;
       }
     }
@@ -699,7 +738,8 @@
       min-width: 0;
       min-height: 0;
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
+      align-items: stretch;
       padding: 0;
       border: 0;
       background: transparent;
@@ -712,38 +752,54 @@
     @media (prefers-reduced-motion: reduce) {
       .provenance-inspector { transition: none; }
     }
-    .provenance-inspector__toolbar {
-      flex: 0 0 auto;
+    .provenance-inspector__rail {
+      flex: 0 0 40px;
       display: flex;
-      justify-content: flex-end;
+      flex-direction: column;
       align-items: center;
-      min-height: 28px;
-      padding: 0 0 var(--sp-0-5);
+      padding: 0 2px 0 0;
+      box-sizing: border-box;
     }
-    .provenance-inspector__toolbar .provenance-inspector__close {
+    .provenance-inspector__main {
+      flex: 1 1 auto;
+      min-width: 0;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .provenance-inspector__panel-toggle {
       position: static;
       width: 36px;
       height: 36px;
+      margin: 0;
       border: 0;
       border-radius: 10px;
       background: rgba(255, 255, 255, 0.06);
       color: var(--text);
-      font-size: 22px;
-      line-height: 1;
       cursor: pointer;
       flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
     }
-    .provenance-inspector__toolbar .provenance-inspector__close:hover {
+    .provenance-inspector__panel-toggle:hover {
       background: rgba(255, 255, 255, 0.12);
     }
-    .provenance-inspector__toolbar .provenance-inspector__close:focus {
+    .provenance-inspector__panel-toggle:focus {
       outline: none;
       box-shadow: none;
     }
-    .provenance-inspector__toolbar .provenance-inspector__close:focus-visible {
+    .provenance-inspector__panel-toggle:focus-visible {
       outline: 2px solid rgba(140, 195, 255, 0.9);
       outline-offset: 2px;
       box-shadow: none;
+    }
+    .provenance-inspector__panel-toggle-icon {
+      width: 20px;
+      height: 20px;
+      display: block;
+      flex-shrink: 0;
     }
     .provenance-inspector__scroll {
       flex: 1 1 auto;
@@ -1017,15 +1073,30 @@
             </div>
           </div>
         </div>
+        <div class="provenance-inspector-collapsed-slot" id="provenance-inspector-collapsed-slot" hidden aria-hidden="true">
+          <button type="button" class="provenance-inspector__panel-toggle" id="prov-inspector-show-collapsed" tabindex="-1" aria-label="Show overview panel" title="Show overview panel">
+            <svg class="provenance-inspector__panel-toggle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="4" y="4" width="16" height="16" rx="2"/>
+              <line x1="9" y1="4" x2="9" y2="20"/>
+            </svg>
+          </button>
+        </div>
         <aside id="provenance-inspector" class="provenance-inspector" hidden aria-hidden="true" aria-labelledby="prov-inspector-title">
-          <div class="provenance-inspector__toolbar">
-            <button type="button" class="provenance-inspector__close" id="prov-inspector-close" tabindex="-1" aria-label="Close overview panel">&times;</button>
+          <div class="provenance-inspector__rail">
+            <button type="button" class="provenance-inspector__panel-toggle" id="prov-inspector-close" tabindex="-1" aria-label="Hide overview panel" title="Hide overview panel">
+              <svg class="provenance-inspector__panel-toggle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="4" y="4" width="16" height="16" rx="2"/>
+                <line x1="9" y1="4" x2="9" y2="20"/>
+              </svg>
+            </button>
           </div>
-          <div class="provenance-inspector__scroll">
-            <div class="chart-tooltip__kicker provenance-overlay__kicker" id="prov-inspector-kicker"></div>
-            <div class="chart-tooltip__title provenance-overlay__headline" id="prov-inspector-title" role="heading" aria-level="2"></div>
-            <div class="chart-tooltip__meta" id="prov-inspector-meta"></div>
-            <div class="summary-body provenance-markdown chart-tooltip__body provenance-markdown-panel" id="prov-inspector-body"></div>
+          <div class="provenance-inspector__main">
+            <div class="provenance-inspector__scroll">
+              <div class="chart-tooltip__kicker provenance-overlay__kicker" id="prov-inspector-kicker"></div>
+              <div class="chart-tooltip__title provenance-overlay__headline" id="prov-inspector-title" role="heading" aria-level="2"></div>
+              <div class="chart-tooltip__meta" id="prov-inspector-meta"></div>
+              <div class="summary-body provenance-markdown chart-tooltip__body provenance-markdown-panel" id="prov-inspector-body"></div>
+            </div>
           </div>
         </aside>
       </div>
@@ -1184,6 +1255,9 @@
       else if (slug === 'pdf') mileSeries[lab] = data.strictPdf;
       else mileSeries[lab] = (data.months || []).map(() => 0);
     });
+
+    /** Last overview cell shown in the side panel; used to reopen after collapsing without picking a new cell. */
+    let provenanceInspectorLastOpen = null;
 
     function navigateProvenancePage(month, project, activity) {
       const url = new URL('provenance.html', window.location.href);
@@ -1566,6 +1640,7 @@
           if (el.closest('#chart-tooltip')) return true;
           if (el.closest('.provenance-overlay__dialog')) return true;
           if (el.closest('#provenance-inspector')) return true;
+          if (el.closest('#provenance-inspector-collapsed-slot')) return true;
         }
       }
       const ch = document.getElementById('matrix-chart');
@@ -1591,6 +1666,11 @@
       const pi = document.getElementById('provenance-inspector');
       if (pi && !pi.hidden && cx >= 0 && cy >= 0) {
         const r = pi.getBoundingClientRect();
+        if (cx >= r.left - pad && cx <= r.right + pad && cy >= r.top - pad && cy <= r.bottom + pad) return true;
+      }
+      const collapsed = document.getElementById('provenance-inspector-collapsed-slot');
+      if (collapsed && !collapsed.hidden && cx >= 0 && cy >= 0) {
+        const r = collapsed.getBoundingClientRect();
         if (cx >= r.left - pad && cx <= r.right + pad && cy >= r.top - pad && cy <= r.bottom + pad) return true;
       }
       return false;
@@ -1654,10 +1734,12 @@
       if (!inspector) return;
       inspector.style.paddingTop = '';
       inspector.style.removeProperty('--prov-inspector-scroll-mt');
+      const slot = document.getElementById('provenance-inspector-collapsed-slot');
+      if (slot) slot.style.paddingTop = '';
     }
 
     /**
-     * Side-by-side layout (≥1181px): vertically center the close control on the All projects row, then
+     * Side-by-side layout (≥1181px): vertically center the panel toggle on the All projects row, then
      * offset the overview body so the kicker top matches the first matrix label row (top of heatmap row 0).
      */
     function syncProvenanceInspectorAlignment() {
@@ -1665,8 +1747,8 @@
       const backNav = document.getElementById('matrix-back-all-projects-nav');
       const kicker = document.getElementById('prov-inspector-kicker');
       const ml = document.getElementById('matrix-labels');
-      const closeBtn = document.getElementById('prov-inspector-close');
-      if (!inspector || inspector.hidden || !closeBtn) {
+      const panelToggle = document.getElementById('prov-inspector-close');
+      if (!inspector || inspector.hidden || !panelToggle) {
         resetProvenanceInspectorAlignment();
         return;
       }
@@ -1684,10 +1766,10 @@
       void inspector.offsetHeight;
 
       const navRect = backNav.getBoundingClientRect();
-      const closeRect = closeBtn.getBoundingClientRect();
+      const toggleRect = panelToggle.getBoundingClientRect();
       const navCenter = navRect.top + navRect.height * 0.5;
-      const closeCenter = closeRect.top + closeRect.height * 0.5;
-      const padTop = Math.max(0, Math.round(navCenter - closeCenter));
+      const toggleCenter = toggleRect.top + toggleRect.height * 0.5;
+      const padTop = Math.max(0, Math.round(navCenter - toggleCenter));
       inspector.style.paddingTop = `${padTop}px`;
 
       void inspector.offsetHeight;
@@ -1703,8 +1785,66 @@
       }
     }
 
+    function syncProvenanceInspectorCollapsedSlotAlignment() {
+      const slot = document.getElementById('provenance-inspector-collapsed-slot');
+      const showBtn = document.getElementById('prov-inspector-show-collapsed');
+      const backNav = document.getElementById('matrix-back-all-projects-nav');
+      if (!slot || !showBtn || slot.hidden) {
+        if (slot && slot.hidden) slot.style.paddingTop = '';
+        return;
+      }
+      if (!window.matchMedia('(min-width: 1181px)').matches) {
+        slot.style.paddingTop = '';
+        return;
+      }
+      if (!backNav || backNav.classList.contains('matrix-back-all-projects-nav--concealed')) {
+        slot.style.paddingTop = '';
+        return;
+      }
+      slot.style.paddingTop = '0px';
+      void slot.offsetHeight;
+      const navRect = backNav.getBoundingClientRect();
+      const btnRect = showBtn.getBoundingClientRect();
+      const navCenter = navRect.top + navRect.height * 0.5;
+      const btnCenter = btnRect.top + btnRect.height * 0.5;
+      slot.style.paddingTop = `${Math.max(0, Math.round(navCenter - btnCenter))}px`;
+    }
+
+    function syncProvenanceInspectorCollapsedSlotVisibility() {
+      const slot = document.getElementById('provenance-inspector-collapsed-slot');
+      const insp = document.getElementById('provenance-inspector');
+      const btn = document.getElementById('prov-inspector-show-collapsed');
+      if (!slot || !insp) return;
+      const inspOpen = !insp.hasAttribute('hidden');
+      const show = Boolean(provenanceInspectorLastOpen) && !inspOpen;
+      if (show) {
+        slot.removeAttribute('hidden');
+        slot.setAttribute('aria-hidden', 'false');
+        if (btn) btn.tabIndex = 0;
+      } else {
+        slot.setAttribute('hidden', '');
+        slot.setAttribute('aria-hidden', 'true');
+        if (btn) {
+          btn.tabIndex = -1;
+          if (document.activeElement === btn) btn.blur();
+        }
+        slot.style.paddingTop = '';
+      }
+    }
+
+    function reopenCollapsedProvenanceInspector() {
+      const s = provenanceInspectorLastOpen;
+      if (!s) return;
+      const insp = document.getElementById('provenance-inspector');
+      if (insp && !insp.hasAttribute('hidden')) return;
+      openProvenanceInspector(s.month, s.project, s.activity, s.focusMeta || undefined);
+    }
+
     function scheduleSyncProvenanceInspectorAlignment() {
-      const run = () => syncProvenanceInspectorAlignment();
+      const run = () => {
+        syncProvenanceInspectorAlignment();
+        syncProvenanceInspectorCollapsedSlotAlignment();
+      };
       requestAnimationFrame(() => {
         requestAnimationFrame(run);
       });
@@ -1714,7 +1854,11 @@
     let provenanceInspectorAlignResizeTimer = null;
     window.addEventListener('resize', () => {
       const inspector = document.getElementById('provenance-inspector');
-      if (!inspector || inspector.hidden) return;
+      const collapsedSlot = document.getElementById('provenance-inspector-collapsed-slot');
+      if (!inspector) return;
+      const needAlign =
+        !inspector.hidden || (collapsedSlot && !collapsedSlot.hidden);
+      if (!needAlign) return;
       if (provenanceInspectorAlignResizeTimer) window.clearTimeout(provenanceInspectorAlignResizeTimer);
       provenanceInspectorAlignResizeTimer = window.setTimeout(() => {
         provenanceInspectorAlignResizeTimer = null;
@@ -1776,8 +1920,18 @@
         metaEl: document.getElementById('prov-inspector-meta'),
         bodyEl: document.getElementById('prov-inspector-body'),
       });
-      const closeBtn = document.getElementById('prov-inspector-close');
-      if (closeBtn) closeBtn.tabIndex = 0;
+      provenanceInspectorLastOpen = {
+        month,
+        project,
+        activity,
+        focusMeta:
+          focusMeta && focusMeta.rowKey != null && focusMeta.rowIndex != null && focusMeta.rowIndex >= 0
+            ? { rowKey: focusMeta.rowKey, rowIndex: focusMeta.rowIndex }
+            : null
+      };
+      syncProvenanceInspectorCollapsedSlotVisibility();
+      const panelToggle = document.getElementById('prov-inspector-close');
+      if (panelToggle) panelToggle.tabIndex = 0;
       requestAnimationFrame(() =>
         scheduleMatrixChartResize({ preserveScroll: false, scrollProjectRowIntoView: false })
       );
@@ -1790,10 +1944,10 @@
       if (ov && !ov.hidden) closeProvenanceOverlay();
       const root = document.getElementById('provenance-inspector');
       const chart = document.getElementById('matrix-chart');
-      const closeBtn = document.getElementById('prov-inspector-close');
-      if (closeBtn) {
-        closeBtn.tabIndex = -1;
-        if (document.activeElement === closeBtn) closeBtn.blur();
+      const panelToggle = document.getElementById('prov-inspector-close');
+      if (panelToggle) {
+        panelToggle.tabIndex = -1;
+        if (document.activeElement === panelToggle) panelToggle.blur();
       }
       if (!root) return;
       resetProvenanceInspectorAlignment();
@@ -1814,6 +1968,9 @@
           restoredMilestoneScrollLeft: saved?.milestoneScrollLeft
         })
       );
+      syncProvenanceInspectorCollapsedSlotVisibility();
+      scheduleSyncProvenanceInspectorAlignment();
+      window.setTimeout(scheduleSyncProvenanceInspectorAlignment, 360);
     }
 
     function closeProvenanceOverlay() {
@@ -1884,8 +2041,14 @@
       const root = document.getElementById('provenance-inspector');
       if (!root) return;
       document.getElementById('prov-inspector-close')?.addEventListener('click', closeProvenanceInspector);
+      document.getElementById('prov-inspector-show-collapsed')?.addEventListener('click', reopenCollapsedProvenanceInspector);
       root.addEventListener('pointerenter', dismissTooltipsForOverviewHover, true);
       root.addEventListener('pointerleave', scheduleMatrixHoverExit, true);
+      const collapsedSlot = document.getElementById('provenance-inspector-collapsed-slot');
+      if (collapsedSlot) {
+        collapsedSlot.addEventListener('pointerenter', dismissTooltipsForOverviewHover, true);
+        collapsedSlot.addEventListener('pointerleave', scheduleMatrixHoverExit, true);
+      }
       requestAnimationFrame(() => {
         const b = document.getElementById('prov-inspector-close');
         if (b && document.activeElement === b) b.blur();
