@@ -64,8 +64,7 @@
     .matrix-map-heading-row {
       display: flex;
       flex-wrap: wrap;
-      align-items: baseline;
-      justify-content: space-between;
+      align-items: center;
       gap: var(--sp-1) var(--sp-2);
       flex-shrink: 0;
       margin: 0 0 var(--sp-1);
@@ -74,26 +73,71 @@
       margin: 0;
       flex-shrink: 0;
     }
-    .matrix-back-all-projects {
-      flex-shrink: 0;
-      font: inherit;
-      font-size: var(--text-xs, 12px);
+    /**
+     * One matrix row height (28px) above the bottom of the axis padding, then a blank 28px band (“carriage return”)
+     * before the first project row — keeps #matrix-labels row 0 aligned with heatmap row 0.
+     */
+    .matrix-back-all-projects-nav {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: calc(var(--matrix-plot-margin-top, 102px) - 56px);
+      height: 28px;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 12px 0 14px;
+      margin: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      appearance: none;
+      font-family: inherit;
+      font-size: 14px;
       font-weight: 700;
-      padding: 6px 12px;
-      border-radius: 8px;
-      border: 1px solid rgba(121, 192, 255, 0.35);
-      background: rgba(121, 192, 255, 0.1);
-      color: #edf3fb;
+      line-height: 1;
+      letter-spacing: -0.01em;
+      color: rgba(210, 220, 238, 0.92);
       cursor: pointer;
-      transition: background 120ms ease, border-color 120ms ease;
+      text-align: left;
+      transition: color 0.15s ease;
     }
-    .matrix-back-all-projects:hover {
-      background: rgba(121, 192, 255, 0.16);
-      border-color: rgba(121, 192, 255, 0.5);
+    .matrix-back-all-projects-nav:hover {
+      color: #f2f6ff;
     }
-    .matrix-back-all-projects:focus-visible {
-      outline: 2px solid rgba(121, 192, 255, 0.65);
+    .matrix-back-all-projects-nav:focus {
+      outline: none;
+    }
+    .matrix-back-all-projects-nav:focus-visible {
+      outline: 2px solid rgba(121, 192, 255, 0.55);
       outline-offset: 2px;
+    }
+    .matrix-back-all-projects-nav--concealed {
+      visibility: hidden;
+      pointer-events: none;
+      user-select: none;
+    }
+    .matrix-back-nav-ring {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: rgba(237, 243, 251, 0.8);
+      transition: border-color 0.15s ease, color 0.15s ease;
+    }
+    .matrix-back-all-projects-nav:hover .matrix-back-nav-ring {
+      border-color: rgba(255, 255, 255, 0.38);
+      color: #ffffff;
+    }
+    .matrix-back-nav-ring svg {
+      display: block;
+      width: 9px;
+      height: 9px;
     }
     .matrix-chart-stack {
       display: flex;
@@ -175,11 +219,11 @@
       border-right: 1px solid rgba(255, 255, 255, 0.06);
       border-radius: 0;
       /* Top padding tracks Plotly matrix margin.t (see --matrix-plot-margin-top in renderMatrix). */
-      padding: var(--matrix-plot-margin-top, 82px) 12px 52px 0;
+      padding: var(--matrix-plot-margin-top, 102px) 12px 52px 0;
       align-self: start;
     }
     .fixed-labels.milestones {
-      padding-top: var(--matrix-plot-margin-top, 82px);
+      padding-top: var(--matrix-plot-margin-top, 102px);
       padding-bottom: 52px;
       align-self: stretch;
     }
@@ -241,7 +285,7 @@
       transform-origin: 30% 50%;
     }
     .fixed-label:hover { background: rgba(255, 255, 255, 0.04); }
-    .fixed-label.active { background: rgba(140, 195, 255, 0.12); color: #ffffff; }
+    .fixed-label.active { background: transparent; color: #ffffff; }
     .fixed-label.project-open::after {
       transform: rotate(90deg);
       border-left-color: rgba(255, 255, 255, 0.95);
@@ -263,8 +307,8 @@
       overflow: hidden;
     }
     .fixed-label.project-open {
-      background: rgba(95, 146, 214, 0.16);
-      box-shadow: inset 0 0 0 1px rgba(121, 192, 255, 0.22);
+      background: transparent;
+      box-shadow: none;
     }
     /* When one project is expanded, recede other project rows and lift activity labels. */
     .matrix-shell .matrix-labels--drilldown .fixed-label.project:not(.active) {
@@ -673,8 +717,8 @@
       display: flex;
       justify-content: flex-end;
       align-items: center;
-      min-height: 40px;
-      padding: var(--sp-1) 0 var(--sp-0-5);
+      min-height: 28px;
+      padding: 0 0 var(--sp-0-5);
     }
     .provenance-inspector__toolbar .provenance-inspector__close {
       position: static;
@@ -707,6 +751,8 @@
       overflow: auto;
       display: flex;
       flex-direction: column;
+      /* JS sets --prov-inspector-scroll-mt so kicker lines up with first matrix row (heatmap row 0). */
+      margin-top: var(--prov-inspector-scroll-mt, 0px);
       padding: 0 0 var(--sp-2) 0;
       background: transparent;
     }
@@ -941,12 +987,24 @@
         <div class="matrix-map-section">
           <div class="matrix-map-heading-row">
             <h3 class="chart-panel-section-heading">Project Activity Map</h3>
-            <button type="button" id="matrix-back-all-projects" class="matrix-back-all-projects" hidden aria-label="Show all projects in the matrix">
-              All projects
-            </button>
           </div>
           <div class="matrix-shell timeline-pane">
             <div class="fixed-labels">
+              <button
+                type="button"
+                id="matrix-back-all-projects-nav"
+                class="matrix-back-all-projects-nav matrix-back-all-projects-nav--concealed"
+                aria-hidden="true"
+                tabindex="-1"
+                aria-label="Show all projects in the matrix"
+              >
+                <span class="matrix-back-nav-ring" aria-hidden="true">
+                  <svg viewBox="0 0 12 12" width="9" height="9" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M7.5 2.5L4 6l3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </span>
+                <span class="matrix-back-nav-cta">All projects</span>
+              </button>
               <div class="fixed-labels-grid" id="matrix-labels"></div>
             </div>
             <div class="matrix-chart-stack">
@@ -1005,7 +1063,7 @@
             <div class="legend-item"><span class="swatch" style="background: var(--track-1);"></span><span><strong>1</strong> trace signal</span></div>
             <div class="legend-item"><span class="swatch" style="background: var(--track-2);"></span><span><strong>2</strong> active secondary thread</span></div>
             <div class="legend-item"><span class="swatch" style="background: var(--track-3);"></span><span><strong>3</strong> peak for that project row (volume) or monthly winner (dominance)</span></div>
-            <div class="legend-item"><span class="swatch" style="background: var(--track-2);"></span><span>Open a project to show only that project’s aggregate row plus activity sub-rows (full blues). Use <strong>All projects</strong> or click the project row again to return to the full grid; scroll inside the map viewport to move through rows</span></div>
+            <div class="legend-item"><span class="swatch" style="background: var(--track-2);"></span><span>Open a project to show only that project’s aggregate row plus activity sub-rows (full blues). Use <strong>All projects</strong> above the list or click the project row again to return to the full grid; scroll inside the map viewport to move through rows</span></div>
             <div class="legend-item"><span class="swatch" style="background: linear-gradient(90deg,#f07178,#6cb6ff,#d2a8ff,#56d4dd,#80e2a2,#ffba68,#adb5bd,#d29aff);"></span><span>Deliverable timeline: one row per <code>deliv:*</code> type in monthly summaries; heatmap cells mark months with that tag (same layout as the project matrix; prototype/presentation/PDF rows also pick up legacy vocabulary when tags are absent)</span></div>
           </div>
         </section>
@@ -1213,13 +1271,10 @@
     }
 
     let inspScrollRafH = null;
-    let inspScrollRafV = null;
 
     function stopInspScrollAnim() {
       if (inspScrollRafH) cancelAnimationFrame(inspScrollRafH);
-      if (inspScrollRafV) cancelAnimationFrame(inspScrollRafV);
       inspScrollRafH = null;
-      inspScrollRafV = null;
     }
 
     function easeInOutCubic(t) {
@@ -1255,32 +1310,6 @@
         }
       }
       inspScrollRafH = requestAnimationFrame(tick);
-    }
-
-    function animatePaneScrollTop(pane, targetTop, durationMs, onDone) {
-      const dur = Number(durationMs);
-      const from = pane.scrollTop;
-      const d = targetTop - from;
-      const finish = () => {
-        if (typeof onDone === 'function') queueMicrotask(onDone);
-      };
-      if (!Number.isFinite(dur) || dur <= 0 || Math.abs(d) < 0.5) {
-        pane.scrollTop = targetTop;
-        finish();
-        return;
-      }
-      const t0 = performance.now();
-      function tick(now) {
-        const u = Math.min(1, (now - t0) / dur);
-        pane.scrollTop = Math.round(from + d * easeInOutCubic(u));
-        if (u < 1) inspScrollRafV = requestAnimationFrame(tick);
-        else {
-          inspScrollRafV = null;
-          pane.scrollTop = targetTop;
-          finish();
-        }
-      }
-      inspScrollRafV = requestAnimationFrame(tick);
     }
 
     /** Horizontally scroll matrix + milestone strips so month `globalMonthIdx` is visible in #matrix-scroll.
@@ -1341,13 +1370,13 @@
       }
     }
 
-    /** After inspector opens + matrix replot: vertical row center, then horizontal month reveal (left margin) with retries
-     *  so flex/scrollbar layout can settle (avoids one-frame stale `getBoundingClientRect` / `_size`). */
+    /** After inspector opens + matrix replot: only scroll vertically if the row is off-screen (instant), then horizontal month reveal.
+     *  Skips smooth vertical centering so the label column and heatmap do not appear to “jump” relative to the rest of the page. */
     function runInspectorMatrixScrollFocus(chart, globalMonthIdx, rowIdx) {
       requestAnimationFrame(() => {
         stopInspScrollAnim();
         const nudgeHover = () => scheduleMatrixChartHoverNudgeFromPointer(56);
-        scrollMatrixPaneToCenterRowIndex(rowIdx, { behavior: 'smooth', onDone: nudgeHover });
+        scrollMatrixPaneToRowIndex(rowIdx);
         const bumpInstant = () => {
           updateInspectorScrollLeadingGutters(chart);
           scrollMatrixToCenterMonth(chart, globalMonthIdx, { behavior: 'auto' });
@@ -1412,48 +1441,6 @@
         const delta = rowRect.top - paneRect.top - 1;
         const maxScroll = Math.max(0, pane.scrollHeight - pane.clientHeight);
         pane.scrollTop = Math.max(0, Math.min(maxScroll, pane.scrollTop + delta));
-      });
-    }
-
-    /** Vertically center row `idx` in the matrix timeline pane (inspector). Skips when the row is already
-     *  fully visible so horizontal-only cell changes do not re-run vertical easing. */
-    function scrollMatrixPaneToCenterRowIndex(idx, options = {}) {
-      if (idx == null || idx < 0) return;
-      const smooth = options.behavior === 'smooth';
-      const onDone = options.onDone;
-      const done = () => {
-        if (typeof onDone === 'function') queueMicrotask(onDone);
-      };
-      requestAnimationFrame(() => {
-        const pane = document.querySelector('.matrix-shell.timeline-pane');
-        const ml = document.getElementById('matrix-labels');
-        if (!pane || !ml) {
-          done();
-          return;
-        }
-        const rowEl = ml.children[idx];
-        if (!rowEl) {
-          done();
-          return;
-        }
-        const tol = 4;
-        const rowRect = rowEl.getBoundingClientRect();
-        const paneRect = pane.getBoundingClientRect();
-        if (rowRect.top >= paneRect.top - tol && rowRect.bottom <= paneRect.bottom + tol) {
-          done();
-          return;
-        }
-        const rowCenter = (rowRect.top + rowRect.bottom) / 2;
-        const paneCenter = (paneRect.top + paneRect.bottom) / 2;
-        const delta = rowCenter - paneCenter;
-        const maxScroll = Math.max(0, pane.scrollHeight - pane.clientHeight);
-        const targetTop = Math.max(0, Math.min(maxScroll, pane.scrollTop + delta));
-        if (smooth) {
-          animatePaneScrollTop(pane, targetTop, MATRIX_INSPECTOR_SCROLL_DURATION_MS, onDone);
-        } else {
-          pane.scrollTop = targetTop;
-          done();
-        }
       });
     }
 
@@ -1662,6 +1649,79 @@
       });
     }
 
+    function resetProvenanceInspectorAlignment() {
+      const inspector = document.getElementById('provenance-inspector');
+      if (!inspector) return;
+      inspector.style.paddingTop = '';
+      inspector.style.removeProperty('--prov-inspector-scroll-mt');
+    }
+
+    /**
+     * Side-by-side layout (≥1181px): vertically center the close control on the All projects row, then
+     * offset the overview body so the kicker top matches the first matrix label row (top of heatmap row 0).
+     */
+    function syncProvenanceInspectorAlignment() {
+      const inspector = document.getElementById('provenance-inspector');
+      const backNav = document.getElementById('matrix-back-all-projects-nav');
+      const kicker = document.getElementById('prov-inspector-kicker');
+      const ml = document.getElementById('matrix-labels');
+      const closeBtn = document.getElementById('prov-inspector-close');
+      if (!inspector || inspector.hidden || !closeBtn) {
+        resetProvenanceInspectorAlignment();
+        return;
+      }
+      if (!window.matchMedia('(min-width: 1181px)').matches) {
+        resetProvenanceInspectorAlignment();
+        return;
+      }
+      if (!backNav || backNav.classList.contains('matrix-back-all-projects-nav--concealed')) {
+        resetProvenanceInspectorAlignment();
+        return;
+      }
+
+      inspector.style.paddingTop = '0px';
+      inspector.style.removeProperty('--prov-inspector-scroll-mt');
+      void inspector.offsetHeight;
+
+      const navRect = backNav.getBoundingClientRect();
+      const closeRect = closeBtn.getBoundingClientRect();
+      const navCenter = navRect.top + navRect.height * 0.5;
+      const closeCenter = closeRect.top + closeRect.height * 0.5;
+      const padTop = Math.max(0, Math.round(navCenter - closeCenter));
+      inspector.style.paddingTop = `${padTop}px`;
+
+      void inspector.offsetHeight;
+
+      const firstLabel = ml && ml.firstElementChild;
+      if (firstLabel && kicker) {
+        const labelTop = firstLabel.getBoundingClientRect().top;
+        const kickerTop = kicker.getBoundingClientRect().top;
+        const mt = Math.max(0, Math.round(labelTop - kickerTop));
+        inspector.style.setProperty('--prov-inspector-scroll-mt', `${mt}px`);
+      } else {
+        inspector.style.removeProperty('--prov-inspector-scroll-mt');
+      }
+    }
+
+    function scheduleSyncProvenanceInspectorAlignment() {
+      const run = () => syncProvenanceInspectorAlignment();
+      requestAnimationFrame(() => {
+        requestAnimationFrame(run);
+      });
+      window.setTimeout(run, 200);
+    }
+
+    let provenanceInspectorAlignResizeTimer = null;
+    window.addEventListener('resize', () => {
+      const inspector = document.getElementById('provenance-inspector');
+      if (!inspector || inspector.hidden) return;
+      if (provenanceInspectorAlignResizeTimer) window.clearTimeout(provenanceInspectorAlignResizeTimer);
+      provenanceInspectorAlignResizeTimer = window.setTimeout(() => {
+        provenanceInspectorAlignResizeTimer = null;
+        scheduleSyncProvenanceInspectorAlignment();
+      }, 100);
+    });
+
     function openProvenanceInspector(month, project, activity, focusMeta) {
       const root = document.getElementById('provenance-inspector');
       const chart = document.getElementById('matrix-chart');
@@ -1718,7 +1778,11 @@
       });
       const closeBtn = document.getElementById('prov-inspector-close');
       if (closeBtn) closeBtn.tabIndex = 0;
-      requestAnimationFrame(() => scheduleMatrixChartResize({ preserveScroll: false }));
+      requestAnimationFrame(() =>
+        scheduleMatrixChartResize({ preserveScroll: false, scrollProjectRowIntoView: false })
+      );
+      scheduleSyncProvenanceInspectorAlignment();
+      window.setTimeout(scheduleSyncProvenanceInspectorAlignment, 360);
     }
 
     function closeProvenanceInspector() {
@@ -1732,6 +1796,7 @@
         if (document.activeElement === closeBtn) closeBtn.blur();
       }
       if (!root) return;
+      resetProvenanceInspectorAlignment();
       root.setAttribute('hidden', '');
       root.setAttribute('aria-hidden', 'true');
       const saved = matrixInspectorSaved;
@@ -1744,6 +1809,7 @@
       requestAnimationFrame(() =>
         scheduleMatrixChartResize({
           preserveScroll: false,
+          scrollProjectRowIntoView: false,
           restoredMatrixScrollLeft: saved?.matrixScrollLeft,
           restoredMilestoneScrollLeft: saved?.milestoneScrollLeft
         })
@@ -2397,13 +2463,7 @@
       return buildProjectRowTooltipShell(month, project, buildProjectRowTooltipHeavyHtml(project, globalMonthIdx));
     }
 
-    const TOOLTIP_DWELL_MS = 95;
-    const TOOLTIP_ADJ_CELL_DWELL_EXTRA_MS = 28;
-    const TOOLTIP_V_MAX_PX_PER_MS = 1.05;
     const TOOLTIP_STILL_MS = 65;
-    const TOOLTIP_HEAVY_RETRY_MS = 28;
-    const TOOLTIP_HEAVY_PLACEHOLDER =
-      '<p class="chart-tooltip__heavy-placeholder">Hold steady to see lifecycle and month notes.</p>';
 
     const TT_VEL_ENTER_FAST = 0.88;
     const TT_VEL_EXIT_FAST = 0.65;
@@ -2580,38 +2640,8 @@
       });
     }
 
-    function tryCommitMatrixProjectHeavy(expectedKey) {
-      const tt = chartTooltip;
-      if (!tt || tt.style.display !== 'block') return;
-      if (tt._pendingHeavyCellKey !== expectedKey) return;
-      updateTooltipVelocityBand(tt);
-      const v = effectiveTooltipPointerSpeed(tt);
-      if (v > TOOLTIP_V_MAX_PX_PER_MS) {
-        tt._heavyCommitTimer = window.setTimeout(() => tryCommitMatrixProjectHeavy(expectedKey), TOOLTIP_HEAVY_RETRY_MS);
-        return;
-      }
-      tt._heavyCommitTimer = null;
-      applyMatrixProjectHeavyContent(tt._pendingHeavyHtml, true);
-    }
-
-    function scheduleMatrixProjectHeavyCommit(cellKey, heavyHtml, gridHint) {
-      const tt = chartTooltip;
-      if (!tt) return;
-      clearMatrixProjectHeavyTimer();
-      tt._pendingHeavyCellKey = cellKey;
-      tt._pendingHeavyHtml = heavyHtml;
-      let dwell = TOOLTIP_DWELL_MS;
-      if (gridHint && tt._lastMatrixGridHint) {
-        const dist =
-          Math.abs(gridHint.m - tt._lastMatrixGridHint.m) + Math.abs(gridHint.r - tt._lastMatrixGridHint.r);
-        if (dist <= 1) dwell += TOOLTIP_ADJ_CELL_DWELL_EXTRA_MS;
-      }
-      if (gridHint) tt._lastMatrixGridHint = gridHint;
-      tt._heavyCommitTimer = window.setTimeout(() => tryCommitMatrixProjectHeavy(cellKey), dwell);
-    }
-
     /**
-     * Project-row matrix tooltip: light chrome updates every hover; heavy body after dwell + low pointer speed.
+     * Project-row matrix tooltip: chrome + full body update on each hover (no placeholder / dwell).
      */
     function showMatrixProjectTooltip(payload) {
       const { month, project, globalMonthIdx, bbox, gd, pointerEvent, gridHint } = payload;
@@ -2687,49 +2717,32 @@
         chartTooltip._tooltipVelBand = undefined;
         clearTooltipVelocityStillTimer(chartTooltip);
         resetChartTooltipPointerState(chartTooltip);
-        chartTooltip.innerHTML = buildProjectRowTooltipShell(month, project, TOOLTIP_HEAVY_PLACEHOLDER);
-        const heavyEl = chartTooltip.querySelector('.chart-tooltip__heavy');
-        if (heavyEl) {
-          heavyEl.classList.remove('chart-tooltip__heavy--instant');
-          heavyEl.classList.add('chart-tooltip__heavy--pending');
-        }
-        const surfaceEl = getChartTooltipSurface(chartTooltip);
-        if (surfaceEl) surfaceEl.classList.add('chart-tooltip__surface--muted');
+        clearMatrixProjectHeavyTimer();
+        chartTooltip.innerHTML = buildProjectRowTooltipShell(month, project, heavyHtml);
         chartTooltip.style.display = 'block';
         chartTooltip.setAttribute('aria-hidden', 'false');
         chartTooltip._matrixTooltipCellKey = cellKey;
+        if (gridHint) chartTooltip._lastMatrixGridHint = gridHint;
         applyLayout();
         updateTooltipVelocityBand(chartTooltip);
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            if (surfaceEl) surfaceEl.classList.remove('chart-tooltip__surface--muted');
-            updateTooltipVelocityBand(chartTooltip);
-            scheduleTooltipVelocityStillRefresh(chartTooltip);
-          });
-        });
-        scheduleMatrixProjectHeavyCommit(cellKey, heavyHtml, gridHint);
+        scheduleTooltipVelocityStillRefresh(chartTooltip);
         return;
       }
 
       clearMatrixProjectHeavyTimer();
       const kicker = chartTooltip.querySelector('.chart-tooltip__kicker');
       const title = chartTooltip.querySelector('.chart-tooltip__title');
-      const heavy = chartTooltip.querySelector('.chart-tooltip__heavy');
       if (kicker) kicker.textContent = month;
       if (title) title.textContent = project;
-      if (heavy) {
-        heavy.classList.remove('chart-tooltip__heavy--instant', 'chart-tooltip__heavy--muted');
-        heavy.classList.add('chart-tooltip__heavy--pending');
-        heavy.innerHTML = TOOLTIP_HEAVY_PLACEHOLDER;
-      }
       chartTooltip._matrixTooltipCellKey = cellKey;
+      if (gridHint) chartTooltip._lastMatrixGridHint = gridHint;
       applyLayout();
       updateTooltipVelocityBand(chartTooltip);
       scheduleTooltipVelocityStillRefresh(chartTooltip);
-      scheduleMatrixProjectHeavyCommit(cellKey, heavyHtml, gridHint);
+      applyMatrixProjectHeavyContent(heavyHtml, false);
     }
 
-    /** Activity sub-row hover: same motion, dwell, and heavy commit pipeline as project-row tooltip. */
+    /** Activity sub-row hover: same motion model as project-row tooltip; full body updates immediately. */
     function showMatrixActivityOverviewTooltip(payload) {
       const { month, project, activity, bbox, gd, pointerEvent, gridHint } = payload;
       if (!chartTooltip || month == null || !project || !activity) return;
@@ -2806,28 +2819,14 @@
         clearTooltipVelocityStillTimer(chartTooltip);
         resetChartTooltipPointerState(chartTooltip);
         clearMatrixProjectHeavyTimer();
-        chartTooltip.innerHTML = buildActivityOverviewTooltipShell(month, project, activity, TOOLTIP_HEAVY_PLACEHOLDER);
-        const heavyEl = chartTooltip.querySelector('.chart-tooltip__heavy');
-        if (heavyEl) {
-          heavyEl.classList.remove('chart-tooltip__heavy--instant');
-          heavyEl.classList.add('chart-tooltip__heavy--pending');
-        }
-        const surfaceEl = getChartTooltipSurface(chartTooltip);
-        if (surfaceEl) surfaceEl.classList.add('chart-tooltip__surface--muted');
+        chartTooltip.innerHTML = buildActivityOverviewTooltipShell(month, project, activity, heavyHtml);
         chartTooltip.style.display = 'block';
         chartTooltip.setAttribute('aria-hidden', 'false');
         chartTooltip._matrixTooltipCellKey = cellKey;
         if (gridHint) chartTooltip._lastMatrixGridHint = gridHint;
         applyLayout();
         updateTooltipVelocityBand(chartTooltip);
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            if (surfaceEl) surfaceEl.classList.remove('chart-tooltip__surface--muted');
-            updateTooltipVelocityBand(chartTooltip);
-            scheduleTooltipVelocityStillRefresh(chartTooltip);
-          });
-        });
-        scheduleMatrixProjectHeavyCommit(cellKey, heavyHtml, gridHint);
+        scheduleTooltipVelocityStillRefresh(chartTooltip);
         return;
       }
 
@@ -2835,24 +2834,18 @@
       const kicker = chartTooltip.querySelector('.chart-tooltip__kicker');
       const title = chartTooltip.querySelector('.chart-tooltip__title');
       const meta = chartTooltip.querySelector('.chart-tooltip__meta');
-      const heavy = chartTooltip.querySelector('.chart-tooltip__heavy');
       if (kicker) kicker.textContent = month;
       if (title) title.textContent = project;
       if (meta) meta.textContent = activity;
-      if (heavy) {
-        heavy.classList.remove('chart-tooltip__heavy--instant', 'chart-tooltip__heavy--muted');
-        heavy.classList.add('chart-tooltip__heavy--pending');
-        heavy.innerHTML = TOOLTIP_HEAVY_PLACEHOLDER;
-      }
       chartTooltip._matrixTooltipCellKey = cellKey;
       if (gridHint) chartTooltip._lastMatrixGridHint = gridHint;
       applyLayout();
       updateTooltipVelocityBand(chartTooltip);
       scheduleTooltipVelocityStillRefresh(chartTooltip);
-      scheduleMatrixProjectHeavyCommit(cellKey, heavyHtml, gridHint);
+      applyMatrixProjectHeavyContent(heavyHtml, false);
     }
 
-    /** Milestone / deliverables heatmap: same #chart-tooltip shell + deferred heavy body as matrix project rows. */
+    /** Milestone / deliverables heatmap: same #chart-tooltip shell + immediate full body as matrix rows. */
     function showMilestoneHeatmapTooltip(payload) {
       const { month, rowLabel, heavyHtml, bbox, gd, pointerEvent, gridHint, rowIndex, rowCount } = payload;
       if (!chartTooltip || month == null || !rowLabel || !heavyHtml) return;
@@ -2929,46 +2922,27 @@
         chartTooltip._tooltipVelBand = undefined;
         clearTooltipVelocityStillTimer(chartTooltip);
         resetChartTooltipPointerState(chartTooltip);
-        chartTooltip.innerHTML = buildProjectRowTooltipShell(month, rowLabel, TOOLTIP_HEAVY_PLACEHOLDER);
-        const heavyEl = chartTooltip.querySelector('.chart-tooltip__heavy');
-        if (heavyEl) {
-          heavyEl.classList.remove('chart-tooltip__heavy--instant');
-          heavyEl.classList.add('chart-tooltip__heavy--pending');
-        }
-        const surfaceEl = getChartTooltipSurface(chartTooltip);
-        if (surfaceEl) surfaceEl.classList.add('chart-tooltip__surface--muted');
+        clearMatrixProjectHeavyTimer();
+        chartTooltip.innerHTML = buildProjectRowTooltipShell(month, rowLabel, heavyHtml);
         chartTooltip.style.display = 'block';
         chartTooltip.setAttribute('aria-hidden', 'false');
         chartTooltip._matrixTooltipCellKey = cellKey;
         applyLayout();
         updateTooltipVelocityBand(chartTooltip);
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            if (surfaceEl) surfaceEl.classList.remove('chart-tooltip__surface--muted');
-            updateTooltipVelocityBand(chartTooltip);
-            scheduleTooltipVelocityStillRefresh(chartTooltip);
-          });
-        });
-        scheduleMatrixProjectHeavyCommit(cellKey, heavyHtml, gridHint);
+        scheduleTooltipVelocityStillRefresh(chartTooltip);
         return;
       }
 
       clearMatrixProjectHeavyTimer();
       const kicker = chartTooltip.querySelector('.chart-tooltip__kicker');
       const title = chartTooltip.querySelector('.chart-tooltip__title');
-      const heavy = chartTooltip.querySelector('.chart-tooltip__heavy');
       if (kicker) kicker.textContent = month;
       if (title) title.textContent = rowLabel;
-      if (heavy) {
-        heavy.classList.remove('chart-tooltip__heavy--instant', 'chart-tooltip__heavy--muted');
-        heavy.classList.add('chart-tooltip__heavy--pending');
-        heavy.innerHTML = TOOLTIP_HEAVY_PLACEHOLDER;
-      }
       chartTooltip._matrixTooltipCellKey = cellKey;
       applyLayout();
       updateTooltipVelocityBand(chartTooltip);
       scheduleTooltipVelocityStillRefresh(chartTooltip);
-      scheduleMatrixProjectHeavyCommit(cellKey, heavyHtml, gridHint);
+      applyMatrixProjectHeavyContent(heavyHtml, false);
     }
 
     function hideChartTooltip() {
@@ -3062,8 +3036,6 @@
     const MATRIX_HEATMAP_X_GAP_MIN = 1;
     /** Minimum brick width (px) when enforcing full-range min plot width. */
     const MATRIX_CELL_MIN_PX = 1;
-    /** Hide matrix x-axis tick labels when columns are still too narrow after the floor. */
-    const MATRIX_PX_PER_COL_HIDE_TICKS = 8;
     const matrixHeatmapYGap = 4;
 
     const fullMonthCount = data.months.length;
@@ -3312,6 +3284,12 @@
 
     /** Shared L/R inset with Deliverables heatmap; must match buildMatrixXAxisTickConfig inner width math. */
     const MATRIX_PLOT_MARGIN_LR = { l: 18, r: 18 };
+    /**
+     * Fixed Plotly margin.t and --matrix-plot-margin-top (sticky row labels). Paired with layout.margin.autoexpand:false
+     * and axis automargin:false so Plotly does not grow margins when tick text/angle changes (inspector plot width, etc.).
+     * Slot height = worst case from buildMatrixXAxisTickConfig (102px for -50° ticks).
+     */
+    const MATRIX_X_AXIS_MARGIN_TOP_LAYOUT = 102;
 
     /** Inspector-open plot: floor for min brick width in max() with proportional heatWidth (full dataset stays in view). */
     const MATRIX_INSPECTOR_MIN_PX_PER_COL = 16;
@@ -3381,6 +3359,8 @@
 
     function renderMatrix(selectedProject, options = {}) {
       const preserveScroll = options.preserveScroll === true;
+      /** False when resizing for inspector open/close — avoids re-scrolling the pane to the project row (layout jump vs heatmap). */
+      const scrollProjectRowIntoView = options.scrollProjectRowIntoView !== false;
       const rMat = options.restoredMatrixScrollLeft;
       const rMil = options.restoredMilestoneScrollLeft;
       const savedScrollLeft = preserveScroll && matrixScroll ? matrixScroll.scrollLeft : 0;
@@ -3437,12 +3417,6 @@
         matrixXGapTrace = matrixUsesNarrowXGap ? MATRIX_HEATMAP_X_GAP_MIN : matrixHeatmapXGap;
       }
       const matrixInnerW = Math.max(1, plotWidth - MATRIX_PLOT_MARGIN_LR.l - MATRIX_PLOT_MARGIN_LR.r);
-      /* Tick visibility + margin.t follow *viewport* column density. Inspector uses a wide plot (scroll) so
-       * per-column width in the figure is large; old logic showed ticks only when matrixUsesNarrowXGap — huge
-       * margin.t vs compact closed view and a visible vertical jump with the sidebar. */
-      const containerInnerW = Math.max(1, containerWidth - MATRIX_PLOT_MARGIN_LR.l - MATRIX_PLOT_MARGIN_LR.r);
-      const containerPxPerCol = containerInnerW / Math.max(1, visibleCount);
-      const hideMatrixXTickLabels = containerPxPerCol < MATRIX_PX_PER_COL_HIDE_TICKS;
       const projectZ = expandedRows.map(row =>
         row.type === 'project' ? row.values : Array(visibleCount).fill(null)
       );
@@ -3468,9 +3442,7 @@
         xTickCfg.ticktext.length === visibleMonths.length
           ? xTickCfg.ticktext
           : visibleMonths.map((_, i) => xTickCfg.ticktext[i] ?? '');
-      const matrixMarginTop = hideMatrixXTickLabels
-        ? Math.min(xTickCfg.marginTop, 40)
-        : xTickCfg.marginTop;
+      const matrixMarginTop = MATRIX_X_AXIS_MARGIN_TOP_LAYOUT;
       const chartPanel = document.querySelector('.panel.chart-panel');
       chartPanel?.style.setProperty('--matrix-plot-margin-top', `${matrixMarginTop}px`);
       if (chartPanel) {
@@ -3559,12 +3531,23 @@
         ? [matrixTraceProject, matrixTraceActivity]
         : [matrixTraceProject];
 
+      /* Exact body height = label grid (repeat(n, rowHeight)). A previous min height (320px) stretched Plotly rows
+       * when n was small so each “view” (collapsed vs drill) had different row pitch vs .fixed-labels — visible drift. */
+      const matrixChartHeight =
+        matrixMarginTop + matrixMarginBottom + Math.max(1, expandedRows.length) * rowHeight;
+
       Plotly.newPlot('matrix-chart', matrixChartTraces, {
         width: plotWidth,
-        height: Math.max(320, matrixMarginTop + matrixMarginBottom + (expandedRows.length * rowHeight)),
+        height: matrixChartHeight,
         paper_bgcolor: 'rgba(0,0,0,0)',
         plot_bgcolor: 'rgba(0,0,0,0)',
-        margin: { l: MATRIX_PLOT_MARGIN_LR.l, r: MATRIX_PLOT_MARGIN_LR.r, t: matrixMarginTop, b: matrixMarginBottom },
+        margin: {
+          l: MATRIX_PLOT_MARGIN_LR.l,
+          r: MATRIX_PLOT_MARGIN_LR.r,
+          t: matrixMarginTop,
+          b: matrixMarginBottom,
+          autoexpand: false
+        },
         shapes: matrixShapes,
         hoverlabel: {
           align: 'left',
@@ -3584,7 +3567,8 @@
           side: 'top',
           tickfont: xTickCfg.tickfont,
           tickangle: xTickCfg.tickangle,
-          showticklabels: !hideMatrixXTickLabels,
+          showticklabels: true,
+          automargin: false,
           showgrid: false,
           ticks: '',
           ticklen: 0,
@@ -3592,8 +3576,13 @@
           showspikes: false
         },
         yaxis: {
-          autorange: 'reversed', showticklabels: false, showgrid: false,
-          ticks: '', ticklen: 0, zeroline: false,
+          autorange: 'reversed',
+          showticklabels: false,
+          automargin: false,
+          showgrid: false,
+          ticks: '',
+          ticklen: 0,
+          zeroline: false,
           showspikes: false
         }
       }, { responsive: false, displayModeBar: false, scrollZoom: false, doubleClick: false }).then(() => {
@@ -3636,7 +3625,7 @@
         chart.on('plotly_unhover', () => {
           scheduleMatrixHoverExit();
         });
-        if (selectedProject && !preserveScroll) {
+        if (selectedProject && scrollProjectRowIntoView && !preserveScroll) {
           scrollMatrixPaneToExpandedProject(selectedProject);
         }
         const insp = document.getElementById('provenance-inspector');
@@ -3650,6 +3639,7 @@
             runInspectorMatrixScrollFocus(chart, g, ri);
           }
         }
+        scheduleSyncProvenanceInspectorAlignment();
       });
 
       const matrixLabelShell = document.querySelector('.matrix-shell .fixed-labels');
@@ -3693,7 +3683,7 @@
       const visibleCount = visibleMonths.length;
       const nMile = mileRows.length;
       if (nMile === 0) return;
-      const mileMt = Number(matrixMarginTop) || 82;
+      const mileMt = Number(matrixMarginTop) || MATRIX_X_AXIS_MARGIN_TOP_LAYOUT;
       const mileMb = Number(matrixMarginBottom) || 52;
       const pw = Math.max(1, Math.round(Number(plotWidth) || 0));
       const xg = Number.isFinite(heatmapXGap) && heatmapXGap >= 0 ? heatmapXGap : matrixHeatmapXGap;
@@ -3748,7 +3738,13 @@
         height: Math.max(120, milestonePlotHeight),
         paper_bgcolor: 'rgba(0,0,0,0)',
         plot_bgcolor: 'rgba(0,0,0,0)',
-        margin: { l: MATRIX_PLOT_MARGIN_LR.l, r: MATRIX_PLOT_MARGIN_LR.r, t: mileMt, b: mileMb },
+        margin: {
+          l: MATRIX_PLOT_MARGIN_LR.l,
+          r: MATRIX_PLOT_MARGIN_LR.r,
+          t: mileMt,
+          b: mileMb,
+          autoexpand: false
+        },
         shapes: mileShapes,
         hoverlabel: {
           align: 'left',
@@ -3766,6 +3762,7 @@
           tickfont: xTickCfgM.tickfont,
           tickangle: xTickCfgM.tickangle,
           showticklabels: false,
+          automargin: false,
           showgrid: false,
           ticks: '',
           ticklen: 0,
@@ -3778,6 +3775,7 @@
           categoryarray: mileRows,
           autorange: 'reversed',
           showticklabels: false,
+          automargin: false,
           showgrid: false,
           ticks: '',
           ticklen: 0,
@@ -4004,7 +4002,7 @@
         }
         detailTitle.textContent = 'Selected Project';
         detailCopy.textContent =
-          'Click a project row to open it alone in the matrix (aggregate row + activity types by month). Use All projects above the map or click the same row again to see every project.';
+          'Click a project row to open it alone in the matrix (aggregate row + activity types by month). Use All projects above the list or click the same row again to see every project.';
         detailStats.innerHTML = [
           { value: data.summaryCount, label: 'Summary files' },
           { value: data.rows.length, label: 'Project tags (rows)' },
@@ -4012,14 +4010,22 @@
         ].map(item => `
           <div class="stat"><span class="value">${item.value}</span><span class="label">${item.label}</span></div>
         `).join('');
-        const backBtn = document.getElementById('matrix-back-all-projects');
-        if (backBtn) backBtn.hidden = true;
+        const backNav = document.getElementById('matrix-back-all-projects-nav');
+        if (backNav) {
+          backNav.classList.add('matrix-back-all-projects-nav--concealed');
+          backNav.setAttribute('aria-hidden', 'true');
+          backNav.tabIndex = -1;
+        }
         renderMatrix(null);
         return;
       }
 
-      const backBtnOpen = document.getElementById('matrix-back-all-projects');
-      if (backBtnOpen) backBtnOpen.hidden = false;
+      const backNavOpen = document.getElementById('matrix-back-all-projects-nav');
+      if (backNavOpen) {
+        backNavOpen.classList.remove('matrix-back-all-projects-nav--concealed');
+        backNavOpen.setAttribute('aria-hidden', 'false');
+        backNavOpen.tabIndex = 0;
+      }
 
       const projectIdx = data.rows.indexOf(expandedProject);
       const monthlyScores = (data.projectScores[expandedProject] || []).slice(visibleStartIdx, visibleEndIdx + 1);
@@ -4042,7 +4048,7 @@
       renderMatrix(expandedProject);
     }
 
-    document.getElementById('matrix-back-all-projects')?.addEventListener('click', () => {
+    document.getElementById('matrix-back-all-projects-nav')?.addEventListener('click', () => {
       setActiveProject(null);
     });
 
