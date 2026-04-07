@@ -431,13 +431,11 @@
       renderSummaryBody(bodyEl, source, hlSet);
     }
 
-    if (!matchesOnly) {
-      const first = bodyEl.querySelector('.summary-block--hl, .people-chip--hl');
-      if (first && typeof first.scrollIntoView === 'function') {
-        requestAnimationFrame(function () {
-          first.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-        });
-      }
+    const firstHl = bodyEl.querySelector('.summary-block--hl, .people-chip--hl');
+    if (firstHl && typeof firstHl.scrollIntoView === 'function') {
+      requestAnimationFrame(function () {
+        firstHl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      });
     }
     return { ok: true };
   }
