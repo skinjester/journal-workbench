@@ -34,6 +34,7 @@
       overflow-y: auto;
       overflow-x: hidden;
       overscroll-behavior-y: contain;
+      overscroll-behavior-x: none;
       scrollbar-gutter: stable;
     }
     /* Sticky provenance column needs a non-clipping ancestor (see #provenance-inspector). */
@@ -60,9 +61,39 @@
       flex-direction: column;
       align-items: stretch;
     }
-    .matrix-map-section > .chart-panel-section-heading {
-      margin: 0 0 var(--sp-1);
+    .matrix-map-heading-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: var(--sp-1) var(--sp-2);
       flex-shrink: 0;
+      margin: 0 0 var(--sp-1);
+    }
+    .matrix-map-heading-row .chart-panel-section-heading {
+      margin: 0;
+      flex-shrink: 0;
+    }
+    .matrix-back-all-projects {
+      flex-shrink: 0;
+      font: inherit;
+      font-size: var(--text-xs, 12px);
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(121, 192, 255, 0.35);
+      background: rgba(121, 192, 255, 0.1);
+      color: #edf3fb;
+      cursor: pointer;
+      transition: background 120ms ease, border-color 120ms ease;
+    }
+    .matrix-back-all-projects:hover {
+      background: rgba(121, 192, 255, 0.16);
+      border-color: rgba(121, 192, 255, 0.5);
+    }
+    .matrix-back-all-projects:focus-visible {
+      outline: 2px solid rgba(121, 192, 255, 0.65);
+      outline-offset: 2px;
     }
     .matrix-chart-stack {
       display: flex;
@@ -269,6 +300,8 @@
       padding-bottom: 0;
       scrollbar-gutter: stable;
       touch-action: pan-x pan-y;
+      /* Mac trackpad: avoid horizontal overscroll chaining into browser back/forward when there’s no (or no more) room to scroll. */
+      overscroll-behavior-x: none;
     }
     /* Width set from #matrix-scroll so Deliverables aligns with the heatmap column (panel-wide row vs matrix+inspector row). */
     #matrix-scroll,
@@ -906,7 +939,12 @@
     <section class="panel chart-panel">
       <div class="matrix-workbench-row" id="matrix-workbench-row">
         <div class="matrix-map-section">
-          <h3 class="chart-panel-section-heading">Project Activity Map</h3>
+          <div class="matrix-map-heading-row">
+            <h3 class="chart-panel-section-heading">Project Activity Map</h3>
+            <button type="button" id="matrix-back-all-projects" class="matrix-back-all-projects" hidden aria-label="Show all projects in the matrix">
+              All projects
+            </button>
+          </div>
           <div class="matrix-shell timeline-pane">
             <div class="fixed-labels">
               <div class="fixed-labels-grid" id="matrix-labels"></div>
@@ -967,7 +1005,7 @@
             <div class="legend-item"><span class="swatch" style="background: var(--track-1);"></span><span><strong>1</strong> trace signal</span></div>
             <div class="legend-item"><span class="swatch" style="background: var(--track-2);"></span><span><strong>2</strong> active secondary thread</span></div>
             <div class="legend-item"><span class="swatch" style="background: var(--track-3);"></span><span><strong>3</strong> peak for that project row (volume) or monthly winner (dominance)</span></div>
-            <div class="legend-item"><span class="swatch" style="background: var(--track-2);"></span><span>Expanded: other project rows use a grey-tinted dim scale and a darker band; activity rows stay full-color blues; scroll inside the map viewport to move through rows</span></div>
+            <div class="legend-item"><span class="swatch" style="background: var(--track-2);"></span><span>Open a project to show only that project’s aggregate row plus activity sub-rows (full blues). Use <strong>All projects</strong> or click the project row again to return to the full grid; scroll inside the map viewport to move through rows</span></div>
             <div class="legend-item"><span class="swatch" style="background: linear-gradient(90deg,#f07178,#6cb6ff,#d2a8ff,#56d4dd,#80e2a2,#ffba68,#adb5bd,#d29aff);"></span><span>Deliverable timeline: one row per <code>deliv:*</code> type in monthly summaries; heatmap cells mark months with that tag (same layout as the project matrix; prototype/presentation/PDF rows also pick up legacy vocabulary when tags are absent)</span></div>
           </div>
         </section>
@@ -1798,40 +1836,22 @@
       operations: '#adb5bd',
       pdf: '#d29aff'
     };
-    /* Activity layer always full intensity; project aggregate uses dim blues when another row is expanded. */
-    /* Slightly muted mids / peaks so warm crosshair overlay is easier to read over busy cells. */
+    /* Project + activity heatmaps share full blues; slightly muted mids / peaks for crosshair legibility. */
     const intensityBluescale = [
       [0.0, '#0d1117'],
       [0.3333, '#283d55'],
       [0.6666, '#2d6494'],
       [1.0, '#68ace8']
     ];
-    /* Desaturated / grey-tinted so collapsed project rows read clearly against full-blue activity drill-in. */
-    const projectDimBluescale = [
-      [0.0, '#0b0d10'],
-      [0.3333, '#262b32'],
-      [0.6666, '#3d4754'],
-      [1.0, '#586776']
-    ];
-    /**
-     * Row bands under heatmaps. Strong project-vs-activity contrast only when a project is expanded;
-     * default (collapsed) uses a light uniform band so the matrix stays full brightness.
-     */
-    function matrixRowBandShapes(expandedRows, projectExpanded) {
+    /** Row bands under heatmaps: uniform light strip per row (no dark “sibling project” band; drill is single-project only). */
+    function matrixRowBandShapes(expandedRows) {
       const n = expandedRows.length;
       if (n === 0) return [];
       const shapes = [];
+      const fillcolor = 'rgba(255, 255, 255, 0.028)';
       for (let i = 0; i < n; i++) {
         const y0 = 1 - (i + 1) / n;
         const y1 = 1 - i / n;
-        const isProject = expandedRows[i].type === 'project';
-        let fillcolor;
-        if (!projectExpanded) {
-          fillcolor = 'rgba(255, 255, 255, 0.028)';
-        } else {
-          /* Outer project rows: darker band + dim/grey heatmap. Activity rows: same neutral lift as collapsed matrix. */
-          fillcolor = isProject ? 'rgba(0, 0, 0, 0.38)' : 'rgba(255, 255, 255, 0.028)';
-        }
         shapes.push({
           type: 'rect',
           xref: 'paper',
@@ -3209,58 +3229,75 @@
         .sort((a, b) => (b.activeMonths - a.activeMonths) || (b.total - a.total));
     }
 
+    function pushProjectRowForMatrix(rows, project, rIdx, startIdx, endIdx, visibleMonths) {
+      const rowValues = data.intensity[rIdx].slice(startIdx, endIdx + 1);
+      rows.push({
+        key: project,
+        label: project,
+        type: 'project',
+        project,
+        values: rowValues,
+        hover: visibleMonths.map((month, localIdx) => {
+          const gi = startIdx + localIdx;
+          if (data.activityTopRows && data.activityTopRows[project]) {
+            return buildProjectRowHoverText(month, project, gi);
+          }
+          const activityHintsMap = data.activityHints || data.sectionHints || {};
+          const hint = (activityHintsMap[project] || [])[gi] || '';
+          const stackedHint = hintStringToStackedLines(hint);
+          const wrappedDescription = data.descriptions[project] ? wrapWords(data.descriptions[project], 48) : '';
+          const parts = [`<b>${escapeHtml(month)}</b>`, escapeHtml(project)];
+          if (stackedHint) parts.push(stackedHint);
+          if (wrappedDescription) parts.push(wrappedDescription);
+          return parts.join('<br>');
+        })
+      });
+    }
+
+    /** Collapsed: one row per project. Drill: only the opened project row + its activity sub-rows. */
     function buildExpandedRows(selectedProject, startIdx, endIdx) {
       const visibleMonths = data.months.slice(startIdx, endIdx + 1);
-      const activities = selectedProject ? scopedActivitiesForProject(selectedProject, startIdx, endIdx) : [];
       const rows = [];
 
-      data.rows.forEach((project, rIdx) => {
-        const rowValues = data.intensity[rIdx].slice(startIdx, endIdx + 1);
+      if (!selectedProject) {
+        data.rows.forEach((project, rIdx) => {
+          pushProjectRowForMatrix(rows, project, rIdx, startIdx, endIdx, visibleMonths);
+        });
+        return rows;
+      }
+
+      const rIdx = data.rows.indexOf(selectedProject);
+      if (rIdx < 0) {
+        data.rows.forEach((project, ri) => {
+          pushProjectRowForMatrix(rows, project, ri, startIdx, endIdx, visibleMonths);
+        });
+        return rows;
+      }
+
+      const project = selectedProject;
+      pushProjectRowForMatrix(rows, project, rIdx, startIdx, endIdx, visibleMonths);
+
+      const activities = scopedActivitiesForProject(project, startIdx, endIdx);
+      const intensityMode = data.intensityMode || 'volume';
+      const domZs = intensityMode === 'dominance' ? activityDominanceIntensities(activities) : null;
+      activities.forEach((activity, ai) => {
+        const values =
+          intensityMode === 'dominance'
+            ? domZs[ai]
+            : intensityRowFromOwnSeries(activity.monthly);
         rows.push({
-          key: project,
-          label: project,
-          type: 'project',
+          key: `${project}::${activity.name}`,
+          label: activity.name,
+          type: 'activity',
           project,
-          values: rowValues,
+          rawMonthly: activity.monthly,
+          values,
           hover: visibleMonths.map((month, localIdx) => {
-            const gi = startIdx + localIdx;
-            if (data.activityTopRows && data.activityTopRows[project]) {
-              return buildProjectRowHoverText(month, project, gi);
-            }
-            const activityHintsMap = data.activityHints || data.sectionHints || {};
-            const hint = (activityHintsMap[project] || [])[gi] || '';
-            const stackedHint = hintStringToStackedLines(hint);
-            const wrappedDescription = data.descriptions[project] ? wrapWords(data.descriptions[project], 48) : '';
-            const parts = [`<b>${escapeHtml(month)}</b>`, escapeHtml(project)];
-            if (stackedHint) parts.push(stackedHint);
-            if (wrappedDescription) parts.push(wrappedDescription);
-            return parts.join('<br>');
+            if (activity.monthly[localIdx] <= 0) return '';
+            const e = escapeHtml;
+            return `<b>${e(month)}</b><br>${e(project)} · ${e(activity.name)}<br>Click for provenance`;
           })
         });
-
-        if (project === selectedProject) {
-          const intensityMode = data.intensityMode || 'volume';
-          const domZs = intensityMode === 'dominance' ? activityDominanceIntensities(activities) : null;
-          activities.forEach((activity, ai) => {
-            const values =
-              intensityMode === 'dominance'
-                ? domZs[ai]
-                : intensityRowFromOwnSeries(activity.monthly);
-            rows.push({
-              key: `${project}::${activity.name}`,
-              label: activity.name,
-              type: 'activity',
-              project,
-              rawMonthly: activity.monthly,
-              values,
-              hover: visibleMonths.map((month, localIdx) => {
-                if (activity.monthly[localIdx] <= 0) return '';
-                const e = escapeHtml;
-                return `<b>${e(month)}</b><br>${e(project)} · ${e(activity.name)}<br>Click for provenance`;
-              })
-            });
-          });
-        }
       });
 
       return rows;
@@ -3412,10 +3449,10 @@
         row.type === 'activity' ? row.hover : Array(visibleCount).fill('')
       );
 
-      const projectHeatColorscale = selectedProject ? projectDimBluescale : intensityBluescale;
+      const projectHeatColorscale = intensityBluescale;
       const matrixShapes = [
         ...makeYearBandShapes(visibleMonths),
-        ...matrixRowBandShapes(expandedRows, Boolean(selectedProject))
+        ...matrixRowBandShapes(expandedRows)
       ];
 
       const matrixMarginBottom = 52;
@@ -3895,17 +3932,21 @@
           const scrollPane = strip.closest('.timeline-pane');
           const maxSL = () => Math.max(0, strip.scrollWidth - strip.clientWidth);
 
-          if (canHScroll && e.shiftKey && absY > 0) {
+          if (e.shiftKey && absY > 0) {
             e.preventDefault();
-            strip.scrollLeft = Math.max(0, Math.min(maxSL(), strip.scrollLeft + e.deltaY));
+            if (canHScroll) {
+              strip.scrollLeft = Math.max(0, Math.min(maxSL(), strip.scrollLeft + e.deltaY));
+            }
             return;
           }
 
           /* Horizontal component scrolls the strip; require absX > 0.5*absY so vertical swipes are not jittered by tiny deltaX. */
-          if (canHScroll && e.deltaX !== 0 && absX > absY * 0.5) {
+          if (e.deltaX !== 0 && absX > absY * 0.5) {
             e.preventDefault();
-            strip.scrollLeft = Math.max(0, Math.min(maxSL(), strip.scrollLeft + e.deltaX));
-            if (absX >= absY) return;
+            if (canHScroll) {
+              strip.scrollLeft = Math.max(0, Math.min(maxSL(), strip.scrollLeft + e.deltaX));
+            }
+            if (absX >= absY || !canHScroll) return;
           }
 
           const mostlyVertical = absY >= absX;
@@ -3947,7 +3988,8 @@
           if (po && !po.hidden) closeProvenanceOverlay();
         }
         detailTitle.textContent = 'Selected Project';
-        detailCopy.textContent = 'Click a project row to expand description-based activity types (counts per month) inline in the matrix.';
+        detailCopy.textContent =
+          'Click a project row to open it alone in the matrix (aggregate row + activity types by month). Use All projects above the map or click the same row again to see every project.';
         detailStats.innerHTML = [
           { value: data.summaryCount, label: 'Summary files' },
           { value: data.rows.length, label: 'Project tags (rows)' },
@@ -3955,9 +3997,14 @@
         ].map(item => `
           <div class="stat"><span class="value">${item.value}</span><span class="label">${item.label}</span></div>
         `).join('');
+        const backBtn = document.getElementById('matrix-back-all-projects');
+        if (backBtn) backBtn.hidden = true;
         renderMatrix(null);
         return;
       }
+
+      const backBtnOpen = document.getElementById('matrix-back-all-projects');
+      if (backBtnOpen) backBtnOpen.hidden = false;
 
       const projectIdx = data.rows.indexOf(expandedProject);
       const monthlyScores = (data.projectScores[expandedProject] || []).slice(visibleStartIdx, visibleEndIdx + 1);
@@ -3979,6 +4026,10 @@
 
       renderMatrix(expandedProject);
     }
+
+    document.getElementById('matrix-back-all-projects')?.addEventListener('click', () => {
+      setActiveProject(null);
+    });
 
     // Start collapsed so the full project grid is visible; expand any row to drill in.
     setActiveProject(null);
