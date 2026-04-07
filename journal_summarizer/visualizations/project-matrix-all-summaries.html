@@ -1809,18 +1809,32 @@
       });
     }
 
+    /** Pushes the inspector column down so its top matches `.matrix-shell` (heatmap), not the section heading row. */
+    function provenanceInspectorHeatmapAlignMarginPx() {
+      const mapSection = document.querySelector('.matrix-map-section');
+      const shell = mapSection && mapSection.querySelector('.matrix-shell');
+      if (!mapSection || !shell) return 0;
+      const dy = shell.getBoundingClientRect().top - mapSection.getBoundingClientRect().top;
+      return Math.max(0, Math.round(dy));
+    }
+
     function resetProvenanceInspectorAlignment() {
       const inspector = document.getElementById('provenance-inspector');
       if (!inspector) return;
       inspector.style.paddingTop = '';
+      inspector.style.marginTop = '';
       inspector.style.removeProperty('--prov-inspector-scroll-mt');
       const slot = document.getElementById('provenance-inspector-collapsed-slot');
-      if (slot) slot.style.paddingTop = '';
+      if (slot) {
+        slot.style.paddingTop = '';
+        slot.style.marginTop = '';
+      }
     }
 
     /**
      * Side-by-side layout (≥1181px): vertically center the panel toggle on the All projects row, then
      * offset the overview body so the kicker top matches the first matrix label row (top of heatmap row 0).
+     * Aligns even when the nav is .matrix-back-all-projects-nav--concealed (visibility:hidden): same geometry as drill mode.
      */
     function syncProvenanceInspectorAlignment() {
       const inspector = document.getElementById('provenance-inspector');
@@ -1836,10 +1850,13 @@
         resetProvenanceInspectorAlignment();
         return;
       }
-      if (!backNav || backNav.classList.contains('matrix-back-all-projects-nav--concealed')) {
+      if (!backNav) {
         resetProvenanceInspectorAlignment();
         return;
       }
+
+      const heatmapAlignPx = provenanceInspectorHeatmapAlignMarginPx();
+      inspector.style.marginTop = heatmapAlignPx > 0 ? `${heatmapAlignPx}px` : '';
 
       inspector.style.paddingTop = '0px';
       inspector.style.removeProperty('--prov-inspector-scroll-mt');
@@ -1870,17 +1887,24 @@
       const showBtn = document.getElementById('prov-inspector-show-collapsed');
       const backNav = document.getElementById('matrix-back-all-projects-nav');
       if (!slot || !showBtn || slot.hidden) {
-        if (slot && slot.hidden) slot.style.paddingTop = '';
+        if (slot && slot.hidden) {
+          slot.style.paddingTop = '';
+          slot.style.marginTop = '';
+        }
         return;
       }
       if (!window.matchMedia('(min-width: 1181px)').matches) {
         slot.style.paddingTop = '';
+        slot.style.marginTop = '';
         return;
       }
-      if (!backNav || backNav.classList.contains('matrix-back-all-projects-nav--concealed')) {
+      if (!backNav) {
         slot.style.paddingTop = '';
+        slot.style.marginTop = '';
         return;
       }
+      const heatmapAlignPx = provenanceInspectorHeatmapAlignMarginPx();
+      slot.style.marginTop = heatmapAlignPx > 0 ? `${heatmapAlignPx}px` : '';
       slot.style.paddingTop = '0px';
       void slot.offsetHeight;
       const navRect = backNav.getBoundingClientRect();
@@ -1909,6 +1933,7 @@
           if (document.activeElement === btn) btn.blur();
         }
         slot.style.paddingTop = '';
+        slot.style.marginTop = '';
       }
     }
 
