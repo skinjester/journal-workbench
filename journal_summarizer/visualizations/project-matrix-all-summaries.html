@@ -302,7 +302,64 @@
       pointer-events: none;
       display: none;
     }
+    /* Pass hits through tooltip chrome; activity provenance panel re-enables below. */
+    #chart-tooltip .chart-tooltip__surface * {
+      pointer-events: none;
+    }
+    /* Activity overview only: scrollable body + descendants hit-test (scroll, links); rest of tooltip stays pass-through. */
+    #chart-tooltip .chart-tooltip__heavy.chart-tooltip__body.summary-body.provenance-markdown.provenance-markdown-panel {
+      pointer-events: auto;
+      flex: 1 1 auto;
+      min-height: 0;
+      max-height: min(56vh, 480px);
+      overflow-y: auto;
+      overflow-x: hidden;
+      margin: 0;
+      font-size: var(--text-sm);
+      line-height: 1.45;
+      color: var(--matrix-tooltip-body, #e9ded0);
+      font-family: "Manrope", system-ui, sans-serif;
+      word-break: break-word;
+    }
+    #chart-tooltip .chart-tooltip__heavy.chart-tooltip__body.summary-body.provenance-markdown.provenance-markdown-panel * {
+      pointer-events: auto;
+    }
+    #chart-tooltip .provenance-markdown-panel .summary-block em,
+    #chart-tooltip .provenance-markdown-panel .summary-block p em {
+      color: var(--matrix-tooltip-muted, #9d8f7c);
+    }
+    #chart-tooltip .provenance-markdown-panel strong {
+      color: var(--matrix-tooltip-strong, #ffffff);
+      font-weight: 700;
+    }
+    #chart-tooltip .provenance-markdown-panel .people-name {
+      color: var(--matrix-tooltip-body, #e9ded0);
+    }
+    #chart-tooltip .provenance-markdown-panel .people-plain {
+      color: var(--matrix-tooltip-body, #e9ded0);
+    }
+    #chart-tooltip .provenance-markdown-panel .empty,
+    #chart-tooltip .provenance-markdown-panel .people-none {
+      color: var(--matrix-tooltip-muted, #9d8f7c);
+    }
+    #chart-tooltip .provenance-markdown-panel code {
+      color: var(--matrix-tooltip-meta, #d4b896);
+      background: rgba(255, 186, 120, 0.08);
+    }
+    #chart-tooltip .provenance-markdown-panel .people-avatar {
+      background: linear-gradient(145deg, rgba(255, 200, 150, 0.45), rgba(160, 95, 45, 0.55));
+      color: #1a1410;
+    }
+    #chart-tooltip .provenance-markdown-panel .people-chip {
+      background: rgba(255, 186, 120, 0.08);
+      border-color: rgba(255, 186, 120, 0.18);
+    }
     #chart-tooltip .chart-tooltip__surface {
+      pointer-events: none;
+      max-height: min(62vh, 560px);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
       padding: var(--sp-1);
       border-radius: 12px;
       border: 1px solid var(--matrix-tooltip-border, rgba(190, 155, 110, 0.5));
@@ -1549,69 +1606,6 @@
       });
     }
 
-    /** Floating tooltip only (activity hover). Clicks use openProvenanceInspector. */
-    function openProvenanceOverlay(month, project, activity, bbox, fallbackRect, pointerEvent) {
-      const root = document.getElementById('provenance-overlay');
-      const chart = document.getElementById('matrix-chart');
-      const dialog = root && root.querySelector('.provenance-overlay__dialog');
-      const ct = document.getElementById('chart-tooltip');
-      const prov = typeof provenanceData !== 'undefined' ? provenanceData : null;
-      if (!root || typeof ProvenanceView === 'undefined' || !prov || !prov.monthSources) {
-        navigateProvenancePage(month, project, activity);
-        return;
-      }
-      cancelMatrixHoverExit();
-      const cellKey = `${month}\0${project}\0${activity}`;
-      hideChartTooltip();
-      if (
-        chart &&
-        !root.hidden &&
-        root.classList.contains('provenance-overlay--hover') &&
-        chart._provenanceOpenKey === cellKey
-      ) {
-        requestAnimationFrame(() => positionProvenanceDialog(bbox, fallbackRect, chart));
-        if (ct && dialog) {
-          ct._velocityOverlaySurface = dialog;
-          ct._matrixTooltipMotion = true;
-          ensureChartTooltipMotionListener();
-          recordChartTooltipPointerFromEvent(ct, pointerEvent);
-          updateTooltipVelocityBand(ct);
-          scheduleTooltipVelocityStillRefresh(ct);
-        }
-        return;
-      }
-      if (typeof marked !== 'undefined') {
-        marked.setOptions({ gfm: true, breaks: false });
-      }
-      root.classList.add('provenance-overlay--hover');
-      if (dialog) dialog.setAttribute('aria-modal', 'false');
-      root.removeAttribute('hidden');
-      root.setAttribute('aria-hidden', 'false');
-      if (chart) chart._provenanceOpenKey = cellKey;
-      ProvenanceView.render({
-        month,
-        project,
-        activity,
-        provenanceData: prov,
-        hoverSummary: true,
-        kickerEl: document.getElementById('prov-overlay-kicker'),
-        titleEl: document.getElementById('prov-overlay-title'),
-        metaEl: document.getElementById('prov-overlay-meta'),
-        bodyEl: document.getElementById('prov-overlay-body'),
-      });
-      requestAnimationFrame(() => positionProvenanceDialog(bbox, fallbackRect, chart));
-      if (ct && dialog) {
-        ct._velocityOverlaySurface = dialog;
-        ct._matrixTooltipMotion = true;
-        ct._tooltipVelBand = undefined;
-        clearTooltipVelocityClasses(dialog);
-        ensureChartTooltipMotionListener();
-        recordChartTooltipPointerFromEvent(ct, pointerEvent);
-        updateTooltipVelocityBand(ct);
-        scheduleTooltipVelocityStillRefresh(ct);
-      }
-    }
-
     function openProvenanceInspector(month, project, activity, focusMeta) {
       const root = document.getElementById('provenance-inspector');
       const chart = document.getElementById('matrix-chart');
@@ -2163,7 +2157,19 @@
           gridHint: { m: localMonthIdx, r: idx }
         });
       } else if (!inspectorOpen && row.type === 'activity' && localMonthIdx >= 0) {
-        openProvenanceOverlay(xKey, row.project, row.label, bbox, chart.getBoundingClientRect(), pointerEvent);
+        const po = document.getElementById('provenance-overlay');
+        if (po && !po.hidden && po.classList.contains('provenance-overlay--hover')) {
+          closeProvenanceOverlay();
+        }
+        showMatrixActivityOverviewTooltip({
+          month: xKey,
+          project: row.project,
+          activity: row.label,
+          bbox,
+          gd: chart,
+          pointerEvent,
+          gridHint: { m: localMonthIdx, r: idx }
+        });
       }
       const json = chart._matrixHoverBaseShapesJson;
       if (!json) return;
@@ -2327,6 +2333,44 @@
           <div class="chart-tooltip__heavy chart-tooltip__body">${heavyInnerHtml}</div>
         </div>
       `;
+    }
+
+    /** Activity-row hover: same shell width as project tooltip; body = matchesOnly provenance overview. */
+    function buildActivityOverviewTooltipShell(month, project, activity, bodyHtml) {
+      return `
+        <div class="chart-tooltip__surface">
+          <div class="chart-tooltip__kicker">${escapeHtml(month)}</div>
+          <div class="chart-tooltip__title">${escapeHtml(project)}</div>
+          <div class="chart-tooltip__meta">${escapeHtml(activity)}</div>
+          <div class="chart-tooltip__heavy chart-tooltip__body summary-body provenance-markdown provenance-markdown-panel">${bodyHtml}</div>
+        </div>
+      `;
+    }
+
+    function buildMatrixActivityOverviewBodyHtml(month, project, activity) {
+      const prov = typeof provenanceData !== 'undefined' ? provenanceData : null;
+      if (!prov || typeof ProvenanceView === 'undefined') {
+        return '<span class="empty">Overview unavailable.</span>';
+      }
+      if (typeof marked !== 'undefined') {
+        marked.setOptions({ gfm: true, breaks: false });
+      }
+      const bodyEl = document.createElement('div');
+      const r = ProvenanceView.render({
+        month,
+        project,
+        activity,
+        kickerEl: document.createElement('span'),
+        titleEl: document.createElement('span'),
+        metaEl: document.createElement('span'),
+        bodyEl,
+        provenanceData: prov,
+        matchesOnly: true
+      });
+      if (!r || !r.ok) {
+        return '<span class="empty">Overview unavailable.</span>';
+      }
+      return bodyEl.innerHTML;
     }
 
     function buildProjectRowTooltipHtml(month, project, globalMonthIdx) {
@@ -2584,6 +2628,11 @@
         chartTooltip.style.display === 'block' && chartTooltip.querySelector('.chart-tooltip__surface .chart-tooltip__kicker');
       const prevCellKey = chartTooltip._matrixTooltipCellKey;
       const sameCell = wasVisible && prevCellKey === cellKey;
+      const prevShellIsProject =
+        wasVisible &&
+        prevCellKey &&
+        !prevCellKey.startsWith('activity:') &&
+        !prevCellKey.startsWith('milestone:');
 
       if (reducedMotion) {
         clearMatrixProjectHeavyTimer();
@@ -2606,7 +2655,7 @@
         return;
       }
 
-      if (!wasVisible) {
+      if (!wasVisible || !prevShellIsProject) {
         if (chartTooltip._tooltipSwapOnOut) {
           chartTooltip.removeEventListener('transitionend', chartTooltip._tooltipSwapOnOut);
           chartTooltip._tooltipSwapOnOut = null;
@@ -2660,6 +2709,129 @@
       scheduleMatrixProjectHeavyCommit(cellKey, heavyHtml, gridHint);
     }
 
+    /** Activity sub-row hover: same motion, dwell, and heavy commit pipeline as project-row tooltip. */
+    function showMatrixActivityOverviewTooltip(payload) {
+      const { month, project, activity, bbox, gd, pointerEvent, gridHint } = payload;
+      if (!chartTooltip || month == null || !project || !activity) return;
+      chartTooltip._velocityOverlaySurface = null;
+      const existingSurface = getChartTooltipSurface(chartTooltip);
+      if (existingSurface) {
+        existingSurface.classList.remove('chart-tooltip__surface--leaving');
+      }
+      const po = document.getElementById('provenance-overlay');
+      if (po && !po.hidden && po.classList.contains('provenance-overlay--hover')) {
+        closeProvenanceOverlay();
+      }
+      const cellKey = `activity:\0${month}\0${project}\0${activity}`;
+      const heavyHtml = buildMatrixActivityOverviewBodyHtml(month, project, activity);
+
+      const applyLayout = () => {
+        const pad = 12;
+        const chartRect = gd && gd.getBoundingClientRect ? gd.getBoundingClientRect() : null;
+        const vb = bbox && gd ? plotlyHoverBboxToViewport(gd, bbox) : null;
+        let left = vb ? (vb.x1 + 14) : (chartRect ? chartRect.right + 14 : pad);
+        let top = vb ? (vb.y0 - 2) : (chartRect ? chartRect.top : pad);
+        const tipRect = chartTooltip.getBoundingClientRect();
+        if (left + tipRect.width > window.innerWidth - pad) {
+          left = vb ? (vb.x0 - tipRect.width - 14) : (window.innerWidth - tipRect.width - pad);
+        }
+        if (left < pad) left = pad;
+        if (top + tipRect.height > window.innerHeight - pad) {
+          top = window.innerHeight - tipRect.height - pad;
+        }
+        if (top < pad) top = pad;
+        chartTooltip.style.left = `${Math.round(left)}px`;
+        chartTooltip.style.top = `${Math.round(top)}px`;
+      };
+
+      const wasVisible =
+        chartTooltip.style.display === 'block' && chartTooltip.querySelector('.chart-tooltip__surface .chart-tooltip__kicker');
+      const prevCellKey = chartTooltip._matrixTooltipCellKey;
+      const sameCell = wasVisible && prevCellKey === cellKey;
+      const prevShellIsActivity = wasVisible && prevCellKey && prevCellKey.startsWith('activity:');
+
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reducedMotion) {
+        clearMatrixProjectHeavyTimer();
+        chartTooltip.innerHTML = buildActivityOverviewTooltipShell(month, project, activity, heavyHtml);
+        chartTooltip.style.display = 'block';
+        chartTooltip.setAttribute('aria-hidden', 'false');
+        chartTooltip._matrixTooltipCellKey = cellKey;
+        if (gridHint) chartTooltip._lastMatrixGridHint = gridHint;
+        applyLayout();
+        return;
+      }
+
+      chartTooltip._matrixTooltipMotion = true;
+      ensureChartTooltipMotionListener();
+      recordChartTooltipPointerFromEvent(chartTooltip, pointerEvent);
+
+      if (sameCell) {
+        applyLayout();
+        updateTooltipVelocityBand(chartTooltip);
+        scheduleTooltipVelocityStillRefresh(chartTooltip);
+        return;
+      }
+
+      if (!wasVisible || !prevShellIsActivity) {
+        if (chartTooltip._tooltipSwapOnOut) {
+          chartTooltip.removeEventListener('transitionend', chartTooltip._tooltipSwapOnOut);
+          chartTooltip._tooltipSwapOnOut = null;
+        }
+        const prevSurface = getChartTooltipSurface(chartTooltip);
+        if (prevSurface) {
+          prevSurface.classList.remove('chart-tooltip__surface--muted', 'chart-tooltip__surface--leaving');
+        }
+        chartTooltip._tooltipVelBand = undefined;
+        clearTooltipVelocityStillTimer(chartTooltip);
+        resetChartTooltipPointerState(chartTooltip);
+        clearMatrixProjectHeavyTimer();
+        chartTooltip.innerHTML = buildActivityOverviewTooltipShell(month, project, activity, TOOLTIP_HEAVY_PLACEHOLDER);
+        const heavyEl = chartTooltip.querySelector('.chart-tooltip__heavy');
+        if (heavyEl) {
+          heavyEl.classList.remove('chart-tooltip__heavy--instant');
+          heavyEl.classList.add('chart-tooltip__heavy--pending');
+        }
+        const surfaceEl = getChartTooltipSurface(chartTooltip);
+        if (surfaceEl) surfaceEl.classList.add('chart-tooltip__surface--muted');
+        chartTooltip.style.display = 'block';
+        chartTooltip.setAttribute('aria-hidden', 'false');
+        chartTooltip._matrixTooltipCellKey = cellKey;
+        if (gridHint) chartTooltip._lastMatrixGridHint = gridHint;
+        applyLayout();
+        updateTooltipVelocityBand(chartTooltip);
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            if (surfaceEl) surfaceEl.classList.remove('chart-tooltip__surface--muted');
+            updateTooltipVelocityBand(chartTooltip);
+            scheduleTooltipVelocityStillRefresh(chartTooltip);
+          });
+        });
+        scheduleMatrixProjectHeavyCommit(cellKey, heavyHtml, gridHint);
+        return;
+      }
+
+      clearMatrixProjectHeavyTimer();
+      const kicker = chartTooltip.querySelector('.chart-tooltip__kicker');
+      const title = chartTooltip.querySelector('.chart-tooltip__title');
+      const meta = chartTooltip.querySelector('.chart-tooltip__meta');
+      const heavy = chartTooltip.querySelector('.chart-tooltip__heavy');
+      if (kicker) kicker.textContent = month;
+      if (title) title.textContent = project;
+      if (meta) meta.textContent = activity;
+      if (heavy) {
+        heavy.classList.remove('chart-tooltip__heavy--instant', 'chart-tooltip__heavy--muted');
+        heavy.classList.add('chart-tooltip__heavy--pending');
+        heavy.innerHTML = TOOLTIP_HEAVY_PLACEHOLDER;
+      }
+      chartTooltip._matrixTooltipCellKey = cellKey;
+      if (gridHint) chartTooltip._lastMatrixGridHint = gridHint;
+      applyLayout();
+      updateTooltipVelocityBand(chartTooltip);
+      scheduleTooltipVelocityStillRefresh(chartTooltip);
+      scheduleMatrixProjectHeavyCommit(cellKey, heavyHtml, gridHint);
+    }
+
     /** Milestone / deliverables heatmap: same #chart-tooltip shell + deferred heavy body as matrix project rows. */
     function showMilestoneHeatmapTooltip(payload) {
       const { month, rowLabel, heavyHtml, bbox, gd, pointerEvent, gridHint, rowIndex, rowCount } = payload;
@@ -2701,6 +2873,8 @@
         chartTooltip.style.display === 'block' && chartTooltip.querySelector('.chart-tooltip__surface .chart-tooltip__kicker');
       const prevCellKey = chartTooltip._matrixTooltipCellKey;
       const sameCell = wasVisible && prevCellKey === cellKey;
+      const prevShellIsMilestone =
+        wasVisible && prevCellKey && prevCellKey.startsWith('milestone:');
 
       if (reducedMotion) {
         clearMatrixProjectHeavyTimer();
@@ -2723,7 +2897,7 @@
         return;
       }
 
-      if (!wasVisible) {
+      if (!wasVisible || !prevShellIsMilestone) {
         if (chartTooltip._tooltipSwapOnOut) {
           chartTooltip.removeEventListener('transitionend', chartTooltip._tooltipSwapOnOut);
           chartTooltip._tooltipSwapOnOut = null;
