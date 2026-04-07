@@ -232,7 +232,20 @@
       overflow: hidden;
     }
     .fixed-label.project-open {
-      background: rgba(95, 146, 214, 0.1);
+      background: rgba(95, 146, 214, 0.16);
+      box-shadow: inset 0 0 0 1px rgba(121, 192, 255, 0.22);
+    }
+    /* When one project is expanded, recede other project rows and lift activity labels. */
+    .matrix-shell .matrix-labels--drilldown .fixed-label.project:not(.active) {
+      opacity: 0.78;
+      color: rgba(237, 243, 251, 0.58);
+    }
+    .matrix-shell .matrix-labels--drilldown .fixed-label.project:not(.active)::after {
+      border-left-color: rgba(237, 243, 251, 0.38);
+    }
+    .matrix-shell .matrix-labels--drilldown .fixed-label.child {
+      color: rgba(237, 243, 251, 0.9);
+      border-left-color: rgba(121, 192, 255, 0.52);
     }
     /* Matrix hover: warm accent (--matrix-hover-* set from MATRIX_HOVER_TOKENS in script). */
     .fixed-label.hover-row-affordance {
@@ -954,7 +967,7 @@
             <div class="legend-item"><span class="swatch" style="background: var(--track-1);"></span><span><strong>1</strong> trace signal</span></div>
             <div class="legend-item"><span class="swatch" style="background: var(--track-2);"></span><span><strong>2</strong> active secondary thread</span></div>
             <div class="legend-item"><span class="swatch" style="background: var(--track-3);"></span><span><strong>3</strong> peak for that project row (volume) or monthly winner (dominance)</span></div>
-            <div class="legend-item"><span class="swatch" style="background: var(--track-2);"></span><span>Expanded: other project rows use a dim scale; activity rows use the same 0–3 rules and blues; scroll inside the map viewport to move through rows</span></div>
+            <div class="legend-item"><span class="swatch" style="background: var(--track-2);"></span><span>Expanded: other project rows use a grey-tinted dim scale and a darker band; activity rows stay full-color blues; scroll inside the map viewport to move through rows</span></div>
             <div class="legend-item"><span class="swatch" style="background: linear-gradient(90deg,#f07178,#6cb6ff,#d2a8ff,#56d4dd,#80e2a2,#ffba68,#adb5bd,#d29aff);"></span><span>Deliverable timeline: one row per <code>deliv:*</code> type in monthly summaries; heatmap cells mark months with that tag (same layout as the project matrix; prototype/presentation/PDF rows also pick up legacy vocabulary when tags are absent)</span></div>
           </div>
         </section>
@@ -1004,15 +1017,21 @@
       return fb[s] || s;
     });
     /**
-     * Matrix crosshair / hover: warm accent + dim veil so navigation reads separately from blue heatmap data.
+     * Matrix crosshair / hover: warm row+column fills, rules, cell outline. No outer dim (heatmap stays full brightness).
      * Values are mirrored onto :root for CSS row labels (see .fixed-label.hover-row-affordance).
      */
     const MATRIX_HOVER_TOKENS = {
+      /** Full-width row band: same alpha reads “solid” because the strip is tall × wide. */
       crossFill: 'rgba(255, 186, 120, 0.2)',
-      dimVeil: 'rgba(4, 8, 14, 0.2)',
+      /**
+       * Narrow month column: needs higher alpha than crossFill or only the vertical rule lines read;
+       * row + column then feel like one system (both filled), not “row wash vs column wires”.
+       */
+      crossFillColumn: 'rgba(255, 186, 120, 0.34)',
       ruleColor: 'rgba(200, 165, 118, 0.58)',
       ruleWidth: 1.35,
-      cellOutline: 'rgba(255, 255, 255, 0.82)',
+      /** Match warm crosshair; avoid stark white vs amber row/column. */
+      cellOutline: 'rgba(255, 220, 186, 0.9)',
       cellOutlineWidth: 2,
       milestoneColFill: 'rgba(255, 186, 120, 0.2)',
       labelBg: 'rgba(255, 186, 120, 0.16)',
@@ -1039,7 +1058,6 @@
       const r = document.documentElement;
       const T = MATRIX_HOVER_TOKENS;
       r.style.setProperty('--matrix-hover-cross-fill', T.crossFill);
-      r.style.setProperty('--matrix-hover-dim-veil', T.dimVeil);
       r.style.setProperty('--matrix-hover-rule-color', T.ruleColor);
       r.style.setProperty('--matrix-hover-label-bg', T.labelBg);
       r.style.setProperty('--matrix-hover-label-bg-project', T.labelBgProject);
@@ -1788,11 +1806,12 @@
       [0.6666, '#2d6494'],
       [1.0, '#68ace8']
     ];
+    /* Desaturated / grey-tinted so collapsed project rows read clearly against full-blue activity drill-in. */
     const projectDimBluescale = [
-      [0.0, '#050608'],
-      [0.3333, '#1e2d3d'],
-      [0.6666, '#1c5286'],
-      [1.0, '#3a6fa3']
+      [0.0, '#0b0d10'],
+      [0.3333, '#262b32'],
+      [0.6666, '#3d4754'],
+      [1.0, '#586776']
     ];
     /**
      * Row bands under heatmaps. Strong project-vs-activity contrast only when a project is expanded;
@@ -1810,8 +1829,8 @@
         if (!projectExpanded) {
           fillcolor = 'rgba(255, 255, 255, 0.028)';
         } else {
-          /* Outer project rows: dark band + dim heatmap. Activity rows: same neutral lift as collapsed matrix. */
-          fillcolor = isProject ? 'rgba(0, 0, 0, 0.22)' : 'rgba(255, 255, 255, 0.028)';
+          /* Outer project rows: darker band + dim/grey heatmap. Activity rows: same neutral lift as collapsed matrix. */
+          fillcolor = isProject ? 'rgba(0, 0, 0, 0.38)' : 'rgba(255, 255, 255, 0.028)';
         }
         shapes.push({
           type: 'rect',
@@ -1877,34 +1896,6 @@
       return { x0: Math.min(a, b), x1: Math.max(a, b) };
     }
 
-    /**
-     * Row tint uses paper y fractions (same math as expanded-project strip).
-     * Column tint prefers hover bbox (exact cell bounds); falls back to uniform inner width if missing.
-     */
-    /** Dim plot regions outside the hovered row/column cross (paper coords). */
-    function matrixHoverDimOutsideCrossShapes(rowIndex, rowCount, colX) {
-      const veil = MATRIX_HOVER_TOKENS.dimVeil;
-      const layer = 'above';
-      const n = rowCount;
-      const y0 = 1 - (rowIndex + 1) / n;
-      const y1 = 1 - rowIndex / n;
-      if (!colX) {
-        return [
-          { type: 'rect', xref: 'paper', yref: 'paper', x0: 0, x1: 1, y0: 0, y1: y0, fillcolor: veil, line: { width: 0 }, layer },
-          { type: 'rect', xref: 'paper', yref: 'paper', x0: 0, x1: 1, y0: y1, y1: 1, fillcolor: veil, line: { width: 0 }, layer }
-        ];
-      }
-      const x0 = colX.x0;
-      const x1 = colX.x1;
-      return [
-        { type: 'rect', xref: 'paper', yref: 'paper', x0: 0, x1: 1, y0: 0, y1: y0, fillcolor: veil, line: { width: 0 }, layer },
-        { type: 'rect', xref: 'paper', yref: 'paper', x0: 0, x1: x0, y0: y1, y1: 1, fillcolor: veil, line: { width: 0 }, layer },
-        { type: 'rect', xref: 'paper', yref: 'paper', x0: x1, x1: 1, y0: y1, y1: 1, fillcolor: veil, line: { width: 0 }, layer },
-        { type: 'rect', xref: 'paper', yref: 'paper', x0: 0, x1: x0, y0, y1, fillcolor: veil, line: { width: 0 }, layer },
-        { type: 'rect', xref: 'paper', yref: 'paper', x0: x1, x1: 1, y0, y1, fillcolor: veil, line: { width: 0 }, layer }
-      ];
-    }
-
     /** Full-span row/column guide lines at the cross edges (paper coords). */
     function matrixHoverCrossRuleLineShapes(rowIndex, rowCount, colX) {
       const T = MATRIX_HOVER_TOKENS;
@@ -1931,10 +1922,13 @@
     }
 
     /** `visibleMonthsOverride`: use when `gd` has no layout yet (e.g. inspector base shapes during renderMatrix). */
-    function matrixHoverBandShapes(rowIndex, monthKey, rowCount, gd, hoverBbox, visibleMonthsOverride) {
+    function matrixHoverBandShapes(rowIndex, monthKey, rowCount, gd, hoverBbox, visibleMonthsOverride, bandEmphasis) {
       if (rowIndex < 0 || rowCount <= 0 || monthKey == null || monthKey === '') return [];
       const T = MATRIX_HOVER_TOKENS;
-      const fill = T.crossFill;
+      const isInspector = bandEmphasis === 'inspector';
+      /* Inspector: no warm row/column wash — rules + cell outline only. Hover uses warm fills; neither dims the rest of the plot. */
+      const fillRow = isInspector ? 'rgba(0,0,0,0)' : T.crossFill;
+      const fillCol = isInspector ? 'rgba(0,0,0,0)' : T.crossFillColumn;
       const ry0 = 1 - (rowIndex + 1) / rowCount;
       const ry1 = 1 - rowIndex / rowCount;
       const rowRect = {
@@ -1945,7 +1939,7 @@
         x1: 1,
         y0: ry0,
         y1: ry1,
-        fillcolor: fill,
+        fillcolor: fillRow,
         line: { width: 0 },
         layer: 'above'
       };
@@ -1959,10 +1953,9 @@
         const ncols = Math.max(1, months.length);
         if (mi >= 0) colX = { x0: mi / ncols, x1: (mi + 1) / ncols };
       }
-      const dim = matrixHoverDimOutsideCrossShapes(rowIndex, rowCount, colX);
       const rules = matrixHoverCrossRuleLineShapes(rowIndex, rowCount, colX);
       if (!colX) {
-        return dim.concat(rowRect, rules);
+        return [rowRect, ...rules];
       }
       const colRect = {
         type: 'rect',
@@ -1972,7 +1965,7 @@
         x1: colX.x1,
         y0: 0,
         y1: 1,
-        fillcolor: fill,
+        fillcolor: fillCol,
         line: { width: 0 },
         layer: 'above'
       };
@@ -1988,7 +1981,7 @@
         line: { color: T.cellOutline, width: T.cellOutlineWidth },
         layer: 'above'
       };
-      return dim.concat(rowRect, colRect, rules, cellOutline);
+      return [rowRect, colRect, ...rules, cellOutline];
     }
 
     /** z in (0,1) band per row so discrete row colors map cleanly on one heatmap. */
@@ -3469,7 +3462,7 @@
         const riSel = expandedRows.findIndex((r) => r.key === cellFocus.rowKey);
         if (riSel >= 0 && visibleMonths.includes(cellFocus.month)) {
           matrixShapes.push(
-            ...matrixHoverBandShapes(riSel, cellFocus.month, expandedRows.length, chartPre, null, visibleMonths)
+            ...matrixHoverBandShapes(riSel, cellFocus.month, expandedRows.length, chartPre, null, visibleMonths, 'inspector')
           );
         }
       }
@@ -3607,6 +3600,10 @@
         }
       });
 
+      const matrixLabelShell = document.querySelector('.matrix-shell .fixed-labels');
+      if (matrixLabelShell) {
+        matrixLabelShell.classList.toggle('matrix-labels--drilldown', Boolean(selectedProject));
+      }
       matrixLabels.style.gridTemplateRows = `repeat(${expandedRows.length}, ${rowHeight}px)`;
       matrixLabels.innerHTML = expandedRows.map(row => {
         if (row.type === 'project') {
