@@ -25,7 +25,7 @@
     .panel { border: 1px solid var(--line); border-radius: 18px; background: linear-gradient(180deg, rgba(255,255,255,0.018), rgba(255,255,255,0.01)); box-shadow: 0 20px 56px var(--shadow); overflow: hidden; }
     .chart-panel {
       padding: clamp(var(--sp-3), 2.5vw, var(--sp-4)); margin-top: 0;
-      /* JS sets --timeline-pane-max-height (~12 heatmap rows + margins); fallback until first renderMatrix. */
+      /* Fallback before JS; renderMatrix / renderMilestones set per-pane max-height from actual row counts. */
       --timeline-pane-max-height: min(85vh, 520px);
     }
     .matrix-shell.timeline-pane,
@@ -67,7 +67,13 @@
       align-items: center;
       gap: var(--sp-1) var(--sp-2);
       flex-shrink: 0;
-      margin: 0 0 var(--sp-1);
+      margin: 0 0 var(--sp-0-5);
+      position: relative;
+      z-index: 2;
+    }
+    /* Pull heatmap toward the title so month labels sit closer under “Project Activity Map”. */
+    .matrix-map-section > .matrix-shell {
+      margin-top: -20px;
     }
     .matrix-map-heading-row .chart-panel-section-heading {
       margin: 0;
@@ -217,14 +223,16 @@
       max-width: min(360px, 100%);
       width: auto;
       align-self: stretch;
+      visibility: visible;
     }
-    /* Toggle column only (overview panel closed): 40px under Deliverables. */
-    .chart-panel:has(#provenance-inspector[hidden]) .deliverables-inspector-spacer {
+    /* Overview closed: only the toggle column — matrix + Deliverables use remaining width. */
+    .chart-panel:has(#provenance-sidebar-chrome):has(#provenance-inspector[hidden]) .deliverables-inspector-spacer {
       flex: 0 0 40px;
       min-width: 40px;
       max-width: 40px;
       width: 40px;
       align-self: stretch;
+      visibility: visible;
     }
     /** Fixed 40px column: single stationary toggle; panel opens to the right, not under this control. */
     #provenance-sidebar-chrome {
@@ -283,7 +291,7 @@
       color: var(--text);
       line-height: 1.2;
     }
-    /* Must match JS rowHeight; Plotly ygap draws gutters inside each row bin (labels still align). */
+    /* Must match JS rowHeight; heatmap uses xgap/ygap 0 so row/month underlay shapes share the same bins as bricks. */
     .fixed-labels-grid {
       display: grid;
       gap: 0;
@@ -773,6 +781,14 @@
     .provenance-inspector[hidden] {
       display: none !important;
     }
+    /* Hide overview text until Plotly has resized + alignment runs (avoids vertical jump on open). */
+    .provenance-inspector.provenance-inspector--pre-align .provenance-inspector__scroll {
+      opacity: 0;
+      transition: none;
+    }
+    .provenance-inspector.provenance-inspector--pre-align {
+      pointer-events: none;
+    }
     @media (prefers-reduced-motion: reduce) {
       .provenance-inspector { transition: none; }
     }
@@ -827,6 +843,13 @@
       margin-top: var(--prov-inspector-scroll-mt, 0px);
       padding: 0 0 var(--sp-2) 0;
       background: transparent;
+    }
+    .provenance-inspector__empty-hint {
+      margin: 0;
+      color: var(--muted);
+      font-size: var(--text-md);
+      line-height: var(--lh-body-relaxed);
+      max-width: 42ch;
     }
     .provenance-overlay__dialog {
       position: fixed;
@@ -1365,29 +1388,32 @@
 
     /** Custom eased scroll (longer / gentler than native `behavior: 'smooth'`). Uses `MATRIX_INSPECTOR_SCROLL_DURATION_MS`. */
     function animateScrollLeftPair(scrollEl, ms, targetLeft, durationMs, onDone) {
+      const chart = document.getElementById('matrix-chart');
+      const { min, max } = getMatrixHorizontalScrollClamp(chart);
       const dur = Number(durationMs);
+      const targetClamped = Math.max(min, Math.min(max, targetLeft));
       const fromLeft = scrollEl.scrollLeft;
-      const d = targetLeft - fromLeft;
+      const d = targetClamped - fromLeft;
       const finish = () => {
+        scrollEl.scrollLeft = Math.max(min, Math.min(max, targetClamped));
+        if (ms) ms.scrollLeft = scrollEl.scrollLeft;
         if (typeof onDone === 'function') queueMicrotask(onDone);
       };
       if (!Number.isFinite(dur) || dur <= 0 || Math.abs(d) < 0.5) {
-        scrollEl.scrollLeft = targetLeft;
-        if (ms) ms.scrollLeft = targetLeft;
+        scrollEl.scrollLeft = targetClamped;
+        if (ms) ms.scrollLeft = targetClamped;
         finish();
         return;
       }
       const t0 = performance.now();
       function tick(now) {
         const u = Math.min(1, (now - t0) / dur);
-        const v = Math.round(fromLeft + d * easeInOutCubic(u));
+        const v = Math.max(min, Math.min(max, Math.round(fromLeft + d * easeInOutCubic(u))));
         scrollEl.scrollLeft = v;
         if (ms) ms.scrollLeft = v;
         if (u < 1) inspScrollRafH = requestAnimationFrame(tick);
         else {
           inspScrollRafH = null;
-          scrollEl.scrollLeft = targetLeft;
-          if (ms) ms.scrollLeft = targetLeft;
           finish();
         }
       }
@@ -1440,8 +1466,10 @@
       const cwCss = cwLayout * scale;
       const marginPx = MATRIX_INSPECTOR_LEFT_COL_MARGIN * cwCss;
       const maxSL = Math.max(0, scrollEl.scrollWidth - scrollEl.clientWidth);
+      const minSL = getMatrixHeatmapMinScrollLeft(chart);
+      const effMin = Math.min(minSL, maxSL);
       const target = cellLeftInContent - marginPx;
-      const sl = Math.max(0, Math.min(maxSL, Math.round(target)));
+      const sl = Math.max(effMin, Math.min(maxSL, Math.round(target)));
       const after = options.onAfterScroll;
       if (smooth) {
         animateScrollLeftPair(scrollEl, ms, sl, MATRIX_INSPECTOR_SCROLL_DURATION_MS, after);
@@ -1493,6 +1521,60 @@
       const cellLeftInContent = chartLeftInContent + colLeftCssPx;
       const cwCss = cwLayout * scale;
       return { left: cellLeftInContent, right: cellLeftInContent + cwCss };
+    }
+
+    /**
+     * Pixel width of the inspector-only leading gutter (same formula as applied to #matrix-scroll-leading-gutter).
+     */
+    function computeInspectorMatrixLeadingGutterWidthPx(matrixGd) {
+      if (!matrixInspectorLayoutActive || !matrixGd || !matrixGd._matrixColGeom || !matrixGd._fullLayout) return 0;
+      const geom = matrixGd._matrixColGeom;
+      const nCols = geom.nCols;
+      if (nCols <= 0) return 0;
+      const xgap =
+        Number.isFinite(Number(geom.xgap)) && Number(geom.xgap) >= 0 ? Number(geom.xgap) : 0;
+      const cr = matrixGd.getBoundingClientRect();
+      const layoutW =
+        matrixGd._fullLayout.width > 0 ? matrixGd._fullLayout.width : cr.width;
+      const scale = cr.width / Math.max(1, layoutW);
+      const gs = matrixGd._fullLayout._size;
+      let cwLayout = layoutW / Math.max(1, nCols);
+      if (gs && Number(gs.w) > 0) {
+        const cw = (gs.w - Math.max(0, nCols - 1) * xgap) / Math.max(1, nCols);
+        if (cw > 0 && Number.isFinite(cw)) cwLayout = cw;
+      }
+      const cwCss = cwLayout * scale;
+      return Math.max(0, Math.round(MATRIX_INSPECTOR_LEFT_COL_MARGIN * cwCss));
+    }
+
+    /**
+     * Zoomed-in min horizontal scroll: align with collapsed view. Collapsed shows plot margin.l then month 0; min
+     * scroll must be **gutter width only** (not gutter + margin), or the first brick snaps to the viewport edge and
+     * shifts ~18px vs the non-inspector map.
+     */
+    function getMatrixHeatmapMinScrollLeft(chart) {
+      if (!chart) return 0;
+      return computeInspectorMatrixLeadingGutterWidthPx(chart);
+    }
+
+    function getMatrixHorizontalScrollClamp(chart) {
+      const el = document.getElementById('matrix-scroll');
+      if (!el) return { min: 0, max: 0 };
+      const maxSL = Math.max(0, el.scrollWidth - el.clientWidth);
+      const minSL = getMatrixHeatmapMinScrollLeft(chart || document.getElementById('matrix-chart'));
+      const effMin = Math.min(minSL, maxSL);
+      return { min: effMin, max: maxSL };
+    }
+
+    function clampMatrixHorizontalScroll(chart) {
+      const el = document.getElementById('matrix-scroll');
+      const ms = document.getElementById('milestone-scroll');
+      if (!el) return;
+      const ch = chart || document.getElementById('matrix-chart');
+      const { min, max } = getMatrixHorizontalScrollClamp(ch);
+      const sl = Math.max(min, Math.min(max, el.scrollLeft));
+      if (el.scrollLeft !== sl) el.scrollLeft = sl;
+      if (ms && ms.scrollLeft !== sl) ms.scrollLeft = sl;
     }
 
     /**
@@ -1555,27 +1637,7 @@
       const mg = document.getElementById('matrix-scroll-leading-gutter');
       const mileG = document.getElementById('milestone-scroll-leading-gutter');
       if (!mg || !mileG) return;
-      let wPx = 0;
-      if (matrixInspectorLayoutActive && matrixGd && matrixGd._matrixColGeom && matrixGd._fullLayout) {
-        const geom = matrixGd._matrixColGeom;
-        const nCols = geom.nCols;
-        if (nCols > 0) {
-          const xgap =
-            Number.isFinite(Number(geom.xgap)) && Number(geom.xgap) >= 0 ? Number(geom.xgap) : 0;
-          const cr = matrixGd.getBoundingClientRect();
-          const layoutW =
-            matrixGd._fullLayout.width > 0 ? matrixGd._fullLayout.width : cr.width;
-          const scale = cr.width / Math.max(1, layoutW);
-          const gs = matrixGd._fullLayout._size;
-          let cwLayout = layoutW / Math.max(1, nCols);
-          if (gs && Number(gs.w) > 0) {
-            const cw = (gs.w - Math.max(0, nCols - 1) * xgap) / Math.max(1, nCols);
-            if (cw > 0 && Number.isFinite(cw)) cwLayout = cw;
-          }
-          const cwCss = cwLayout * scale;
-          wPx = Math.max(0, Math.round(MATRIX_INSPECTOR_LEFT_COL_MARGIN * cwCss));
-        }
-      }
+      const wPx = computeInspectorMatrixLeadingGutterWidthPx(matrixGd);
       mg.style.width = `${wPx}px`;
       mileG.style.width = `${wPx}px`;
     }
@@ -1819,9 +1881,39 @@
       return Math.max(0, Math.round(dy));
     }
 
+    /** First Plotly x-axis category tick `<text>` (month labels at top of heatmap). */
+    function matrixHeatmapFirstXAxisTickTextEl() {
+      const root = document.getElementById('matrix-chart');
+      if (!root) return null;
+      const svg = root.querySelector('.plotly svg');
+      if (!svg) return null;
+      let texts = svg.querySelectorAll('g.xtick text');
+      if (!texts.length) texts = svg.querySelectorAll('.xtick text');
+      if (!texts.length) {
+        const layer = svg.querySelector('.xaxislayer-above') || svg.querySelector('.xaxislayer-below');
+        if (layer) texts = layer.querySelectorAll('text');
+      }
+      return texts.length ? texts[0] : null;
+    }
+
+    /** Viewport Y of first text line baseline (plain `textContent` node; overview kicker/title). */
+    function provenanceInspectorTextBaselineY(el) {
+      if (!el) return null;
+      const child = el.firstChild;
+      if (child && child.nodeType === Node.TEXT_NODE && String(child.textContent || '').trim()) {
+        const range = document.createRange();
+        range.selectNodeContents(child);
+        const rects = range.getClientRects();
+        if (rects.length > 0) return rects[rects.length - 1].bottom;
+      }
+      const br = el.getBoundingClientRect();
+      return br.bottom;
+    }
+
     function resetProvenanceInspectorAlignment() {
       const inspector = document.getElementById('provenance-inspector');
       const chrome = document.getElementById('provenance-sidebar-chrome');
+      const panelToggle = document.getElementById('prov-inspector-toggle');
       if (inspector) {
         inspector.style.paddingTop = '';
         inspector.style.marginTop = '';
@@ -1831,45 +1923,64 @@
         chrome.style.paddingTop = '';
         chrome.style.marginTop = '';
       }
+      if (panelToggle) panelToggle.style.transform = '';
     }
 
     /**
-     * Stationary toggle in #provenance-sidebar-chrome (wide): heatmap vertical offset + center on All projects row.
-     * Does not move when the overview panel opens — the panel is a sibling to the right.
+     * Wide: sidebar toggle lines up with “Project Activity Map” title baseline using translateY on the button only.
+     * Padding on #provenance-sidebar-chrome was inflating .matrix-workbench-row height and leaving a gap above Deliverables.
      */
     function syncProvenanceSidebarChromeAlignment() {
       const chrome = document.getElementById('provenance-sidebar-chrome');
-      const backNav = document.getElementById('matrix-back-all-projects-nav');
       const panelToggle = document.getElementById('prov-inspector-toggle');
-      if (!chrome || !backNav || !panelToggle) {
+      const sectionHeading = document.querySelector('.matrix-map-heading-row .chart-panel-section-heading');
+      if (!chrome || !panelToggle) {
         if (chrome) {
           chrome.style.paddingTop = '';
           chrome.style.marginTop = '';
         }
+        const t = document.getElementById('prov-inspector-toggle');
+        if (t) t.style.transform = '';
         return;
       }
       if (!window.matchMedia('(min-width: 1181px)').matches) {
         chrome.style.paddingTop = '';
         chrome.style.marginTop = '';
+        panelToggle.style.transform = '';
         return;
       }
-      const heatmapAlignPx = provenanceInspectorHeatmapAlignMarginPx();
-      chrome.style.marginTop = heatmapAlignPx > 0 ? `${heatmapAlignPx}px` : '';
       chrome.style.paddingTop = '0px';
+      chrome.style.marginTop = '';
+      panelToggle.style.transform = '';
       void chrome.offsetHeight;
-      const navRect = backNav.getBoundingClientRect();
-      const toggleRect = panelToggle.getBoundingClientRect();
-      const navCenter = navRect.top + navRect.height * 0.5;
-      const toggleCenter = toggleRect.top + toggleRect.height * 0.5;
-      chrome.style.paddingTop = `${Math.max(0, Math.round(navCenter - toggleCenter))}px`;
+      const titleBaselineY = provenanceInspectorTextBaselineY(sectionHeading);
+      if (titleBaselineY == null) {
+        const backNav = document.getElementById('matrix-back-all-projects-nav');
+        if (backNav) {
+          void chrome.offsetHeight;
+          const navRect = backNav.getBoundingClientRect();
+          const toggleRect = panelToggle.getBoundingClientRect();
+          const navCenter = navRect.top + navRect.height * 0.5;
+          const toggleCenter = toggleRect.top + toggleRect.height * 0.5;
+          const d = Math.round(navCenter - toggleCenter);
+          panelToggle.style.transform = d !== 0 ? `translateY(${d}px)` : '';
+        } else {
+          panelToggle.style.transform = '';
+        }
+        return;
+      }
+      void chrome.offsetHeight;
+      const delta = Math.round(titleBaselineY - panelToggle.getBoundingClientRect().bottom);
+      panelToggle.style.transform = delta !== 0 ? `translateY(${delta}px)` : '';
     }
 
     /**
-     * Wide + overview open: heatmap offset on the panel + kicker vs first matrix row (toggle lives in chrome only).
+     * Wide + overview open: heatmap offset on the panel + headline baseline vs Plotly x-axis tick baseline.
      */
     function syncProvenanceInspectorAlignment() {
       const inspector = document.getElementById('provenance-inspector');
       const kicker = document.getElementById('prov-inspector-kicker');
+      const title = document.getElementById('prov-inspector-title');
       const ml = document.getElementById('matrix-labels');
       if (!inspector) return;
       if (inspector.hidden) {
@@ -1886,6 +1997,16 @@
       inspector.style.marginTop = heatmapAlignPx > 0 ? `${heatmapAlignPx}px` : '';
       inspector.style.removeProperty('--prov-inspector-scroll-mt');
       void inspector.offsetHeight;
+      const tickText = matrixHeatmapFirstXAxisTickTextEl();
+      const tickBaselineY = tickText ? tickText.getBoundingClientRect().bottom : null;
+      const headlineEl =
+        title && String(title.textContent || '').trim() ? title : kicker;
+      const headlineBaselineY = provenanceInspectorTextBaselineY(headlineEl);
+      if (tickBaselineY != null && headlineBaselineY != null) {
+        const mt = Math.round(tickBaselineY - headlineBaselineY);
+        inspector.style.setProperty('--prov-inspector-scroll-mt', `${mt}px`);
+        return;
+      }
       const firstLabel = ml && ml.firstElementChild;
       if (firstLabel && kicker) {
         const labelTop = firstLabel.getBoundingClientRect().top;
@@ -1907,27 +2028,50 @@
       btn.setAttribute('aria-expanded', open ? 'true' : 'false');
     }
 
-    /** When the strip is opened with no prior cell, pick a visible month and the first project row (or first activity row). */
-    function openProvenanceInspectorDefaultCell() {
+    /** Sidebar opened with no remembered cell: show placeholder only (no default month/project). */
+    function openProvenanceInspectorEmpty() {
+      const root = document.getElementById('provenance-inspector');
       const chart = document.getElementById('matrix-chart');
-      const rows = chart && chart._matrixExpandedRows;
-      const visible = data.months.slice(visibleStartIdx, visibleEndIdx + 1);
-      if (!rows || rows.length === 0 || visible.length === 0) return;
-      const month = visible[Math.min(visible.length - 1, Math.floor(visible.length / 2))];
-      const projectRow = rows.find((r) => r.type === 'project') || rows[0];
-      const rowIdx = rows.indexOf(projectRow);
-      if (projectRow.type === 'project') {
-        openProvenanceInspector(month, projectRow.project, '', {
-          projectOverview: true,
-          rowIndex: rowIdx,
-          rowKey: projectRow.key
-        });
-      } else if (projectRow.type === 'activity') {
-        openProvenanceInspector(month, projectRow.project, projectRow.label, {
-          rowIndex: rowIdx,
-          rowKey: projectRow.key
-        });
+      if (!root) return;
+      closeProvenanceOverlay();
+      clearMatrixHoverBands(chart);
+      cancelMatrixHoverExit();
+      hideChartTooltip();
+      if (chart) {
+        chart._provenanceOpenKey = '';
+        chart._inspectorCellFocus = null;
+        delete chart._skipInspectorScrollIfInView;
+        if (!matrixInspectorLayoutActive) {
+          matrixInspectorSaved = {
+            matrixScrollLeft: document.getElementById('matrix-scroll')?.scrollLeft ?? 0,
+            milestoneScrollLeft: document.getElementById('milestone-scroll')?.scrollLeft ?? 0
+          };
+        }
+        matrixInspectorLayoutActive = true;
       }
+      const kicker = document.getElementById('prov-inspector-kicker');
+      const title = document.getElementById('prov-inspector-title');
+      const meta = document.getElementById('prov-inspector-meta');
+      const body = document.getElementById('prov-inspector-body');
+      if (kicker) kicker.textContent = '';
+      if (title) title.textContent = 'Overview';
+      if (meta) meta.textContent = '';
+      if (body) {
+        body.innerHTML =
+          '<p class="provenance-inspector__empty-hint">Click a heatmap cell to see that month’s summary or activity lines.</p>';
+      }
+      root.classList.add('provenance-inspector--pre-align');
+      root.removeAttribute('hidden');
+      root.setAttribute('aria-hidden', 'false');
+      syncProvInspectorToggleAffordance();
+      syncProvenanceSidebarChromeAlignment();
+      requestAnimationFrame(() =>
+        scheduleMatrixChartResize({ preserveScroll: false, scrollProjectRowIntoView: false })
+      );
+      window.setTimeout(() => {
+        scheduleSyncProvenanceInspectorAlignment();
+        root.classList.remove('provenance-inspector--pre-align');
+      }, 480);
     }
 
     function reopenCollapsedProvenanceInspector() {
@@ -1938,7 +2082,7 @@
         openProvenanceInspector(s.month, s.project, s.activity, s.focusMeta || undefined);
         return;
       }
-      openProvenanceInspectorDefaultCell();
+      openProvenanceInspectorEmpty();
     }
 
     function scheduleSyncProvenanceInspectorAlignment() {
@@ -1946,6 +2090,8 @@
         syncProvenanceSidebarChromeAlignment();
         syncProvenanceInspectorAlignment();
       };
+      /* Run now so the first paint after opening the panel already has marginTop / scroll-mt (avoids flash at top). */
+      run();
       requestAnimationFrame(() => {
         requestAnimationFrame(run);
       });
@@ -1982,6 +2128,7 @@
       if (typeof marked !== 'undefined') {
         marked.setOptions({ gfm: true, breaks: false });
       }
+      root.classList.add('provenance-inspector--pre-align');
       root.removeAttribute('hidden');
       root.setAttribute('aria-hidden', 'false');
       if (chart) {
@@ -2039,11 +2186,15 @@
             : null
       };
       syncProvInspectorToggleAffordance();
+      syncProvenanceSidebarChromeAlignment();
       requestAnimationFrame(() =>
         scheduleMatrixChartResize({ preserveScroll: false, scrollProjectRowIntoView: false })
       );
-      scheduleSyncProvenanceInspectorAlignment();
-      window.setTimeout(scheduleSyncProvenanceInspectorAlignment, 360);
+      /* Fallback if Plotly never completes: align + reveal. Normal path: .then removes --pre-align earlier. */
+      window.setTimeout(() => {
+        scheduleSyncProvenanceInspectorAlignment();
+        root.classList.remove('provenance-inspector--pre-align');
+      }, 480);
     }
 
     function closeProvenanceInspector() {
@@ -2052,6 +2203,7 @@
       const root = document.getElementById('provenance-inspector');
       const chart = document.getElementById('matrix-chart');
       if (!root) return;
+      root.classList.remove('provenance-inspector--pre-align');
       resetProvenanceInspectorAlignment();
       root.setAttribute('hidden', '');
       root.setAttribute('aria-hidden', 'true');
@@ -3286,19 +3438,45 @@
     }
 
     const rowHeight = 28;
-    /** Visible heatmap row bins in timeline panes before inner vertical scroll (~12). */
-    const TIMELINE_PANE_VISIBLE_ROW_COUNT = 12;
+    const TIMELINE_PANE_HEIGHT_CAP_FRAC = 0.85;
+
+    function timelinePaneHeightCapPx() {
+      return Math.floor(window.innerHeight * TIMELINE_PANE_HEIGHT_CAP_FRAC);
+    }
+
+    function clampTimelinePaneScroll(pane) {
+      if (!pane) return;
+      const maxTop = Math.max(0, pane.scrollHeight - pane.clientHeight);
+      if (pane.scrollTop > maxTop) pane.scrollTop = maxTop;
+    }
+
+    /** Prevent scrolling past the last pixel of real content if layout reports excess scrollHeight. */
+    function ensureTimelinePaneOverscrollClamp(pane) {
+      if (!pane || pane.dataset.timelineOverscrollClamp === '1') return;
+      pane.dataset.timelineOverscrollClamp = '1';
+      pane.addEventListener(
+        'scroll',
+        () => {
+          const maxTop = Math.max(0, pane.scrollHeight - pane.clientHeight);
+          if (pane.scrollTop > maxTop) pane.scrollTop = maxTop;
+        },
+        { passive: true }
+      );
+    }
     const milestoneLabelsEl = document.getElementById('milestone-labels');
     milestoneLabelsEl.style.gridTemplateRows = `repeat(${mileRows.length}, ${rowHeight}px)`;
     milestoneLabelsEl.innerHTML = mileRows.map((row) => `<div class="fixed-label milestone">${escapeHtml(String(row))}</div>`).join('');
 
-    /** Plotly heatmap brick gaps (px): xgap = gutters between months; ygap = gutters between rows. */
-    const matrixHeatmapXGap = 2;
-    /** Narrow mode (min-width floor / horizontal scroll): tighter x gap so 1px cells stay readable. */
-    const MATRIX_HEATMAP_X_GAP_MIN = 1;
+    /**
+     * Heatmap brick gaps (px). Non-zero gaps inset cells vs category bins, so paper/year/row underlay shapes look like a
+     * misaligned “zoomed out” grid over the data. Zero keeps inspector vs collapsed widths consistent with the same edges.
+     */
+    const matrixHeatmapXGap = 0;
+    /** Narrow mode uses the same gap so shape + cell geometry never diverge. */
+    const MATRIX_HEATMAP_X_GAP_MIN = 0;
     /** Minimum brick width (px) when enforcing full-range min plot width. */
     const MATRIX_CELL_MIN_PX = 1;
-    const matrixHeatmapYGap = 4;
+    const matrixHeatmapYGap = 0;
 
     const fullMonthCount = data.months.length;
     let visibleStartIdx = 0;
@@ -3547,9 +3725,8 @@
     /** Shared L/R inset with Deliverables heatmap; must match buildMatrixXAxisTickConfig inner width math. */
     const MATRIX_PLOT_MARGIN_LR = { l: 18, r: 18 };
     /**
-     * Fixed Plotly margin.t and --matrix-plot-margin-top (sticky row labels). Paired with layout.margin.autoexpand:false
-     * and axis automargin:false so Plotly does not grow margins when tick text/angle changes (inspector plot width, etc.).
-     * Slot height = worst case from buildMatrixXAxisTickConfig (102px for -50° ticks).
+     * Fallback Plotly margin.t / CSS --matrix-plot-margin-top before first render; live layout uses
+     * buildMatrixXAxisTickConfig(...).marginTop (82–102px by density). Paired with autoexpand:false / automargin:false.
      */
     const MATRIX_X_AXIS_MARGIN_TOP_LAYOUT = 102;
 
@@ -3582,6 +3759,14 @@
         if (w > 64) return w;
       }
       return Math.max(320, Math.min(data.heatWidth, Math.floor(window.innerWidth * 0.9) - 280));
+    }
+
+    /**
+     * Inspector-only horizontal sizing: wider plot + scroll so a focused month/column can stay usable.
+     * Default / overview closed uses viewport-fill so the heatmap uses full #matrix-scroll width.
+     */
+    function matrixUseInspectorHeatmapPlotSizing() {
+      return matrixInspectorLayoutActive;
     }
 
     /** Deliverables lives in a full-width row; matrix chart is only as wide as matrix-shell — pin strip to that column. */
@@ -3645,7 +3830,7 @@
       let matrixUsesNarrowXGap;
       let matrixXGapTrace;
 
-      if (matrixInspectorLayoutActive) {
+      if (matrixUseInspectorHeatmapPlotSizing()) {
         matrixXGapTrace = MATRIX_HEATMAP_X_GAP_MIN;
         const innerTarget =
           visibleCount * MATRIX_INSPECTOR_MIN_PX_PER_COL + Math.max(0, visibleCount - 1) * matrixXGapTrace;
@@ -3704,13 +3889,22 @@
         xTickCfg.ticktext.length === visibleMonths.length
           ? xTickCfg.ticktext
           : visibleMonths.map((_, i) => xTickCfg.ticktext[i] ?? '');
+      /**
+       * Fixed top margin for layout + sticky labels — not xTickCfg.marginTop. Tick config’s margin changes with
+       * plotWidth (sidebar open vs closed), which was shifting the whole heatmap vertically every toggle.
+       */
       const matrixMarginTop = MATRIX_X_AXIS_MARGIN_TOP_LAYOUT;
       const chartPanel = document.querySelector('.panel.chart-panel');
       chartPanel?.style.setProperty('--matrix-plot-margin-top', `${matrixMarginTop}px`);
-      if (chartPanel) {
-        const rawPane = matrixMarginTop + TIMELINE_PANE_VISIBLE_ROW_COUNT * rowHeight + matrixMarginBottom;
-        const capPx = Math.floor(window.innerHeight * 0.85);
-        chartPanel.style.setProperty('--timeline-pane-max-height', `${Math.min(rawPane, capPx)}px`);
+      {
+        const capPx = timelinePaneHeightCapPx();
+        const matrixContentPx =
+          matrixMarginTop + Math.max(1, expandedRows.length) * rowHeight + matrixMarginBottom;
+        const matrixTimelinePane = document.querySelector('.matrix-shell.timeline-pane');
+        if (matrixTimelinePane) {
+          matrixTimelinePane.style.maxHeight = `${Math.min(matrixContentPx, capPx)}px`;
+          ensureTimelinePaneOverscrollClamp(matrixTimelinePane);
+        }
       }
 
       if (selectedProject) {
@@ -3767,6 +3961,7 @@
         z: projectZ,
         zmin: 0,
         zmax: 3,
+        zsmooth: false,
         colorscale: projectHeatColorscale,
         showscale: false,
         text: projectText,
@@ -3781,6 +3976,7 @@
         z: activityZ,
         zmin: 0,
         zmax: 3,
+        zsmooth: false,
         colorscale: intensityBluescale,
         showscale: false,
         text: activityText,
@@ -3847,9 +4043,10 @@
           zeroline: false,
           showspikes: false
         }
-      }, { responsive: false, displayModeBar: false, scrollZoom: false, doubleClick: false }).then(() => {
+      }, { responsive: false, displayModeBar: false, scrollZoom: false, doubleClick: false       }).then(() => {
         const chart = document.getElementById('matrix-chart');
         updateInspectorScrollLeadingGutters(chart);
+        clampMatrixHorizontalScroll(chart);
         chart._matrixExpandedRows = expandedRows;
         // Plotly.newPlot purges prior listeners on the graph div; re-bind after every redraw
         // (expand/collapse calls renderMatrix again). One-time dataset guards would leave no handlers.
@@ -3914,6 +4111,16 @@
         }
         scheduleSyncProvenanceInspectorAlignment();
         syncProvInspectorToggleAffordance();
+        const inspReveal = document.getElementById('provenance-inspector');
+        if (inspReveal && inspReveal.classList.contains('provenance-inspector--pre-align')) {
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              inspReveal.classList.remove('provenance-inspector--pre-align');
+            });
+          });
+        }
+        clampTimelinePaneScroll(document.querySelector('.matrix-shell.timeline-pane'));
+        clampMatrixHorizontalScroll(chart);
       });
 
       const matrixLabelShell = document.querySelector('.matrix-shell .fixed-labels');
@@ -3949,6 +4156,9 @@
           milestoneScroll.scrollLeft =
             rMil != null && Number.isFinite(Number(rMil)) ? Math.max(0, Number(rMil)) : scrollTarget;
         }
+        requestAnimationFrame(() => {
+          clampMatrixHorizontalScroll(document.getElementById('matrix-chart'));
+        });
       }
     }
 
@@ -3983,6 +4193,13 @@
       }
 
       const milestonePlotHeight = mileMt + mileMb + nMile * rowHeight;
+      {
+        const milePane = document.querySelector('.milestone-shell.timeline-pane');
+        if (milePane) {
+          milePane.style.maxHeight = `${Math.min(milestonePlotHeight, timelinePaneHeightCapPx())}px`;
+          ensureTimelinePaneOverscrollClamp(milePane);
+        }
+      }
       const mileShapes = [...makeYearBandShapes(visibleMonths), ...makeMilestoneLaneShapes()];
 
       const mileChartEl = document.getElementById('milestone-chart');
@@ -4173,6 +4390,8 @@
           }
           scheduleMatrixHoverExit();
         });
+        clampTimelinePaneScroll(document.querySelector('.milestone-shell.timeline-pane'));
+        clampMatrixHorizontalScroll(document.getElementById('matrix-chart'));
       });
     }
 
@@ -4181,16 +4400,24 @@
     const matrixScroll = document.getElementById('matrix-scroll');
     const milestoneScroll = document.getElementById('milestone-scroll');
     let syncing = false;
-    function linkScroll(source, target) {
+    function linkScroll(source) {
       source.addEventListener('scroll', () => {
+        if (!matrixScroll || !milestoneScroll) return;
         if (syncing) return;
         syncing = true;
-        target.scrollLeft = source.scrollLeft;
-        requestAnimationFrame(() => { syncing = false; });
+        try {
+          if (source !== matrixScroll) matrixScroll.scrollLeft = source.scrollLeft;
+          clampMatrixHorizontalScroll(document.getElementById('matrix-chart'));
+          milestoneScroll.scrollLeft = matrixScroll.scrollLeft;
+        } finally {
+          requestAnimationFrame(() => {
+            syncing = false;
+          });
+        }
       });
     }
-    linkScroll(matrixScroll, milestoneScroll);
-    linkScroll(milestoneScroll, matrixScroll);
+    linkScroll(matrixScroll);
+    linkScroll(milestoneScroll);
 
     (function bindTimelinePaneHoverWheelCapture() {
       document.querySelectorAll('.timeline-pane').forEach((pane) => {
@@ -4221,8 +4448,13 @@
 
           if (e.shiftKey && absY > 0) {
             e.preventDefault();
-            if (canHScroll) {
-              strip.scrollLeft = Math.max(0, Math.min(maxSL(), strip.scrollLeft + e.deltaY));
+            if (canHScroll && matrixScroll && milestoneScroll) {
+              const chart = document.getElementById('matrix-chart');
+              if (strip !== matrixScroll) matrixScroll.scrollLeft = strip.scrollLeft;
+              const { min, max } = getMatrixHorizontalScrollClamp(chart);
+              matrixScroll.scrollLeft = Math.max(min, Math.min(max, matrixScroll.scrollLeft + e.deltaY));
+              clampMatrixHorizontalScroll(chart);
+              milestoneScroll.scrollLeft = matrixScroll.scrollLeft;
             }
             return;
           }
@@ -4230,8 +4462,13 @@
           /* Horizontal component scrolls the strip; require absX > 0.5*absY so vertical swipes are not jittered by tiny deltaX. */
           if (e.deltaX !== 0 && absX > absY * 0.5) {
             e.preventDefault();
-            if (canHScroll) {
-              strip.scrollLeft = Math.max(0, Math.min(maxSL(), strip.scrollLeft + e.deltaX));
+            if (canHScroll && matrixScroll && milestoneScroll) {
+              const chart = document.getElementById('matrix-chart');
+              if (strip !== matrixScroll) matrixScroll.scrollLeft = strip.scrollLeft;
+              const { min, max } = getMatrixHorizontalScrollClamp(chart);
+              matrixScroll.scrollLeft = Math.max(min, Math.min(max, matrixScroll.scrollLeft + e.deltaX));
+              clampMatrixHorizontalScroll(chart);
+              milestoneScroll.scrollLeft = matrixScroll.scrollLeft;
             }
             if (absX >= absY || !canHScroll) return;
           }

@@ -641,9 +641,9 @@ def build_payload(summaries_dir: Path, intensity_mode: str = "volume") -> Dict[s
                 for mi in range(n)
             ]
 
-    # Match Plotly heatmap xgap (~2) + cell body (~40px) in project-matrix-all-summaries.html.
-    cell_w, gap = 40, 2
-    heat_w = n * (cell_w + gap) + 80
+    # Nominal full-timeline width for inspector proportional sizing (see project-matrix-all-summaries.html: xgap/ygap 0).
+    cell_pitch_px = 42
+    heat_w = n * cell_pitch_px + 80
 
     best_proj = max(projects, key=lambda pr: sum(project_scores[pr]))
     dom = dominant_runs(months, projects, project_scores)
