@@ -168,8 +168,23 @@
       flex: 1 1 auto;
       min-width: 0;
     }
-    .matrix-workbench-row:has(#provenance-inspector:not([hidden])),
-    .matrix-workbench-row:has(.provenance-inspector-collapsed-slot:not([hidden])) {
+    /**
+     * DOM order is matrix → chrome → inspector, but on wide viewports flex order is
+     * matrix → inspector → chrome so the toggle column stays on the trailing edge.
+     * Otherwise opening the panel shrinks the matrix and the chrome (with the icon) slides left.
+     */
+    @media (min-width: 1181px) {
+      .matrix-workbench-row > .matrix-map-section {
+        order: 1;
+      }
+      #provenance-inspector:not([hidden]) {
+        order: 2;
+      }
+      #provenance-sidebar-chrome {
+        order: 3;
+      }
+    }
+    .matrix-workbench-row:has(#provenance-sidebar-chrome) {
       gap: var(--sp-2);
     }
     /* Mirror matrix + inspector row so Deliverables chart column lines up with the heatmap (not full panel width). */
@@ -193,8 +208,7 @@
       pointer-events: none;
       visibility: hidden;
     }
-    .chart-panel:has(#provenance-inspector:not([hidden])) .deliverables-workbench-row,
-    .chart-panel:has(.provenance-inspector-collapsed-slot:not([hidden])) .deliverables-workbench-row {
+    .chart-panel:has(#provenance-sidebar-chrome) .deliverables-workbench-row {
       gap: var(--sp-2);
     }
     .chart-panel:has(#provenance-inspector:not([hidden])) .deliverables-inspector-spacer {
@@ -204,38 +218,36 @@
       width: auto;
       align-self: stretch;
     }
-    /* Strip only (inspector closed): match 40px rail so Deliverables stays aligned with the heatmap column. */
-    .chart-panel:has(.provenance-inspector-collapsed-slot:not([hidden])):not(:has(#provenance-inspector:not([hidden]))) .deliverables-inspector-spacer {
+    /* Toggle column only (overview panel closed): 40px under Deliverables. */
+    .chart-panel:has(#provenance-inspector[hidden]) .deliverables-inspector-spacer {
       flex: 0 0 40px;
       min-width: 40px;
       max-width: 40px;
       width: 40px;
       align-self: stretch;
     }
-    .provenance-inspector-collapsed-slot {
+    /** Fixed 40px column: single stationary toggle; panel opens to the right, not under this control. */
+    #provenance-sidebar-chrome {
       flex: 0 0 40px;
       width: 40px;
       min-width: 40px;
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      padding: 0 2px 0 0;
+      align-items: flex-end;
+      padding: 0 0 0 2px;
       position: sticky;
       top: var(--sp-3);
       align-self: flex-start;
       z-index: 3;
       border-left: 1px solid rgba(255, 255, 255, 0.055);
     }
-    .provenance-inspector-collapsed-slot[hidden] {
-      display: none !important;
-    }
     #provenance-inspector:not([hidden]) {
       position: sticky;
       top: var(--sp-3);
-      flex: 0 0 min(360px, 38%);
-      min-width: 260px;
-      max-width: min(360px, 100%);
+      flex: 0 0 min(320px, 35%);
+      min-width: 220px;
+      max-width: min(320px, 100%);
       align-self: flex-start;
       max-height: calc(100vh - var(--sp-4) - var(--sp-3));
       max-height: calc(100dvh - var(--sp-4) - var(--sp-3));
@@ -661,12 +673,18 @@
     @media (max-width: 1180px) {
       .lower-grid { grid-template-columns: 1fr; }
       .detail-layout { grid-template-columns: 1fr; }
-      .matrix-workbench-row:has(#provenance-inspector:not([hidden])),
-      .matrix-workbench-row:has(.provenance-inspector-collapsed-slot:not([hidden])) {
+      /* Document order: matrix → toggle strip → inspector (toggle between chart and panel). */
+      .matrix-workbench-row > .matrix-map-section,
+      #provenance-sidebar-chrome,
+      #provenance-inspector {
+        order: 0;
+      }
+      .matrix-workbench-row:has(#provenance-sidebar-chrome),
+      .matrix-workbench-row:has(#provenance-inspector:not([hidden])) {
         flex-direction: column;
       }
-      .matrix-workbench-row:has(#provenance-inspector:not([hidden])) > .matrix-map-section,
-      .matrix-workbench-row:has(.provenance-inspector-collapsed-slot:not([hidden])) > .matrix-map-section {
+      .matrix-workbench-row:has(#provenance-sidebar-chrome) > .matrix-map-section,
+      .matrix-workbench-row:has(#provenance-inspector:not([hidden])) > .matrix-map-section {
         flex: 0 1 auto;
       }
       .matrix-workbench-row:has(#provenance-inspector:not([hidden])) #provenance-inspector {
@@ -683,7 +701,7 @@
         max-height: calc(100dvh - var(--sp-4) - var(--sp-2));
         z-index: 3;
       }
-      .matrix-workbench-row:has(.provenance-inspector-collapsed-slot:not([hidden])) .provenance-inspector-collapsed-slot {
+      #provenance-sidebar-chrome {
         position: sticky;
         top: var(--sp-2);
         align-self: flex-end;
@@ -696,8 +714,7 @@
         padding-bottom: var(--sp-1);
       }
       /* Inspector is stacked below the matrix; do not reserve a right column under Deliverables. */
-      .chart-panel:has(#provenance-inspector:not([hidden])) .deliverables-inspector-spacer,
-      .chart-panel:has(.provenance-inspector-collapsed-slot:not([hidden])):not(:has(#provenance-inspector:not([hidden]))) .deliverables-inspector-spacer {
+      .chart-panel:has(#provenance-sidebar-chrome) .deliverables-inspector-spacer {
         display: none;
       }
     }
@@ -745,7 +762,7 @@
       min-width: 0;
       min-height: 0;
       display: flex;
-      flex-direction: row;
+      flex-direction: column;
       align-items: stretch;
       padding: 0;
       border: 0;
@@ -758,14 +775,6 @@
     }
     @media (prefers-reduced-motion: reduce) {
       .provenance-inspector { transition: none; }
-    }
-    .provenance-inspector__rail {
-      flex: 0 0 40px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 0 2px 0 0;
-      box-sizing: border-box;
     }
     .provenance-inspector__main {
       flex: 1 1 auto;
@@ -1080,8 +1089,8 @@
             </div>
           </div>
         </div>
-        <div class="provenance-inspector-collapsed-slot" id="provenance-inspector-collapsed-slot" hidden aria-hidden="true">
-          <button type="button" class="provenance-inspector__panel-toggle" id="prov-inspector-show-collapsed" tabindex="-1" aria-label="Show overview panel" title="Show overview panel">
+        <div id="provenance-sidebar-chrome" class="provenance-sidebar-chrome" aria-hidden="false">
+          <button type="button" class="provenance-inspector__panel-toggle" id="prov-inspector-toggle" tabindex="0" aria-label="Show overview panel" title="Show overview panel">
             <svg class="provenance-inspector__panel-toggle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <rect x="4" y="4" width="16" height="16" rx="2"/>
               <line x1="9" y1="4" x2="9" y2="20"/>
@@ -1089,14 +1098,6 @@
           </button>
         </div>
         <aside id="provenance-inspector" class="provenance-inspector" hidden aria-hidden="true" aria-labelledby="prov-inspector-title">
-          <div class="provenance-inspector__rail">
-            <button type="button" class="provenance-inspector__panel-toggle" id="prov-inspector-close" tabindex="-1" aria-label="Hide overview panel" title="Hide overview panel">
-              <svg class="provenance-inspector__panel-toggle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <rect x="4" y="4" width="16" height="16" rx="2"/>
-                <line x1="9" y1="4" x2="9" y2="20"/>
-              </svg>
-            </button>
-          </div>
           <div class="provenance-inspector__main">
             <div class="provenance-inspector__scroll">
               <div class="chart-tooltip__kicker provenance-overlay__kicker" id="prov-inspector-kicker"></div>
@@ -1720,7 +1721,7 @@
           if (el.closest('#chart-tooltip')) return true;
           if (el.closest('.provenance-overlay__dialog')) return true;
           if (el.closest('#provenance-inspector')) return true;
-          if (el.closest('#provenance-inspector-collapsed-slot')) return true;
+          if (el.closest('#provenance-sidebar-chrome')) return true;
         }
       }
       const ch = document.getElementById('matrix-chart');
@@ -1748,9 +1749,9 @@
         const r = pi.getBoundingClientRect();
         if (cx >= r.left - pad && cx <= r.right + pad && cy >= r.top - pad && cy <= r.bottom + pad) return true;
       }
-      const collapsed = document.getElementById('provenance-inspector-collapsed-slot');
-      if (collapsed && !collapsed.hidden && cx >= 0 && cy >= 0) {
-        const r = collapsed.getBoundingClientRect();
+      const sidebarChrome = document.getElementById('provenance-sidebar-chrome');
+      if (sidebarChrome && cx >= 0 && cy >= 0) {
+        const r = sidebarChrome.getBoundingClientRect();
         if (cx >= r.left - pad && cx <= r.right + pad && cy >= r.top - pad && cy <= r.bottom + pad) return true;
       }
       return false;
@@ -1820,57 +1821,71 @@
 
     function resetProvenanceInspectorAlignment() {
       const inspector = document.getElementById('provenance-inspector');
-      if (!inspector) return;
-      inspector.style.paddingTop = '';
-      inspector.style.marginTop = '';
-      inspector.style.removeProperty('--prov-inspector-scroll-mt');
-      const slot = document.getElementById('provenance-inspector-collapsed-slot');
-      if (slot) {
-        slot.style.paddingTop = '';
-        slot.style.marginTop = '';
+      const chrome = document.getElementById('provenance-sidebar-chrome');
+      if (inspector) {
+        inspector.style.paddingTop = '';
+        inspector.style.marginTop = '';
+        inspector.style.removeProperty('--prov-inspector-scroll-mt');
+      }
+      if (chrome) {
+        chrome.style.paddingTop = '';
+        chrome.style.marginTop = '';
       }
     }
 
     /**
-     * Side-by-side layout (≥1181px): vertically center the panel toggle on the All projects row, then
-     * offset the overview body so the kicker top matches the first matrix label row (top of heatmap row 0).
-     * Aligns even when the nav is .matrix-back-all-projects-nav--concealed (visibility:hidden): same geometry as drill mode.
+     * Stationary toggle in #provenance-sidebar-chrome (wide): heatmap vertical offset + center on All projects row.
+     * Does not move when the overview panel opens — the panel is a sibling to the right.
      */
-    function syncProvenanceInspectorAlignment() {
-      const inspector = document.getElementById('provenance-inspector');
+    function syncProvenanceSidebarChromeAlignment() {
+      const chrome = document.getElementById('provenance-sidebar-chrome');
       const backNav = document.getElementById('matrix-back-all-projects-nav');
-      const kicker = document.getElementById('prov-inspector-kicker');
-      const ml = document.getElementById('matrix-labels');
-      const panelToggle = document.getElementById('prov-inspector-close');
-      if (!inspector || inspector.hidden || !panelToggle) {
-        resetProvenanceInspectorAlignment();
+      const panelToggle = document.getElementById('prov-inspector-toggle');
+      if (!chrome || !backNav || !panelToggle) {
+        if (chrome) {
+          chrome.style.paddingTop = '';
+          chrome.style.marginTop = '';
+        }
         return;
       }
       if (!window.matchMedia('(min-width: 1181px)').matches) {
-        resetProvenanceInspectorAlignment();
+        chrome.style.paddingTop = '';
+        chrome.style.marginTop = '';
         return;
       }
-      if (!backNav) {
-        resetProvenanceInspectorAlignment();
-        return;
-      }
-
       const heatmapAlignPx = provenanceInspectorHeatmapAlignMarginPx();
-      inspector.style.marginTop = heatmapAlignPx > 0 ? `${heatmapAlignPx}px` : '';
-
-      inspector.style.paddingTop = '0px';
-      inspector.style.removeProperty('--prov-inspector-scroll-mt');
-      void inspector.offsetHeight;
-
+      chrome.style.marginTop = heatmapAlignPx > 0 ? `${heatmapAlignPx}px` : '';
+      chrome.style.paddingTop = '0px';
+      void chrome.offsetHeight;
       const navRect = backNav.getBoundingClientRect();
       const toggleRect = panelToggle.getBoundingClientRect();
       const navCenter = navRect.top + navRect.height * 0.5;
       const toggleCenter = toggleRect.top + toggleRect.height * 0.5;
-      const padTop = Math.max(0, Math.round(navCenter - toggleCenter));
-      inspector.style.paddingTop = `${padTop}px`;
+      chrome.style.paddingTop = `${Math.max(0, Math.round(navCenter - toggleCenter))}px`;
+    }
 
+    /**
+     * Wide + overview open: heatmap offset on the panel + kicker vs first matrix row (toggle lives in chrome only).
+     */
+    function syncProvenanceInspectorAlignment() {
+      const inspector = document.getElementById('provenance-inspector');
+      const kicker = document.getElementById('prov-inspector-kicker');
+      const ml = document.getElementById('matrix-labels');
+      if (!inspector) return;
+      if (inspector.hidden) {
+        inspector.style.marginTop = '';
+        inspector.style.removeProperty('--prov-inspector-scroll-mt');
+        return;
+      }
+      if (!window.matchMedia('(min-width: 1181px)').matches) {
+        inspector.style.marginTop = '';
+        inspector.style.removeProperty('--prov-inspector-scroll-mt');
+        return;
+      }
+      const heatmapAlignPx = provenanceInspectorHeatmapAlignMarginPx();
+      inspector.style.marginTop = heatmapAlignPx > 0 ? `${heatmapAlignPx}px` : '';
+      inspector.style.removeProperty('--prov-inspector-scroll-mt');
       void inspector.offsetHeight;
-
       const firstLabel = ml && ml.firstElementChild;
       if (firstLabel && kicker) {
         const labelTop = firstLabel.getBoundingClientRect().top;
@@ -1882,59 +1897,14 @@
       }
     }
 
-    function syncProvenanceInspectorCollapsedSlotAlignment() {
-      const slot = document.getElementById('provenance-inspector-collapsed-slot');
-      const showBtn = document.getElementById('prov-inspector-show-collapsed');
-      const backNav = document.getElementById('matrix-back-all-projects-nav');
-      if (!slot || !showBtn || slot.hidden) {
-        if (slot && slot.hidden) {
-          slot.style.paddingTop = '';
-          slot.style.marginTop = '';
-        }
-        return;
-      }
-      if (!window.matchMedia('(min-width: 1181px)').matches) {
-        slot.style.paddingTop = '';
-        slot.style.marginTop = '';
-        return;
-      }
-      if (!backNav) {
-        slot.style.paddingTop = '';
-        slot.style.marginTop = '';
-        return;
-      }
-      const heatmapAlignPx = provenanceInspectorHeatmapAlignMarginPx();
-      slot.style.marginTop = heatmapAlignPx > 0 ? `${heatmapAlignPx}px` : '';
-      slot.style.paddingTop = '0px';
-      void slot.offsetHeight;
-      const navRect = backNav.getBoundingClientRect();
-      const btnRect = showBtn.getBoundingClientRect();
-      const navCenter = navRect.top + navRect.height * 0.5;
-      const btnCenter = btnRect.top + btnRect.height * 0.5;
-      slot.style.paddingTop = `${Math.max(0, Math.round(navCenter - btnCenter))}px`;
-    }
-
-    function syncProvenanceInspectorCollapsedSlotVisibility() {
-      const slot = document.getElementById('provenance-inspector-collapsed-slot');
+    function syncProvInspectorToggleAffordance() {
+      const btn = document.getElementById('prov-inspector-toggle');
       const insp = document.getElementById('provenance-inspector');
-      const btn = document.getElementById('prov-inspector-show-collapsed');
-      if (!slot || !insp) return;
-      const inspOpen = !insp.hasAttribute('hidden');
-      const show = !inspOpen;
-      if (show) {
-        slot.removeAttribute('hidden');
-        slot.setAttribute('aria-hidden', 'false');
-        if (btn) btn.tabIndex = 0;
-      } else {
-        slot.setAttribute('hidden', '');
-        slot.setAttribute('aria-hidden', 'true');
-        if (btn) {
-          btn.tabIndex = -1;
-          if (document.activeElement === btn) btn.blur();
-        }
-        slot.style.paddingTop = '';
-        slot.style.marginTop = '';
-      }
+      if (!btn || !insp) return;
+      const open = !insp.hasAttribute('hidden');
+      btn.setAttribute('aria-label', open ? 'Hide overview panel' : 'Show overview panel');
+      btn.title = open ? 'Hide overview panel' : 'Show overview panel';
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
     }
 
     /** When the strip is opened with no prior cell, pick a visible month and the first project row (or first activity row). */
@@ -1973,8 +1943,8 @@
 
     function scheduleSyncProvenanceInspectorAlignment() {
       const run = () => {
+        syncProvenanceSidebarChromeAlignment();
         syncProvenanceInspectorAlignment();
-        syncProvenanceInspectorCollapsedSlotAlignment();
       };
       requestAnimationFrame(() => {
         requestAnimationFrame(run);
@@ -1984,12 +1954,7 @@
 
     let provenanceInspectorAlignResizeTimer = null;
     window.addEventListener('resize', () => {
-      const inspector = document.getElementById('provenance-inspector');
-      const collapsedSlot = document.getElementById('provenance-inspector-collapsed-slot');
-      if (!inspector) return;
-      const needAlign =
-        !inspector.hidden || (collapsedSlot && !collapsedSlot.hidden);
-      if (!needAlign) return;
+      if (!document.getElementById('provenance-sidebar-chrome')) return;
       if (provenanceInspectorAlignResizeTimer) window.clearTimeout(provenanceInspectorAlignResizeTimer);
       provenanceInspectorAlignResizeTimer = window.setTimeout(() => {
         provenanceInspectorAlignResizeTimer = null;
@@ -2073,9 +2038,7 @@
               }
             : null
       };
-      syncProvenanceInspectorCollapsedSlotVisibility();
-      const panelToggle = document.getElementById('prov-inspector-close');
-      if (panelToggle) panelToggle.tabIndex = 0;
+      syncProvInspectorToggleAffordance();
       requestAnimationFrame(() =>
         scheduleMatrixChartResize({ preserveScroll: false, scrollProjectRowIntoView: false })
       );
@@ -2088,11 +2051,6 @@
       if (ov && !ov.hidden) closeProvenanceOverlay();
       const root = document.getElementById('provenance-inspector');
       const chart = document.getElementById('matrix-chart');
-      const panelToggle = document.getElementById('prov-inspector-close');
-      if (panelToggle) {
-        panelToggle.tabIndex = -1;
-        if (document.activeElement === panelToggle) panelToggle.blur();
-      }
       if (!root) return;
       resetProvenanceInspectorAlignment();
       root.setAttribute('hidden', '');
@@ -2113,7 +2071,7 @@
           restoredMilestoneScrollLeft: saved?.milestoneScrollLeft
         })
       );
-      syncProvenanceInspectorCollapsedSlotVisibility();
+      syncProvInspectorToggleAffordance();
       scheduleSyncProvenanceInspectorAlignment();
       window.setTimeout(scheduleSyncProvenanceInspectorAlignment, 360);
     }
@@ -2185,19 +2143,15 @@
     (function bindProvenanceInspector() {
       const root = document.getElementById('provenance-inspector');
       if (!root) return;
-      document.getElementById('prov-inspector-close')?.addEventListener('click', closeProvenanceInspector);
-      document.getElementById('prov-inspector-show-collapsed')?.addEventListener('click', reopenCollapsedProvenanceInspector);
+      document.getElementById('prov-inspector-toggle')?.addEventListener('click', () => {
+        const insp = document.getElementById('provenance-inspector');
+        if (insp && insp.hasAttribute('hidden')) reopenCollapsedProvenanceInspector();
+        else closeProvenanceInspector();
+      });
       root.addEventListener('pointerenter', dismissTooltipsForOverviewHover, true);
       root.addEventListener('pointerleave', scheduleMatrixHoverExit, true);
-      const collapsedSlot = document.getElementById('provenance-inspector-collapsed-slot');
-      if (collapsedSlot) {
-        collapsedSlot.addEventListener('pointerenter', dismissTooltipsForOverviewHover, true);
-        collapsedSlot.addEventListener('pointerleave', scheduleMatrixHoverExit, true);
-      }
-      requestAnimationFrame(() => {
-        const b = document.getElementById('prov-inspector-close');
-        if (b && document.activeElement === b) b.blur();
-      });
+      document.getElementById('provenance-sidebar-chrome')?.addEventListener('pointerenter', dismissTooltipsForOverviewHover, true);
+      document.getElementById('provenance-sidebar-chrome')?.addEventListener('pointerleave', scheduleMatrixHoverExit, true);
     })();
 
     const mileColorsBySlug = {
@@ -3959,7 +3913,7 @@
           }
         }
         scheduleSyncProvenanceInspectorAlignment();
-        syncProvenanceInspectorCollapsedSlotVisibility();
+        syncProvInspectorToggleAffordance();
       });
 
       const matrixLabelShell = document.querySelector('.matrix-shell .fixed-labels');
