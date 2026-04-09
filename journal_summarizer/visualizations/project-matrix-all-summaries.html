@@ -1868,7 +1868,7 @@
       const ch = document.getElementById('matrix-chart');
       if (ch) ch._lastMatrixCellBboxPage = null;
       if (ml) Array.from(ml.children).forEach((el) => el.classList.remove('hover-row-affordance'));
-      hideChartTooltipWithTransition();
+      hideChartTooltip();
       const po = document.getElementById('provenance-overlay');
       if (po && !po.hidden && po.classList.contains('provenance-overlay--hover')) {
         closeProvenanceOverlay();
@@ -2336,7 +2336,7 @@
 
     function dismissTooltipsForOverviewHover() {
       cancelMatrixHoverExit();
-      hideChartTooltipWithTransition();
+      hideChartTooltip();
       closeProvenanceOverlay();
       const mChart = document.getElementById('matrix-chart');
       clearMatrixHoverBands(mChart);
@@ -3496,40 +3496,6 @@
       chartTooltip.style.display = 'none';
       chartTooltip.innerHTML = '';
       chartTooltip.setAttribute('aria-hidden', 'true');
-    }
-
-    /** Fade out then remove (e.g. pointer entered overview panel). Respects prefers-reduced-motion. */
-    function hideChartTooltipWithTransition() {
-      if (!chartTooltip) return;
-      const hasContent = chartTooltip.innerHTML.trim().length > 0;
-      if (chartTooltip.style.display !== 'block' || !hasContent) {
-        hideChartTooltip();
-        return;
-      }
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        hideChartTooltip();
-        return;
-      }
-      const surface = getChartTooltipSurface(chartTooltip);
-      if (!surface) {
-        hideChartTooltip();
-        return;
-      }
-      clearTooltipVelocityStillTimer(chartTooltip);
-      surface.classList.add('chart-tooltip__surface--leaving');
-      let settled = false;
-      const finish = () => {
-        if (settled) return;
-        settled = true;
-        surface.removeEventListener('transitionend', onEnd);
-        hideChartTooltip();
-      };
-      const onEnd = (e) => {
-        if (e.target !== surface || e.propertyName !== 'opacity') return;
-        finish();
-      };
-      surface.addEventListener('transitionend', onEnd);
-      window.setTimeout(finish, 400);
     }
 
     /** Fallback when activityTopRows missing: turn "Top activities: a 1, b 2" into stacked lines. */
