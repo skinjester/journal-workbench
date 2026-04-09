@@ -2267,6 +2267,15 @@
       }, 100);
     });
 
+    /** True when the sidebar was last opened for an activity line (child), not the project aggregate (parent). */
+    function provenanceInspectorLastOpenShowsActivity(pi) {
+      if (!pi) return false;
+      const act = pi.activity == null ? '' : String(pi.activity).trim();
+      if (act !== '') return true;
+      if (pi.focusMeta && pi.focusMeta.projectOverview === false) return true;
+      return false;
+    }
+
     /** After matrix redraw or Plotly unhover-with-click, restore minimal inspector hint for the selected cell. */
     function showInspectorHintAfterOpen() {
       if (!isProvenanceInspectorOpen()) return;
@@ -5164,8 +5173,30 @@
         if (po && !po.hidden) closeProvenanceOverlay();
         /* Keep #provenance-inspector open when leaving drill — closing it cleared _provenanceOpenKey / focus and removed the selected-month matrix bands on the full grid. */
         const chartPre = document.getElementById('matrix-chart');
-        const pi = provenanceInspectorLastOpen;
-        if (chartPre && pi && pi.project) {
+        let pi = provenanceInspectorLastOpen;
+        const inspEl = document.getElementById('provenance-inspector');
+        const inspectorVisible = Boolean(inspEl && !inspEl.hasAttribute('hidden'));
+
+        let inspectorRefreshedToProjectOverview = false;
+        if (
+          inspectorVisible &&
+          pi &&
+          pi.month != null &&
+          pi.project &&
+          provenanceInspectorLastOpenShowsActivity(pi)
+        ) {
+          const proj = pi.project;
+          const projRowIdx = data.rows.indexOf(proj);
+          const fm =
+            projRowIdx >= 0
+              ? { projectOverview: true, rowIndex: projRowIdx, rowKey: proj }
+              : { projectOverview: true };
+          openProvenanceInspector(String(pi.month), proj, '', fm);
+          inspectorRefreshedToProjectOverview = true;
+          pi = provenanceInspectorLastOpen;
+        }
+
+        if (chartPre && pi && pi.project && !inspectorRefreshedToProjectOverview) {
           const proj = pi.project;
           const projRowIdx = data.rows.indexOf(proj);
           if (projRowIdx >= 0) {
@@ -5186,7 +5217,7 @@
             }
           }
         }
-        if (chartPre && pi && pi.month != null && pi.project) {
+        if (chartPre && pi && pi.month != null && pi.project && !inspectorRefreshedToProjectOverview) {
           syncMatrixPinnedSelection(
             chartPre,
             pi.month,
@@ -5249,6 +5280,25 @@
               `<div class="stat"><span class="value">${item.value}</span><span class="label">${item.label}</span></div>`
           )
           .join('');
+      }
+
+      const inspDrill = document.getElementById('provenance-inspector');
+      const piDrill = provenanceInspectorLastOpen;
+      if (
+        inspDrill &&
+        !inspDrill.hasAttribute('hidden') &&
+        piDrill &&
+        piDrill.month != null &&
+        expandedProject &&
+        piDrill.project &&
+        piDrill.project !== expandedProject
+      ) {
+        const rowIdxOv = data.rows.indexOf(expandedProject);
+        const fmDrill =
+          rowIdxOv >= 0
+            ? { projectOverview: true, rowIndex: rowIdxOv, rowKey: expandedProject }
+            : { projectOverview: true };
+        openProvenanceInspector(String(piDrill.month), expandedProject, '', fmDrill);
       }
 
       renderMatrix(expandedProject);
