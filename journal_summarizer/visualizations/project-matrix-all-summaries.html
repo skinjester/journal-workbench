@@ -374,6 +374,14 @@
       background: transparent;
       box-shadow: none;
     }
+    /* Persisted matrix cell selection (project + month): visible in all matrix layouts even when the inspector is hidden. */
+    .fixed-label.project.matrix-cell-selected:not(.active) {
+      background: rgba(255, 165, 88, 0.12);
+      box-shadow: inset 3px 0 0 rgba(255, 186, 120, 0.55);
+    }
+    .fixed-label.project.matrix-cell-selected.active {
+      box-shadow: inset 3px 0 0 rgba(255, 186, 120, 0.75);
+    }
     /* When one project is expanded, recede other project rows and lift activity labels. */
     .matrix-shell .matrix-labels--drilldown .fixed-label.project:not(.active) {
       opacity: 0.78;
@@ -1371,6 +1379,23 @@
       }
     }
 
+    /**
+     * Month/project for matrix inspector outlines: independent of Plotly hover bbox and of _inspectorCellFocus.
+     * Set when opening the in-page inspector from a cell; cleared when the inspector is closed or emptied.
+     */
+    function syncMatrixPinnedSelection(chart, month, project, activity) {
+      if (!chart || month == null || month === '' || project == null || project === '') return;
+      chart._matrixPinnedSelection = {
+        month: String(month),
+        project: String(project),
+        activity: activity == null || activity === '' ? '' : String(activity)
+      };
+    }
+
+    function clearMatrixPinnedSelection(chart) {
+      if (chart) delete chart._matrixPinnedSelection;
+    }
+
     let inspScrollRafH = null;
 
     function stopInspScrollAnim() {
@@ -2167,6 +2192,7 @@
       if (chart) {
         chart._provenanceOpenKey = '';
         chart._inspectorCellFocus = null;
+        clearMatrixPinnedSelection(chart);
         delete chart._skipInspectorScrollIfInView;
         if (!matrixInspectorLayoutActive) {
           matrixInspectorSaved = {
@@ -2306,7 +2332,10 @@
       const wasInspectorAlreadyOpen = Boolean(root && !root.hasAttribute('hidden'));
       const wasLayoutAlreadyActive = matrixInspectorLayoutActive;
       if (!root || typeof ProvenanceView === 'undefined' || !prov || !prov.monthSources) {
-        if (chart) chart._inspectorCellFocus = null;
+        if (chart) {
+          chart._inspectorCellFocus = null;
+          clearMatrixPinnedSelection(chart);
+        }
         navigateProvenancePage(month, project, projectOverview ? 'overview' : activity);
         return;
       }
@@ -2374,6 +2403,7 @@
               }
             : null
       };
+      syncMatrixPinnedSelection(chart, month, project, projectOverview ? '' : activity);
       syncProvInspectorToggleAffordance();
       syncProvenanceSidebarChromeAlignment();
       requestAnimationFrame(() =>
@@ -2402,6 +2432,7 @@
       if (chart) {
         chart._provenanceOpenKey = '';
         chart._inspectorCellFocus = null;
+        /* Keep _matrixPinnedSelection so the chosen (project, month) stays drawn on the matrix/milestone in every layout. */
         delete chart._skipInspectorScrollIfInView;
       }
       requestAnimationFrame(() =>
@@ -2420,7 +2451,6 @@
     function closeProvenanceOverlay() {
       cancelMatrixHoverExit();
       const root = document.getElementById('provenance-overlay');
-      const chart = document.getElementById('matrix-chart');
       if (!root) return;
       const dialog = root.querySelector('.provenance-overlay__dialog');
       const ct = document.getElementById('chart-tooltip');
@@ -2446,7 +2476,7 @@
       root.classList.remove('provenance-overlay--hover');
       root.setAttribute('hidden', '');
       root.setAttribute('aria-hidden', 'true');
-      if (chart) chart._provenanceOpenKey = '';
+      /* Do not clear chart._provenanceOpenKey here — that belongs to #provenance-inspector cell selection, not this modal. */
     }
 
     (function bindProvenanceOverlay() {
@@ -2585,6 +2615,65 @@
       return { x0: Math.min(a, b), x1: Math.max(a, b) };
     }
 
+    /** Paper x0/x1 for a month column from inner heat width + xgap (matches Plotly bins; no live bbox). */
+    function matrixPaperColumnXFromLattice(monthKey, visibleMonths, innerW, xgap) {
+      if (!visibleMonths || !visibleMonths.length || monthKey == null || monthKey === '') return null;
+      const mi = visibleMonths.indexOf(monthKey);
+      if (mi < 0) return null;
+      const ncols = visibleMonths.length;
+      const xi = Number.isFinite(Number(xgap)) && Number(xgap) >= 0 ? Number(xgap) : 0;
+      const w = Math.max(1, Number(innerW) || 1);
+      const cw = (w - Math.max(0, ncols - 1) * xi) / Math.max(1, ncols);
+      if (!Number.isFinite(cw) || cw <= 0) return null;
+      const x0px = mi * (cw + xi);
+      const x1px = x0px + cw;
+      const clamp = (t) => Math.max(0, Math.min(1, t));
+      return { x0: clamp(x0px / w), x1: clamp(x1px / w) };
+    }
+
+    /**
+     * Pinned month falls outside the current `visibleStartIdx..visibleEndIdx` slice (e.g. future zoom). Draw edge
+     * lines so the selection is not silently invisible; caller may also scroll the slice to include the month.
+     */
+    function matrixPinnedOffWindowEdgeShapes(monthKey, visibleStartIdx, visibleEndIdx) {
+      const g = data.months.indexOf(monthKey);
+      if (g < 0) return [];
+      if (g >= visibleStartIdx && g <= visibleEndIdx) return [];
+      const T = MATRIX_HOVER_TOKENS;
+      const vline = (x, w) => ({
+        type: 'line',
+        xref: 'paper',
+        yref: 'paper',
+        x0: x,
+        x1: x,
+        y0: 0,
+        y1: 1,
+        line: { color: T.ruleColor, width: w },
+        layer: 'above'
+      });
+      if (g < visibleStartIdx) return [vline(0.006, 3), vline(0.014, 1.5)];
+      return [vline(0.986, 3), vline(0.994, 1.5)];
+    }
+
+    /** Inspector-style full-height column edges when no row resolves (e.g. activity row hidden after “all projects”). */
+    function matrixInspectorColumnOnlyRuleShapes(colX) {
+      if (!colX) return [];
+      const T = MATRIX_HOVER_TOKENS;
+      const layer = 'above';
+      const vline = (x) => ({
+        type: 'line',
+        xref: 'paper',
+        yref: 'paper',
+        x0: x,
+        x1: x,
+        y0: 0,
+        y1: 1,
+        line: { color: T.ruleColor, width: T.ruleWidth },
+        layer
+      });
+      return [vline(colX.x0), vline(colX.x1)];
+    }
+
     /** Full-span row/column guide lines at the cross edges (paper coords). */
     function matrixHoverCrossRuleLineShapes(rowIndex, rowCount, colX) {
       const T = MATRIX_HOVER_TOKENS;
@@ -2610,8 +2699,20 @@
       return [...horiz, seg(colX.x0, colX.x0, 0, 1), seg(colX.x1, colX.x1, 0, 1)];
     }
 
-    /** `visibleMonthsOverride`: use when `gd` has no layout yet (e.g. inspector base shapes during renderMatrix). */
-    function matrixHoverBandShapes(rowIndex, monthKey, rowCount, gd, hoverBbox, visibleMonthsOverride, bandEmphasis) {
+    /**
+     * `visibleMonthsOverride`: use when `gd` has no layout yet (e.g. inspector base shapes during renderMatrix).
+     * `colXOverride`: paper coords from matrixPaperColumnXFromLattice when bbox/`_fullLayout` are missing or stale.
+     */
+    function matrixHoverBandShapes(
+      rowIndex,
+      monthKey,
+      rowCount,
+      gd,
+      hoverBbox,
+      visibleMonthsOverride,
+      bandEmphasis,
+      colXOverride
+    ) {
       if (rowIndex < 0 || rowCount <= 0 || monthKey == null || monthKey === '') return [];
       const T = MATRIX_HOVER_TOKENS;
       const isInspector = bandEmphasis === 'inspector';
@@ -2636,7 +2737,8 @@
         (visibleMonthsOverride && visibleMonthsOverride.length)
           ? visibleMonthsOverride
           : (gd && (gd._milestoneVisibleMonths || gd._matrixVisibleMonths));
-      let colX = matrixPaperColumnXFromHoverBbox(gd, hoverBbox);
+      let colX = colXOverride || null;
+      if (!colX) colX = matrixPaperColumnXFromHoverBbox(gd, hoverBbox);
       if (!colX && months) {
         const mi = months.indexOf(monthKey);
         const ncols = Math.max(1, months.length);
@@ -2979,7 +3081,22 @@
         chart._matrixHoverBandKey = '';
         return;
       }
-      const bands = matrixHoverBandShapes(idx, monthKeyForBands, rows.length, chart, bbox);
+      const pinSel = chart._matrixPinnedSelection;
+      const hasActivePin =
+        pinSel &&
+        pinSel.month != null &&
+        String(pinSel.month) !== '' &&
+        pinSel.project;
+      /* With a persisted cell selection, use inspector-style hover bands (no opaque cross-fill) so pin outlines stay visible. */
+      const bands = matrixHoverBandShapes(
+        idx,
+        monthKeyForBands,
+        rows.length,
+        chart,
+        bbox,
+        hasActivePin ? visibleMonths : undefined,
+        hasActivePin ? 'inspector' : undefined
+      );
       const merged = base.concat(bands);
       try {
         Plotly.relayout(chart, { shapes: merged });
@@ -4333,12 +4450,50 @@
       const inspPanel = document.getElementById('provenance-inspector');
       const chartPre = document.getElementById('matrix-chart');
       const cellFocus = chartPre && chartPre._inspectorCellFocus;
-      if (inspPanel && !inspPanel.hidden && cellFocus && cellFocus.month != null && cellFocus.rowKey != null) {
-        const riSel = expandedRows.findIndex((r) => r.key === cellFocus.rowKey);
-        if (riSel >= 0 && visibleMonths.includes(cellFocus.month)) {
+      const pi = provenanceInspectorLastOpen;
+      const pin = chartPre && chartPre._matrixPinnedSelection;
+      const paintMonth =
+        pin && pin.month != null && pin.month !== ''
+          ? pin.month
+          : pi && pi.month != null
+            ? pi.month
+            : null;
+      const paintProject =
+        pin && pin.project ? pin.project : pi && pi.project ? pi.project : null;
+      const monthInDataset = paintMonth != null && data.months.includes(paintMonth);
+      const showMatrixCellSelection = monthInDataset && paintProject;
+      if (showMatrixCellSelection) {
+        const monthInSlice = visibleMonths.includes(paintMonth);
+        const colXLattice = monthInSlice
+          ? matrixPaperColumnXFromLattice(paintMonth, visibleMonths, matrixInnerW, matrixXGapTrace)
+          : null;
+        if (!monthInSlice) {
           matrixShapes.push(
-            ...matrixHoverBandShapes(riSel, cellFocus.month, expandedRows.length, chartPre, null, visibleMonths, 'inspector')
+            ...matrixPinnedOffWindowEdgeShapes(paintMonth, visibleStartIdx, visibleEndIdx)
           );
+        }
+        let riSel = -1;
+        if (cellFocus && cellFocus.rowKey != null) {
+          riSel = expandedRows.findIndex((r) => r.key === cellFocus.rowKey);
+        }
+        if (riSel < 0 && paintProject) {
+          riSel = expandedRows.findIndex((r) => r.type === 'project' && r.project === paintProject);
+        }
+        if (riSel >= 0 && colXLattice) {
+          matrixShapes.push(
+            ...matrixHoverBandShapes(
+              riSel,
+              paintMonth,
+              expandedRows.length,
+              chartPre,
+              null,
+              visibleMonths,
+              'inspector',
+              colXLattice
+            )
+          );
+        } else if (colXLattice) {
+          matrixShapes.push(...matrixInspectorColumnOnlyRuleShapes(colXLattice));
         }
       }
 
@@ -4509,7 +4664,14 @@
         chart.on('plotly_unhover', () => {
           if (isProvenanceInspectorOpen()) {
             const c = document.getElementById('matrix-chart');
-            if (c && c._inspectorCellFocus) {
+            const piUh = provenanceInspectorLastOpen;
+            const pinUh = c && c._matrixPinnedSelection;
+            const pinned =
+              (c && c._inspectorCellFocus) ||
+              (piUh &&
+                piUh.month != null &&
+                (pinUh?.project || piUh.project));
+            if (pinned) {
               cancelMatrixHoverExit();
               requestAnimationFrame(() => {
                 if (
@@ -4565,6 +4727,9 @@
         ) {
           requestAnimationFrame(() => showInspectorHintAfterOpen());
         }
+        /* Plotly often omits plotly_hover after newPlot if the pointer never moves; re-sync row/column bands from the last known client position (esp. backing out to all-projects while the cursor stays on a brick). Do not use scheduleMatrixChartHoverNudgeFromPointer twice — it clears the prior timer. */
+        requestAnimationFrame(() => matrixChartHoverNudgeFromPointer());
+        setTimeout(() => matrixChartHoverNudgeFromPointer(), 72);
       });
 
       const matrixLabelShell = document.querySelector('.matrix-shell .fixed-labels');
@@ -4576,6 +4741,7 @@
         if (row.type === 'project') {
           const classes = ['fixed-label', 'project'];
           if (row.project === selectedProject) classes.push('active', 'project-open');
+          if (showMatrixCellSelection && row.project === paintProject) classes.push('matrix-cell-selected');
           return `<button type="button" class="${classes.join(' ')}" data-project="${escapeHtml(row.project)}"><span class="fixed-label-text">${escapeHtml(row.label)}</span></button>`;
         }
         return `<div class="fixed-label child" role="button" tabindex="0" title="Collapse project"><span class="fixed-label-text">${escapeHtml(row.label)}</span></div>`;
@@ -4648,6 +4814,26 @@
         }
       }
       const mileShapes = [...makeYearBandShapes(visibleMonths), ...makeMilestoneLaneShapes()];
+      {
+        const matrixRef = document.getElementById('matrix-chart');
+        const pinM = matrixRef && matrixRef._matrixPinnedSelection;
+        const piM = provenanceInspectorLastOpen;
+        const selMonthM =
+          pinM && pinM.month != null && pinM.month !== ''
+            ? pinM.month
+            : piM && piM.month != null
+              ? piM.month
+              : null;
+        if (selMonthM && data.months.includes(selMonthM)) {
+          const innerM = Math.max(1, pw - MATRIX_PLOT_MARGIN_LR.l - MATRIX_PLOT_MARGIN_LR.r);
+          if (visibleMonths.includes(selMonthM)) {
+            const colM = matrixPaperColumnXFromLattice(selMonthM, visibleMonths, innerM, xg);
+            if (colM) mileShapes.push(...matrixInspectorColumnOnlyRuleShapes(colM));
+          } else {
+            mileShapes.push(...matrixPinnedOffWindowEdgeShapes(selMonthM, visibleStartIdx, visibleEndIdx));
+          }
+        }
+      }
 
       const mileChartEl = document.getElementById('milestone-chart');
       if (mileChartEl) {
@@ -4974,11 +5160,39 @@
       expandedProject = expandedProject === project ? null : project;
 
       if (!expandedProject) {
-        const insp = document.getElementById('provenance-inspector');
-        if (insp && !insp.hidden) closeProvenanceInspector();
-        else {
-          const po = document.getElementById('provenance-overlay');
-          if (po && !po.hidden) closeProvenanceOverlay();
+        const po = document.getElementById('provenance-overlay');
+        if (po && !po.hidden) closeProvenanceOverlay();
+        /* Keep #provenance-inspector open when leaving drill — closing it cleared _provenanceOpenKey / focus and removed the selected-month matrix bands on the full grid. */
+        const chartPre = document.getElementById('matrix-chart');
+        const pi = provenanceInspectorLastOpen;
+        if (chartPre && pi && pi.project) {
+          const proj = pi.project;
+          const projRowIdx = data.rows.indexOf(proj);
+          if (projRowIdx >= 0) {
+            const cf = chartPre._inspectorCellFocus;
+            if (cf && cf.project === proj) {
+              const rk = cf.rowKey == null ? '' : String(cf.rowKey);
+              if (rk !== proj || rk.includes('::')) {
+                chartPre._inspectorCellFocus = {
+                  ...cf,
+                  rowKey: proj,
+                  rowIndex: projRowIdx
+                };
+              }
+            }
+            if (pi.focusMeta && typeof pi.focusMeta === 'object') {
+              pi.focusMeta.rowKey = proj;
+              pi.focusMeta.rowIndex = -1;
+            }
+          }
+        }
+        if (chartPre && pi && pi.month != null && pi.project) {
+          syncMatrixPinnedSelection(
+            chartPre,
+            pi.month,
+            pi.project,
+            pi.activity == null ? '' : pi.activity
+          );
         }
         if (detailTitle) detailTitle.textContent = 'Selected Project';
         if (detailCopy) {
