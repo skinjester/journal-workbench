@@ -356,6 +356,10 @@
       min-width: 0;
       border-top: 0;
       overflow: hidden;
+      cursor: pointer;
+    }
+    .fixed-label.child:hover {
+      background: rgba(255, 255, 255, 0.04);
     }
     .fixed-label.project-open {
       background: transparent;
@@ -1664,8 +1668,10 @@
     /** Leaving the heatmap (gap before the floating panel) fires plotly_unhover immediately; defer cleanup
      *  so the pointer can reach #chart-tooltip or the provenance dialog. */
     const MATRIX_HOVER_EXIT_MS = 250;
-    /** Padded hit slop around last cell + panels so fast moves don’t hide UI before tooltip/dialog repos. */
+    /** Padded slop around modal panels / inspector (large, for comfortable targeting). */
     const MATRIX_HOVER_EXIT_SLOP_PX = 120;
+    /** Tight slop for #chart-tooltip only — large horizontal slop overlapped the label↔grid gutter and kept the panel open. */
+    const CHART_TOOLTIP_BRIDGE_SLOP_PX = 40;
     let matrixHoverExitTimer = null;
     let lastPointerClientX = -1;
     let lastPointerClientY = -1;
@@ -1678,6 +1684,7 @@
         lastPointerClientY = e.clientY;
         lastPointerPageX = e.pageX;
         lastPointerPageY = e.pageY;
+        scheduleMatrixHoverExitIfPointerOutsideGrid();
       };
       window.addEventListener('pointermove', rec, { passive: true, capture: true });
       window.addEventListener('pointerdown', rec, { passive: true, capture: true });
@@ -1772,49 +1779,82 @@
     function shouldDeferMatrixHoverExitCleanup() {
       const cx = lastPointerClientX;
       const cy = lastPointerClientY;
-      const pad = MATRIX_HOVER_EXIT_SLOP_PX;
+      const panelPad = MATRIX_HOVER_EXIT_SLOP_PX;
+      const tipPad = CHART_TOOLTIP_BRIDGE_SLOP_PX;
+      let el = null;
       if (cx >= 0 && cy >= 0) {
-        const el = document.elementFromPoint(cx, cy);
-        if (el) {
-          if (el.closest('#matrix-chart')) return true;
-          if (el.closest('#milestone-chart')) return true;
-          if (el.closest('#matrix-labels')) return true;
-          if (el.closest('#milestone-labels')) return true;
-          if (el.closest('#chart-tooltip')) return true;
-          if (el.closest('.provenance-overlay__dialog')) return true;
-          if (el.closest('#provenance-inspector')) return true;
-          if (el.closest('#provenance-sidebar-chrome')) return true;
+        try {
+          el = document.elementFromPoint(cx, cy);
+        } catch (e) {
+          el = null;
         }
       }
-      const ch = document.getElementById('matrix-chart');
-      const b = ch && ch._lastMatrixCellBboxPage;
-      if (b && lastPointerPageX >= 0 && lastPointerPageY >= 0) {
-        const px = lastPointerPageX;
-        const py = lastPointerPageY;
-        if (px >= b.x0 - pad && px <= b.x1 + pad && py >= b.y0 - pad && py <= b.y1 + pad) return true;
+      const mch = document.getElementById('matrix-chart');
+      const ms = document.getElementById('milestone-chart');
+      const inLabelStripOrLeadingGutter =
+        Boolean(
+          el &&
+            (el.closest('.fixed-labels') ||
+              el.closest('#matrix-scroll-leading-gutter') ||
+              el.closest('#milestone-scroll-leading-gutter'))
+        );
+      /** Leading gutter uses pointer-events:none — hits fall through to #matrix-chart margins / empty plot. */
+      const overChartButNotHeatmapCell =
+        Boolean(
+          el &&
+            ((mch && el.closest('#matrix-chart') && !matrixHitTestCellFromClientXY(mch, cx, cy)) ||
+              (ms && el.closest('#milestone-chart') && !milestoneHitTestCellFromClientXY(ms, cx, cy)))
+        );
+      const skipChartTooltipBridgeSlop = inLabelStripOrLeadingGutter || overChartButNotHeatmapCell;
+      if (cx >= 0 && cy >= 0 && el) {
+        if (mch && el.closest('#matrix-chart') && matrixHitTestCellFromClientXY(mch, cx, cy)) return true;
+        if (ms && el.closest('#milestone-chart') && milestoneHitTestCellFromClientXY(ms, cx, cy)) return true;
+        if (el.closest('#chart-tooltip')) return true;
+        if (el.closest('.provenance-overlay__dialog')) return true;
+        if (el.closest('#provenance-inspector')) return true;
+        if (el.closest('#provenance-sidebar-chrome')) return true;
       }
       const tt = document.getElementById('chart-tooltip');
-      if (tt && tt.style.display === 'block' && cx >= 0 && cy >= 0) {
+      if (!skipChartTooltipBridgeSlop && tt && tt.style.display === 'block' && cx >= 0 && cy >= 0) {
         const r = tt.getBoundingClientRect();
-        if (cx >= r.left - pad && cx <= r.right + pad && cy >= r.top - pad && cy <= r.bottom + pad) return true;
+        if (cx >= r.left - tipPad && cx <= r.right + tipPad && cy >= r.top - tipPad && cy <= r.bottom + tipPad)
+          return true;
       }
       const po = document.getElementById('provenance-overlay');
       if (po && !po.hidden && cx >= 0 && cy >= 0) {
         const dlg = po.querySelector('.provenance-overlay__dialog');
         if (dlg) {
           const r = dlg.getBoundingClientRect();
-          if (cx >= r.left - pad && cx <= r.right + pad && cy >= r.top - pad && cy <= r.bottom + pad) return true;
+          if (
+            cx >= r.left - panelPad &&
+            cx <= r.right + panelPad &&
+            cy >= r.top - panelPad &&
+            cy <= r.bottom + panelPad
+          )
+            return true;
         }
       }
       const pi = document.getElementById('provenance-inspector');
       if (pi && !pi.hidden && cx >= 0 && cy >= 0) {
         const r = pi.getBoundingClientRect();
-        if (cx >= r.left - pad && cx <= r.right + pad && cy >= r.top - pad && cy <= r.bottom + pad) return true;
+        if (
+          cx >= r.left - panelPad &&
+          cx <= r.right + panelPad &&
+          cy >= r.top - panelPad &&
+          cy <= r.bottom + panelPad
+        )
+          return true;
       }
       const sidebarChrome = document.getElementById('provenance-sidebar-chrome');
       if (sidebarChrome && cx >= 0 && cy >= 0) {
         const r = sidebarChrome.getBoundingClientRect();
-        if (cx >= r.left - pad && cx <= r.right + pad && cy >= r.top - pad && cy <= r.bottom + pad) return true;
+        if (
+          cx >= r.left - panelPad &&
+          cx <= r.right + panelPad &&
+          cy >= r.top - panelPad &&
+          cy <= r.bottom + panelPad
+        )
+          return true;
       }
       return false;
     }
@@ -1828,7 +1868,7 @@
       const ch = document.getElementById('matrix-chart');
       if (ch) ch._lastMatrixCellBboxPage = null;
       if (ml) Array.from(ml.children).forEach((el) => el.classList.remove('hover-row-affordance'));
-      hideChartTooltip();
+      hideChartTooltipWithTransition();
       const po = document.getElementById('provenance-overlay');
       if (po && !po.hidden && po.classList.contains('provenance-overlay--hover')) {
         closeProvenanceOverlay();
@@ -1855,6 +1895,24 @@
 
     function scheduleMatrixHoverExit() {
       cancelMatrixHoverExit();
+      matrixHoverExitTimer = setTimeout(() => {
+        matrixHoverExitTimer = null;
+        runMatrixHoverExitCleanup();
+      }, MATRIX_HOVER_EXIT_MS);
+    }
+
+    /**
+     * Plotly often omits plotly_unhover when leaving bricks; pointermove + strict cell hit test dismisses
+     * #chart-tooltip once the pointer leaves heatmap cells (still defers for tooltip bridge slop).
+     */
+    function scheduleMatrixHoverExitIfPointerOutsideGrid() {
+      const tt = document.getElementById('chart-tooltip');
+      if (!tt || tt.style.display !== 'block') return;
+      if (shouldDeferMatrixHoverExitCleanup()) {
+        cancelMatrixHoverExit();
+        return;
+      }
+      if (matrixHoverExitTimer != null) return;
       matrixHoverExitTimer = setTimeout(() => {
         matrixHoverExitTimer = null;
         runMatrixHoverExitCleanup();
@@ -2554,7 +2612,7 @@
     }
 
     /**
-     * Map viewport coordinates to heatmap cell using _fullLayout._size + xgap-aware columns (same lattice as scroll math).
+     * Map viewport coordinates to a heatmap brick (not margins, not x-gaps between months).
      * Bbox uses the same space as Plotly hover bbox (see matrixPaperColumnXFromHoverBbox / plotlyHoverBboxToViewport).
      */
     function matrixHitTestCellFromClientXY(gd, clientX, clientY) {
@@ -2590,10 +2648,59 @@
             break;
           }
         }
-        if (colIndex < 0) {
-          const slot = lx / (cw + xgap);
-          colIndex = Math.min(ncols - 1, Math.max(0, Math.round(slot)));
+        if (colIndex < 0) return null;
+        lx0 = gs.l + colIndex * (cw + xgap);
+        lx1 = lx0 + cw;
+      } else {
+        const slotW = gs.w / Math.max(1, ncols);
+        colIndex = Math.min(ncols - 1, Math.max(0, Math.floor((lx / gs.w) * ncols)));
+        lx0 = gs.l + colIndex * slotW;
+        lx1 = lx0 + slotW;
+      }
+      const xKey = months[colIndex];
+      const gLeft = gd.offsetLeft + gd.clientLeft;
+      const gTop = gd.offsetTop + gd.clientTop;
+      const paperYTop = 1 - idx / n;
+      const paperYBottom = 1 - (idx + 1) / n;
+      const fy0 = gs.t + (1 - paperYTop) * gs.h;
+      const fy1 = gs.t + (1 - paperYBottom) * gs.h;
+      const bbox = { x0: lx0 + gLeft, y0: fy0 + gTop, x1: lx1 + gLeft, y1: fy1 + gTop };
+      return { idx, xKey, bbox };
+    }
+
+    /** Deliverables heatmap: same xgap column lattice as matrix; null in margins or between-column gaps. */
+    function milestoneHitTestCellFromClientXY(gd, clientX, clientY) {
+      if (!gd || !gd._fullLayout) return null;
+      const gs = gd._fullLayout._size;
+      if (!gs || !(gs.w > 0) || !(gs.h > 0)) return null;
+      const r = gd.getBoundingClientRect();
+      const figX = clientX - r.left;
+      const figY = clientY - r.top;
+      if (figX < gs.l || figX > gs.l + gs.w || figY < gs.t || figY > gs.t + gs.h) return null;
+      const months = gd._milestoneVisibleMonths;
+      const n = gd._milestoneRowCount;
+      if (!months || !months.length || !Number.isFinite(n) || n < 1) return null;
+      const ncols = months.length;
+      const t = Math.max(0, Math.min(1, (figY - gs.t) / gs.h));
+      const idx = Math.min(n - 1, Math.max(0, Math.floor(t * n)));
+      const lx = figX - gs.l;
+      const geom = gd._milestoneColGeom;
+      const xgap =
+        geom && Number.isFinite(Number(geom.xgap)) && Number(geom.xgap) >= 0 ? Number(geom.xgap) : 0;
+      const cw = (gs.w - Math.max(0, ncols - 1) * xgap) / Math.max(1, ncols);
+      let colIndex = -1;
+      let lx0;
+      let lx1;
+      if (cw > 0) {
+        for (let i = 0; i < ncols; i++) {
+          const x0 = i * (cw + xgap);
+          const x1 = x0 + cw;
+          if (lx >= x0 && lx < x1) {
+            colIndex = i;
+            break;
+          }
         }
+        if (colIndex < 0) return null;
         lx0 = gs.l + colIndex * (cw + xgap);
         lx1 = lx0 + cw;
       } else {
@@ -4075,6 +4182,15 @@
           const rows = chart._matrixExpandedRows;
           const ml = document.getElementById('matrix-labels');
           if (!rows || !ml) return;
+          const domEv = ev && ev.event;
+          const hcx =
+            domEv && typeof domEv.clientX === 'number' ? domEv.clientX : lastPointerClientX;
+          const hcy =
+            domEv && typeof domEv.clientY === 'number' ? domEv.clientY : lastPointerClientY;
+          if (!matrixHitTestCellFromClientXY(chart, hcx, hcy)) {
+            scheduleMatrixHoverExit();
+            return;
+          }
           const pt = pickMatrixHoverPoint(ev.points);
           if (!pt || pt.y == null || pt.x == null) return;
           const yKey = typeof pt.y === 'string' ? pt.y : String(pt.y);
@@ -4134,12 +4250,8 @@
           if (row.project === selectedProject) classes.push('active', 'project-open');
           return `<button type="button" class="${classes.join(' ')}" data-project="${escapeHtml(row.project)}"><span class="fixed-label-text">${escapeHtml(row.label)}</span></button>`;
         }
-        return `<div class="fixed-label child"><span class="fixed-label-text">${escapeHtml(row.label)}</span></div>`;
+        return `<div class="fixed-label child" role="button" tabindex="0" title="Collapse project"><span class="fixed-label-text">${escapeHtml(row.label)}</span></div>`;
       }).join('');
-
-      Array.from(matrixLabels.querySelectorAll('[data-project]')).forEach(el => {
-        el.addEventListener('click', () => setActiveProject(el.dataset.project));
-      });
 
       syncMilestoneScrollWidth();
       renderMilestones(matrixMarginTop, matrixMarginBottom, plotWidth, matrixXGapTrace);
@@ -4207,6 +4319,8 @@
         mileChartEl._milestoneHoverColKey = '';
         mileChartEl._milestoneHoverBandKey = '';
         mileChartEl._milestoneVisibleMonths = visibleMonths;
+        mileChartEl._milestoneRowCount = nMile;
+        mileChartEl._milestoneColGeom = { xgap: xg };
         mileChartEl._milestoneBaseShapesJson = JSON.stringify(mileShapes);
       }
 
@@ -4285,6 +4399,15 @@
         mileChart.on('plotly_hover', (ev) => {
           const inspPanel = document.getElementById('provenance-inspector');
           const inspectorOpen = Boolean(inspPanel && !inspPanel.hidden);
+          const domEv = ev && ev.event;
+          const hcx =
+            domEv && typeof domEv.clientX === 'number' ? domEv.clientX : lastPointerClientX;
+          const hcy =
+            domEv && typeof domEv.clientY === 'number' ? domEv.clientY : lastPointerClientY;
+          if (!milestoneHitTestCellFromClientXY(mileChart, hcx, hcy)) {
+            scheduleMatrixHoverExit();
+            return;
+          }
           const pt = ev.points && ev.points[0];
           if (!pt || pt.x == null || pt.y == null) return;
           const xKey = typeof pt.x === 'string' ? pt.x : String(pt.x);
@@ -4560,6 +4683,26 @@
     }
 
     document.getElementById('matrix-back-all-projects-nav')?.addEventListener('click', () => {
+      setActiveProject(null);
+    });
+
+    /** One delegated handler: project row toggles drill (same project → collapse); activity rows collapse to all projects. */
+    matrixLabels?.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-project]');
+      if (btn && btn.dataset.project) {
+        const p = btn.dataset.project;
+        setActiveProject(expandedProject === p ? null : p);
+        return;
+      }
+      if (e.target.closest('.fixed-label.child') && expandedProject) {
+        setActiveProject(null);
+      }
+    });
+    matrixLabels?.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const child = e.target.closest('.fixed-label.child');
+      if (!child || !expandedProject) return;
+      e.preventDefault();
       setActiveProject(null);
     });
 
