@@ -405,6 +405,10 @@
       background: var(--matrix-hover-label-bg, rgba(255, 186, 120, 0.16));
       border-left-color: var(--matrix-hover-label-child-border, rgba(255, 205, 145, 0.62));
     }
+    .fixed-label.child.matrix-cell-selected {
+      background: rgba(255, 165, 88, 0.14);
+      border-left-color: rgba(255, 186, 120, 0.7);
+    }
     .fixed-label.milestone {
       color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
       background: transparent; cursor: default;
@@ -2440,8 +2444,27 @@
       matrixInspectorSaved = null;
       if (chart) {
         chart._provenanceOpenKey = '';
-        chart._inspectorCellFocus = null;
-        /* Keep _matrixPinnedSelection so the chosen (project, month) stays drawn on the matrix/milestone in every layout. */
+        const piClose = provenanceInspectorLastOpen;
+        if (
+          piClose &&
+          piClose.month != null &&
+          piClose.project &&
+          piClose.focusMeta &&
+          piClose.focusMeta.rowKey != null &&
+          piClose.focusMeta.rowIndex != null &&
+          piClose.focusMeta.rowIndex >= 0
+        ) {
+          chart._inspectorCellFocus = {
+            month: piClose.month,
+            rowKey: piClose.focusMeta.rowKey,
+            rowIndex: piClose.focusMeta.rowIndex,
+            project: piClose.project,
+            activity: piClose.activity == null ? '' : String(piClose.activity)
+          };
+        } else {
+          chart._inspectorCellFocus = null;
+        }
+        /* Keep _matrixPinnedSelection (month / project / activity) for matrix + milestone pins when the sidebar closes. */
         delete chart._skipInspectorScrollIfInView;
       }
       requestAnimationFrame(() =>
@@ -4469,6 +4492,7 @@
             : null;
       const paintProject =
         pin && pin.project ? pin.project : pi && pi.project ? pi.project : null;
+      const paintActivity = pin && pin.activity ? String(pin.activity).trim() : '';
       const monthInDataset = paintMonth != null && data.months.includes(paintMonth);
       const showMatrixCellSelection = monthInDataset && paintProject;
       if (showMatrixCellSelection) {
@@ -4484,6 +4508,11 @@
         let riSel = -1;
         if (cellFocus && cellFocus.rowKey != null) {
           riSel = expandedRows.findIndex((r) => r.key === cellFocus.rowKey);
+        }
+        if (riSel < 0 && paintActivity !== '' && selectedProject === paintProject) {
+          riSel = expandedRows.findIndex(
+            (r) => r.type === 'activity' && r.project === paintProject && r.label === paintActivity
+          );
         }
         if (riSel < 0 && paintProject) {
           riSel = expandedRows.findIndex((r) => r.type === 'project' && r.project === paintProject);
@@ -4750,10 +4779,25 @@
         if (row.type === 'project') {
           const classes = ['fixed-label', 'project'];
           if (row.project === selectedProject) classes.push('active', 'project-open');
-          if (showMatrixCellSelection && row.project === paintProject) classes.push('matrix-cell-selected');
+          const pinAct = paintActivity;
+          const selOnProjectRow =
+            showMatrixCellSelection &&
+            row.project === paintProject &&
+            (pinAct === '' || selectedProject !== paintProject);
+          if (selOnProjectRow) classes.push('matrix-cell-selected');
           return `<button type="button" class="${classes.join(' ')}" data-project="${escapeHtml(row.project)}"><span class="fixed-label-text">${escapeHtml(row.label)}</span></button>`;
         }
-        return `<div class="fixed-label child" role="button" tabindex="0" title="Collapse project"><span class="fixed-label-text">${escapeHtml(row.label)}</span></div>`;
+        const childClasses = ['fixed-label', 'child'];
+        if (
+          showMatrixCellSelection &&
+          paintActivity !== '' &&
+          row.type === 'activity' &&
+          row.project === paintProject &&
+          row.label === paintActivity
+        ) {
+          childClasses.push('matrix-cell-selected');
+        }
+        return `<div class="${childClasses.join(' ')}" role="button" tabindex="0" title="Collapse project"><span class="fixed-label-text">${escapeHtml(row.label)}</span></div>`;
       }).join('');
 
       syncMilestoneScrollWidth();
