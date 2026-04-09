@@ -447,6 +447,24 @@
       pointer-events: none;
       display: none;
     }
+    /* Overview sidebar open: minimal label by the cursor (full body lives in the inspector). */
+    #chart-tooltip.chart-tooltip--inspector-hint {
+      width: max-content;
+      max-width: min(280px, calc(100vw - var(--sp-3)));
+    }
+    #chart-tooltip.chart-tooltip--inspector-hint .chart-tooltip__surface {
+      padding: var(--sp-0-5) var(--sp-1);
+      max-height: none;
+    }
+    #chart-tooltip.chart-tooltip--inspector-hint .chart-tooltip__kicker {
+      margin: 0 0 2px;
+      font-size: var(--text-2xs);
+    }
+    #chart-tooltip.chart-tooltip--inspector-hint .chart-tooltip__title {
+      margin: 0;
+      font-size: var(--text-xs);
+      line-height: var(--lh-snug);
+    }
     /* Pass hits through tooltip chrome; activity provenance panel re-enables below. */
     #chart-tooltip .chart-tooltip__surface * {
       pointer-events: none;
@@ -1668,15 +1686,55 @@
     /** Leaving the heatmap (gap before the floating panel) fires plotly_unhover immediately; defer cleanup
      *  so the pointer can reach #chart-tooltip or the provenance dialog. */
     const MATRIX_HOVER_EXIT_MS = 250;
+    /** Extra delay when arming sticky exit from pointermove if the pointer is moving fast (px/ms); avoids one-frame gaps arming hide. */
+    const MATRIX_HOVER_EXIT_FAST_PTR_SPEED = 1.15;
+    const MATRIX_HOVER_EXIT_FAST_EXTRA_MS = 100;
     /** Padded slop around modal panels / inspector (large, for comfortable targeting). */
     const MATRIX_HOVER_EXIT_SLOP_PX = 120;
     /** Tight slop for #chart-tooltip only — large horizontal slop overlapped the label↔grid gutter and kept the panel open. */
     const CHART_TOOLTIP_BRIDGE_SLOP_PX = 40;
     let matrixHoverExitTimer = null;
+    /** Generation for double-rAF sticky exit: only the latest pointermove arms the timer. */
+    let matrixHoverExitStickyGen = 0;
     let lastPointerClientX = -1;
     let lastPointerClientY = -1;
     let lastPointerPageX = -1;
     let lastPointerPageY = -1;
+    let globalPointerSpeedPxPerMs = 0;
+    let globalPtrPrevX = -1;
+    let globalPtrPrevY = -1;
+    let globalPtrPrevT = null;
+
+    /** Cursor-anchored #chart-tooltip layout (inspector hint mode). */
+    function layoutChartTooltipAtPointer(pointerEvent) {
+      const tt = document.getElementById('chart-tooltip');
+      if (!tt || tt.style.display !== 'block') return;
+      const pad = 12;
+      const ox = 14;
+      const oy = 14;
+      let cx = lastPointerClientX;
+      let cy = lastPointerClientY;
+      if (pointerEvent && typeof pointerEvent.clientX === 'number' && typeof pointerEvent.clientY === 'number') {
+        cx = pointerEvent.clientX;
+        cy = pointerEvent.clientY;
+      }
+      if (cx < 0 || cy < 0) return;
+      let left = cx + ox;
+      let top = cy + oy;
+      tt.style.left = `${Math.round(left)}px`;
+      tt.style.top = `${Math.round(top)}px`;
+      const tipRect = tt.getBoundingClientRect();
+      if (tipRect.right > window.innerWidth - pad) {
+        left = cx - tipRect.width - ox;
+      }
+      if (left < pad) left = pad;
+      if (tipRect.bottom > window.innerHeight - pad) {
+        top = cy - tipRect.height - oy;
+      }
+      if (top < pad) top = pad;
+      tt.style.left = `${Math.round(left)}px`;
+      tt.style.top = `${Math.round(top)}px`;
+    }
 
     (function bindGlobalPointerTrail() {
       const rec = (e) => {
@@ -1684,7 +1742,19 @@
         lastPointerClientY = e.clientY;
         lastPointerPageX = e.pageX;
         lastPointerPageY = e.pageY;
+        const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+        if (globalPtrPrevX >= 0 && globalPtrPrevT != null && now > globalPtrPrevT) {
+          const d = Math.hypot(e.clientX - globalPtrPrevX, e.clientY - globalPtrPrevY);
+          globalPointerSpeedPxPerMs = d / Math.max(now - globalPtrPrevT, 0.16);
+        }
+        globalPtrPrevX = e.clientX;
+        globalPtrPrevY = e.clientY;
+        globalPtrPrevT = now;
         scheduleMatrixHoverExitIfPointerOutsideGrid();
+        const ttHint = document.getElementById('chart-tooltip');
+        if (ttHint && ttHint.classList.contains('chart-tooltip--inspector-hint') && ttHint.style.display === 'block') {
+          layoutChartTooltipAtPointer(e);
+        }
       };
       window.addEventListener('pointermove', rec, { passive: true, capture: true });
       window.addEventListener('pointerdown', rec, { passive: true, capture: true });
@@ -1776,6 +1846,11 @@
       return Boolean(po && !po.hidden && po.classList.contains('provenance-overlay--hover'));
     }
 
+    function isProvenanceInspectorOpen() {
+      const pi = document.getElementById('provenance-inspector');
+      return Boolean(pi && !pi.hidden);
+    }
+
     function shouldDeferMatrixHoverExitCleanup() {
       const cx = lastPointerClientX;
       const cy = lastPointerClientY;
@@ -1859,6 +1934,20 @@
       return false;
     }
 
+    /**
+     * Single place that starts the hover-exit timer. reset=true: cancel any pending timer and restart (Plotly paths).
+     * reset=false: only arm if no timer yet (pointermove sticky path, after rAF validation).
+     */
+    function armMatrixHoverExitTimer(delayMs, reset) {
+      const d = Math.max(0, Number(delayMs) || 0);
+      if (reset) cancelMatrixHoverExit();
+      else if (matrixHoverExitTimer != null) return;
+      matrixHoverExitTimer = window.setTimeout(() => {
+        matrixHoverExitTimer = null;
+        runMatrixHoverExitCleanup();
+      }, d);
+    }
+
     function runMatrixHoverExitCleanup() {
       if (shouldDeferMatrixHoverExitCleanup()) {
         scheduleMatrixHoverExit();
@@ -1894,16 +1983,13 @@
     }
 
     function scheduleMatrixHoverExit() {
-      cancelMatrixHoverExit();
-      matrixHoverExitTimer = setTimeout(() => {
-        matrixHoverExitTimer = null;
-        runMatrixHoverExitCleanup();
-      }, MATRIX_HOVER_EXIT_MS);
+      armMatrixHoverExitTimer(MATRIX_HOVER_EXIT_MS, true);
     }
 
     /**
      * Plotly often omits plotly_unhover when leaving bricks; pointermove + strict cell hit test dismisses
-     * #chart-tooltip once the pointer leaves heatmap cells (still defers for tooltip bridge slop).
+     * #chart-tooltip. Double-rAF re-check avoids arming hide on a one-frame glitch; fast-pointer extra delay
+     * reduces accidental arms when sweeping across gaps.
      */
     function scheduleMatrixHoverExitIfPointerOutsideGrid() {
       const tt = document.getElementById('chart-tooltip');
@@ -1913,10 +1999,22 @@
         return;
       }
       if (matrixHoverExitTimer != null) return;
-      matrixHoverExitTimer = setTimeout(() => {
-        matrixHoverExitTimer = null;
-        runMatrixHoverExitCleanup();
-      }, MATRIX_HOVER_EXIT_MS);
+      const gen = ++matrixHoverExitStickyGen;
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (gen !== matrixHoverExitStickyGen) return;
+          const tt2 = document.getElementById('chart-tooltip');
+          if (!tt2 || tt2.style.display !== 'block') return;
+          if (shouldDeferMatrixHoverExitCleanup()) {
+            cancelMatrixHoverExit();
+            return;
+          }
+          if (matrixHoverExitTimer != null) return;
+          const extra =
+            globalPointerSpeedPxPerMs >= MATRIX_HOVER_EXIT_FAST_PTR_SPEED ? MATRIX_HOVER_EXIT_FAST_EXTRA_MS : 0;
+          armMatrixHoverExitTimer(MATRIX_HOVER_EXIT_MS + extra, false);
+        });
+      });
     }
 
     function scheduleMatrixChartResize(renderOpts) {
@@ -2722,13 +2820,14 @@
 
     /**
      * One place for matrix hover visuals (row affordance, shapes, milestone column, #chart-tooltip).
-     * Tooltips show in drill view even when the provenance inspector is open; entering the inspector still dismisses them via its pointer handler.
+     * With the overview inspector open, only a minimal cursor hint is shown; full tooltips when the inspector is closed.
      * @param {{ forceShapes?: boolean }} [opts] — after programmatic scroll, pass { forceShapes: true } so bands relayout even if cell key unchanged.
      */
     function syncMatrixHoverToCell(chart, rows, visibleMonths, idx, xKey, bbox, pointerEvent, opts) {
       const ml = document.getElementById('matrix-labels');
       if (!chart || !rows || !ml) return;
       cancelMatrixHoverExit();
+      const inspectorOpen = isProvenanceInspectorOpen();
       if (bbox) {
         chart._lastMatrixCellBboxPage = {
           x0: bbox.x0,
@@ -2753,29 +2852,49 @@
         if (po && !po.hidden && po.classList.contains('provenance-overlay--hover')) {
           closeProvenanceOverlay();
         }
-        showMatrixProjectTooltip({
-          month: xKeyStr || xKey,
-          project: row.project,
-          globalMonthIdx,
-          bbox,
-          gd: chart,
-          pointerEvent,
-          gridHint: { m: localMonthIdx, r: idx }
-        });
+        if (inspectorOpen) {
+          showMatrixInspectorHintTooltip({
+            month: xKeyStr || xKey,
+            titleLine: row.project,
+            cellKey: `hint:proj:\0${xKeyStr}\0${row.project}`,
+            pointerEvent,
+            gridHint: { m: localMonthIdx, r: idx }
+          });
+        } else {
+          showMatrixProjectTooltip({
+            month: xKeyStr || xKey,
+            project: row.project,
+            globalMonthIdx,
+            bbox,
+            gd: chart,
+            pointerEvent,
+            gridHint: { m: localMonthIdx, r: idx }
+          });
+        }
       } else if (row.type === 'activity' && localMonthIdx >= 0) {
         const po = document.getElementById('provenance-overlay');
         if (po && !po.hidden && po.classList.contains('provenance-overlay--hover')) {
           closeProvenanceOverlay();
         }
-        showMatrixActivityOverviewTooltip({
-          month: xKeyStr || xKey,
-          project: row.project,
-          activity: row.label,
-          bbox,
-          gd: chart,
-          pointerEvent,
-          gridHint: { m: localMonthIdx, r: idx }
-        });
+        if (inspectorOpen) {
+          showMatrixInspectorHintTooltip({
+            month: xKeyStr || xKey,
+            titleLine: `${row.project} · ${row.label}`,
+            cellKey: `hint:act:\0${xKeyStr}\0${row.project}\0${row.label}`,
+            pointerEvent,
+            gridHint: { m: localMonthIdx, r: idx }
+          });
+        } else {
+          showMatrixActivityOverviewTooltip({
+            month: xKeyStr || xKey,
+            project: row.project,
+            activity: row.label,
+            bbox,
+            gd: chart,
+            pointerEvent,
+            gridHint: { m: localMonthIdx, r: idx }
+          });
+        }
       }
       const json = chart._matrixHoverBaseShapesJson;
       if (!json) return;
@@ -2954,6 +3073,16 @@
       `;
     }
 
+    /** Provenance inspector open: month + one title line only (no heavy body). */
+    function buildInspectorHintTooltipShell(month, titleLine) {
+      return `
+        <div class="chart-tooltip__surface">
+          <div class="chart-tooltip__kicker">${escapeHtml(month)}</div>
+          <div class="chart-tooltip__title">${escapeHtml(titleLine)}</div>
+        </div>
+      `;
+    }
+
     function buildMatrixActivityOverviewBodyHtml(month, project, activity) {
       const prov = typeof provenanceData !== 'undefined' ? provenanceData : null;
       if (!prov || typeof ProvenanceView === 'undefined') {
@@ -2997,6 +3126,98 @@
       return tt && tt.querySelector ? tt.querySelector('.chart-tooltip__surface') : null;
     }
 
+    function showMatrixInspectorHintTooltip(payload) {
+      const { month, titleLine, cellKey, pointerEvent, gridHint } = payload;
+      if (!chartTooltip || month == null || titleLine == null) return;
+      const same =
+        chartTooltip.style.display === 'block' &&
+        chartTooltip.classList.contains('chart-tooltip--inspector-hint') &&
+        chartTooltip._matrixTooltipCellKey === cellKey;
+      if (same) {
+        const k = chartTooltip.querySelector('.chart-tooltip__kicker');
+        const t = chartTooltip.querySelector('.chart-tooltip__title');
+        if (k) k.textContent = month;
+        if (t) t.textContent = titleLine;
+        if (gridHint) chartTooltip._lastMatrixGridHint = gridHint;
+        layoutChartTooltipAtPointer(pointerEvent);
+        return;
+      }
+      chartTooltip.classList.add('chart-tooltip--inspector-hint');
+      chartTooltip._velocityOverlaySurface = null;
+      clearMatrixProjectHeavyTimer();
+      if (chartTooltip._tooltipSwapOnOut) {
+        chartTooltip.removeEventListener('transitionend', chartTooltip._tooltipSwapOnOut);
+        chartTooltip._tooltipSwapOnOut = null;
+      }
+      removeChartTooltipMotionListener();
+      chartTooltip._matrixTooltipMotion = false;
+      chartTooltip._tooltipVelBand = undefined;
+      clearTooltipVelocityStillTimer(chartTooltip);
+      const prevSurface = getChartTooltipSurface(chartTooltip);
+      if (prevSurface) {
+        prevSurface.classList.remove(
+          'chart-tooltip__surface--leaving',
+          'chart-tooltip__surface--muted',
+          'chart-tooltip__surface--vel-fast',
+          'chart-tooltip__surface--vel-med'
+        );
+      }
+      chartTooltip.innerHTML = buildInspectorHintTooltipShell(month, titleLine);
+      chartTooltip.style.display = 'block';
+      chartTooltip.setAttribute('aria-hidden', 'false');
+      chartTooltip._matrixTooltipCellKey = cellKey;
+      if (gridHint) chartTooltip._lastMatrixGridHint = gridHint;
+      layoutChartTooltipAtPointer(pointerEvent);
+    }
+
+    function showMilestoneInspectorHintTooltip(payload) {
+      const { month, rowLabel, cellKey, pointerEvent } = payload;
+      if (!chartTooltip || month == null || !rowLabel) return;
+      const titleLine = String(rowLabel);
+      const same =
+        chartTooltip.style.display === 'block' &&
+        chartTooltip.classList.contains('chart-tooltip--inspector-hint') &&
+        chartTooltip._matrixTooltipCellKey === cellKey;
+      if (same) {
+        const k = chartTooltip.querySelector('.chart-tooltip__kicker');
+        const t = chartTooltip.querySelector('.chart-tooltip__title');
+        if (k) k.textContent = month;
+        if (t) t.textContent = titleLine;
+        layoutChartTooltipAtPointer(pointerEvent);
+        return;
+      }
+      const po = document.getElementById('provenance-overlay');
+      if (po && !po.hidden && po.classList.contains('provenance-overlay--hover')) {
+        closeProvenanceOverlay();
+      }
+      chartTooltip.classList.add('chart-tooltip--inspector-hint');
+      chartTooltip._velocityOverlaySurface = null;
+      clearMatrixProjectHeavyTimer();
+      if (chartTooltip._tooltipSwapOnOut) {
+        chartTooltip.removeEventListener('transitionend', chartTooltip._tooltipSwapOnOut);
+        chartTooltip._tooltipSwapOnOut = null;
+      }
+      removeChartTooltipMotionListener();
+      chartTooltip._matrixTooltipMotion = false;
+      chartTooltip._tooltipVelBand = undefined;
+      clearTooltipVelocityStillTimer(chartTooltip);
+      const prevSurface = getChartTooltipSurface(chartTooltip);
+      if (prevSurface) {
+        prevSurface.classList.remove(
+          'chart-tooltip__surface--leaving',
+          'chart-tooltip__surface--muted',
+          'chart-tooltip__surface--vel-fast',
+          'chart-tooltip__surface--vel-med'
+        );
+      }
+      chartTooltip.innerHTML = buildInspectorHintTooltipShell(month, titleLine);
+      chartTooltip.style.display = 'block';
+      chartTooltip.setAttribute('aria-hidden', 'false');
+      chartTooltip._matrixTooltipCellKey = cellKey;
+      chartTooltip._lastMatrixGridHint = undefined;
+      layoutChartTooltipAtPointer(pointerEvent);
+    }
+
     /** When set (provenance hover), velocity bands apply to this element instead of the matrix tooltip surface. */
     function getVelocityBandSurface(tt) {
       if (!tt) return null;
@@ -3011,6 +3232,7 @@
 
     function updateTooltipVelocityBand(tt) {
       if (!tt || !tt._matrixTooltipMotion) return;
+      if (tt.classList && tt.classList.contains('chart-tooltip--inspector-hint')) return;
       if (!tt._velocityOverlaySurface && tt.style.display !== 'block') return;
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       const surface = getVelocityBandSurface(tt);
@@ -3048,6 +3270,7 @@
     function scheduleTooltipVelocityStillRefresh(tt) {
       if (!tt) return;
       clearTooltipVelocityStillTimer(tt);
+      if (tt.classList && tt.classList.contains('chart-tooltip--inspector-hint')) return;
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       if (!tt._velocityOverlaySurface && tt.style.display !== 'block') return;
       if (!tt._matrixTooltipMotion) return;
@@ -3072,6 +3295,7 @@
     function onChartTooltipGlobalPointerMove(e) {
       const tt = chartTooltip;
       if (!tt || !tt._matrixTooltipMotion) return;
+      if (tt.classList.contains('chart-tooltip--inspector-hint')) return;
       if (!tt._velocityOverlaySurface && tt.style.display !== 'block') return;
       const now = performance.now();
       const lx = tt._ptrX;
@@ -3167,6 +3391,7 @@
     function showMatrixProjectTooltip(payload) {
       const { month, project, globalMonthIdx, bbox, gd, pointerEvent, gridHint } = payload;
       if (!chartTooltip || month == null || !project || globalMonthIdx < 0) return;
+      chartTooltip.classList.remove('chart-tooltip--inspector-hint');
       chartTooltip._velocityOverlaySurface = null;
       const existingSurface = getChartTooltipSurface(chartTooltip);
       if (existingSurface) {
@@ -3267,6 +3492,7 @@
     function showMatrixActivityOverviewTooltip(payload) {
       const { month, project, activity, bbox, gd, pointerEvent, gridHint } = payload;
       if (!chartTooltip || month == null || !project || !activity) return;
+      chartTooltip.classList.remove('chart-tooltip--inspector-hint');
       chartTooltip._velocityOverlaySurface = null;
       const existingSurface = getChartTooltipSurface(chartTooltip);
       if (existingSurface) {
@@ -3370,6 +3596,7 @@
     function showMilestoneHeatmapTooltip(payload) {
       const { month, rowLabel, heavyHtml, bbox, gd, pointerEvent, gridHint, rowIndex, rowCount } = payload;
       if (!chartTooltip || month == null || !rowLabel || !heavyHtml) return;
+      chartTooltip.classList.remove('chart-tooltip--inspector-hint');
       const po = document.getElementById('provenance-overlay');
       if (po && !po.hidden && po.classList.contains('provenance-overlay--hover')) {
         closeProvenanceOverlay();
@@ -3493,6 +3720,7 @@
         );
       }
       chartTooltip._swapToken = (chartTooltip._swapToken || 0) + 1;
+      chartTooltip.classList.remove('chart-tooltip--inspector-hint');
       chartTooltip.style.display = 'none';
       chartTooltip.innerHTML = '';
       chartTooltip.setAttribute('aria-hidden', 'true');
@@ -4087,6 +4315,7 @@
           font: { size: 11, color: '#edf3fb' }
         },
         hovermode: 'closest',
+        dragmode: false,
         font: { family: 'Manrope, sans-serif', size: 12, color: '#edf3fb' },
         xaxis: {
           type: 'category',
@@ -4104,7 +4333,8 @@
           ticks: '',
           ticklen: 0,
           zeroline: false,
-          showspikes: false
+          showspikes: false,
+          fixedrange: true
         },
         yaxis: {
           autorange: 'reversed',
@@ -4114,7 +4344,8 @@
           ticks: '',
           ticklen: 0,
           zeroline: false,
-          showspikes: false
+          showspikes: false,
+          fixedrange: true
         }
       }, { responsive: false, displayModeBar: false, scrollZoom: false, doubleClick: false       }).then(() => {
         const chart = document.getElementById('matrix-chart');
@@ -4324,6 +4555,7 @@
           font: { size: 11, color: '#edf3fb' }
         },
         hovermode: 'closest',
+        dragmode: false,
         font: { family: 'Manrope, sans-serif', size: 12, color: '#edf3fb' },
         xaxis: {
           type: 'category',
@@ -4338,7 +4570,8 @@
           ticks: '',
           ticklen: 0,
           zeroline: false,
-          showspikes: false
+          showspikes: false,
+          fixedrange: true
         },
         yaxis: {
           type: 'category',
@@ -4351,7 +4584,8 @@
           ticks: '',
           ticklen: 0,
           zeroline: false,
-          showspikes: false
+          showspikes: false,
+          fixedrange: true
         },
         showlegend: false
       }, {
@@ -4402,7 +4636,16 @@
             gridHint: localMonthIdx >= 0 ? { m: localMonthIdx, r: rowIdx } : undefined
           };
           if (mileChart._milestoneHoverBandKey === bandKey) {
-            if (!inspectorOpen) showMilestoneHeatmapTooltip(tipPayload);
+            if (inspectorOpen) {
+              showMilestoneInspectorHintTooltip({
+                month: xKey,
+                rowLabel: yKey,
+                cellKey: `hint:mile:\0${xKey}\0${yKey}`,
+                pointerEvent
+              });
+            } else {
+              showMilestoneHeatmapTooltip(tipPayload);
+            }
             return;
           }
           mileChart._milestoneHoverBandKey = bandKey;
@@ -4455,7 +4698,16 @@
               kids[i].classList.toggle('hover-row-affordance', i === rowIdx);
             }
           }
-          if (!inspectorOpen) showMilestoneHeatmapTooltip(tipPayload);
+          if (inspectorOpen) {
+            showMilestoneInspectorHintTooltip({
+              month: xKey,
+              rowLabel: yKey,
+              cellKey: `hint:mile:\0${xKey}\0${yKey}`,
+              pointerEvent
+            });
+          } else {
+            showMilestoneHeatmapTooltip(tipPayload);
+          }
         });
         mileChart.on('plotly_unhover', () => {
           const mj = mileChart._milestoneBaseShapesJson;
