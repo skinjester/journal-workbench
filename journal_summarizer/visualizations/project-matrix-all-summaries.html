@@ -40,8 +40,10 @@
       grid-template-columns: minmax(0, 1fr);
       gap: var(--sp-2);
       align-items: start;
+      align-content: start;
       width: 100%;
       min-width: 0;
+      min-height: 0;
       flex: 1 1 auto;
     }
     .chart-panel:has(#provenance-inspector:not([hidden])) .workbench-main {
@@ -50,6 +52,7 @@
     .workbench-left {
       display: flex;
       flex-direction: column;
+      align-items: stretch;
       gap: 0;
       min-width: 0;
       width: 100%;
@@ -85,6 +88,7 @@
       display: grid;
       grid-template-columns: var(--matrix-label-col-width) minmax(0, 1fr);
       gap: 0;
+      box-sizing: border-box;
     }
     .matrix-shell { align-items: start; }
     .milestone-shell { align-items: stretch; }
@@ -208,6 +212,8 @@
       display: flex;
       flex-direction: row;
       align-items: flex-start;
+      flex: 0 0 auto;
+      align-self: flex-start;
       width: 100%;
       min-width: 0;
       margin-bottom: 0;
@@ -240,18 +246,20 @@
       background: transparent;
       border-right: 1px solid rgba(255, 255, 255, 0.06);
       border-radius: 0;
-      /* Top padding tracks Plotly matrix margin.t (see --matrix-plot-margin-top in renderMatrix). */
-      padding: var(--matrix-plot-margin-top, 102px) 12px 52px 0;
+      /* Top/bottom padding track Plotly margin.t / margin.b (JS sets --matrix-plot-margin-* in renderMatrix). */
+      padding: var(--matrix-plot-margin-top, 102px) 12px var(--matrix-plot-margin-bottom, 6px) 0;
       align-self: start;
     }
     .fixed-labels.milestones {
       padding-top: var(--matrix-plot-margin-top, 102px);
-      padding-bottom: 52px;
+      padding-bottom: var(--matrix-plot-margin-bottom, 6px);
       align-self: stretch;
     }
     .deliverables-section {
-      margin-top: 0;
+      margin-top: 4px;
       padding-top: 0;
+      flex: 0 0 auto;
+      align-self: stretch;
     }
     .chart-panel-section-heading,
     .meta-panel h2,
@@ -4395,7 +4403,8 @@
         ...matrixRowBandShapes(expandedRows)
       ];
 
-      const matrixMarginBottom = 52;
+      /** Paired with `.fixed-labels` `--matrix-plot-margin-bottom` (x-axis is top; smaller b = less empty strip under last row). */
+      const matrixMarginBottom = 6;
       const xTickCfg = buildMatrixXAxisTickConfig(visibleMonths, plotWidth, MATRIX_PLOT_MARGIN_LR);
       const matrixXTickText =
         xTickCfg.ticktext.length === visibleMonths.length
@@ -4408,12 +4417,17 @@
       const matrixMarginTop = MATRIX_X_AXIS_MARGIN_TOP_LAYOUT;
       const chartPanel = document.querySelector('.panel.chart-panel');
       chartPanel?.style.setProperty('--matrix-plot-margin-top', `${matrixMarginTop}px`);
+      chartPanel?.style.setProperty('--matrix-plot-margin-bottom', `${matrixMarginBottom}px`);
       {
         const matrixContentPx =
           matrixMarginTop + Math.max(1, expandedRows.length) * rowHeight + matrixMarginBottom;
         const matrixTimelinePane = document.querySelector('.matrix-shell.timeline-pane');
         if (matrixTimelinePane) {
-          matrixTimelinePane.style.maxHeight = `${matrixContentPx}px`;
+          const matrixH = `${matrixContentPx}px`;
+          /* max-height alone does not shrink used height when grid min-content is inflated — lock to Plotly body height. */
+          matrixTimelinePane.style.height = matrixH;
+          matrixTimelinePane.style.maxHeight = matrixH;
+          matrixTimelinePane.style.minHeight = '0';
           ensureTimelinePaneOverscrollClamp(matrixTimelinePane);
         }
       }
@@ -4807,7 +4821,7 @@
       const nMile = mileRows.length;
       if (nMile === 0) return;
       const mileMt = Number(matrixMarginTop) || MATRIX_X_AXIS_MARGIN_TOP_LAYOUT;
-      const mileMb = Number(matrixMarginBottom) || 52;
+      const mileMb = Number(matrixMarginBottom) || 6;
       const pw = Math.max(1, Math.round(Number(plotWidth) || 0));
       const xg = Number.isFinite(heatmapXGap) && heatmapXGap >= 0 ? heatmapXGap : matrixHeatmapXGap;
 
@@ -4835,7 +4849,10 @@
       {
         const milePane = document.querySelector('.milestone-shell.timeline-pane');
         if (milePane) {
-          milePane.style.maxHeight = `${milestonePlotHeight}px`;
+          const mileH = `${milestonePlotHeight}px`;
+          milePane.style.height = mileH;
+          milePane.style.maxHeight = mileH;
+          milePane.style.minHeight = '0';
           ensureTimelinePaneOverscrollClamp(milePane);
         }
       }
