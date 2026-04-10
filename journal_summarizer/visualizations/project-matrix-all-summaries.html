@@ -21,34 +21,30 @@
         radial-gradient(circle at 78% 82%, rgba(128, 226, 162, 0.11), transparent 24%),
         linear-gradient(180deg, #090c11 0%, var(--bg) 100%);
     }
-    .wrap { max-width: min(1320px, 100%); margin: 0 auto; padding: var(--sp-4) clamp(var(--sp-3), 4vw, var(--sp-5)) var(--sp-6); }
+    .wrap { max-width: min(1320px, 100%); margin: 0 auto; padding: var(--sp-3) clamp(var(--sp-3), 4vw, var(--sp-5)) var(--sp-6); }
     .panel { border: 1px solid var(--line); border-radius: 18px; background: linear-gradient(180deg, rgba(255,255,255,0.018), rgba(255,255,255,0.01)); box-shadow: 0 20px 56px var(--shadow); overflow: hidden; }
     .chart-panel {
-      padding: clamp(var(--sp-3), 2.5vw, var(--sp-4)); margin-top: 0;
-      /* Fallback before JS; renderMatrix / renderMilestones set per-pane max-height from actual row counts. */
-      --timeline-pane-max-height: min(85vh, 520px);
+      padding-top: var(--sp-2);
+      padding-right: clamp(var(--sp-3), 2.5vw, var(--sp-4));
+      padding-bottom: clamp(var(--sp-3), 2.5vw, var(--sp-4));
+      padding-left: clamp(var(--sp-3), 2.5vw, var(--sp-4));
+      margin-top: 0;
+      /* Fallback before JS; panes grow to full heatmap height (page scrolls). */
+      --timeline-pane-max-height: none;
     }
+    /* Vertical: full plot height (JS); no inner vertical scroll — only #matrix-scroll / #milestone-scroll scroll horizontally. */
     .matrix-shell.timeline-pane,
     .milestone-shell.timeline-pane {
       max-height: var(--timeline-pane-max-height);
-      overflow-y: auto;
+      overflow-y: hidden;
       overflow-x: hidden;
-      overscroll-behavior-y: contain;
+      overscroll-behavior-y: auto;
       overscroll-behavior-x: none;
       scrollbar-gutter: stable;
     }
     /* Sticky provenance column needs a non-clipping ancestor (see #provenance-inspector). */
     .panel.chart-panel {
       overflow: visible;
-    }
-    .meta-panel h2, .detail-panel h2 {
-      margin: 0 0 var(--sp-2);
-      font-family: "Cormorant Garamond", Georgia, serif;
-      font-size: 1.2rem;
-      font-weight: 600;
-      letter-spacing: -0.01em;
-      text-transform: none;
-      color: var(--text);
     }
     /**
      * Single source for the project-label column: heatmap scrollport starts flush on its trailing edge.
@@ -70,23 +66,32 @@
       flex-direction: column;
       align-items: stretch;
     }
-    .matrix-map-heading-row {
+    /* Non-sticky title bar: section heading + overview toggle (scrolls with page). */
+    .matrix-chart-title-bar {
       display: flex;
-      flex-wrap: wrap;
+      flex-direction: row;
       align-items: center;
-      gap: var(--sp-1) var(--sp-2);
+      justify-content: space-between;
+      gap: var(--sp-2);
+      width: 100%;
+      min-width: 0;
       flex-shrink: 0;
       margin: 0 0 var(--sp-0-5);
+      padding-bottom: var(--sp-1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
       position: relative;
       z-index: 2;
     }
-    /* Pull heatmap toward the title so month labels sit closer under “Project Activity Map”. */
+    .matrix-chart-title-bar__lead {
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+    .matrix-chart-title-bar .chart-panel-section-heading {
+      margin: 0;
+    }
+    /* Pull heatmap toward the chart block so month labels sit closer under the title bar. */
     .matrix-map-section > .matrix-shell {
       margin-top: -20px;
-    }
-    .matrix-map-heading-row .chart-panel-section-heading {
-      margin: 0;
-      flex-shrink: 0;
     }
     /**
      * One matrix row height (28px) above the bottom of the axis padding, then a blank 28px band (“carriage return”)
@@ -109,7 +114,7 @@
       background: transparent;
       appearance: none;
       font-family: inherit;
-      font-size: 14px;
+      font-size: var(--text-body);
       font-weight: 700;
       line-height: 1;
       letter-spacing: -0.01em;
@@ -184,10 +189,22 @@
       min-width: 0;
     }
     /**
-     * DOM order is matrix → chrome → inspector, but on wide viewports flex order is
-     * matrix → inspector → chrome so the toggle column stays on the trailing edge.
-     * Otherwise opening the panel shrinks the matrix and the chrome (with the icon) slides left.
+     * DOM order is matrix → trailing gutter → inspector. Wide viewports flex order is
+     * matrix → inspector → gutter so the 40px strip stays on the trailing edge (toggle lives in title bar).
      */
+    .chart-panel:has(#provenance-sidebar-chrome) .matrix-workbench-row {
+      gap: var(--sp-2);
+    }
+    .matrix-workbench-trailing-gutter {
+      flex: 0 0 40px;
+      width: 40px;
+      min-width: 40px;
+      max-width: 40px;
+      box-sizing: border-box;
+      flex-shrink: 0;
+      pointer-events: none;
+      visibility: hidden;
+    }
     @media (min-width: 1181px) {
       .matrix-workbench-row > .matrix-map-section {
         order: 1;
@@ -195,12 +212,9 @@
       #provenance-inspector:not([hidden]) {
         order: 2;
       }
-      #provenance-sidebar-chrome {
+      .matrix-workbench-trailing-gutter {
         order: 3;
       }
-    }
-    .matrix-workbench-row:has(#provenance-sidebar-chrome) {
-      gap: var(--sp-2);
     }
     /* Mirror matrix + inspector row so Deliverables chart column lines up with the heatmap (not full panel width). */
     .deliverables-workbench-row {
@@ -243,21 +257,18 @@
       align-self: stretch;
       visibility: visible;
     }
-    /** Fixed 40px column: single stationary toggle; panel opens to the right, not under this control. */
+    /** Overview toggle in title bar (40px hit target). */
     #provenance-sidebar-chrome {
-      flex: 0 0 40px;
+      flex: 0 0 auto;
       width: 40px;
       min-width: 40px;
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
       align-items: flex-end;
-      padding: 0 0 0 2px;
-      position: sticky;
-      top: var(--sp-3);
-      align-self: flex-start;
+      justify-content: center;
+      padding: 0;
       z-index: 3;
-      border-left: 1px solid rgba(255, 255, 255, 0.055);
     }
     #provenance-inspector:not([hidden]) {
       position: sticky;
@@ -291,14 +302,21 @@
       margin-top: 0;
       padding-top: 0;
     }
-    .chart-panel-section-heading {
+    .chart-panel-section-heading,
+    .meta-panel h2,
+    .detail-panel h2 {
       margin: 0 0 var(--sp-1);
       font-family: "Cormorant Garamond", Georgia, serif;
       font-size: clamp(1.05rem, 1.6vw, 1.2rem);
       font-weight: 600;
       letter-spacing: -0.01em;
+      text-transform: none;
       color: var(--text);
       line-height: 1.2;
+    }
+    .meta-panel h2,
+    .detail-panel h2 {
+      margin: 0 0 var(--sp-2);
     }
     /* Must match JS rowHeight; heatmap uses xgap/ygap 0 so row/month underlay shapes share the same bins as bricks. */
     .fixed-labels-grid {
@@ -314,7 +332,7 @@
       height: 28px;
       min-height: 28px;
       max-height: 28px;
-      padding: 0 12px 0 14px; color: var(--text); font-size: 12px; line-height: 1.15; font-family: inherit;
+      padding: 0 12px 0 14px; color: var(--text); font-size: var(--text-section); line-height: var(--lh-label); font-family: inherit;
       background: transparent;
       border-radius: 0;
       cursor: pointer; transition: background 120ms ease, color 120ms ease;
@@ -330,7 +348,7 @@
       text-align: left;
     }
     .fixed-label.project {
-      font-weight: 800;
+      font-weight: 700;
       background: transparent;
     }
     .fixed-label.project::after {
@@ -355,7 +373,7 @@
       padding-left: 15px;
       padding-right: 12px;
       border-left: 3px solid rgba(121, 192, 255, 0.42);
-      font-size: 11px; font-weight: 600; color: var(--muted);
+      font-size: var(--text-sm); font-weight: 600; color: var(--muted);
       background: transparent;
       border-radius: 0;
       box-sizing: border-box;
@@ -410,7 +428,7 @@
       border-left-color: rgba(255, 186, 120, 0.7);
     }
     .fixed-label.milestone {
-      color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+      color: var(--muted); font-size: var(--text-xs); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
       background: transparent; cursor: default;
     }
     .scroll-area {
@@ -419,7 +437,7 @@
       border-radius: 0;
       padding-bottom: 0;
       scrollbar-gutter: stable;
-      touch-action: pan-x pan-y;
+      touch-action: pan-x;
       /* Mac trackpad: avoid horizontal overscroll chaining into browser back/forward when there’s no (or no more) room to scroll. */
       overscroll-behavior-x: none;
     }
@@ -489,7 +507,7 @@
     #chart-tooltip.chart-tooltip--inspector-hint .chart-tooltip__hint-count {
       margin: var(--sp-0-5) 0 0;
       font-size: var(--text-2xs);
-      color: var(--matrix-tooltip-muted, #9d8f7c);
+      color: var(--matrix-tooltip-muted, var(--warm-read-muted));
       font-variant-numeric: tabular-nums;
     }
     /* Pass hits through tooltip chrome; activity provenance panel re-enables below. */
@@ -507,7 +525,7 @@
       margin: 0;
       font-size: var(--text-sm);
       line-height: 1.45;
-      color: var(--matrix-tooltip-body, #e9ded0);
+      color: var(--matrix-tooltip-body, var(--warm-read-body));
       font-family: "Manrope", system-ui, sans-serif;
       word-break: break-word;
     }
@@ -516,29 +534,29 @@
     }
     #chart-tooltip .provenance-markdown-panel .summary-block em,
     #chart-tooltip .provenance-markdown-panel .summary-block p em {
-      color: var(--matrix-tooltip-muted, #9d8f7c);
+      color: var(--matrix-tooltip-muted, var(--warm-read-muted));
     }
     #chart-tooltip .provenance-markdown-panel strong {
-      color: var(--matrix-tooltip-strong, #ffffff);
+      color: var(--matrix-tooltip-strong, var(--warm-read-strong));
       font-weight: 700;
     }
     #chart-tooltip .provenance-markdown-panel .people-name {
-      color: var(--matrix-tooltip-body, #e9ded0);
+      color: var(--matrix-tooltip-body, var(--warm-read-body));
     }
     #chart-tooltip .provenance-markdown-panel .people-plain {
-      color: var(--matrix-tooltip-body, #e9ded0);
+      color: var(--matrix-tooltip-body, var(--warm-read-body));
     }
     #chart-tooltip .provenance-markdown-panel .empty,
     #chart-tooltip .provenance-markdown-panel .people-none {
-      color: var(--matrix-tooltip-muted, #9d8f7c);
+      color: var(--matrix-tooltip-muted, var(--warm-read-muted));
     }
     #chart-tooltip .provenance-markdown-panel code {
-      color: var(--matrix-tooltip-meta, #d4b896);
+      color: var(--matrix-tooltip-meta, var(--warm-read-meta));
       background: rgba(255, 186, 120, 0.08);
     }
     #chart-tooltip .provenance-markdown-panel .people-avatar {
       background: linear-gradient(145deg, rgba(255, 200, 150, 0.45), rgba(160, 95, 45, 0.55));
-      color: var(--matrix-tooltip-body, #e9ded0);
+      color: var(--matrix-tooltip-body, var(--warm-read-body));
     }
     #chart-tooltip .provenance-markdown-panel .people-chip {
       background: rgba(255, 186, 120, 0.08);
@@ -552,9 +570,9 @@
       min-height: 0;
       padding: var(--sp-1);
       border-radius: 12px;
-      border: 1px solid var(--matrix-tooltip-border, rgba(190, 155, 110, 0.5));
-      background: var(--matrix-tooltip-surface-bg, rgba(22, 18, 15, 0.98));
-      box-shadow: var(--matrix-tooltip-shadow, 0 18px 42px rgba(0, 0, 0, 0.42), 0 0 0 1px rgba(255, 186, 120, 0.08));
+      border: 1px solid var(--matrix-tooltip-border, var(--warm-read-border));
+      background: var(--matrix-tooltip-surface-bg, var(--warm-read-surface));
+      box-shadow: var(--matrix-tooltip-shadow, var(--warm-read-shadow));
       opacity: 1;
       transition: opacity 0.18s ease;
     }
@@ -590,39 +608,39 @@
       font-weight: 700;
       letter-spacing: 0.05em;
       text-transform: uppercase;
-      color: var(--matrix-tooltip-kicker, #c9a67e);
+      color: var(--matrix-tooltip-kicker, var(--warm-read-kicker));
     }
     #chart-tooltip .chart-tooltip__title {
       margin: 0 0 var(--sp-1);
       font-size: var(--text-md);
       line-height: var(--lh-tight);
-      font-weight: 800;
-      color: var(--matrix-tooltip-title, #fff6eb);
+      font-weight: 700;
+      color: var(--matrix-tooltip-title, var(--warm-read-title));
     }
     #chart-tooltip .chart-tooltip__meta {
       margin: 0 0 var(--sp-1);
       font-size: var(--text-sm);
       line-height: 1.3;
       font-weight: 600;
-      color: var(--matrix-tooltip-meta, #d4b896);
+      color: var(--matrix-tooltip-meta, var(--warm-read-meta));
     }
     #chart-tooltip .chart-tooltip__body {
       font-size: var(--text-sm);
       line-height: 1.45;
-      color: var(--matrix-tooltip-body, #e9ded0);
+      color: var(--matrix-tooltip-body, var(--warm-read-body));
     }
     #chart-tooltip .chart-tooltip__body .tt-closing {
       margin: 0;
-      color: var(--matrix-tooltip-body, #e9ded0);
+      color: var(--matrix-tooltip-body, var(--warm-read-body));
     }
     #chart-tooltip .chart-tooltip__body .tt-section-title {
       margin: var(--sp-2) 0 var(--sp-0-5);
       font-size: var(--text-xs);
       line-height: var(--lh-tight);
-      font-weight: 800;
+      font-weight: 700;
       letter-spacing: 0.05em;
       text-transform: uppercase;
-      color: var(--matrix-tooltip-section-title, #ffe8cc);
+      color: var(--matrix-tooltip-section-title, var(--warm-read-section));
     }
     #chart-tooltip .chart-tooltip__body .tt-section-title:first-child { margin-top: 0; }
     #chart-tooltip .chart-tooltip__body .tt-bullet {
@@ -635,13 +653,13 @@
       margin: var(--sp-2) 0 0;
       font-size: var(--text-2xs);
       line-height: var(--lh-snug);
-      color: var(--matrix-tooltip-hint, #8c7d6a);
+      color: var(--matrix-tooltip-hint, var(--warm-read-hint));
       font-weight: 500;
     }
     #chart-tooltip .chart-tooltip__body b,
-    #chart-tooltip .chart-tooltip__body strong { color: var(--matrix-tooltip-strong, #ffffff); font-weight: 700; }
+    #chart-tooltip .chart-tooltip__body strong { color: var(--matrix-tooltip-strong, var(--warm-read-strong)); font-weight: 700; }
     #chart-tooltip .chart-tooltip__body .tt-section-viz { margin-top: var(--sp-0-5); }
-    #chart-tooltip .chart-tooltip__body .tt-section-empty { margin: var(--sp-1) 0 0; font-size: var(--text-xs); color: var(--matrix-tooltip-muted, #9d8f7c); font-style: italic; }
+    #chart-tooltip .chart-tooltip__body .tt-section-empty { margin: var(--sp-1) 0 0; font-size: var(--text-xs); color: var(--matrix-tooltip-muted, var(--warm-read-muted)); font-style: italic; }
     #chart-tooltip .chart-tooltip__heavy.chart-tooltip__body {
       opacity: 1;
       transition: opacity 0.26s ease-out;
@@ -657,7 +675,7 @@
       margin: 0;
       font-size: var(--text-xs);
       line-height: var(--lh-snug);
-      color: var(--matrix-tooltip-hint, #8c7d6a);
+      color: var(--matrix-tooltip-hint, var(--warm-read-hint));
       font-style: italic;
     }
     #chart-tooltip .tt-life-row--explore .tt-bar-fill { background: linear-gradient(90deg, #4a5c6e, #6b7d8f); }
@@ -667,10 +685,10 @@
     #chart-tooltip .tt-life-row--ship .tt-bar-fill { background: linear-gradient(90deg, #1a7f37, #3fb950); }
     #chart-tooltip .tt-bars { margin-top: var(--sp-0-5); display: flex; flex-direction: column; gap: var(--sp-0-5); }
     #chart-tooltip .tt-bar-row { display: grid; grid-template-columns: minmax(0, 72px) 1fr 20px; align-items: center; gap: var(--sp-1) var(--sp-0-5); font-size: var(--text-2xs); }
-    #chart-tooltip .tt-bar-label { color: var(--matrix-tooltip-bar-label, #c4b09a); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    #chart-tooltip .tt-bar-label { color: var(--matrix-tooltip-bar-label, var(--warm-read-bar-label)); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     #chart-tooltip .tt-bar-track { height: 5px; background: var(--matrix-tooltip-bar-track, rgba(255, 194, 140, 0.14)); border-radius: 3px; overflow: hidden; }
     #chart-tooltip .tt-bar-fill { height: 100%; background: var(--matrix-tooltip-bar-fill-default, linear-gradient(90deg, #8f6238, #d9a066)); border-radius: 3px; max-width: 100%; }
-    #chart-tooltip .tt-bar-n { text-align: right; color: var(--matrix-tooltip-bar-n, #dcc4a8); font-variant-numeric: tabular-nums; }
+    #chart-tooltip .tt-bar-n { text-align: right; color: var(--matrix-tooltip-bar-n, var(--warm-read-bar-n)); font-variant-numeric: tabular-nums; }
     #chart-tooltip .tt-life-bars .tt-bar-row { margin-bottom: 1px; }
     #chart-tooltip .chart-tooltip__body .tt-life-bars .tt-bar-row {
       font-size: var(--text-2xs);
@@ -680,7 +698,7 @@
     }
     #chart-tooltip .chart-tooltip__body .tt-life-bars .tt-bar-label {
       font-weight: 700;
-      color: var(--matrix-tooltip-bar-label, #c4b09a);
+      color: var(--matrix-tooltip-bar-label, var(--warm-read-bar-label));
       min-width: 0;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -688,9 +706,9 @@
     }
     #chart-tooltip .chart-tooltip__body .tt-life-bars .tt-bar-n {
       font-size: var(--text-2xs);
-      color: var(--matrix-tooltip-muted, #9d8f7c);
+      color: var(--matrix-tooltip-muted, var(--warm-read-muted));
     }
-    #chart-tooltip .chart-tooltip__body .tt-closing { margin-top: var(--sp-2); font-size: var(--text-xs); color: var(--matrix-tooltip-muted, #9d8f7c); line-height: var(--lh-snug); }
+    #chart-tooltip .chart-tooltip__body .tt-closing { margin-top: var(--sp-2); font-size: var(--text-xs); color: var(--matrix-tooltip-muted, var(--warm-read-muted)); line-height: var(--lh-snug); }
     /* Let Plotly set height exactly = margins + rows*rowHeight (no min-height drift vs labels). */
     #matrix-chart { min-height: 0; }
     #milestone-chart { min-height: 0; margin-top: 0; }
@@ -705,8 +723,8 @@
     .detail-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-2); margin-top: var(--sp-2); }
     .stat, .card { border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,0.02); }
     .stat { padding: var(--sp-2); }
-    .stat .value { display: block; margin-bottom: var(--sp-0-5); font-size: 22px; font-weight: 800; color: var(--text); }
-    .stat .label { display: block; color: var(--muted); font-size: 12px; line-height: 1.35; }
+    .stat .value { display: block; margin-bottom: var(--sp-0-5); font-size: var(--text-2xl); font-weight: 700; color: var(--text); }
+    .stat .label { display: block; color: var(--muted); font-size: var(--text-sm); line-height: var(--lh-ui); }
     .selected-project-card h3 { margin: 0 0 var(--sp-1); font-size: var(--text-md); letter-spacing: 0.06em; text-transform: uppercase; }
     .selected-project-card p { margin: 0; color: var(--muted); font-size: var(--text-md); line-height: var(--lh-body-relaxed); }
     .meta-panel { display: grid; gap: 0; background: rgba(8,11,16,0.42); }
@@ -730,17 +748,18 @@
     @media (max-width: 1180px) {
       .lower-grid { grid-template-columns: 1fr; }
       .detail-layout { grid-template-columns: 1fr; }
-      /* Document order: matrix → toggle strip → inspector (toggle between chart and panel). */
+      .matrix-workbench-trailing-gutter {
+        display: none;
+      }
       .matrix-workbench-row > .matrix-map-section,
-      #provenance-sidebar-chrome,
       #provenance-inspector {
         order: 0;
       }
-      .matrix-workbench-row:has(#provenance-sidebar-chrome),
+      .chart-panel:has(#provenance-sidebar-chrome) .matrix-workbench-row,
       .matrix-workbench-row:has(#provenance-inspector:not([hidden])) {
         flex-direction: column;
       }
-      .matrix-workbench-row:has(#provenance-sidebar-chrome) > .matrix-map-section,
+      .chart-panel:has(#provenance-sidebar-chrome) .matrix-workbench-row > .matrix-map-section,
       .matrix-workbench-row:has(#provenance-inspector:not([hidden])) > .matrix-map-section {
         flex: 0 1 auto;
       }
@@ -757,18 +776,6 @@
         max-height: calc(100vh - var(--sp-4) - var(--sp-2));
         max-height: calc(100dvh - var(--sp-4) - var(--sp-2));
         z-index: 3;
-      }
-      #provenance-sidebar-chrome {
-        position: sticky;
-        top: var(--sp-2);
-        align-self: flex-end;
-        flex: 0 0 auto;
-        width: 40px;
-        min-width: 40px;
-        border-left: 0;
-        border-top: 1px solid rgba(255, 255, 255, 0.05);
-        padding-top: var(--sp-1);
-        padding-bottom: var(--sp-1);
       }
       /* Inspector is stacked below the matrix; do not reserve a right column under Deliverables. */
       .chart-panel:has(#provenance-sidebar-chrome) .deliverables-inspector-spacer {
@@ -942,7 +949,7 @@
       position: absolute; top: var(--sp-1); right: var(--sp-1);
       width: 36px; height: 36px; border: 0; border-radius: 10px;
       background: rgba(255,255,255,0.06);
-      color: var(--text); font-size: 22px; line-height: 1;
+      color: var(--text); font-size: var(--text-2xl); line-height: 1;
       cursor: pointer;
     }
     .provenance-overlay__close:hover { background: rgba(255,255,255,0.12); }
@@ -959,7 +966,7 @@
       margin: 0 var(--sp-5) var(--sp-1) 0;
       font-size: var(--text-md);
       line-height: var(--lh-tight);
-      font-weight: 800;
+      font-weight: 700;
       color: #f5f9ff;
     }
     .provenance-overlay__dialog .chart-tooltip__meta {
@@ -982,7 +989,7 @@
       margin: 0 0 var(--sp-1) 0;
       font-size: var(--text-md);
       line-height: var(--lh-tight);
-      font-weight: 800;
+      font-weight: 700;
       color: #f5f9ff;
     }
     .provenance-inspector .chart-tooltip__meta {
@@ -1023,7 +1030,7 @@
       font-family: "Manrope", system-ui, sans-serif;
       font-size: var(--text-xs);
       line-height: var(--lh-tight);
-      font-weight: 800;
+      font-weight: 700;
       letter-spacing: 0.05em;
       text-transform: uppercase;
       color: #f1f6fd;
@@ -1095,7 +1102,7 @@
       border-radius: 50%;
       flex-shrink: 0;
       font-size: var(--text-xs);
-      font-weight: 800;
+      font-weight: 700;
       letter-spacing: -0.02em;
       background: linear-gradient(145deg, rgba(121, 192, 255, 0.38), rgba(49, 109, 202, 0.5));
       color: #f6f9ff;
@@ -1127,11 +1134,21 @@
 <body>
   <div class="wrap">
     <section class="panel chart-panel">
+      <header class="matrix-chart-title-bar">
+        <div class="matrix-chart-title-bar__lead">
+          <h3 class="chart-panel-section-heading">Project Activity Map</h3>
+        </div>
+        <div id="provenance-sidebar-chrome" class="provenance-sidebar-chrome" aria-hidden="false">
+          <button type="button" class="provenance-inspector__panel-toggle" id="prov-inspector-toggle" tabindex="0" aria-label="Show overview panel" title="Show overview panel">
+            <svg class="provenance-inspector__panel-toggle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="4" y="4" width="16" height="16" rx="2"/>
+              <line x1="9" y1="4" x2="9" y2="20"/>
+            </svg>
+          </button>
+        </div>
+      </header>
       <div class="matrix-workbench-row" id="matrix-workbench-row">
         <div class="matrix-map-section">
-          <div class="matrix-map-heading-row">
-            <h3 class="chart-panel-section-heading">Project Activity Map</h3>
-          </div>
           <div class="matrix-shell timeline-pane">
             <div class="fixed-labels">
               <button
@@ -1161,14 +1178,7 @@
             </div>
           </div>
         </div>
-        <div id="provenance-sidebar-chrome" class="provenance-sidebar-chrome" aria-hidden="false">
-          <button type="button" class="provenance-inspector__panel-toggle" id="prov-inspector-toggle" tabindex="0" aria-label="Show overview panel" title="Show overview panel">
-            <svg class="provenance-inspector__panel-toggle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <rect x="4" y="4" width="16" height="16" rx="2"/>
-              <line x1="9" y1="4" x2="9" y2="20"/>
-            </svg>
-          </button>
-        </div>
+        <div class="matrix-workbench-trailing-gutter" aria-hidden="true"></div>
         <aside id="provenance-inspector" class="provenance-inspector" hidden aria-hidden="true" aria-labelledby="prov-inspector-title">
           <div class="provenance-inspector__main">
             <div class="provenance-inspector__scroll">
@@ -1664,23 +1674,9 @@
       mileG.style.width = `${wPx}px`;
     }
 
-    /** Scroll the matrix timeline pane so row `idx` is visible (label heights match heatmap rows). */
+    /** No-op: timeline pane has no vertical scroll (all rows visible); horizontal focus handled elsewhere. */
     function scrollMatrixPaneToRowIndex(idx) {
-      if (idx == null || idx < 0) return;
-      requestAnimationFrame(() => {
-        const pane = document.querySelector('.matrix-shell.timeline-pane');
-        const ml = document.getElementById('matrix-labels');
-        if (!pane || !ml) return;
-        const rowEl = ml.children[idx];
-        if (!rowEl) return;
-        const tol = 3;
-        const rowRect = rowEl.getBoundingClientRect();
-        const paneRect = pane.getBoundingClientRect();
-        if (rowRect.top >= paneRect.top - tol && rowRect.bottom <= paneRect.bottom + tol) return;
-        const delta = rowRect.top - paneRect.top - 1;
-        const maxScroll = Math.max(0, pane.scrollHeight - pane.clientHeight);
-        pane.scrollTop = Math.max(0, Math.min(maxScroll, pane.scrollTop + delta));
-      });
+      void idx;
     }
 
     /** Leaving the heatmap (gap before the floating panel) fires plotly_unhover immediately; defer cleanup
@@ -2082,52 +2078,15 @@
       if (panelToggle) panelToggle.style.transform = '';
     }
 
-    /**
-     * Wide: sidebar toggle lines up with “Project Activity Map” title baseline using translateY on the button only.
-     * Padding on #provenance-sidebar-chrome was inflating .matrix-workbench-row height and leaving a gap above Deliverables.
-     */
+    /** Title + toggle share `.matrix-chart-title-bar` (flex); clear any legacy nudge styles. */
     function syncProvenanceSidebarChromeAlignment() {
       const chrome = document.getElementById('provenance-sidebar-chrome');
       const panelToggle = document.getElementById('prov-inspector-toggle');
-      const sectionHeading = document.querySelector('.matrix-map-heading-row .chart-panel-section-heading');
-      if (!chrome || !panelToggle) {
-        if (chrome) {
-          chrome.style.paddingTop = '';
-          chrome.style.marginTop = '';
-        }
-        const t = document.getElementById('prov-inspector-toggle');
-        if (t) t.style.transform = '';
-        return;
-      }
-      if (!window.matchMedia('(min-width: 1181px)').matches) {
+      if (chrome) {
         chrome.style.paddingTop = '';
         chrome.style.marginTop = '';
-        panelToggle.style.transform = '';
-        return;
       }
-      chrome.style.paddingTop = '0px';
-      chrome.style.marginTop = '';
-      panelToggle.style.transform = '';
-      void chrome.offsetHeight;
-      const titleBaselineY = provenanceInspectorTextBaselineY(sectionHeading);
-      if (titleBaselineY == null) {
-        const backNav = document.getElementById('matrix-back-all-projects-nav');
-        if (backNav) {
-          void chrome.offsetHeight;
-          const navRect = backNav.getBoundingClientRect();
-          const toggleRect = panelToggle.getBoundingClientRect();
-          const navCenter = navRect.top + navRect.height * 0.5;
-          const toggleCenter = toggleRect.top + toggleRect.height * 0.5;
-          const d = Math.round(navCenter - toggleCenter);
-          panelToggle.style.transform = d !== 0 ? `translateY(${d}px)` : '';
-        } else {
-          panelToggle.style.transform = '';
-        }
-        return;
-      }
-      void chrome.offsetHeight;
-      const delta = Math.round(titleBaselineY - panelToggle.getBoundingClientRect().bottom);
-      panelToggle.style.transform = delta !== 0 ? `translateY(${delta}px)` : '';
+      if (panelToggle) panelToggle.style.transform = '';
     }
 
     /**
@@ -3971,11 +3930,6 @@
     }
 
     const rowHeight = 28;
-    const TIMELINE_PANE_HEIGHT_CAP_FRAC = 0.85;
-
-    function timelinePaneHeightCapPx() {
-      return Math.floor(window.innerHeight * TIMELINE_PANE_HEIGHT_CAP_FRAC);
-    }
 
     function clampTimelinePaneScroll(pane) {
       if (!pane) return;
@@ -4058,12 +4012,13 @@
       const n = visibleMonths.length;
       const innerW = Math.max(1, plotWidth - marginLR.l - marginLR.r);
       const pxPerCol = innerW / Math.max(1, n);
+      const MIN_AXIS_TICK_PX = 10;
 
       if (pxPerCol >= 34) {
         return {
           ticktext: makeMonthYearTickText(visibleMonths),
           tickangle: 0,
-          tickfont: { size: 9 },
+          tickfont: { size: Math.max(MIN_AXIS_TICK_PX, 11) },
           marginTop: 82
         };
       }
@@ -4072,7 +4027,7 @@
         return {
           ticktext: makeMonthYearTickText(visibleMonths),
           tickangle: -50,
-          tickfont: { size: 8 },
+          tickfont: { size: Math.max(MIN_AXIS_TICK_PX, 10) },
           marginTop: 102
         };
       }
@@ -4093,7 +4048,7 @@
         return {
           ticktext,
           tickangle: -40,
-          tickfont: { size: 8 },
+          tickfont: { size: MIN_AXIS_TICK_PX },
           marginTop: 96
         };
       }
@@ -4110,7 +4065,7 @@
       return {
         ticktext: ticktextYearOnly,
         tickangle: 0,
-        tickfont: { size: 8 },
+        tickfont: { size: MIN_AXIS_TICK_PX },
         marginTop: 58
       };
     }
@@ -4333,27 +4288,9 @@
       }
     }
 
-    /** Scroll the matrix timeline pane so the expanded project row sits just under the sticky section heading. */
+    /** No-op: no vertical scroll inside matrix shell; expand/collapse does not scroll the pane. */
     function scrollMatrixPaneToExpandedProject(projectName) {
-      if (!projectName || typeof projectName !== 'string') return;
-      requestAnimationFrame(() => {
-        const pane = document.querySelector('.matrix-shell.timeline-pane');
-        let btn;
-        try {
-          btn = pane?.querySelector(`button[data-project="${CSS.escape(projectName)}"]`);
-        } catch (e) {
-          return;
-        }
-        if (!pane || !btn) return;
-        const tol = 3;
-        const btnRect = btn.getBoundingClientRect();
-        const paneRect = pane.getBoundingClientRect();
-        /* Title is above the scroll pane; keep the row inside the visible viewport. */
-        if (btnRect.top >= paneRect.top - tol && btnRect.bottom <= paneRect.bottom + tol) return;
-        const delta = btnRect.top - paneRect.top - 1;
-        const maxScroll = Math.max(0, pane.scrollHeight - pane.clientHeight);
-        pane.scrollTop = Math.max(0, Math.min(maxScroll, pane.scrollTop + delta));
-      });
+      void projectName;
     }
 
     function renderMatrix(selectedProject, options = {}) {
@@ -4449,12 +4386,11 @@
       const chartPanel = document.querySelector('.panel.chart-panel');
       chartPanel?.style.setProperty('--matrix-plot-margin-top', `${matrixMarginTop}px`);
       {
-        const capPx = timelinePaneHeightCapPx();
         const matrixContentPx =
           matrixMarginTop + Math.max(1, expandedRows.length) * rowHeight + matrixMarginBottom;
         const matrixTimelinePane = document.querySelector('.matrix-shell.timeline-pane');
         if (matrixTimelinePane) {
-          matrixTimelinePane.style.maxHeight = `${Math.min(matrixContentPx, capPx)}px`;
+          matrixTimelinePane.style.maxHeight = `${matrixContentPx}px`;
           ensureTimelinePaneOverscrollClamp(matrixTimelinePane);
         }
       }
@@ -4608,11 +4544,11 @@
           align: 'left',
           bgcolor: 'rgba(58, 58, 58, 0.96)',
           bordercolor: 'rgba(255,255,255,0.18)',
-          font: { size: 11, color: '#edf3fb' }
+          font: { size: 12, color: '#edf3fb' }
         },
         hovermode: 'closest',
         dragmode: false,
-        font: { family: 'Manrope, sans-serif', size: 12, color: '#edf3fb' },
+        font: { family: 'Manrope, sans-serif', size: 13, color: '#edf3fb' },
         xaxis: {
           type: 'category',
           categoryorder: 'array',
@@ -4862,7 +4798,7 @@
       {
         const milePane = document.querySelector('.milestone-shell.timeline-pane');
         if (milePane) {
-          milePane.style.maxHeight = `${Math.min(milestonePlotHeight, timelinePaneHeightCapPx())}px`;
+          milePane.style.maxHeight = `${milestonePlotHeight}px`;
           ensureTimelinePaneOverscrollClamp(milePane);
         }
       }
@@ -4929,11 +4865,11 @@
           align: 'left',
           bgcolor: 'rgba(58, 58, 58, 0.96)',
           bordercolor: 'rgba(255,255,255,0.18)',
-          font: { size: 11, color: '#edf3fb' }
+          font: { size: 12, color: '#edf3fb' }
         },
         hovermode: 'closest',
         dragmode: false,
-        font: { family: 'Manrope, sans-serif', size: 12, color: '#edf3fb' },
+        font: { family: 'Manrope, sans-serif', size: 13, color: '#edf3fb' },
         xaxis: {
           type: 'category',
           categoryorder: 'array',
@@ -5139,21 +5075,7 @@
     linkScroll(matrixScroll);
     linkScroll(milestoneScroll);
 
-    (function bindTimelinePaneHoverWheelCapture() {
-      document.querySelectorAll('.timeline-pane').forEach((pane) => {
-        pane.addEventListener('pointerenter', () => {
-          pane.dataset.timelineWheelCapture = '1';
-        });
-        pane.addEventListener('pointerleave', () => {
-          delete pane.dataset.timelineWheelCapture;
-        });
-        pane.addEventListener('pointercancel', () => {
-          delete pane.dataset.timelineWheelCapture;
-        });
-      });
-    })();
-
-    /** Wheel over matrix/milestone strips: apply deltaX to strip when it overflows; vertical → timeline pane (capture so Plotly cannot eat X). */
+    /** Wheel over matrix/milestone strips: map horizontal (and shift+vertical) to linked horizontal scroll only (capture so Plotly cannot eat X). */
     (function bindTimelinePaneWheelScroll() {
       const strips = [matrixScroll, milestoneScroll].filter(Boolean);
       const opts = { passive: false, capture: true };
@@ -5163,8 +5085,6 @@
           const absY = Math.abs(e.deltaY);
           const absX = Math.abs(e.deltaX);
           const canHScroll = strip.scrollWidth > strip.clientWidth + 1;
-          const scrollPane = strip.closest('.timeline-pane');
-          const maxSL = () => Math.max(0, strip.scrollWidth - strip.clientWidth);
 
           if (e.shiftKey && absY > 0) {
             e.preventDefault();
@@ -5192,13 +5112,6 @@
             }
             if (absX >= absY || !canHScroll) return;
           }
-
-          const mostlyVertical = absY >= absX;
-          if (!mostlyVertical) return;
-          if (!scrollPane || scrollPane.dataset.timelineWheelCapture !== '1') return;
-          if (scrollPane.scrollHeight <= scrollPane.clientHeight + 1) return;
-          e.preventDefault();
-          scrollPane.scrollTop += e.deltaY;
         }, opts);
       }
     })();

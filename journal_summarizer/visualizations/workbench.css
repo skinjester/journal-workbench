@@ -1,6 +1,9 @@
 /**
  * Journal Workbench — shared theme, typography, and 8px layout grid.
  * Spacing: use --sp-1 (8px) … --sp-6 (48px). Half-step --sp-0-5 (4px) only for hairlines/nudges.
+ *
+ * Line-height roles (map to --lh-*): --lh-label ≈ tight UI/caps; --lh-ui ≈ snug one-liners;
+ * --lh-prose ≈ body markdown (existing --lh-tight / --lh-snug / --lh-body).
  */
 :root {
   --bg: #0d1117;
@@ -29,16 +32,39 @@
   --sp-5: 40px;
   --sp-6: 48px;
 
-  --text-2xs: 9px;
-  --text-xs: 10px;
-  --text-sm: 11px;
-  --text-md: 13px;
-  --text-body: 14px;
-  --text-section: 12px;
+  --text-2xs: 10px;
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-md: 14px;
+  --text-body: 15px;
+  --text-section: 13px;
   --text-lg: 18px;
   --text-xl: 20px;
+  --text-2xl: 22px;
   --lh-tight: 1.2;
   --lh-snug: 1.35;
   --lh-body: 1.55;
   --lh-body-relaxed: 1.58;
+  /* Aliases for mental model (see file header) */
+  --lh-label: var(--lh-tight);
+  --lh-ui: var(--lh-snug);
+  --lh-prose: var(--lh-body);
+
+  /**
+   * Warm reading layer (tooltips / dense overlays): cream + amber family aligned with matrix crosshair.
+   * JS may override --matrix-tooltip-*; these are fallbacks in the matrix HTML.
+   */
+  --warm-read-body: #e9ded0;
+  --warm-read-muted: #9d8f7c;
+  --warm-read-kicker: #c9a67e;
+  --warm-read-title: #fff6eb;
+  --warm-read-meta: #d4b896;
+  --warm-read-section: #ffe8cc;
+  --warm-read-hint: #8c7d6a;
+  --warm-read-bar-label: #c4b09a;
+  --warm-read-bar-n: #dcc4a8;
+  --warm-read-strong: #ffffff;
+  --warm-read-border: rgba(190, 155, 110, 0.5);
+  --warm-read-surface: rgba(22, 18, 15, 0.98);
+  --warm-read-shadow: 0 18px 42px rgba(0, 0, 0, 0.42), 0 0 0 1px rgba(255, 186, 120, 0.08);
 }
