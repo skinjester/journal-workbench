@@ -33,6 +33,10 @@
       margin-top: 0;
       /* Fallback before JS; panes grow to full heatmap height (page scrolls). */
       --timeline-pane-max-height: none;
+      /* Activity vs deliverables shells (.workbench-left gap); JS does not override. */
+      --charts-stack-gap: var(--sp-1);
+      /* Deliverables top band: smaller than matrix month-axis margin.t (ticks hidden); JS sets live value in renderMatrix. */
+      --milestone-plot-margin-top: 8px;
     }
     /** Header + two-column main + footer: left stacks both heatmaps; right is overview only. */
     .workbench-main {
@@ -49,11 +53,15 @@
     .chart-panel:has(#provenance-inspector:not([hidden])) .workbench-main {
       grid-template-columns: minmax(0, 1fr) minmax(220px, min(35%, 320px));
     }
+    /**
+     * Vertical gap between activity (.matrix-workbench-row) and deliverables — see --charts-stack-gap on .chart-panel.
+     * Plotly margin.b (--matrix-plot-margin-bottom) is inside the matrix figure below the last heatmap row, not this gap.
+     */
     .workbench-left {
       display: flex;
       flex-direction: column;
       align-items: stretch;
-      gap: 0;
+      gap: var(--charts-stack-gap);
       min-width: 0;
       width: 100%;
     }
@@ -73,7 +81,7 @@
       overflow-x: hidden;
       overscroll-behavior-y: auto;
       overscroll-behavior-x: none;
-      scrollbar-gutter: stable;
+      /* Horizontal gutter lives on .scroll-area; pane height is synced to label + scroll column after Plotly (incl. scrollbar). */
     }
     /* Sticky provenance column needs a non-clipping ancestor (see #provenance-inspector). */
     .panel.chart-panel {
@@ -89,6 +97,8 @@
       grid-template-columns: var(--matrix-label-col-width) minmax(0, 1fr);
       gap: 0;
       box-sizing: border-box;
+      /* Avoid stretching a single auto row to fill a taller explicit height (dead band under the heatmap). */
+      align-content: start;
     }
     .matrix-shell { align-items: start; }
     .milestone-shell { align-items: stretch; }
@@ -247,16 +257,16 @@
       border-right: 1px solid rgba(255, 255, 255, 0.06);
       border-radius: 0;
       /* Top/bottom padding track Plotly margin.t / margin.b (JS sets --matrix-plot-margin-* in renderMatrix). */
-      padding: var(--matrix-plot-margin-top, 102px) 12px var(--matrix-plot-margin-bottom, 6px) 0;
+      padding: var(--matrix-plot-margin-top, 102px) 12px var(--matrix-plot-margin-bottom, 4px) 0;
       align-self: start;
     }
     .fixed-labels.milestones {
-      padding-top: var(--matrix-plot-margin-top, 102px);
-      padding-bottom: var(--matrix-plot-margin-bottom, 6px);
+      padding-top: var(--milestone-plot-margin-top, 8px);
+      padding-bottom: var(--matrix-plot-margin-bottom, 4px);
       align-self: stretch;
     }
     .deliverables-section {
-      margin-top: 4px;
+      margin-top: 0;
       padding-top: 0;
       flex: 0 0 auto;
       align-self: stretch;
@@ -3981,6 +3991,33 @@
         { passive: true }
       );
     }
+
+    /**
+     * Shrink or grow timeline pane to content. Must drop the prior inline height first: otherwise the grid can stretch
+     * .fixed-labels / #matrix-scroll to fill the pane and offsetHeight never shrinks (dead band stays ~formula height).
+     */
+    function syncTimelinePaneHeightToDom(pane, formulaFallbackPx) {
+      if (!pane) return;
+      pane.style.height = 'auto';
+      pane.style.maxHeight = 'none';
+      void pane.offsetHeight;
+      const labels = pane.querySelector('.fixed-labels');
+      const scroll = pane.querySelector('.scroll-area');
+      const plotDiv = scroll
+        ? scroll.querySelector('#matrix-chart') || scroll.querySelector('#milestone-chart')
+        : null;
+      const lh = labels ? labels.offsetHeight : 0;
+      const sh = scroll ? scroll.offsetHeight : 0;
+      const ph = plotDiv ? plotDiv.offsetHeight : 0;
+      const strip = Math.max(sh, ph);
+      const measured = Math.max(lh, strip);
+      const fb = Math.max(1, Math.round(Number(formulaFallbackPx) || 0));
+      const px = measured > 0 ? Math.ceil(measured) : fb;
+      const h = `${px}px`;
+      pane.style.height = h;
+      pane.style.maxHeight = h;
+      ensureTimelinePaneOverscrollClamp(pane);
+    }
     const milestoneLabelsEl = document.getElementById('milestone-labels');
     milestoneLabelsEl.style.gridTemplateRows = `repeat(${mileRows.length}, ${rowHeight}px)`;
     milestoneLabelsEl.innerHTML = mileRows.map((row) => `<div class="fixed-label milestone">${escapeHtml(String(row))}</div>`).join('');
@@ -4252,6 +4289,11 @@
      * buildMatrixXAxisTickConfig(...).marginTop (82–102px by density). Paired with autoexpand:false / automargin:false.
      */
     const MATRIX_X_AXIS_MARGIN_TOP_LAYOUT = 102;
+    /**
+     * Deliverables heatmap: top Plotly margin + label padding-top. Smaller than MATRIX_X_AXIS_MARGIN_TOP_LAYOUT because
+     * month ticks are hidden; horizontal brick lattice still matches matrix (same plotWidth, margin.l/r, xgap).
+     */
+    const MILESTONE_PLOT_MARGIN_TOP = 8;
 
     /** Inspector-open plot: floor for min brick width in max() with proportional heatWidth (full dataset stays in view). */
     const MATRIX_INSPECTOR_MIN_PX_PER_COL = 16;
@@ -4404,7 +4446,7 @@
       ];
 
       /** Paired with `.fixed-labels` `--matrix-plot-margin-bottom` (x-axis is top; smaller b = less empty strip under last row). */
-      const matrixMarginBottom = 6;
+      const matrixMarginBottom = 4;
       const xTickCfg = buildMatrixXAxisTickConfig(visibleMonths, plotWidth, MATRIX_PLOT_MARGIN_LR);
       const matrixXTickText =
         xTickCfg.ticktext.length === visibleMonths.length
@@ -4418,12 +4460,13 @@
       const chartPanel = document.querySelector('.panel.chart-panel');
       chartPanel?.style.setProperty('--matrix-plot-margin-top', `${matrixMarginTop}px`);
       chartPanel?.style.setProperty('--matrix-plot-margin-bottom', `${matrixMarginBottom}px`);
+      chartPanel?.style.setProperty('--milestone-plot-margin-top', `${MILESTONE_PLOT_MARGIN_TOP}px`);
+      const matrixTimelineContentPx =
+        matrixMarginTop + Math.max(1, expandedRows.length) * rowHeight + matrixMarginBottom;
       {
-        const matrixContentPx =
-          matrixMarginTop + Math.max(1, expandedRows.length) * rowHeight + matrixMarginBottom;
         const matrixTimelinePane = document.querySelector('.matrix-shell.timeline-pane');
         if (matrixTimelinePane) {
-          const matrixH = `${matrixContentPx}px`;
+          const matrixH = `${matrixTimelineContentPx}px`;
           /* max-height alone does not shrink used height when grid min-content is inflated — lock to Plotly body height. */
           matrixTimelinePane.style.height = matrixH;
           matrixTimelinePane.style.maxHeight = matrixH;
@@ -4618,12 +4661,19 @@
         }
       }, { responsive: false, displayModeBar: false, scrollZoom: false, doubleClick: false       }).then(() => {
         const chart = document.getElementById('matrix-chart');
+        const matrixPane = document.querySelector('.matrix-shell.timeline-pane');
+        const syncMatrixPaneHeight = () =>
+          syncTimelinePaneHeightToDom(matrixPane, matrixTimelineContentPx);
         const syncScrollGutter = () => {
           updateInspectorScrollLeadingGutters(chart);
           clampMatrixHorizontalScroll(chart);
         };
         syncScrollGutter();
-        requestAnimationFrame(syncScrollGutter);
+        syncMatrixPaneHeight();
+        requestAnimationFrame(() => {
+          syncScrollGutter();
+          syncMatrixPaneHeight();
+        });
         chart._matrixExpandedRows = expandedRows;
         // Plotly.newPlot purges prior listeners on the graph div; re-bind after every redraw
         // (expand/collapse calls renderMatrix again). One-time dataset guards would leave no handlers.
@@ -4742,7 +4792,15 @@
             });
           });
         }
-        clampTimelinePaneScroll(document.querySelector('.matrix-shell.timeline-pane'));
+        requestAnimationFrame(() => {
+          syncScrollGutter();
+          syncMatrixPaneHeight();
+          clampTimelinePaneScroll(document.querySelector('.matrix-shell.timeline-pane'));
+          requestAnimationFrame(() => {
+            syncMatrixPaneHeight();
+            clampTimelinePaneScroll(document.querySelector('.matrix-shell.timeline-pane'));
+          });
+        });
         clampMatrixHorizontalScroll(chart);
         if (
           isProvenanceInspectorOpen() &&
@@ -4788,7 +4846,7 @@
       }).join('');
 
       syncMilestoneScrollWidth();
-      renderMilestones(matrixMarginTop, matrixMarginBottom, plotWidth, matrixXGapTrace);
+      renderMilestones(matrixMarginBottom, plotWidth, matrixXGapTrace);
       let skipHScrollForInspectorFocus = false;
       if (inspPanel && !inspPanel.hidden && cellFocus && cellFocus.month != null && cellFocus.rowKey != null) {
         const gFocus = data.months.indexOf(cellFocus.month);
@@ -4815,13 +4873,13 @@
       }
     }
 
-    function renderMilestones(matrixMarginTop, matrixMarginBottom, plotWidth, heatmapXGap) {
+    function renderMilestones(matrixMarginBottom, plotWidth, heatmapXGap) {
       const visibleMonths = data.months.slice(visibleStartIdx, visibleEndIdx + 1);
       const visibleCount = visibleMonths.length;
       const nMile = mileRows.length;
       if (nMile === 0) return;
-      const mileMt = Number(matrixMarginTop) || MATRIX_X_AXIS_MARGIN_TOP_LAYOUT;
-      const mileMb = Number(matrixMarginBottom) || 6;
+      const mileMt = MILESTONE_PLOT_MARGIN_TOP;
+      const mileMb = Number(matrixMarginBottom) || 4;
       const pw = Math.max(1, Math.round(Number(plotWidth) || 0));
       const xg = Number.isFinite(heatmapXGap) && heatmapXGap >= 0 ? heatmapXGap : matrixHeatmapXGap;
 
@@ -4963,6 +5021,13 @@
       }).then(() => {
         const mileChart = document.getElementById('milestone-chart');
         if (!mileChart) return;
+        const milePane = document.querySelector('.milestone-shell.timeline-pane');
+        const syncMilePaneHeight = () =>
+          syncTimelinePaneHeightToDom(milePane, milestonePlotHeight);
+        syncMilePaneHeight();
+        requestAnimationFrame(() => {
+          syncMilePaneHeight();
+        });
         mileChart.on('plotly_hover', (ev) => {
           const inspPanel = document.getElementById('provenance-inspector');
           const inspectorOpen = Boolean(inspPanel && !inspPanel.hidden);
@@ -5104,7 +5169,14 @@
           }
           scheduleMatrixHoverExit();
         });
-        clampTimelinePaneScroll(document.querySelector('.milestone-shell.timeline-pane'));
+        requestAnimationFrame(() => {
+          syncMilePaneHeight();
+          clampTimelinePaneScroll(document.querySelector('.milestone-shell.timeline-pane'));
+          requestAnimationFrame(() => {
+            syncMilePaneHeight();
+            clampTimelinePaneScroll(document.querySelector('.milestone-shell.timeline-pane'));
+          });
+        });
         clampMatrixHorizontalScroll(document.getElementById('matrix-chart'));
       });
     }
