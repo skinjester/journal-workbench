@@ -24,6 +24,8 @@
     .wrap { max-width: min(1320px, 100%); margin: 0 auto; padding: var(--sp-3) clamp(var(--sp-3), 4vw, var(--sp-5)) var(--sp-6); }
     .panel { border: 1px solid var(--line); border-radius: 18px; background: linear-gradient(180deg, rgba(255,255,255,0.018), rgba(255,255,255,0.01)); box-shadow: 0 20px 56px var(--shadow); overflow: hidden; }
     .chart-panel {
+      display: flex;
+      flex-direction: column;
       padding-top: var(--sp-2);
       padding-right: clamp(var(--sp-3), 2.5vw, var(--sp-4));
       padding-bottom: clamp(var(--sp-3), 2.5vw, var(--sp-4));
@@ -31,6 +33,34 @@
       margin-top: 0;
       /* Fallback before JS; panes grow to full heatmap height (page scrolls). */
       --timeline-pane-max-height: none;
+    }
+    /** Header + two-column main + footer: left stacks both heatmaps; right is overview only. */
+    .workbench-main {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--sp-2);
+      align-items: start;
+      width: 100%;
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+    .chart-panel:has(#provenance-inspector:not([hidden])) .workbench-main {
+      grid-template-columns: minmax(0, 1fr) minmax(220px, min(35%, 320px));
+    }
+    .workbench-left {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      min-width: 0;
+      width: 100%;
+    }
+    .chart-panel-footer {
+      margin-top: var(--sp-3);
+      padding-top: var(--sp-2);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--muted);
+      font-size: var(--text-sm);
+      flex-shrink: 0;
     }
     /* Vertical: full plot height (JS); no inner vertical scroll — only #matrix-scroll / #milestone-scroll scroll horizontally. */
     .matrix-shell.timeline-pane,
@@ -66,7 +96,7 @@
       flex-direction: column;
       align-items: stretch;
     }
-    /* Non-sticky title bar: section heading + overview toggle (scrolls with page). */
+    /* Non-sticky title bar: section heading (scrolls with page). */
     .matrix-chart-title-bar {
       display: flex;
       flex-direction: row;
@@ -173,7 +203,7 @@
       min-width: 0;
       max-width: 100%;
     }
-    /* Two siblings in one row: main (flex 1) + inspector (fixed basis). Hidden inspector → display:none → main is sole flex child and fills width. */
+    /* Matrix row: full width of left column (inspector lives in .workbench-main grid cell). */
     .matrix-workbench-row {
       display: flex;
       flex-direction: row;
@@ -188,97 +218,18 @@
       flex: 1 1 auto;
       min-width: 0;
     }
-    /**
-     * DOM order is matrix → trailing gutter → inspector. Wide viewports flex order is
-     * matrix → inspector → gutter so the 40px strip stays on the trailing edge (toggle lives in title bar).
-     */
-    .chart-panel:has(#provenance-sidebar-chrome) .matrix-workbench-row {
-      gap: var(--sp-2);
-    }
-    .matrix-workbench-trailing-gutter {
-      flex: 0 0 40px;
-      width: 40px;
-      min-width: 40px;
-      max-width: 40px;
-      box-sizing: border-box;
-      flex-shrink: 0;
-      pointer-events: none;
-      visibility: hidden;
-    }
-    @media (min-width: 1181px) {
-      .matrix-workbench-row > .matrix-map-section {
-        order: 1;
-      }
-      #provenance-inspector:not([hidden]) {
-        order: 2;
-      }
-      .matrix-workbench-trailing-gutter {
-        order: 3;
-      }
-    }
-    /* Mirror matrix + inspector row so Deliverables chart column lines up with the heatmap (not full panel width). */
-    .deliverables-workbench-row {
-      display: flex;
-      flex-direction: row;
-      align-items: flex-start;
+    .deliverables-chart-slot {
       width: 100%;
       min-width: 0;
-    }
-    .deliverables-chart-slot {
-      flex: 1 1 auto;
-      min-width: 0;
-    }
-    .deliverables-inspector-spacer {
-      flex: 0 0 0;
-      width: 0;
-      min-width: 0;
-      max-width: 0;
-      overflow: hidden;
-      pointer-events: none;
-      visibility: hidden;
-    }
-    .chart-panel:has(#provenance-sidebar-chrome) .deliverables-workbench-row {
-      gap: var(--sp-2);
-    }
-    .chart-panel:has(#provenance-inspector:not([hidden])) .deliverables-inspector-spacer {
-      flex: 0 0 min(360px, 38%);
-      min-width: 260px;
-      max-width: min(360px, 100%);
-      width: auto;
-      align-self: stretch;
-      visibility: visible;
-    }
-    /* Overview closed: only the toggle column — matrix + Deliverables use remaining width. */
-    .chart-panel:has(#provenance-sidebar-chrome):has(#provenance-inspector[hidden]) .deliverables-inspector-spacer {
-      flex: 0 0 40px;
-      min-width: 40px;
-      max-width: 40px;
-      width: 40px;
-      align-self: stretch;
-      visibility: visible;
-    }
-    /** Overview toggle in title bar (40px hit target). */
-    #provenance-sidebar-chrome {
-      flex: 0 0 auto;
-      width: 40px;
-      min-width: 40px;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      justify-content: center;
-      padding: 0;
-      z-index: 3;
     }
     #provenance-inspector:not([hidden]) {
       position: sticky;
       top: var(--sp-3);
-      flex: 0 0 min(320px, 35%);
-      min-width: 220px;
-      max-width: min(320px, 100%);
-      align-self: flex-start;
-      max-height: calc(100vh - var(--sp-4) - var(--sp-3));
-      max-height: calc(100dvh - var(--sp-4) - var(--sp-3));
+      align-self: start;
+      width: 100%;
+      min-width: 0;
+      max-width: none;
+      max-height: none;
       z-index: 3;
       /* Subtle edge vs chart column (page chrome, not Plotly). */
       border-left: 1px solid rgba(255, 255, 255, 0.055);
@@ -748,38 +699,22 @@
     @media (max-width: 1180px) {
       .lower-grid { grid-template-columns: 1fr; }
       .detail-layout { grid-template-columns: 1fr; }
-      .matrix-workbench-trailing-gutter {
-        display: none;
+      /* Stack left column (heatmaps) then sidebar below. */
+      .chart-panel:has(#provenance-inspector:not([hidden])) .workbench-main {
+        grid-template-columns: 1fr;
       }
-      .matrix-workbench-row > .matrix-map-section,
-      #provenance-inspector {
-        order: 0;
-      }
-      .chart-panel:has(#provenance-sidebar-chrome) .matrix-workbench-row,
-      .matrix-workbench-row:has(#provenance-inspector:not([hidden])) {
-        flex-direction: column;
-      }
-      .chart-panel:has(#provenance-sidebar-chrome) .matrix-workbench-row > .matrix-map-section,
-      .matrix-workbench-row:has(#provenance-inspector:not([hidden])) > .matrix-map-section {
-        flex: 0 1 auto;
-      }
-      .matrix-workbench-row:has(#provenance-inspector:not([hidden])) #provenance-inspector {
+      .chart-panel:has(#provenance-inspector:not([hidden])) #provenance-inspector {
         position: sticky;
         top: var(--sp-2);
-        flex: 1 1 auto;
+        border-left: 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        width: 100%;
         max-width: none;
         min-width: 0;
         align-self: stretch;
-        border-left: 0;
-        border-top: 1px solid rgba(255, 255, 255, 0.05);
-        min-height: min(50vh, 420px);
-        max-height: calc(100vh - var(--sp-4) - var(--sp-2));
-        max-height: calc(100dvh - var(--sp-4) - var(--sp-2));
+        max-height: none;
+        min-height: 0;
         z-index: 3;
-      }
-      /* Inspector is stacked below the matrix; do not reserve a right column under Deliverables. */
-      .chart-panel:has(#provenance-sidebar-chrome) .deliverables-inspector-spacer {
-        display: none;
       }
     }
 
@@ -849,14 +784,18 @@
       .provenance-inspector { transition: none; }
     }
     .provenance-inspector__main {
+      position: relative;
       flex: 1 1 auto;
       min-width: 0;
       min-height: 0;
       display: flex;
       flex-direction: column;
     }
-    .provenance-inspector__panel-toggle {
-      position: static;
+    .provenance-inspector__close {
+      position: absolute;
+      top: 0;
+      right: 0;
+      z-index: 2;
       width: 36px;
       height: 36px;
       margin: 0;
@@ -864,40 +803,35 @@
       border-radius: 10px;
       background: rgba(255, 255, 255, 0.06);
       color: var(--text);
+      font-size: var(--text-2xl);
+      line-height: 1;
       cursor: pointer;
-      flex-shrink: 0;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       padding: 0;
     }
-    .provenance-inspector__panel-toggle:hover {
+    .provenance-inspector__close:hover {
       background: rgba(255, 255, 255, 0.12);
     }
-    .provenance-inspector__panel-toggle:focus {
+    .provenance-inspector__close:focus {
       outline: none;
       box-shadow: none;
     }
-    .provenance-inspector__panel-toggle:focus-visible {
+    .provenance-inspector__close:focus-visible {
       outline: 2px solid rgba(140, 195, 255, 0.9);
       outline-offset: 2px;
-      box-shadow: none;
-    }
-    .provenance-inspector__panel-toggle-icon {
-      width: 20px;
-      height: 20px;
-      display: block;
-      flex-shrink: 0;
     }
     .provenance-inspector__scroll {
       flex: 1 1 auto;
       min-height: 0;
-      overflow: auto;
+      overflow-x: hidden;
+      overflow-y: visible;
       display: flex;
       flex-direction: column;
       /* JS sets --prov-inspector-scroll-mt so kicker lines up with first matrix row (heatmap row 0). */
       margin-top: var(--prov-inspector-scroll-mt, 0px);
-      padding: 0 0 var(--sp-2) 0;
+      padding: 0 var(--sp-5) var(--sp-2) 0;
       background: transparent;
     }
     .provenance-inspector__empty-hint {
@@ -906,6 +840,23 @@
       font-size: var(--text-md);
       line-height: var(--lh-body-relaxed);
       max-width: 42ch;
+    }
+    /* Full-month project overview: modal (not sidebar); centered, wider than hover tooltip shell. */
+    .provenance-overlay.provenance-overlay--project-overview .provenance-overlay__dialog {
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: min(92vw, 720px);
+      max-width: 100%;
+      max-height: min(85vh, 720px);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .provenance-overlay.provenance-overlay--project-overview .provenance-overlay__dialog #prov-overlay-body {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow: auto;
     }
     .provenance-overlay__dialog {
       position: fixed;
@@ -1138,49 +1089,58 @@
         <div class="matrix-chart-title-bar__lead">
           <h3 class="chart-panel-section-heading">Project Activity Map</h3>
         </div>
-        <div id="provenance-sidebar-chrome" class="provenance-sidebar-chrome" aria-hidden="false">
-          <button type="button" class="provenance-inspector__panel-toggle" id="prov-inspector-toggle" tabindex="0" aria-label="Show overview panel" title="Show overview panel">
-            <svg class="provenance-inspector__panel-toggle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <rect x="4" y="4" width="16" height="16" rx="2"/>
-              <line x1="9" y1="4" x2="9" y2="20"/>
-            </svg>
-          </button>
-        </div>
       </header>
-      <div class="matrix-workbench-row" id="matrix-workbench-row">
-        <div class="matrix-map-section">
-          <div class="matrix-shell timeline-pane">
-            <div class="fixed-labels">
-              <button
-                type="button"
-                id="matrix-back-all-projects-nav"
-                class="matrix-back-all-projects-nav matrix-back-all-projects-nav--concealed"
-                aria-hidden="true"
-                tabindex="-1"
-                aria-label="Show all projects in the matrix"
-              >
-                <span class="matrix-back-nav-ring" aria-hidden="true">
-                  <svg viewBox="0 0 12 12" width="9" height="9" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <path d="M7.5 2.5L4 6l3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-                  </svg>
-                </span>
-                <span class="matrix-back-nav-cta">All projects</span>
-              </button>
-              <div class="fixed-labels-grid" id="matrix-labels"></div>
+      <div class="workbench-main">
+        <div class="workbench-left">
+          <div class="matrix-workbench-row" id="matrix-workbench-row">
+            <div class="matrix-map-section">
+              <div class="matrix-shell timeline-pane">
+                <div class="fixed-labels">
+                  <button
+                    type="button"
+                    id="matrix-back-all-projects-nav"
+                    class="matrix-back-all-projects-nav matrix-back-all-projects-nav--concealed"
+                    aria-hidden="true"
+                    tabindex="-1"
+                    aria-label="Show all projects in the matrix"
+                  >
+                    <span class="matrix-back-nav-ring" aria-hidden="true">
+                      <svg viewBox="0 0 12 12" width="9" height="9" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M7.5 2.5L4 6l3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                    </span>
+                    <span class="matrix-back-nav-cta">All projects</span>
+                  </button>
+                  <div class="fixed-labels-grid" id="matrix-labels"></div>
+                </div>
+                <div class="matrix-chart-stack">
+                  <div class="scroll-area" id="matrix-scroll">
+                    <div class="matrix-scroll-inner">
+                      <div id="matrix-scroll-leading-gutter" class="matrix-scroll-leading-gutter" aria-hidden="true"></div>
+                      <div id="matrix-chart"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="matrix-chart-stack">
-              <div class="scroll-area" id="matrix-scroll">
-                <div class="matrix-scroll-inner">
-                  <div id="matrix-scroll-leading-gutter" class="matrix-scroll-leading-gutter" aria-hidden="true"></div>
-                  <div id="matrix-chart"></div>
+          </div>
+          <div class="deliverables-section">
+            <div class="deliverables-chart-slot">
+              <div class="milestone-shell timeline-pane">
+                <div class="fixed-labels milestones"><div class="fixed-labels-grid" id="milestone-labels"></div></div>
+                <div class="scroll-area" id="milestone-scroll">
+                  <div class="matrix-scroll-inner">
+                    <div id="milestone-scroll-leading-gutter" class="matrix-scroll-leading-gutter" aria-hidden="true"></div>
+                    <div id="milestone-chart"></div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <div class="matrix-workbench-trailing-gutter" aria-hidden="true"></div>
         <aside id="provenance-inspector" class="provenance-inspector" hidden aria-hidden="true" aria-labelledby="prov-inspector-title">
           <div class="provenance-inspector__main">
+            <button type="button" class="provenance-inspector__close" id="prov-inspector-close" aria-label="Close panel">&times;</button>
             <div class="provenance-inspector__scroll">
               <div class="chart-tooltip__kicker provenance-overlay__kicker" id="prov-inspector-kicker"></div>
               <div class="chart-tooltip__title provenance-overlay__headline" id="prov-inspector-title" role="heading" aria-level="2"></div>
@@ -1190,22 +1150,7 @@
           </div>
         </aside>
       </div>
-      <div class="deliverables-section">
-        <div class="deliverables-workbench-row">
-          <div class="deliverables-chart-slot">
-            <div class="milestone-shell timeline-pane">
-              <div class="fixed-labels milestones"><div class="fixed-labels-grid" id="milestone-labels"></div></div>
-              <div class="scroll-area" id="milestone-scroll">
-                <div class="matrix-scroll-inner">
-                  <div id="milestone-scroll-leading-gutter" class="matrix-scroll-leading-gutter" aria-hidden="true"></div>
-                  <div id="milestone-chart"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="deliverables-inspector-spacer" aria-hidden="true"></div>
-        </div>
-      </div>
+      <footer class="chart-panel-footer">Footer</footer>
     </section>
   </div>
   <div class="chart-tooltip" id="chart-tooltip" aria-hidden="true"></div>
@@ -1883,7 +1828,6 @@
         if (el.closest('#chart-tooltip')) return true;
         if (el.closest('.provenance-overlay__dialog')) return true;
         if (el.closest('#provenance-inspector')) return true;
-        if (el.closest('#provenance-sidebar-chrome')) return true;
       }
       const tt = document.getElementById('chart-tooltip');
       if (!skipChartTooltipBridgeSlop && tt && tt.style.display === 'block' && cx >= 0 && cy >= 0) {
@@ -1908,17 +1852,6 @@
       const pi = document.getElementById('provenance-inspector');
       if (pi && !pi.hidden && cx >= 0 && cy >= 0) {
         const r = pi.getBoundingClientRect();
-        if (
-          cx >= r.left - panelPad &&
-          cx <= r.right + panelPad &&
-          cy >= r.top - panelPad &&
-          cy <= r.bottom + panelPad
-        )
-          return true;
-      }
-      const sidebarChrome = document.getElementById('provenance-sidebar-chrome');
-      if (sidebarChrome && cx >= 0 && cy >= 0) {
-        const r = sidebarChrome.getBoundingClientRect();
         if (
           cx >= r.left - panelPad &&
           cx <= r.right + panelPad &&
@@ -2064,30 +1997,15 @@
 
     function resetProvenanceInspectorAlignment() {
       const inspector = document.getElementById('provenance-inspector');
-      const chrome = document.getElementById('provenance-sidebar-chrome');
-      const panelToggle = document.getElementById('prov-inspector-toggle');
       if (inspector) {
         inspector.style.paddingTop = '';
         inspector.style.marginTop = '';
         inspector.style.removeProperty('--prov-inspector-scroll-mt');
       }
-      if (chrome) {
-        chrome.style.paddingTop = '';
-        chrome.style.marginTop = '';
-      }
-      if (panelToggle) panelToggle.style.transform = '';
     }
 
-    /** Title + toggle share `.matrix-chart-title-bar` (flex); clear any legacy nudge styles. */
-    function syncProvenanceSidebarChromeAlignment() {
-      const chrome = document.getElementById('provenance-sidebar-chrome');
-      const panelToggle = document.getElementById('prov-inspector-toggle');
-      if (chrome) {
-        chrome.style.paddingTop = '';
-        chrome.style.marginTop = '';
-      }
-      if (panelToggle) panelToggle.style.transform = '';
-    }
+    /** Clear any legacy nudge styles on the title bar / inspector chrome. */
+    function syncProvenanceSidebarChromeAlignment() {}
 
     /**
      * Wide + overview open: heatmap offset on the panel + headline baseline vs Plotly x-axis tick baseline.
@@ -2133,15 +2051,7 @@
       }
     }
 
-    function syncProvInspectorToggleAffordance() {
-      const btn = document.getElementById('prov-inspector-toggle');
-      const insp = document.getElementById('provenance-inspector');
-      if (!btn || !insp) return;
-      const open = !insp.hasAttribute('hidden');
-      btn.setAttribute('aria-label', open ? 'Hide overview panel' : 'Show overview panel');
-      btn.title = open ? 'Hide overview panel' : 'Show overview panel';
-      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-    }
+    function syncProvInspectorToggleAffordance() {}
 
     /** Sidebar opened with no remembered cell: show placeholder only (no default month/project). */
     function openProvenanceInspectorEmpty() {
@@ -2216,7 +2126,7 @@
 
     let provenanceInspectorAlignResizeTimer = null;
     window.addEventListener('resize', () => {
-      if (!document.getElementById('provenance-sidebar-chrome')) return;
+      if (!document.getElementById('provenance-inspector')) return;
       if (provenanceInspectorAlignResizeTimer) window.clearTimeout(provenanceInspectorAlignResizeTimer);
       provenanceInspectorAlignResizeTimer = window.setTimeout(() => {
         provenanceInspectorAlignResizeTimer = null;
@@ -2296,6 +2206,80 @@
       });
     }
 
+    /** Project-row / full-month overview: modal overlay only (no right-hand #provenance-inspector). */
+    function openProjectOverviewModal(month, project, focusMeta) {
+      const chart = document.getElementById('matrix-chart');
+      const prov = typeof provenanceData !== 'undefined' ? provenanceData : null;
+      const ov = document.getElementById('provenance-overlay');
+      const dialog = ov && ov.querySelector('.provenance-overlay__dialog');
+      if (!ov || !dialog || typeof ProvenanceView === 'undefined' || !prov || !prov.monthSources) {
+        if (chart) {
+          chart._inspectorCellFocus = null;
+          clearMatrixPinnedSelection(chart);
+        }
+        navigateProvenancePage(month, project, 'overview');
+        return;
+      }
+      closeProvenanceInspector();
+      hideChartTooltip();
+      closeProvenanceOverlay();
+      clearMatrixHoverBands(chart);
+      cancelMatrixHoverExit();
+      const cellKey = `${month}\0${project}\0__overview__`;
+      if (typeof marked !== 'undefined') {
+        marked.setOptions({ gfm: true, breaks: false });
+      }
+      if (chart) {
+        chart._skipInspectorScrollIfInView = false;
+        chart._provenanceOpenKey = cellKey;
+        if (focusMeta && focusMeta.rowKey != null && focusMeta.rowIndex != null && focusMeta.rowIndex >= 0) {
+          chart._inspectorCellFocus = {
+            month,
+            rowKey: focusMeta.rowKey,
+            rowIndex: focusMeta.rowIndex,
+            project,
+            activity: ''
+          };
+        } else {
+          chart._inspectorCellFocus = null;
+        }
+      }
+      ProvenanceView.render({
+        month,
+        project,
+        activity: '',
+        projectOverview: true,
+        provenanceData: prov,
+        matchesOnly: false,
+        kickerEl: document.getElementById('prov-overlay-kicker'),
+        titleEl: document.getElementById('prov-overlay-title'),
+        metaEl: document.getElementById('prov-overlay-meta'),
+        bodyEl: document.getElementById('prov-overlay-body'),
+      });
+      provenanceInspectorLastOpen = {
+        month,
+        project,
+        activity: '',
+        focusMeta:
+          focusMeta && focusMeta.rowKey != null && focusMeta.rowIndex != null && focusMeta.rowIndex >= 0
+            ? {
+                rowKey: focusMeta.rowKey,
+                rowIndex: focusMeta.rowIndex,
+                projectOverview: true
+              }
+            : null
+      };
+      syncMatrixPinnedSelection(chart, month, project, '');
+      ov.classList.remove('provenance-overlay--hover');
+      ov.classList.add('provenance-overlay--project-overview');
+      ov.removeAttribute('hidden');
+      ov.setAttribute('aria-hidden', 'false');
+      syncProvInspectorToggleAffordance();
+      requestAnimationFrame(() =>
+        scheduleMatrixChartResize({ preserveScroll: false, scrollProjectRowIntoView: false })
+      );
+    }
+
     function openProvenanceInspector(month, project, activity, focusMeta) {
       const root = document.getElementById('provenance-inspector');
       const chart = document.getElementById('matrix-chart');
@@ -2303,7 +2287,7 @@
       const projectOverview = Boolean(focusMeta && focusMeta.projectOverview);
       const wasInspectorAlreadyOpen = Boolean(root && !root.hasAttribute('hidden'));
       const wasLayoutAlreadyActive = matrixInspectorLayoutActive;
-      if (!root || typeof ProvenanceView === 'undefined' || !prov || !prov.monthSources) {
+      if (typeof ProvenanceView === 'undefined' || !prov || !prov.monthSources) {
         if (chart) {
           chart._inspectorCellFocus = null;
           clearMatrixPinnedSelection(chart);
@@ -2311,10 +2295,18 @@
         navigateProvenancePage(month, project, projectOverview ? 'overview' : activity);
         return;
       }
+      if (projectOverview) {
+        openProjectOverviewModal(month, project, focusMeta);
+        return;
+      }
+      if (!root) {
+        navigateProvenancePage(month, project, activity);
+        return;
+      }
       closeProvenanceOverlay();
       clearMatrixHoverBands(chart);
       cancelMatrixHoverExit();
-      const cellKey = `${month}\0${project}\0${projectOverview ? '__overview__' : activity}`;
+      const cellKey = `${month}\0${project}\0${activity}`;
       if (typeof marked !== 'undefined') {
         marked.setOptions({ gfm: true, breaks: false });
       }
@@ -2334,7 +2326,7 @@
             rowKey: focusMeta.rowKey,
             rowIndex: focusMeta.rowIndex,
             project,
-            activity: projectOverview ? '' : activity
+            activity
           };
           const g = data.months.indexOf(month);
           if (g >= 0) {
@@ -2353,10 +2345,10 @@
       ProvenanceView.render({
         month,
         project,
-        activity: projectOverview ? '' : activity,
-        projectOverview,
+        activity,
+        projectOverview: false,
         provenanceData: prov,
-        matchesOnly: !projectOverview,
+        matchesOnly: true,
         kickerEl: document.getElementById('prov-inspector-kicker'),
         titleEl: document.getElementById('prov-inspector-title'),
         metaEl: document.getElementById('prov-inspector-meta'),
@@ -2365,17 +2357,17 @@
       provenanceInspectorLastOpen = {
         month,
         project,
-        activity: projectOverview ? '' : activity,
+        activity,
         focusMeta:
           focusMeta && focusMeta.rowKey != null && focusMeta.rowIndex != null && focusMeta.rowIndex >= 0
             ? {
                 rowKey: focusMeta.rowKey,
                 rowIndex: focusMeta.rowIndex,
-                projectOverview: Boolean(projectOverview)
+                projectOverview: false
               }
             : null
       };
-      syncMatrixPinnedSelection(chart, month, project, projectOverview ? '' : activity);
+      syncMatrixPinnedSelection(chart, month, project, activity);
       syncProvInspectorToggleAffordance();
       syncProvenanceSidebarChromeAlignment();
       requestAnimationFrame(() =>
@@ -2443,6 +2435,7 @@
       cancelMatrixHoverExit();
       const root = document.getElementById('provenance-overlay');
       if (!root) return;
+      const wasProjectOverviewModal = root.classList.contains('provenance-overlay--project-overview');
       const dialog = root.querySelector('.provenance-overlay__dialog');
       const ct = document.getElementById('chart-tooltip');
       if (ct && dialog && ct._velocityOverlaySurface === dialog) {
@@ -2464,10 +2457,39 @@
         dialog.style.transition = '';
         dialog.setAttribute('aria-modal', 'true');
       }
-      root.classList.remove('provenance-overlay--hover');
+      root.classList.remove('provenance-overlay--hover', 'provenance-overlay--project-overview');
       root.setAttribute('hidden', '');
       root.setAttribute('aria-hidden', 'true');
-      /* Do not clear chart._provenanceOpenKey here — that belongs to #provenance-inspector cell selection, not this modal. */
+      if (wasProjectOverviewModal) {
+        const chart = document.getElementById('matrix-chart');
+        if (chart) {
+          chart._provenanceOpenKey = '';
+          const piClose = provenanceInspectorLastOpen;
+          if (
+            piClose &&
+            piClose.month != null &&
+            piClose.project &&
+            piClose.focusMeta &&
+            piClose.focusMeta.rowKey != null &&
+            piClose.focusMeta.rowIndex != null &&
+            piClose.focusMeta.rowIndex >= 0
+          ) {
+            chart._inspectorCellFocus = {
+              month: piClose.month,
+              rowKey: piClose.focusMeta.rowKey,
+              rowIndex: piClose.focusMeta.rowIndex,
+              project: piClose.project,
+              activity: piClose.activity == null ? '' : String(piClose.activity)
+            };
+          } else {
+            chart._inspectorCellFocus = null;
+          }
+        }
+        requestAnimationFrame(() =>
+          scheduleMatrixChartResize({ preserveScroll: false, scrollProjectRowIntoView: false })
+        );
+      }
+      /* Hover overlay: do not clear chart._provenanceOpenKey (inspector selection). Project overview modal cleanup above. */
     }
 
     (function bindProvenanceOverlay() {
@@ -2478,7 +2500,12 @@
       document.getElementById('prov-overlay-close')?.addEventListener('click', closeProvenanceOverlay);
       document.addEventListener('keydown', (e) => {
         if (e.key !== 'Escape') return;
-        if (!root.hidden) closeProvenanceOverlay();
+        if (!root.hidden) {
+          closeProvenanceOverlay();
+          return;
+        }
+        const insp = document.getElementById('provenance-inspector');
+        if (insp && !insp.hasAttribute('hidden')) closeProvenanceInspector();
       });
       if (dialog) {
         dialog.addEventListener('pointerenter', cancelMatrixHoverExit, true);
@@ -2505,15 +2532,11 @@
     (function bindProvenanceInspector() {
       const root = document.getElementById('provenance-inspector');
       if (!root) return;
-      document.getElementById('prov-inspector-toggle')?.addEventListener('click', () => {
-        const insp = document.getElementById('provenance-inspector');
-        if (insp && insp.hasAttribute('hidden')) reopenCollapsedProvenanceInspector();
-        else closeProvenanceInspector();
+      document.getElementById('prov-inspector-close')?.addEventListener('click', () => {
+        closeProvenanceInspector();
       });
       root.addEventListener('pointerenter', dismissTooltipsForOverviewHover, true);
       root.addEventListener('pointerleave', scheduleMatrixHoverExit, true);
-      document.getElementById('provenance-sidebar-chrome')?.addEventListener('pointerenter', dismissTooltipsForOverviewHover, true);
-      document.getElementById('provenance-sidebar-chrome')?.addEventListener('pointerleave', scheduleMatrixHoverExit, true);
     })();
 
     const mileColorsBySlug = {
@@ -4596,13 +4619,9 @@
           const yKey = typeof point.y === 'string' ? point.y : String(point.y);
           const xKey = typeof point.x === 'string' ? point.x : String(point.x);
           const rows = chart._matrixExpandedRows || [];
+          /* Top-level project row (collapsed grid or aggregate row when drilled): drill + pin clicked month. */
           if (data.rows.includes(yKey)) {
-            const rowIdx = rows.findIndex((r) => r.key === yKey);
-            const fm =
-              rowIdx >= 0
-                ? { projectOverview: true, rowIndex: rowIdx, rowKey: yKey }
-                : { projectOverview: true };
-            openProvenanceInspector(xKey, yKey, '', fm);
+            setActiveProject(yKey, { heatmapMonth: xKey });
             return;
           }
           const rowIdx = rows.findIndex((r) => r.key === yKey);
@@ -4620,20 +4639,21 @@
             domEv && typeof domEv.clientX === 'number' ? domEv.clientX : lastPointerClientX;
           const hcy =
             domEv && typeof domEv.clientY === 'number' ? domEv.clientY : lastPointerClientY;
-          if (!matrixHitTestCellFromClientXY(chart, hcx, hcy)) {
+          /* Use lattice hit-test for row/month/bbox — Plotly "closest" + dual traces can report a different cell than the pixel. */
+          const hit = matrixHitTestCellFromClientXY(chart, hcx, hcy);
+          if (!hit || hit.idx < 0 || hit.idx >= rows.length) {
             scheduleMatrixHoverExit();
             return;
           }
-          const pt = pickMatrixHoverPoint(ev.points);
-          if (!pt || pt.y == null || pt.x == null) return;
-          const yKey = typeof pt.y === 'string' ? pt.y : String(pt.y);
-          const xKey = typeof pt.x === 'string' ? pt.x : String(pt.x);
-          const idx = rows.findIndex(r => r.key === yKey || r.key === pt.y);
-          if (idx < 0) {
-            scheduleMatrixHoverExit();
-            return;
-          }
-          syncMatrixHoverToCell(chart, rows, visibleMonths, idx, xKey, pt.bbox, (ev && ev.event) || undefined);
+          syncMatrixHoverToCell(
+            chart,
+            rows,
+            visibleMonths,
+            hit.idx,
+            hit.xKey,
+            hit.bbox,
+            (ev && ev.event) || undefined
+          );
         });
         chart.on('plotly_unhover', () => {
           if (isProvenanceInspectorOpen()) {
@@ -4665,10 +4685,27 @@
           scrollMatrixPaneToExpandedProject(selectedProject);
         }
         const insp = document.getElementById('provenance-inspector');
+        const poOv = document.getElementById('provenance-overlay');
+        const projectOverviewModalOpen = Boolean(
+          poOv && !poOv.hidden && poOv.classList.contains('provenance-overlay--project-overview')
+        );
         const focus = chart._inspectorCellFocus;
         const skipScrollIfInView = chart._skipInspectorScrollIfInView === true;
         delete chart._skipInspectorScrollIfInView;
-        if (insp && !insp.hidden && focus && focus.month && focus.rowKey != null) {
+        const drillPinnedMonthScroll =
+          Boolean(selectedProject) &&
+          focus &&
+          focus.month &&
+          focus.rowKey != null &&
+          String(focus.rowKey) === String(selectedProject) &&
+          !isProvenanceInspectorOpen() &&
+          !projectOverviewModalOpen;
+        if (
+          focus &&
+          focus.month &&
+          focus.rowKey != null &&
+          ((insp && !insp.hidden) || projectOverviewModalOpen || drillPinnedMonthScroll)
+        ) {
           const g = data.months.indexOf(focus.month);
           const monthOk = g >= 0 && visibleMonths.includes(focus.month);
           const rowOk = expandedRows.some((r) => r.key === focus.rowKey);
@@ -4917,17 +4954,21 @@
             domEv && typeof domEv.clientX === 'number' ? domEv.clientX : lastPointerClientX;
           const hcy =
             domEv && typeof domEv.clientY === 'number' ? domEv.clientY : lastPointerClientY;
-          if (!milestoneHitTestCellFromClientXY(mileChart, hcx, hcy)) {
+          const hitM = milestoneHitTestCellFromClientXY(mileChart, hcx, hcy);
+          if (!hitM || hitM.idx < 0 || hitM.idx >= nMile) {
             scheduleMatrixHoverExit();
             return;
           }
-          const pt = ev.points && ev.points[0];
-          if (!pt || pt.x == null || pt.y == null) return;
-          const xKey = typeof pt.x === 'string' ? pt.x : String(pt.x);
-          const yKey = typeof pt.y === 'string' ? pt.y : String(pt.y);
-          const rowIdx = mileRows.indexOf(yKey);
-          if (rowIdx < 0) return;
-          const heavyHtml = pt.text != null ? String(pt.text).trim() : '';
+          const xKey = hitM.xKey;
+          const rowIdx = hitM.idx;
+          const yKey = mileRows[rowIdx];
+          const colIdx = visibleMonths.indexOf(xKey);
+          const td0 = mileChart.data && mileChart.data[0];
+          const textGrid = td0 && td0.text;
+          const heavyHtml =
+            textGrid && colIdx >= 0 && textGrid[rowIdx]
+              ? String(textGrid[rowIdx][colIdx] || '').trim()
+              : '';
           if (!heavyHtml) return;
           cancelMatrixHoverExit();
           const provRoot = document.getElementById('provenance-overlay');
@@ -4941,7 +4982,7 @@
             month: xKey,
             rowLabel: yKey,
             heavyHtml,
-            bbox: pt.bbox,
+            bbox: hitM.bbox,
             gd: mileChart,
             pointerEvent,
             rowIndex: rowIdx,
@@ -4970,7 +5011,7 @@
             mileChart._milestoneHoverBandKey = '';
             return;
           }
-          const bands = matrixHoverBandShapes(rowIdx, xKey, nMile, mileChart, pt.bbox);
+          const bands = matrixHoverBandShapes(rowIdx, xKey, nMile, mileChart, hitM.bbox);
           try {
             Plotly.relayout(mileChart, { shapes: base.concat(bands) });
           } catch (e) {
@@ -4981,7 +5022,7 @@
           if (mch && mb) {
             try {
               const mbase = JSON.parse(mb);
-              let colX = matrixPaperColumnXFromHoverBbox(mileChart, pt.bbox);
+              let colX = matrixPaperColumnXFromHoverBbox(mileChart, hitM.bbox);
               if (!colX) {
                 const mi = visibleMonths.indexOf(xKey);
                 const nc = Math.max(1, visibleMonths.length);
@@ -5122,8 +5163,36 @@
 
     let expandedProject = null;
 
-    function setActiveProject(project) {
-      expandedProject = expandedProject === project ? null : project;
+    /**
+     * @param {string|null} project
+     * @param {{ heatmapMonth?: string }} [opts] — set `heatmapMonth` when opening drill from a project-row cell:
+     *   expands that project (no label-style toggle), pins month for matrix highlight + horizontal scroll.
+     */
+    function setActiveProject(project, opts) {
+      const o = opts && typeof opts === 'object' ? opts : {};
+      const heatmapMonth = o.heatmapMonth != null && o.heatmapMonth !== '' ? String(o.heatmapMonth) : null;
+
+      if (heatmapMonth && project) {
+        closeProvenanceOverlay();
+        closeProvenanceInspector();
+        const chartHm = document.getElementById('matrix-chart');
+        const projRowIdx = data.rows.indexOf(project);
+        if (chartHm) {
+          syncMatrixPinnedSelection(chartHm, heatmapMonth, project, '');
+          chartHm._inspectorCellFocus = {
+            month: heatmapMonth,
+            rowKey: project,
+            rowIndex: projRowIdx >= 0 ? projRowIdx : -1,
+            project,
+            activity: ''
+          };
+          chartHm._provenanceOpenKey = `${heatmapMonth}\0${project}\0__overview__`;
+          chartHm._skipInspectorScrollIfInView = false;
+        }
+        expandedProject = project;
+      } else {
+        expandedProject = expandedProject === project ? null : project;
+      }
 
       if (!expandedProject) {
         const po = document.getElementById('provenance-overlay');

@@ -359,6 +359,128 @@ def extract_closing_paragraph_html(text: str) -> str:
     return f'<div class="tt-closing">{markdown_inline_to_tooltip_html(blocks[-1])}</div>'
 
 
+PEOPLE_INVOLVED_H3 = re.compile(r"^###\s+People Involved\s*$", re.I)
+# `-[date]** *(project_slug)*` (report_generator / long-form dumps)
+SUMMARY_BULLET_DATED_PROJECT = re.compile(
+    r"^\s*-\s*\*\*\[[^\]]+\]\*\*\s*\*\(([^)]+)\)\*\s*(.*)$"
+)
+# `-[TAG]**` rest… (synthesis / README vocabulary)
+SUMMARY_BULLET_TAG_PREFIX = re.compile(r"^\s*-\s*\*\*\[([^\]]+)\]\*\*\s*(.*)$")
+# Same heuristics as categorizer._rule_based_categorization (people on work bullets)
+_PEOPLE_FROM_LINE_RES: Tuple[re.Pattern[str], ...] = (
+    re.compile(
+        r"\b(?:spoke with|talked to|met with|from|asked|told)\s+"
+        r"([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)"
+    ),
+    re.compile(r"\b([A-Z][a-z]+)\s+(?:suggested|mentioned|said|asked)\b"),
+    re.compile(r"\binvite\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)", re.I),
+    re.compile(r"\bfollow\s+up\s+w(?:ith)?\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)", re.I),
+    re.compile(r"\bretro\s+with\s+([A-Z][a-z]+)", re.I),
+    re.compile(r"\bwith\s+([A-Z][a-z]+)\s+and\s+([A-Z][a-z]+)\b"),
+)
+
+
+def _canonical_matrix_project_label(token_or_tag: str) -> str | None:
+    """Map a tag or parenthetical project string to the matrix row label (DISPLAY_NAMES value)."""
+    raw = (token_or_tag or "").strip()
+    if not raw:
+        return None
+    if raw in ALLOWED_PROJECT_TAGS:
+        return DISPLAY_NAMES.get(raw, raw)
+    tl = raw.lower().replace(" ", "-")
+    for slug, label in DISPLAY_NAMES.items():
+        if slug.lower() == tl or label.lower() == raw.lower():
+            return label
+    if raw in DISPLAY_NAMES.values():
+        return raw
+    return None
+
+
+def _people_involved_display_names(text: str) -> List[str]:
+    """Display names from `### People Involved` bullets (minus plain / none lines)."""
+    lines = text.splitlines()
+    names: List[str] = []
+    i = 0
+    while i < len(lines):
+        if PEOPLE_INVOLVED_H3.match(lines[i].strip()):
+            i += 1
+            while i < len(lines):
+                raw = lines[i]
+                t = raw.strip()
+                if not t:
+                    i += 1
+                    continue
+                if re.match(r"^###\s", t) or re.match(r"^---\s*$", t):
+                    break
+                m = re.match(r"^\s*-\s+(.*)$", raw)
+                if m:
+                    dn = m.group(1).strip().replace("**", "").strip()
+                    if dn and not re.match(r"^none\s+identified\s*$", dn, re.I):
+                        names.append(dn)
+                i += 1
+            break
+        i += 1
+    return names
+
+
+def _name_appears_in_text(name: str, blob: str) -> bool:
+    if not name or not blob:
+        return False
+    parts = name.split()
+    if len(parts) == 1:
+        return bool(
+            re.search(
+                r"(?<![A-Za-z])" + re.escape(parts[0]) + r"(?![A-Za-z])",
+                blob,
+            )
+        )
+    return name in blob
+
+
+def extract_people_by_project_for_month(text: str) -> Dict[str, Set[str]]:
+    """
+    Map matrix project label -> people names tied to that project this month.
+
+    Uses (1) names from ### People Involved that appear on at least one bullet
+    attributed to that project, and (2) the same people regexes as the categorizer
+    applied only to project-tagged bullet lines.
+    """
+    involved = _people_involved_display_names(text)
+    per_project: Dict[str, Set[str]] = defaultdict(set)
+    blobs: Dict[str, List[str]] = defaultdict(list)
+
+    for line in text.splitlines():
+        proj: str | None = None
+        rest = ""
+        md = SUMMARY_BULLET_DATED_PROJECT.match(line)
+        if md:
+            proj = _canonical_matrix_project_label(md.group(1))
+            rest = md.group(2)
+        else:
+            mt = SUMMARY_BULLET_TAG_PREFIX.match(line)
+            if mt:
+                tag = mt.group(1).strip()
+                if tag in ALLOWED_PROJECT_TAGS:
+                    proj = DISPLAY_NAMES.get(tag, tag)
+                    rest = mt.group(2).strip()
+        if not proj:
+            continue
+        blobs[proj].append(line)
+        for rx in _PEOPLE_FROM_LINE_RES:
+            for pm in rx.finditer(rest):
+                for chunk in pm.groups():
+                    if chunk and len(str(chunk).strip()) >= 2:
+                        per_project[proj].add(str(chunk).strip())
+
+    for proj, line_list in blobs.items():
+        blob = "\n".join(line_list)
+        for name in involved:
+            if _name_appears_in_text(name, blob):
+                per_project[proj].add(name)
+
+    return per_project
+
+
 def parse_month_file(
     path: Path,
 ) -> Tuple[
@@ -630,6 +752,14 @@ def build_payload(summaries_dir: Path, intensity_mode: str = "volume") -> Dict[s
         project_activities[p] = activities
 
     month_sources: Dict[str, str] = {months[i]: per_month_full_text[i] for i in range(n)}
+    row_labels = [DISPLAY_NAMES[p] for p in projects]
+    people_by_project: Dict[str, Dict[str, List[str]]] = {}
+    for mi, month in enumerate(months):
+        extracted = extract_people_by_project_for_month(per_month_full_text[mi])
+        people_by_project[month] = {
+            label: sorted(extracted.get(label, set())) for label in row_labels
+        }
+
     activity_provenance: Dict[str, Dict[str, List[List[str]]]] = {}
     for p in projects:
         dname = DISPLAY_NAMES[p]
@@ -668,6 +798,7 @@ def build_payload(summaries_dir: Path, intensity_mode: str = "volume") -> Dict[s
         "projectScores": {DISPLAY_NAMES[p]: project_scores[p] for p in projects},
         "projectActivities": {DISPLAY_NAMES[p]: project_activities[p] for p in projects},
         "monthSources": month_sources,
+        "peopleByProject": people_by_project,
         "activityProvenance": activity_provenance,
         "activityHints": {DISPLAY_NAMES[p]: activity_hints[p] for p in projects},
         "activityTopRows": {DISPLAY_NAMES[p]: activity_top_rows[p] for p in projects},
@@ -784,8 +915,13 @@ def main() -> None:
         "months": raw["months"],
         "monthSources": raw["monthSources"],
         "activityProvenance": raw["activityProvenance"],
+        "peopleByProject": raw["peopleByProject"],
     }
-    matrix_raw = {k: v for k, v in raw.items() if k not in ("monthSources", "activityProvenance")}
+    matrix_raw = {
+        k: v
+        for k, v in raw.items()
+        if k not in ("monthSources", "activityProvenance", "peopleByProject")
+    }
     payload = strip_builder_only_keys(matrix_raw)
 
     if args.stdout:

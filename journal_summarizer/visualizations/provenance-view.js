@@ -162,7 +162,21 @@
     return { lead: '', detail: detail };
   }
 
-  function renderSummaryParts(source, hlSet) {
+  function filterPeopleSectionEntries(entries, peopleProjectFilter) {
+    if (!peopleProjectFilter) return entries;
+    var allow = peopleAllowSetForCell(
+      peopleProjectFilter.provenanceData,
+      peopleProjectFilter.month,
+      peopleProjectFilter.project
+    );
+    if (allow == null) return entries;
+    return entries.filter(function (e) {
+      if (e.kind !== 'name') return false;
+      return allow.has(normLine(e.displayName));
+    });
+  }
+
+  function renderSummaryParts(source, hlSet, peopleProjectFilter) {
     var lines = source.split('\n');
     var parts = [];
     var i = 0;
@@ -176,8 +190,9 @@
         var cls0 = hl0 ? 'summary-block summary-block--hl' : 'summary-block';
         parts.push('<div class="' + cls0 + '">' + parseLineMarkdown(trimmed) + '</div>');
         var sec = parsePeopleSectionLines(lines, i);
-        if (sec.endIdx > i + 1 || sec.entries.length > 0) {
-          var inner = renderPeopleEntriesHtml(sec.entries, hlSet);
+        var peEntries = filterPeopleSectionEntries(sec.entries, peopleProjectFilter);
+        if (sec.endIdx > i + 1 || peEntries.length > 0) {
+          var inner = renderPeopleEntriesHtml(peEntries, hlSet);
           if (inner) {
             parts.push('<div class="summary-block summary-block--people">' + inner + '</div>');
           }
@@ -201,17 +216,19 @@
     return parts;
   }
 
-  function renderSummaryBody(bodyEl, source, hlSet) {
+  function renderSummaryBody(bodyEl, source, hlSet, opts) {
+    opts = opts || {};
+    var peopleProjectFilter = opts.peopleProjectFilter || null;
     var split = splitClosingSummaryParagraph(source);
     var chunks = [];
     if (split.lead) {
-      chunks = chunks.concat(renderSummaryParts(split.lead, hlSet));
+      chunks = chunks.concat(renderSummaryParts(split.lead, hlSet, peopleProjectFilter));
       if (split.detail) {
         chunks.push('<hr class="summary-body-lead-divider" aria-hidden="true" />');
-        chunks = chunks.concat(renderSummaryParts(split.detail, hlSet));
+        chunks = chunks.concat(renderSummaryParts(split.detail, hlSet, peopleProjectFilter));
       }
     } else {
-      chunks = renderSummaryParts(split.detail, hlSet);
+      chunks = renderSummaryParts(split.detail, hlSet, peopleProjectFilter);
     }
     bodyEl.innerHTML = chunks.join('');
   }
@@ -258,11 +275,31 @@
   }
 
   /**
-   * Matrix overlay: keep ### section headings from the month file, but only bullets that match
-   * this cell’s provenance (everything else hidden). Full ### People Involved list is appended
-   * after an &lt;hr&gt; (not filtered to highlights). Stops at --- for structured walk.
+   * When `peopleByProject` exists (from build_project_matrix), return a Set of normalized names
+   * for this month+matrix row; otherwise null → show full People Involved (legacy HTML).
    */
-  function renderFilteredOverlayBody(bodyEl, source, hlSet, highlights) {
+  function peopleAllowSetForCell(provenanceData, month, project) {
+    var root = provenanceData && provenanceData.peopleByProject;
+    if (!root || !month || !project) return null;
+    var pm = root[month];
+    if (!pm || typeof pm !== 'object') return null;
+    if (!Object.prototype.hasOwnProperty.call(pm, project)) return null;
+    var arr = pm[project];
+    if (!Array.isArray(arr)) return null;
+    var s = new Set();
+    for (var i = 0; i < arr.length; i++) {
+      var n = normLine(String(arr[i] || '').trim());
+      if (n) s.add(n);
+    }
+    return s;
+  }
+
+  /**
+   * Matrix overlay: keep ### section headings from the month file, but only bullets that match
+   * this cell’s provenance (everything else hidden). ### People Involved is appended after an
+   * &lt;hr&gt;, filtered to names tied to this project when `peopleByProject` is present.
+   */
+  function renderFilteredOverlayBody(bodyEl, source, hlSet, highlights, cellCtx) {
     var lines = source.split('\n');
     var parts = [];
     var i = 0;
@@ -280,7 +317,17 @@
 
     function appendFullPeopleSection(chunks) {
       if (!peopleBlock || !peopleBlock.entries || peopleBlock.entries.length === 0) return;
-      var inner = renderPeopleEntriesHtml(peopleBlock.entries, noHl);
+      var allow =
+        cellCtx && peopleAllowSetForCell(cellCtx.provenanceData, cellCtx.month, cellCtx.project);
+      var pe = peopleBlock.entries;
+      if (allow != null) {
+        pe = pe.filter(function (e) {
+          if (e.kind !== 'name') return false;
+          return allow.has(normLine(e.displayName));
+        });
+        if (pe.length === 0) return;
+      }
+      var inner = renderPeopleEntriesHtml(pe, noHl);
       if (!inner) return;
       chunks.push('<hr class="summary-body-lead-divider" aria-hidden="true" />');
       chunks.push(
@@ -412,7 +459,9 @@
         bodyEl.innerHTML = '<p class="prov-hover-count">Full month summary</p>';
         return { ok: true };
       }
-      renderSummaryBody(bodyEl, source, new Set());
+      renderSummaryBody(bodyEl, source, new Set(), {
+        peopleProjectFilter: { provenanceData: provenanceData, month: month, project: project }
+      });
       const firstOv = bodyEl.querySelector('.summary-block--hl, .people-chip--hl');
       if (firstOv && typeof firstOv.scrollIntoView === 'function') {
         requestAnimationFrame(function () {
@@ -450,10 +499,16 @@
         bodyEl.innerHTML =
           '<span class="empty">No matching lines for this activity in this month.</span>';
       } else {
-        renderFilteredOverlayBody(bodyEl, source, hlSet, highlights);
+        renderFilteredOverlayBody(bodyEl, source, hlSet, highlights, {
+          provenanceData: provenanceData,
+          month: month,
+          project: project
+        });
       }
     } else {
-      renderSummaryBody(bodyEl, source, hlSet);
+      renderSummaryBody(bodyEl, source, hlSet, {
+        peopleProjectFilter: { provenanceData: provenanceData, month: month, project: project }
+      });
     }
 
     const firstHl = bodyEl.querySelector('.summary-block--hl, .people-chip--hl');
