@@ -3029,6 +3029,7 @@
       if (!sc) return;
       const traces = sc.querySelectorAll(':scope > g.trace');
       let nodes = [];
+      let fallback = [];
       for (let t = 0; t < traces.length; t++) {
         const pg = traces[t].querySelector(':scope > g.points');
         if (!pg) continue;
@@ -3038,11 +3039,15 @@
             (p) => p.classList && p.classList.contains('point')
           );
         }
-        if (arr.length === n) {
+        if (arr.length !== n) continue;
+        const dtrace = ms.data && ms.data[t];
+        if (dtrace && dtrace.hoverinfo === 'skip') {
           nodes = arr;
           break;
         }
+        if (!fallback.length) fallback = arr;
       }
+      if (!nodes.length) nodes = fallback;
       if (nodes.length !== n) return;
       const s = MILESTONE_COLUMN_POINT_DOM_SCALE;
       for (let i = 0; i < n; i++) {
@@ -3199,6 +3204,43 @@
       const fy1 = gs.t + (1 - paperYBottom) * gs.h;
       const bbox = { x0: lx0 + gLeft, y0: fy0 + gTop, x1: lx1 + gLeft, y1: fy1 + gTop };
       return { idx, xKey, bbox };
+    }
+
+    /**
+     * Page-space bbox for deliverables cell (month × row), matching `milestoneHitTestCellFromClientXY` / lane bands.
+     * Used when Plotly’s hovered point is trusted but pointer→lattice mapping disagrees (boundary / snap).
+     */
+    function milestoneBboxForScatterCell(gd, xKey, rowIdx) {
+      if (!gd || !gd._fullLayout) return null;
+      const gs = gd._fullLayout._size;
+      if (!gs || !(gs.w > 0) || !(gs.h > 0)) return null;
+      const months = gd._milestoneVisibleMonths;
+      const n = gd._milestoneRowCount;
+      if (!months || !months.length || !Number.isFinite(n) || n < 1) return null;
+      const ncols = months.length;
+      const colIndex = months.indexOf(String(xKey));
+      if (colIndex < 0 || rowIdx < 0 || rowIdx >= n) return null;
+      const geom = gd._milestoneColGeom;
+      const xgap =
+        geom && Number.isFinite(Number(geom.xgap)) && Number(geom.xgap) >= 0 ? Number(geom.xgap) : 0;
+      const cw = (gs.w - Math.max(0, ncols - 1) * xgap) / Math.max(1, ncols);
+      let lx0;
+      let lx1;
+      if (cw > 0) {
+        lx0 = gs.l + colIndex * (cw + xgap);
+        lx1 = lx0 + cw;
+      } else {
+        const slotW = gs.w / Math.max(1, ncols);
+        lx0 = gs.l + colIndex * slotW;
+        lx1 = lx0 + slotW;
+      }
+      const gLeft = gd.offsetLeft + gd.clientLeft;
+      const gTop = gd.offsetTop + gd.clientTop;
+      const paperYTop = 1 - rowIdx / n;
+      const paperYBottom = 1 - (rowIdx + 1) / n;
+      const fy0 = gs.t + (1 - paperYTop) * gs.h;
+      const fy1 = gs.t + (1 - paperYBottom) * gs.h;
+      return { x0: lx0 + gLeft, y0: fy0 + gTop, x1: lx1 + gLeft, y1: fy1 + gTop };
     }
 
     /**
@@ -4488,8 +4530,17 @@
      * month ticks are hidden; horizontal brick lattice still matches matrix (same plotWidth, margin.l/r, xgap).
      */
     const MILESTONE_PLOT_MARGIN_TOP = 8;
-    /** Visual scale for deliverables dots in the hovered/highlighted month column (SVG transform on path.point, not marker.size). */
-    const MILESTONE_COLUMN_POINT_DOM_SCALE = 1.55;
+    /**
+     * Non-highlighted deliverables dots render at this fraction of the nominal marker diameter; the column highlight
+     * uses MILESTONE_COLUMN_POINT_DOM_SCALE so the active column keeps the same visual pop as ~1.55× the old base size.
+     */
+    const MILESTONE_SCATTER_MARKER_INACTIVE_FRAC = 0.82;
+    /** SVG scale on path.point for the hovered/highlighted month column (pairs with MILESTONE_SCATTER_MARKER_INACTIVE_FRAC). */
+    const MILESTONE_COLUMN_POINT_DOM_SCALE = 1.55 / MILESTONE_SCATTER_MARKER_INACTIVE_FRAC;
+    /** Plotly pixel radius for picking the nearest deliverables point (`hovermode: 'closest'`). */
+    const MILESTONE_LAYOUT_HOVER_DISTANCE_PX = 40;
+    /** Invisible hover trace marker diameter vs visible layout marker (hit target only; native label still hidden in CSS). */
+    const MILESTONE_HOVER_HALO_MARKER_MULT = 2.05;
 
     /** Inspector-open plot: floor for min brick width in max() with proportional heatWidth (full dataset stays in view). */
     const MATRIX_INSPECTOR_MIN_PX_PER_COL = 16;
@@ -5092,8 +5143,11 @@
       const msColors = [];
       const milestoneHitKeys = new Set();
       const markerPx = Math.max(8, Math.min(14, Math.round(rowHeight * 0.38)));
-      /* One fixed Plotly marker size for all points — column emphasis is opacity + stroke only (no bbox shift). */
-      const milestoneMarkerLayoutPx = markerPx;
+      /* Smaller layout size by default; highlighted column grows via SVG scale (see MILESTONE_COLUMN_POINT_DOM_SCALE). */
+      const milestoneMarkerLayoutPx = Math.max(
+        6,
+        Math.round(markerPx * MILESTONE_SCATTER_MARKER_INACTIVE_FRAC)
+      );
       for (let ri = 0; ri < nMile; ri++) {
         const row = mileRows[ri];
         const slug = mileSlugs[ri];
@@ -5164,6 +5218,10 @@
         clampMilestoneChartDomHeight(mileChartEl);
       }
 
+      const milestoneHaloMarkerPx = Math.max(
+        8,
+        Math.round(milestoneMarkerLayoutPx * MILESTONE_HOVER_HALO_MARKER_MULT)
+      );
       const milestoneTraces =
         msX.length > 0
           ? [
@@ -5173,13 +5231,30 @@
                 x: msXNum,
                 y: msY,
                 text: msText,
-                hovertemplate: '%{text}<extra></extra>',
                 cliponaxis: true,
+                hoverinfo: 'skip',
                 marker: {
                   symbol: 'circle',
                   size: milestoneMarkerLayoutPx,
                   color: msColors,
                   line: { width: 2, color: msColors },
+                  opacity: 1
+                }
+              },
+              {
+                type: 'scatter',
+                mode: 'markers',
+                x: msXNum,
+                y: msY,
+                text: msText,
+                hovertemplate: '%{text}<extra></extra>',
+                cliponaxis: true,
+                showlegend: false,
+                marker: {
+                  symbol: 'circle',
+                  size: milestoneHaloMarkerPx,
+                  color: 'rgba(0,0,0,0.001)',
+                  line: { width: 0, color: 'rgba(0,0,0,0)' },
                   opacity: 1
                 }
               }
@@ -5217,6 +5292,7 @@
           font: { size: 12, color: '#edf3fb' }
         },
         hovermode: 'closest',
+        hoverdistance: MILESTONE_LAYOUT_HOVER_DISTANCE_PX,
         dragmode: false,
         font: { family: 'Manrope, sans-serif', size: 13, color: '#edf3fb' },
         xaxis: {
@@ -5285,14 +5361,16 @@
           const hcy =
             domEv && typeof domEv.clientY === 'number' ? domEv.clientY : lastPointerClientY;
           const pts = ev && ev.points;
-          const curve0 = mileChart.data && mileChart.data[0];
+          const mileData = mileChart.data || [];
+          const pt0 = pts && pts.length > 0 ? pts[0] : null;
+          const cn = pt0 != null ? pt0.curveNumber : -1;
+          const curveAt = cn >= 0 ? mileData[cn] : null;
           const scatterPt =
-            pts &&
-            pts.length > 0 &&
-            curve0 &&
-            curve0.type === 'scatter' &&
-            pts[0].curveNumber === 0
-              ? pts[0]
+            pt0 &&
+            curveAt &&
+            curveAt.type === 'scatter' &&
+            (cn === 0 || cn === 1)
+              ? pt0
               : null;
           if (!scatterPt || scatterPt.x == null || scatterPt.y == null) {
             scheduleMatrixHoverExit();
@@ -5313,8 +5391,19 @@
             scheduleMatrixHoverExit();
             return;
           }
+          const hitKey = `${xKey}\0${yKey}`;
+          if (
+            mileChart._milestoneHitKeys instanceof Set &&
+            !mileChart._milestoneHitKeys.has(hitKey)
+          ) {
+            scheduleMatrixHoverExit();
+            return;
+          }
           const hitM = milestoneHitTestCellFromClientXY(mileChart, hcx, hcy);
-          if (!hitM || hitM.idx !== rowIdx || hitM.xKey !== xKey) {
+          let cellBBox =
+            hitM && hitM.idx === rowIdx && hitM.xKey === xKey ? hitM.bbox : null;
+          if (!cellBBox) cellBBox = milestoneBboxForScatterCell(mileChart, xKey, rowIdx);
+          if (!cellBBox) {
             scheduleMatrixHoverExit();
             return;
           }
@@ -5331,7 +5420,7 @@
             month: xKey,
             rowLabel: yKey,
             heavyHtml,
-            bbox: hitM.bbox,
+            bbox: cellBBox,
             gd: mileChart,
             pointerEvent,
             rowIndex: rowIdx,
@@ -5360,7 +5449,7 @@
             mileChart._milestoneHoverBandKey = '';
             return;
           }
-          const bands = matrixHoverBandShapes(rowIdx, xKey, nMile, mileChart, hitM.bbox);
+          const bands = matrixHoverBandShapes(rowIdx, xKey, nMile, mileChart, cellBBox);
           try {
             Plotly.relayout(mileChart, { shapes: base.concat(bands) });
           } catch (e) {
@@ -5372,7 +5461,7 @@
             try {
               const mbase = JSON.parse(mb);
               let colX = milestonePaperColumnXForMonthKey(mileChart, xKey);
-              if (!colX) colX = matrixPaperColumnXFromHoverBbox(mileChart, hitM.bbox);
+              if (!colX) colX = matrixPaperColumnXFromHoverBbox(mileChart, cellBBox);
               if (!colX) {
                 const mi = visibleMonths.indexOf(xKey);
                 const nc = Math.max(1, visibleMonths.length);
