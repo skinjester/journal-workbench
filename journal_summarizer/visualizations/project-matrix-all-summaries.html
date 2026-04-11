@@ -2948,47 +2948,17 @@
     }
 
     /**
-     * Column emphasis: fixed `marker.size` + fixed `marker.line.width`; apparent “radius” via SVG transform scale on `path.point`.
+     * Column emphasis: only SVG `scale` on `path.point` (no opacity / stroke restyle — keeps full brightness everywhere).
      */
     function setMilestoneScatterColumnMarkerSizes(ms, highlightMonthKey) {
       if (!ms || !ms._milestoneScatterMode || !Array.isArray(ms._milestoneScatterX)) return;
       const xs = ms._milestoneScatterX;
-      const fills = ms._milestoneScatterMarkerColors;
-      if (!xs.length || !Array.isArray(fills) || fills.length !== xs.length) return;
+      if (!xs.length) return;
       const hk =
         highlightMonthKey != null && highlightMonthKey !== '' ? String(highlightMonthKey) : '';
       ms._milestoneHighlightColumnKey = hk;
-      const offOp = 0.34;
-      const onOp = 1;
-      const opacities = hk ? xs.map((x) => (String(x) === hk ? onOp : offOp)) : xs.map(() => onOp);
-      const lineW = 2;
-      const lineWidths = xs.map(() => lineW);
-      const lineColors = hk
-        ? xs.map((x, i) => (String(x) === hk ? 'rgba(255,255,255,0.7)' : fills[i]))
-        : fills.map((c) => c);
-      const finish = () => {
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            applyMilestoneScatterPointColumnScale(ms);
-            clampMilestoneChartDomHeight(ms);
-          });
-        });
-      };
-      try {
-        const ret = Plotly.restyle(
-          ms,
-          {
-            'marker.opacity': [opacities],
-            'marker.line.width': [lineWidths],
-            'marker.line.color': [lineColors]
-          },
-          [0]
-        );
-        if (ret && typeof ret.then === 'function') ret.then(finish);
-        else finish();
-      } catch (e) {
-        finish();
-      }
+      applyMilestoneScatterPointColumnScale(ms);
+      clampMilestoneChartDomHeight(ms);
     }
 
     /**
@@ -5074,8 +5044,6 @@
         mileChartEl._milestoneScatterMode = true;
         mileChartEl._milestoneHitKeys = milestoneHitKeys;
         mileChartEl._milestoneScatterX = msX.length > 0 ? msX.slice() : [visibleMonths[0]];
-        mileChartEl._milestoneScatterMarkerColors =
-          msX.length > 0 ? msColors.slice() : ['rgba(0,0,0,0)'];
         mileChartEl._milestoneScatterMarkerLayoutPx = milestoneMarkerLayoutPx;
         mileChartEl._milestoneLayoutHeightPx = milestonePlotHeight;
         clampMilestoneChartDomHeight(mileChartEl);
