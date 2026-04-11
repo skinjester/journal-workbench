@@ -187,7 +187,8 @@ PDF_RE = re.compile(r"(\.pdf\b|\bpdf\b)", re.I)
 
 DELIV_RE = re.compile(r"`deliv:([a-z0-9_-]+)`", re.I)
 
-# Timeline rows (order = top → bottom in the chart). Aligns with CURSOR_SYNTHESIS_INSTRUCTIONS deliv slugs + pdf.
+# Timeline rows (order = top → bottom in the chart). Aligns with CURSOR_SYNTHESIS_INSTRUCTIONS deliv slugs.
+# Excluded from the chart: operations, pdf (still detected for tagging / lifecycle elsewhere).
 DELIV_MILESTONE_SLUGS: Tuple[str, ...] = (
     "audit",
     "documentation",
@@ -195,8 +196,6 @@ DELIV_MILESTONE_SLUGS: Tuple[str, ...] = (
     "visuals",
     "prototype",
     "presentation",
-    "operations",
-    "pdf",
 )
 
 DELIV_MILESTONE_LABELS: Dict[str, str] = {
@@ -206,8 +205,6 @@ DELIV_MILESTONE_LABELS: Dict[str, str] = {
     "visuals": "Visuals",
     "prototype": "Prototype",
     "presentation": "Presentation",
-    "operations": "Operations",
-    "pdf": "PDF",
 }
 
 DELIV_MILESTONE_HOVER: Dict[str, str] = {
@@ -217,8 +214,6 @@ DELIV_MILESTONE_HOVER: Dict[str, str] = {
     "visuals": "Month includes <code>deliv:visuals</code> (stills/motion, comps, exports, non-interactive visuals).",
     "prototype": "Month includes <code>deliv:prototype</code> or prototype/wireframe vocabulary (legacy cue).",
     "presentation": "Month includes <code>deliv:presentation</code> or deck/slides vocabulary (legacy cue).",
-    "operations": "Month includes <code>deliv:operations</code> (infra, DNS, rack, invoices, migrations).",
-    "pdf": "Month includes <code>deliv:pdf</code> or mentions PDF / <code>.pdf</code> (legacy cue).",
 }
 
 
@@ -226,7 +221,6 @@ def deliv_milestone_hits_per_month(
     per_month_full_text: List[str],
     strict_proto: List[int],
     strict_pres: List[int],
-    strict_pdf: List[int],
 ) -> Dict[str, List[int]]:
     """One row per deliverable slug: 1 if that month’s summary has the tag (or merged legacy cues)."""
     n = len(per_month_full_text)
@@ -244,8 +238,6 @@ def deliv_milestone_hits_per_month(
             hits["prototype"][i] = 1
         if strict_pres[i]:
             hits["presentation"][i] = 1
-        if strict_pdf[i]:
-            hits["pdf"][i] = 1
     return hits
 
 
@@ -668,7 +660,7 @@ def build_payload(summaries_dir: Path, intensity_mode: str = "volume") -> Dict[s
         strict_pdf.append(d)
 
     deliv_milestone_hits = deliv_milestone_hits_per_month(
-        per_month_full_text, strict_proto, strict_pres, strict_pdf
+        per_month_full_text, strict_proto, strict_pres
     )
 
     projects = [p for p in ROW_ORDER if p in ALLOWED_PROJECT_TAGS and grand_totals[p] > 0]
