@@ -352,10 +352,7 @@
       min-width: 0;
       border-top: 0;
       overflow: hidden;
-      cursor: pointer;
-    }
-    .fixed-label.child:hover {
-      background: rgba(255, 255, 255, 0.04);
+      cursor: default;
     }
     .fixed-label.project-open {
       background: transparent;
@@ -816,37 +813,6 @@
       display: flex;
       flex-direction: column;
     }
-    .provenance-inspector__close {
-      position: absolute;
-      top: 0;
-      right: 0;
-      z-index: 2;
-      width: 36px;
-      height: 36px;
-      margin: 0;
-      border: 0;
-      border-radius: 10px;
-      background: rgba(255, 255, 255, 0.06);
-      color: var(--text);
-      font-size: var(--text-2xl);
-      line-height: 1;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-    }
-    .provenance-inspector__close:hover {
-      background: rgba(255, 255, 255, 0.12);
-    }
-    .provenance-inspector__close:focus {
-      outline: none;
-      box-shadow: none;
-    }
-    .provenance-inspector__close:focus-visible {
-      outline: 2px solid rgba(140, 195, 255, 0.9);
-      outline-offset: 2px;
-    }
     .provenance-inspector__scroll {
       flex: 1 1 auto;
       min-height: 0;
@@ -1165,7 +1131,6 @@
         </div>
         <aside id="provenance-inspector" class="provenance-inspector" hidden aria-hidden="true" aria-labelledby="prov-inspector-title">
           <div class="provenance-inspector__main">
-            <button type="button" class="provenance-inspector__close" id="prov-inspector-close" aria-label="Close panel">&times;</button>
             <div class="provenance-inspector__scroll">
               <div class="chart-tooltip__kicker provenance-overlay__kicker" id="prov-inspector-kicker"></div>
               <div class="chart-tooltip__title provenance-overlay__headline" id="prov-inspector-title" role="heading" aria-level="2"></div>
@@ -2166,15 +2131,6 @@
       }, 100);
     });
 
-    /** True when the sidebar was last opened for an activity line (child), not the project aggregate (parent). */
-    function provenanceInspectorLastOpenShowsActivity(pi) {
-      if (!pi) return false;
-      const act = pi.activity == null ? '' : String(pi.activity).trim();
-      if (act !== '') return true;
-      if (pi.focusMeta && pi.focusMeta.projectOverview === false) return true;
-      return false;
-    }
-
     /** After matrix redraw or Plotly unhover-with-click, restore minimal inspector hint for the selected cell. */
     function showInspectorHintAfterOpen() {
       if (!isProvenanceInspectorOpen()) return;
@@ -2624,9 +2580,6 @@
     (function bindProvenanceInspector() {
       const root = document.getElementById('provenance-inspector');
       if (!root) return;
-      document.getElementById('prov-inspector-close')?.addEventListener('click', () => {
-        closeProvenanceInspector();
-      });
       root.addEventListener('pointerenter', dismissTooltipsForOverviewHover, true);
       root.addEventListener('pointerleave', scheduleMatrixHoverExit, true);
     })();
@@ -5143,7 +5096,7 @@
         ) {
           childClasses.push('matrix-cell-selected');
         }
-        return `<div class="${childClasses.join(' ')}" role="button" tabindex="0" title="Collapse project"><span class="fixed-label-text">${escapeHtml(row.label)}</span></div>`;
+        return `<div class="${childClasses.join(' ')}"><span class="fixed-label-text">${escapeHtml(row.label)}</span></div>`;
       }).join('');
 
       syncMilestoneScrollWidth();
@@ -5673,64 +5626,32 @@
       if (!expandedProject) {
         const po = document.getElementById('provenance-overlay');
         if (po && !po.hidden) closeProvenanceOverlay();
-        /* Keep #provenance-inspector open when leaving drill — closing it cleared _provenanceOpenKey / focus and removed the selected-month matrix bands on the full grid. */
         const chartPre = document.getElementById('matrix-chart');
-        let pi = provenanceInspectorLastOpen;
-        const inspEl = document.getElementById('provenance-inspector');
-        const inspectorVisible = Boolean(inspEl && !inspEl.hasAttribute('hidden'));
-
-        let inspectorRefreshedToProjectOverview = false;
-        if (
-          inspectorVisible &&
-          pi &&
-          pi.month != null &&
-          pi.project &&
-          provenanceInspectorLastOpenShowsActivity(pi)
-        ) {
-          const proj = pi.project;
-          const projRowIdx = data.rows.indexOf(proj);
-          const fm =
-            projRowIdx >= 0
-              ? { projectOverview: true, rowIndex: projRowIdx, rowKey: proj }
-              : { projectOverview: true };
-          openProvenanceInspector(String(pi.month), proj, '', fm);
-          inspectorRefreshedToProjectOverview = true;
-          pi = provenanceInspectorLastOpen;
+        /* Full “all projects” grid: close the inspector, drop drill pins/focus, and clear hover bands so layout matches the initial multi-project view. */
+        provenanceInspectorLastOpen = null;
+        closeProvenanceInspector();
+        if (chartPre) {
+          clearMatrixPinnedSelection(chartPre);
+          chartPre._inspectorCellFocus = null;
+          chartPre._provenanceOpenKey = '';
+          clearMatrixHoverBands(chartPre);
         }
-
-        if (chartPre && pi && pi.project && !inspectorRefreshedToProjectOverview) {
-          const proj = pi.project;
-          const projRowIdx = data.rows.indexOf(proj);
-          if (projRowIdx >= 0) {
-            const cf = chartPre._inspectorCellFocus;
-            if (cf && cf.project === proj) {
-              const rk = cf.rowKey == null ? '' : String(cf.rowKey);
-              if (rk !== proj || rk.includes('::')) {
-                chartPre._inspectorCellFocus = {
-                  ...cf,
-                  rowKey: proj,
-                  rowIndex: projRowIdx
-                };
-              }
-            }
-            if (pi.focusMeta && typeof pi.focusMeta === 'object') {
-              pi.focusMeta.rowKey = proj;
-              pi.focusMeta.rowIndex = -1;
-            }
-          }
-        }
-        if (chartPre && pi && pi.month != null && pi.project && !inspectorRefreshedToProjectOverview) {
-          syncMatrixPinnedSelection(
-            chartPre,
-            pi.month,
-            pi.project,
-            pi.activity == null ? '' : pi.activity
-          );
+        hideChartTooltip();
+        cancelMatrixHoverExit();
+        const msExit = document.getElementById('milestone-chart');
+        if (msExit && msExit._milestoneBaseShapesJson) {
+          try {
+            Plotly.relayout(msExit, { shapes: JSON.parse(msExit._milestoneBaseShapesJson) });
+          } catch (e) { /* ignore */ }
+          setMilestoneScatterColumnMarkerSizes(msExit, null);
+          msExit._milestoneHoverBandKey = '';
+          const mll = document.getElementById('milestone-labels');
+          if (mll) Array.from(mll.children).forEach((el) => el.classList.remove('hover-row-affordance'));
         }
         if (detailTitle) detailTitle.textContent = 'Selected Project';
         if (detailCopy) {
           detailCopy.textContent =
-            'Click a project row to open it alone in the matrix (aggregate row + activity types by month). Use All projects above the list or click the same row again to see every project.';
+            'Click a project row to open it alone in the matrix (aggregate row + activity types by month). Use All projects above the list or click the same project row again to return to every project. Activity names in the list are labels only.';
         }
         if (detailStats) {
           detailStats.innerHTML = [
@@ -5810,24 +5731,13 @@
       setActiveProject(null);
     });
 
-    /** One delegated handler: project row toggles drill (same project → collapse); activity rows collapse to all projects. */
+    /** Project row toggles drill (same project → collapse). Activity sub-rows are display-only — use “All projects” to leave drill. */
     matrixLabels?.addEventListener('click', (e) => {
       const btn = e.target.closest('button[data-project]');
       if (btn && btn.dataset.project) {
         const p = btn.dataset.project;
         setActiveProject(expandedProject === p ? null : p);
-        return;
       }
-      if (e.target.closest('.fixed-label.child') && expandedProject) {
-        setActiveProject(null);
-      }
-    });
-    matrixLabels?.addEventListener('keydown', (e) => {
-      if (e.key !== 'Enter' && e.key !== ' ') return;
-      const child = e.target.closest('.fixed-label.child');
-      if (!child || !expandedProject) return;
-      e.preventDefault();
-      setActiveProject(null);
     });
 
     // Start collapsed so the full project grid is visible; expand any row to drill in.
