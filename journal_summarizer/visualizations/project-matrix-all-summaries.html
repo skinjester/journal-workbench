@@ -26,7 +26,7 @@
     .chart-panel {
       display: flex;
       flex-direction: column;
-      padding-top: var(--sp-2);
+      padding-top: 0;
       padding-right: clamp(var(--sp-3), 2.5vw, var(--sp-4));
       padding-bottom: clamp(var(--sp-3), 2.5vw, var(--sp-4));
       padding-left: clamp(var(--sp-3), 2.5vw, var(--sp-4));
@@ -120,8 +120,9 @@
       width: 100%;
       min-width: 0;
       flex-shrink: 0;
-      margin: 0 0 var(--sp-0-5);
-      padding-bottom: var(--sp-1);
+      margin: 0;
+      padding-top: var(--sp-1);
+      padding-bottom: 0;
       border-bottom: 1px solid rgba(255, 255, 255, 0.06);
       position: relative;
       z-index: 2;
@@ -133,9 +134,9 @@
     .matrix-chart-title-bar .chart-panel-section-heading {
       margin: 0;
     }
-    /* Pull heatmap toward the chart block so month labels sit closer under the title bar. */
+    /* Pull heatmap toward the title rule; pairs with MATRIX_X_AXIS_MARGIN_TOP_LAYOUT (smaller top Plotly margin). */
     .matrix-map-section > .matrix-shell {
-      margin-top: -20px;
+      margin-top: -40px;
     }
     /**
      * One matrix row height (28px) above the bottom of the axis padding, then a blank 28px band (“carriage return”)
@@ -145,7 +146,7 @@
       position: absolute;
       left: 0;
       right: 0;
-      top: calc(var(--matrix-plot-margin-top, 102px) - 56px);
+      top: calc(var(--matrix-plot-margin-top, 82px) - 56px);
       height: 28px;
       box-sizing: border-box;
       display: flex;
@@ -257,7 +258,7 @@
       border-right: 1px solid rgba(255, 255, 255, 0.06);
       border-radius: 0;
       /* Top/bottom padding track Plotly margin.t / margin.b (JS sets --matrix-plot-margin-* in renderMatrix). */
-      padding: var(--matrix-plot-margin-top, 102px) 12px var(--matrix-plot-margin-bottom, 4px) 0;
+      padding: var(--matrix-plot-margin-top, 82px) 12px var(--matrix-plot-margin-bottom, 4px) 0;
       align-self: start;
     }
     .fixed-labels.milestones {
@@ -4657,9 +4658,10 @@
     const MATRIX_PLOT_MARGIN_LR = { l: 0, r: 18 };
     /**
      * Fallback Plotly margin.t / CSS --matrix-plot-margin-top before first render; live layout uses
-     * buildMatrixXAxisTickConfig(...).marginTop (82–102px by density). Paired with autoexpand:false / automargin:false.
+     * buildMatrixXAxisTickConfig(...).marginTop (58–102px by density). Fixed here so inspector width toggles
+     * do not shift the heatmap vertically; 82px matches the wide-column tick tier (was 102, extra dead band).
      */
-    const MATRIX_X_AXIS_MARGIN_TOP_LAYOUT = 102;
+    const MATRIX_X_AXIS_MARGIN_TOP_LAYOUT = 82;
     /**
      * Deliverables heatmap: top Plotly margin + label padding-top. Smaller than MATRIX_X_AXIS_MARGIN_TOP_LAYOUT because
      * month ticks are hidden; horizontal brick lattice still matches matrix (same plotWidth, margin.l/r, xgap).
