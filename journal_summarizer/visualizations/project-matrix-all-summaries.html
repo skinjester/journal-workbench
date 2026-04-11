@@ -2322,7 +2322,73 @@
         return;
       }
       if (projectOverview) {
-        openProjectOverviewModal(month, project, focusMeta);
+        /* Full-screen modal only when the sidebar is not already open — avoids popping the overlay when
+         * returning to “all projects” or refreshing drill while the inspector is visible. */
+        if (!(wasInspectorAlreadyOpen && root)) {
+          openProjectOverviewModal(month, project, focusMeta);
+          return;
+        }
+        closeProvenanceOverlay();
+        hideChartTooltip();
+        clearMatrixHoverBands(chart);
+        cancelMatrixHoverExit();
+        const cellKeyOv = `${month}\0${project}\0__overview__`;
+        if (typeof marked !== 'undefined') {
+          marked.setOptions({ gfm: true, breaks: false });
+        }
+        if (chart) {
+          chart._skipInspectorScrollIfInView = false;
+          chart._provenanceOpenKey = cellKeyOv;
+          if (focusMeta && focusMeta.rowKey != null && focusMeta.rowIndex != null && focusMeta.rowIndex >= 0) {
+            chart._inspectorCellFocus = {
+              month,
+              rowKey: focusMeta.rowKey,
+              rowIndex: focusMeta.rowIndex,
+              project,
+              activity: ''
+            };
+          } else {
+            chart._inspectorCellFocus = null;
+          }
+        }
+        ProvenanceView.render({
+          month,
+          project,
+          activity: '',
+          projectOverview: true,
+          provenanceData: prov,
+          matchesOnly: false,
+          kickerEl: document.getElementById('prov-inspector-kicker'),
+          titleEl: document.getElementById('prov-inspector-title'),
+          metaEl: document.getElementById('prov-inspector-meta'),
+          bodyEl: document.getElementById('prov-inspector-body')
+        });
+        provenanceInspectorLastOpen = {
+          month,
+          project,
+          activity: '',
+          focusMeta:
+            focusMeta && focusMeta.rowKey != null && focusMeta.rowIndex != null && focusMeta.rowIndex >= 0
+              ? {
+                  rowKey: focusMeta.rowKey,
+                  rowIndex: focusMeta.rowIndex,
+                  projectOverview: true
+                }
+              : null
+        };
+        syncMatrixPinnedSelection(chart, month, project, '');
+        root.classList.add('provenance-inspector--pre-align');
+        root.removeAttribute('hidden');
+        root.setAttribute('aria-hidden', 'false');
+        syncProvInspectorToggleAffordance();
+        syncProvenanceSidebarChromeAlignment();
+        requestAnimationFrame(() =>
+          scheduleMatrixChartResize({ preserveScroll: false, scrollProjectRowIntoView: false })
+        );
+        window.setTimeout(() => {
+          scheduleSyncProvenanceInspectorAlignment();
+          root.classList.remove('provenance-inspector--pre-align');
+        }, 480);
         return;
       }
       if (!root) {
@@ -2784,7 +2850,7 @@
     }
 
     /**
-     * `visibleMonthsOverride`: use when `gd` has no layout yet (e.g. inspector base shapes during renderMatrix).
+     * `visibleMonthsOverride`: use when `gd` has no layout yet (e.g. base shapes during renderMatrix before `_fullLayout`).
      * `colXOverride`: paper coords from matrixPaperColumnXFromLattice when bbox/`_fullLayout` are missing or stale.
      */
     function matrixHoverBandShapes(
@@ -2794,15 +2860,12 @@
       gd,
       hoverBbox,
       visibleMonthsOverride,
-      bandEmphasis,
       colXOverride
     ) {
       if (rowIndex < 0 || rowCount <= 0 || monthKey == null || monthKey === '') return [];
       const T = MATRIX_HOVER_TOKENS;
-      const isInspector = bandEmphasis === 'inspector';
-      /* Inspector: no warm row/column wash — rules + cell outline only. Hover uses warm fills; neither dims the rest of the plot. */
-      const fillRow = isInspector ? 'rgba(0,0,0,0)' : T.crossFill;
-      const fillCol = isInspector ? 'rgba(0,0,0,0)' : T.crossFillColumn;
+      const fillRow = T.crossFill;
+      const fillCol = T.crossFillColumn;
       const ry0 = 1 - (rowIndex + 1) / rowCount;
       const ry1 = 1 - rowIndex / rowCount;
       const rowRect = {
@@ -3342,13 +3405,6 @@
         chart._matrixHoverBandKey = '';
         return;
       }
-      const pinSel = chart._matrixPinnedSelection;
-      const hasActivePin =
-        pinSel &&
-        pinSel.month != null &&
-        String(pinSel.month) !== '' &&
-        pinSel.project;
-      /* With a persisted cell selection, use inspector-style hover bands (no opaque cross-fill) so pin outlines stay visible. */
       let colXSynced = milestonePaperColumnXForMonthKey(chart, monthKeyForBands);
       if (!colXSynced) colXSynced = matrixPaperColumnXFromHoverBbox(chart, bbox);
       const bands = matrixHoverBandShapes(
@@ -3357,8 +3413,7 @@
         rows.length,
         chart,
         bbox,
-        hasActivePin ? visibleMonths : undefined,
-        hasActivePin ? 'inspector' : undefined,
+        undefined,
         colXSynced
       );
       const merged = base.concat(bands);
@@ -4789,7 +4844,6 @@
               chartPre,
               null,
               visibleMonths,
-              'inspector',
               colXLattice
             )
           );
@@ -5353,8 +5407,6 @@
           syncMilePaneHeight();
         });
         mileChart.on('plotly_hover', (ev) => {
-          const inspPanel = document.getElementById('provenance-inspector');
-          const inspectorOpen = Boolean(inspPanel && !inspPanel.hidden);
           const domEv = ev && ev.event;
           const hcx =
             domEv && typeof domEv.clientX === 'number' ? domEv.clientX : lastPointerClientX;
@@ -5386,8 +5438,7 @@
           }
           const yKey = typeof scatterPt.y === 'string' ? scatterPt.y : String(scatterPt.y);
           const rowIdx = mileRows.indexOf(yKey);
-          const heavyHtml = scatterPt.text != null ? String(scatterPt.text).trim() : '';
-          if (rowIdx < 0 || !heavyHtml) {
+          if (rowIdx < 0) {
             scheduleMatrixHoverExit();
             return;
           }
@@ -5414,31 +5465,8 @@
             closeProvenanceOverlay();
           }
           const bandKey = `${rowIdx}\0${xKey}`;
-          const pointerEvent = (ev && ev.event) || undefined;
-          const localMonthIdx = visibleMonths.indexOf(xKey);
-          const tipPayload = {
-            month: xKey,
-            rowLabel: yKey,
-            heavyHtml,
-            bbox: cellBBox,
-            gd: mileChart,
-            pointerEvent,
-            rowIndex: rowIdx,
-            rowCount: nMile,
-            gridHint: localMonthIdx >= 0 ? { m: localMonthIdx, r: rowIdx } : undefined
-          };
           if (mileChart._milestoneHoverBandKey === bandKey) {
-            if (inspectorOpen) {
-              showMilestoneInspectorHintTooltip({
-                month: xKey,
-                rowLabel: yKey,
-                entryCount: 1,
-                cellKey: `hint:mile:\0${xKey}\0${yKey}`,
-                pointerEvent
-              });
-            } else {
-              showMilestoneHeatmapTooltip(tipPayload);
-            }
+            cancelMatrixHoverExit();
             return;
           }
           mileChart._milestoneHoverBandKey = bandKey;
@@ -5450,10 +5478,15 @@
             return;
           }
           const bands = matrixHoverBandShapes(rowIdx, xKey, nMile, mileChart, cellBBox);
+          /* Relayout draws hover shapes above traces; Plotly often emits a spurious plotly_unhover right after.
+           * Ignore unhover cleanup briefly so row/column highlight does not flash off. */
+          mileChart._milestoneSuppressUnhoverUntil =
+            (typeof performance !== 'undefined' ? performance.now() : Date.now()) + 120;
           try {
             Plotly.relayout(mileChart, { shapes: base.concat(bands) });
           } catch (e) {
             mileChart._milestoneHoverBandKey = '';
+            mileChart._milestoneSuppressUnhoverUntil = 0;
           }
           const mch = document.getElementById('matrix-chart');
           const mb = mch && mch._matrixHoverBaseShapesJson;
@@ -5492,19 +5525,15 @@
               kids[i].classList.toggle('hover-row-affordance', i === rowIdx);
             }
           }
-          if (inspectorOpen) {
-            showMilestoneInspectorHintTooltip({
-              month: xKey,
-              rowLabel: yKey,
-              entryCount: 1,
-              cellKey: `hint:mile:\0${xKey}\0${yKey}`,
-              pointerEvent
-            });
-          } else {
-            showMilestoneHeatmapTooltip(tipPayload);
-          }
         });
         mileChart.on('plotly_unhover', () => {
+          const now = typeof performance !== 'undefined' ? performance.now() : Date.now();
+          if (
+            Number.isFinite(mileChart._milestoneSuppressUnhoverUntil) &&
+            now < mileChart._milestoneSuppressUnhoverUntil
+          ) {
+            return;
+          }
           const mj = mileChart._milestoneBaseShapesJson;
           if (mj) {
             try {
