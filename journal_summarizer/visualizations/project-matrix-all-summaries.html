@@ -452,29 +452,13 @@
       pointer-events: none;
       display: none;
     }
-    /* Overview sidebar open: minimal label by the cursor (full body lives in the inspector). */
+    /* Overview sidebar open: narrower width only; kicker/title/meta match full matrix tooltips. */
     #chart-tooltip.chart-tooltip--inspector-hint {
       width: max-content;
       max-width: min(280px, calc(100vw - var(--sp-3)));
     }
     #chart-tooltip.chart-tooltip--inspector-hint .chart-tooltip__surface {
-      padding: var(--sp-0-5) var(--sp-1);
       max-height: none;
-    }
-    #chart-tooltip.chart-tooltip--inspector-hint .chart-tooltip__kicker {
-      margin: 0 0 2px;
-      font-size: var(--text-2xs);
-    }
-    #chart-tooltip.chart-tooltip--inspector-hint .chart-tooltip__title {
-      margin: 0;
-      font-size: var(--text-xs);
-      line-height: var(--lh-snug);
-    }
-    #chart-tooltip.chart-tooltip--inspector-hint .chart-tooltip__hint-count {
-      margin: var(--sp-0-5) 0 0;
-      font-size: var(--text-2xs);
-      color: var(--matrix-tooltip-muted, var(--warm-read-muted));
-      font-variant-numeric: tabular-nums;
     }
     /* Pass hits through tooltip chrome; activity provenance panel re-enables below. */
     #chart-tooltip .chart-tooltip__surface * {
@@ -589,6 +573,15 @@
       line-height: 1.3;
       font-weight: 600;
       color: var(--matrix-tooltip-meta, var(--warm-read-meta));
+    }
+    /* Entry / count line (inspector hint + any shell using .chart-tooltip__hint-count) — same scale as meta. */
+    #chart-tooltip .chart-tooltip__hint-count {
+      margin: var(--sp-0-5) 0 0;
+      font-size: var(--text-sm);
+      line-height: 1.3;
+      font-weight: 600;
+      color: var(--matrix-tooltip-meta, var(--warm-read-meta));
+      font-variant-numeric: tabular-nums;
     }
     #chart-tooltip .chart-tooltip__body {
       font-size: var(--text-sm);
@@ -1877,6 +1870,9 @@
       if (ch) ch._lastMatrixCellBboxPage = null;
       if (ml) Array.from(ml.children).forEach((el) => el.classList.remove('hover-row-affordance'));
       hideChartTooltip();
+      if (isProvenanceInspectorOpen() && provenanceInspectorLastOpen && provenanceInspectorLastOpen.month != null) {
+        restoreProvenanceInspectorPinnedBody();
+      }
       const po = document.getElementById('provenance-overlay');
       if (po && !po.hidden && po.classList.contains('provenance-overlay--hover')) {
         closeProvenanceOverlay();
@@ -2134,6 +2130,7 @@
     /** After matrix redraw or Plotly unhover-with-click, restore minimal inspector hint for the selected cell. */
     function showInspectorHintAfterOpen() {
       if (!isProvenanceInspectorOpen()) return;
+      restoreProvenanceInspectorPinnedBody();
       const chart = document.getElementById('matrix-chart');
       const focus = chart && chart._inspectorCellFocus;
       const pi = provenanceInspectorLastOpen;
@@ -2154,13 +2151,11 @@
 
       if (projectOverview || !activity) {
         if (globalMonthIdx < 0) return;
-        const ps = (data.projectScores && data.projectScores[project]) || [];
-        const entryCount = Number(ps[globalMonthIdx] || 0);
         if (rIdx < 0) rIdx = rows.findIndex((r) => r.type === 'project' && r.project === project);
         showMatrixInspectorHintTooltip({
           month: xKeyStr,
           titleLine: project,
-          entryCount,
+          entryCount: undefined,
           cellKey: `hint:sel:\0${xKeyStr}\0${project}\0__ov__`,
           pointerEvent: undefined,
           gridHint: rIdx >= 0 ? { m: localMonthIdx, r: rIdx } : undefined
@@ -2169,9 +2164,6 @@
       }
 
       const row = rIdx >= 0 ? rows[rIdx] : null;
-      const rm = row && row.rawMonthly;
-      const entryCount =
-        rm && localMonthIdx >= 0 && localMonthIdx < rm.length ? Number(rm[localMonthIdx] || 0) : 0;
       const titleLine = row ? `${row.project} · ${row.label}` : `${project} · ${activity}`;
       if (rIdx < 0) {
         rIdx = rows.findIndex(
@@ -2181,7 +2173,7 @@
       showMatrixInspectorHintTooltip({
         month: xKeyStr,
         titleLine,
-        entryCount,
+        entryCount: undefined,
         cellKey: `hint:sel:\0${xKeyStr}\0${project}\0${activity}`,
         pointerEvent: undefined,
         gridHint: rIdx >= 0 ? { m: localMonthIdx, r: rIdx } : undefined
@@ -2265,6 +2257,7 @@
     function openProvenanceInspector(month, project, activity, focusMeta) {
       const root = document.getElementById('provenance-inspector');
       const chart = document.getElementById('matrix-chart');
+      if (chart) chart._inspectorHoverPreviewKey = '';
       const prov = typeof provenanceData !== 'undefined' ? provenanceData : null;
       const projectOverview = Boolean(focusMeta && focusMeta.projectOverview);
       const wasInspectorAlreadyOpen = Boolean(root && !root.hasAttribute('hidden'));
@@ -2428,6 +2421,97 @@
       }, 480);
     }
 
+    /** Live sidebar preview while the matrix is hovered (inspector open); uses noScrollIntoView to avoid scroll jank. */
+    function renderProvenanceInspectorSidebarPreview(month, project, activity, projectOverview) {
+      const prov = typeof provenanceData !== 'undefined' ? provenanceData : null;
+      if (!isProvenanceInspectorOpen() || typeof ProvenanceView === 'undefined' || !prov || !prov.monthSources) {
+        return;
+      }
+      if (typeof marked !== 'undefined') {
+        marked.setOptions({ gfm: true, breaks: false });
+      }
+      const kickerEl = document.getElementById('prov-inspector-kicker');
+      const titleEl = document.getElementById('prov-inspector-title');
+      const metaEl = document.getElementById('prov-inspector-meta');
+      const bodyEl = document.getElementById('prov-inspector-body');
+      if (!bodyEl) return;
+      if (projectOverview) {
+        ProvenanceView.render({
+          month,
+          project,
+          activity: '',
+          projectOverview: true,
+          provenanceData: prov,
+          matchesOnly: false,
+          kickerEl,
+          titleEl,
+          metaEl,
+          bodyEl,
+          noScrollIntoView: true
+        });
+      } else {
+        ProvenanceView.render({
+          month,
+          project,
+          activity,
+          projectOverview: false,
+          provenanceData: prov,
+          matchesOnly: true,
+          kickerEl,
+          titleEl,
+          metaEl,
+          bodyEl,
+          noScrollIntoView: true
+        });
+      }
+    }
+
+    /** Revert sidebar body to the last cell opened via click (provenanceInspectorLastOpen). */
+    function restoreProvenanceInspectorPinnedBody() {
+      if (!isProvenanceInspectorOpen()) return;
+      const pi = provenanceInspectorLastOpen;
+      if (!pi || pi.month == null || !pi.project) return;
+      const prov = typeof provenanceData !== 'undefined' ? provenanceData : null;
+      if (typeof ProvenanceView === 'undefined' || !prov || !prov.monthSources) return;
+      if (typeof marked !== 'undefined') {
+        marked.setOptions({ gfm: true, breaks: false });
+      }
+      const kickerEl = document.getElementById('prov-inspector-kicker');
+      const titleEl = document.getElementById('prov-inspector-title');
+      const metaEl = document.getElementById('prov-inspector-meta');
+      const bodyEl = document.getElementById('prov-inspector-body');
+      if (!bodyEl) return;
+      const projectOverview = Boolean(pi.focusMeta && pi.focusMeta.projectOverview);
+      const activity = pi.activity == null ? '' : String(pi.activity);
+      if (projectOverview) {
+        ProvenanceView.render({
+          month: pi.month,
+          project: pi.project,
+          activity: '',
+          projectOverview: true,
+          provenanceData: prov,
+          matchesOnly: false,
+          kickerEl,
+          titleEl,
+          metaEl,
+          bodyEl
+        });
+      } else {
+        ProvenanceView.render({
+          month: pi.month,
+          project: pi.project,
+          activity,
+          projectOverview: false,
+          provenanceData: prov,
+          matchesOnly: true,
+          kickerEl,
+          titleEl,
+          metaEl,
+          bodyEl
+        });
+      }
+    }
+
     function closeProvenanceInspector() {
       const ov = document.getElementById('provenance-overlay');
       if (ov && !ov.hidden) closeProvenanceOverlay();
@@ -2442,6 +2526,7 @@
       matrixInspectorLayoutActive = false;
       matrixInspectorSaved = null;
       if (chart) {
+        delete chart._inspectorHoverPreviewKey;
         chart._provenanceOpenKey = '';
         const piClose = provenanceInspectorLastOpen;
         if (
@@ -3293,22 +3378,39 @@
         if (po && !po.hidden && po.classList.contains('provenance-overlay--hover')) {
           closeProvenanceOverlay();
         }
+        const projHasTip = matrixProjectCellHasTooltipContent(row.project, globalMonthIdx);
         if (inspectorOpen) {
-          const ps = (data.projectScores && data.projectScores[row.project]) || [];
-          const entryCount = Number(ps[globalMonthIdx] || 0);
+          const monthStr = xKeyStr || String(xKey);
+          if (globalMonthIdx >= 0) {
+            const pk = `ov:\0${monthStr}\0${row.project}`;
+            if (chart._inspectorHoverPreviewKey !== pk) {
+              chart._inspectorHoverPreviewKey = pk;
+              renderProvenanceInspectorSidebarPreview(monthStr, row.project, '', true);
+            }
+          }
           showMatrixInspectorHintTooltip({
-            month: xKeyStr || xKey,
+            month: monthStr,
             titleLine: row.project,
-            entryCount,
+            entryCount: undefined,
             cellKey: `hint:proj:\0${xKeyStr}\0${row.project}`,
             pointerEvent,
             gridHint: { m: localMonthIdx, r: idx }
           });
-        } else {
+        } else if (projHasTip) {
           showMatrixProjectTooltip({
             month: xKeyStr || xKey,
             project: row.project,
             globalMonthIdx,
+            bbox,
+            gd: chart,
+            pointerEvent,
+            gridHint: { m: localMonthIdx, r: idx }
+          });
+        } else {
+          showMatrixShortCellTooltip({
+            month: xKeyStr || xKey,
+            surfaceHtml: buildMatrixShortProjectCellTooltipHtml(xKeyStr || xKey, row.project),
+            cellKey: `short:proj:\0${xKeyStr}\0${row.project}\0${globalMonthIdx}`,
             bbox,
             gd: chart,
             pointerEvent,
@@ -3320,23 +3422,41 @@
         if (po && !po.hidden && po.classList.contains('provenance-overlay--hover')) {
           closeProvenanceOverlay();
         }
+        const actHasTip = matrixActivityCellHasTooltipContent(row, localMonthIdx);
         if (inspectorOpen) {
-          const rm = row.rawMonthly;
-          const entryCount =
-            rm && localMonthIdx >= 0 && localMonthIdx < rm.length ? Number(rm[localMonthIdx] || 0) : 0;
+          const monthStr = xKeyStr || String(xKey);
+          const pk = `act:\0${monthStr}\0${row.project}\0${row.label}`;
+          if (chart._inspectorHoverPreviewKey !== pk) {
+            chart._inspectorHoverPreviewKey = pk;
+            renderProvenanceInspectorSidebarPreview(monthStr, row.project, row.label, false);
+          }
           showMatrixInspectorHintTooltip({
-            month: xKeyStr || xKey,
+            month: monthStr,
             titleLine: `${row.project} · ${row.label}`,
-            entryCount,
+            entryCount: undefined,
             cellKey: `hint:act:\0${xKeyStr}\0${row.project}\0${row.label}`,
             pointerEvent,
             gridHint: { m: localMonthIdx, r: idx }
           });
-        } else {
+        } else if (actHasTip) {
           showMatrixActivityOverviewTooltip({
             month: xKeyStr || xKey,
             project: row.project,
             activity: row.label,
+            bbox,
+            gd: chart,
+            pointerEvent,
+            gridHint: { m: localMonthIdx, r: idx }
+          });
+        } else {
+          showMatrixShortCellTooltip({
+            month: xKeyStr || xKey,
+            surfaceHtml: buildMatrixShortActivityCellTooltipHtml(
+              xKeyStr || xKey,
+              row.project,
+              row.label
+            ),
+            cellKey: `short:act:\0${xKeyStr}\0${row.project}\0${row.label}\0${localMonthIdx}`,
             bbox,
             gd: chart,
             pointerEvent,
@@ -3484,6 +3604,27 @@
       </div>`;
     }
 
+    /** Project–month cell: show tooltip only when there are tagged bullets or lifecycle-classified counts. */
+    function matrixProjectCellHasTooltipContent(project, globalMonthIdx) {
+      if (globalMonthIdx < 0 || !project) return false;
+      const scores = (data.projectScores && data.projectScores[project]) || [];
+      if (Number(scores[globalMonthIdx] || 0) > 0) return true;
+      const order =
+        data.lifecycleStageOrder && data.lifecycleStageOrder.length
+          ? data.lifecycleStageOrder
+          : ['explore', 'design', 'prototype', 'present', 'ship'];
+      const plc = data.projectLifecycleCounts && data.projectLifecycleCounts[project];
+      const raw = plc && plc[globalMonthIdx] ? plc[globalMonthIdx] : {};
+      const total = order.reduce((s, k) => s + Number(raw[k] || 0), 0);
+      return total > 0;
+    }
+
+    function matrixActivityCellHasTooltipContent(row, localMonthIdx) {
+      if (!row || row.type !== 'activity' || localMonthIdx < 0) return false;
+      const rm = row.rawMonthly;
+      return Boolean(rm && localMonthIdx < rm.length && Number(rm[localMonthIdx] || 0) > 0);
+    }
+
     const chartTooltip = document.getElementById('chart-tooltip');
     const tooltipTopActivityCount = 3;
 
@@ -3551,6 +3692,85 @@
       `;
     }
 
+    /** Empty matrix cells (inspector closed): month + project only — no heavy body. */
+    function buildMatrixShortProjectCellTooltipHtml(month, project) {
+      return `
+        <div class="chart-tooltip__surface">
+          <div class="chart-tooltip__kicker">${escapeHtml(month)}</div>
+          <div class="chart-tooltip__title">${escapeHtml(project)}</div>
+        </div>
+      `;
+    }
+
+    /** Empty activity sub-row: month, project, activity label only — no entry count. */
+    function buildMatrixShortActivityCellTooltipHtml(month, project, activity) {
+      return `
+        <div class="chart-tooltip__surface">
+          <div class="chart-tooltip__kicker">${escapeHtml(month)}</div>
+          <div class="chart-tooltip__title">${escapeHtml(project)}</div>
+          <div class="chart-tooltip__meta">${escapeHtml(activity)}</div>
+        </div>
+      `;
+    }
+
+    /**
+     * Compact matrix cell tooltip anchored to the heatmap cell (same layout as full project tooltip).
+     * Cell keys use prefix `short:` so full project tooltip does not try to reuse this shell.
+     */
+    function showMatrixShortCellTooltip(payload) {
+      const { month, surfaceHtml, cellKey, bbox, gd, pointerEvent, gridHint } = payload;
+      if (!chartTooltip || month == null || !surfaceHtml || !cellKey) return;
+      chartTooltip.classList.remove('chart-tooltip--inspector-hint');
+      chartTooltip._velocityOverlaySurface = null;
+      const existingSurface = getChartTooltipSurface(chartTooltip);
+      if (existingSurface) {
+        existingSurface.classList.remove('chart-tooltip__surface--leaving');
+      }
+      const applyLayout = () => {
+        const pad = 12;
+        const chartRect = gd && gd.getBoundingClientRect ? gd.getBoundingClientRect() : null;
+        const vb = bbox && gd ? plotlyHoverBboxToViewport(gd, bbox) : null;
+        let left = vb ? vb.x1 + 14 : chartRect ? chartRect.right + 14 : pad;
+        let top = vb ? vb.y0 - 2 : chartRect ? chartRect.top : pad;
+        const tipRect = chartTooltip.getBoundingClientRect();
+        if (left + tipRect.width > window.innerWidth - pad) {
+          left = vb ? vb.x0 - tipRect.width - 14 : window.innerWidth - tipRect.width - pad;
+        }
+        if (left < pad) left = pad;
+        if (top + tipRect.height > window.innerHeight - pad) {
+          top = window.innerHeight - tipRect.height - pad;
+        }
+        if (top < pad) top = pad;
+        chartTooltip.style.left = `${Math.round(left)}px`;
+        chartTooltip.style.top = `${Math.round(top)}px`;
+      };
+      if (chartTooltip._tooltipSwapOnOut) {
+        chartTooltip.removeEventListener('transitionend', chartTooltip._tooltipSwapOnOut);
+        chartTooltip._tooltipSwapOnOut = null;
+      }
+      removeChartTooltipMotionListener();
+      chartTooltip._matrixTooltipMotion = false;
+      chartTooltip._tooltipVelBand = undefined;
+      clearTooltipVelocityStillTimer(chartTooltip);
+      const prevSurface = getChartTooltipSurface(chartTooltip);
+      if (prevSurface) {
+        prevSurface.classList.remove(
+          'chart-tooltip__surface--leaving',
+          'chart-tooltip__surface--muted',
+          'chart-tooltip__surface--vel-fast',
+          'chart-tooltip__surface--vel-med'
+        );
+      }
+      clearMatrixProjectHeavyTimer();
+      chartTooltip.innerHTML = surfaceHtml;
+      chartTooltip.style.display = 'block';
+      chartTooltip.setAttribute('aria-hidden', 'false');
+      chartTooltip._matrixTooltipCellKey = cellKey;
+      if (gridHint) chartTooltip._lastMatrixGridHint = gridHint;
+      if (pointerEvent) recordChartTooltipPointerFromEvent(chartTooltip, pointerEvent);
+      applyLayout();
+    }
+
     function buildMatrixActivityOverviewBodyHtml(month, project, activity) {
       const prov = typeof provenanceData !== 'undefined' ? provenanceData : null;
       if (!prov || typeof ProvenanceView === 'undefined') {
@@ -3607,7 +3827,13 @@
         const cnt = chartTooltip.querySelector('.chart-tooltip__hint-count');
         if (k) k.textContent = month;
         if (t) t.textContent = titleLine;
-        if (cnt) cnt.textContent = formatInspectorHintEntryCount(entryCount);
+        if (cnt) {
+          if (entryCount != null && Number.isFinite(Number(entryCount))) {
+            cnt.textContent = formatInspectorHintEntryCount(entryCount);
+          } else {
+            cnt.remove();
+          }
+        }
         if (gridHint) chartTooltip._lastMatrixGridHint = gridHint;
         layoutChartTooltipAtPointer(pointerEvent);
         return;
@@ -3654,7 +3880,13 @@
         const cnt = chartTooltip.querySelector('.chart-tooltip__hint-count');
         if (k) k.textContent = month;
         if (t) t.textContent = titleLine;
-        if (cnt) cnt.textContent = formatInspectorHintEntryCount(entryCount);
+        if (cnt) {
+          if (entryCount != null && Number.isFinite(Number(entryCount))) {
+            cnt.textContent = formatInspectorHintEntryCount(entryCount);
+          } else {
+            cnt.remove();
+          }
+        }
         layoutChartTooltipAtPointer(pointerEvent);
         return;
       }
@@ -3900,7 +4132,8 @@
         wasVisible &&
         prevCellKey &&
         !prevCellKey.startsWith('activity:') &&
-        !prevCellKey.startsWith('milestone:');
+        !prevCellKey.startsWith('milestone:') &&
+        !prevCellKey.startsWith('short:');
 
       if (reducedMotion) {
         clearMatrixProjectHeavyTimer();

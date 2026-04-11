@@ -428,6 +428,7 @@
     const provenanceData = options.provenanceData || {};
     const matchesOnly = Boolean(options.matchesOnly);
     const projectOverview = Boolean(options.projectOverview);
+    const noScrollIntoView = Boolean(options.noScrollIntoView);
 
     if (!bodyEl) return { ok: false, error: 'Missing body element' };
 
@@ -462,11 +463,13 @@
       renderSummaryBody(bodyEl, source, new Set(), {
         peopleProjectFilter: { provenanceData: provenanceData, month: month, project: project }
       });
-      const firstOv = bodyEl.querySelector('.summary-block--hl, .people-chip--hl');
-      if (firstOv && typeof firstOv.scrollIntoView === 'function') {
-        requestAnimationFrame(function () {
-          firstOv.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-        });
+      if (!noScrollIntoView) {
+        const firstOv = bodyEl.querySelector('.summary-block--hl, .people-chip--hl');
+        if (firstOv && typeof firstOv.scrollIntoView === 'function') {
+          requestAnimationFrame(function () {
+            firstOv.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+          });
+        }
       }
       return { ok: true };
     }
@@ -511,11 +514,13 @@
       });
     }
 
-    const firstHl = bodyEl.querySelector('.summary-block--hl, .people-chip--hl');
-    if (firstHl && typeof firstHl.scrollIntoView === 'function') {
-      requestAnimationFrame(function () {
-        firstHl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-      });
+    if (!noScrollIntoView) {
+      const firstHl = bodyEl.querySelector('.summary-block--hl, .people-chip--hl');
+      if (firstHl && typeof firstHl.scrollIntoView === 'function') {
+        requestAnimationFrame(function () {
+          firstHl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        });
+      }
     }
     return { ok: true };
   }
