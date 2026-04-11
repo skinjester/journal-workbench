@@ -680,11 +680,18 @@
     #chart-tooltip .chart-tooltip__body .tt-closing { margin-top: var(--sp-2); font-size: var(--text-xs); color: var(--matrix-tooltip-muted, var(--warm-read-muted)); line-height: var(--lh-snug); }
     /* Let Plotly set height exactly = margins + rows*rowHeight (no min-height drift vs labels). */
     #matrix-chart { min-height: 0; }
-    #milestone-chart { min-height: 0; margin-top: 0; }
-    /* Deliverables heatmap uses #chart-tooltip; hide Plotly’s native hover label only. */
+    /* Lock vertical box: marker restyle must not grow offsetHeight / scroll strip (see _milestoneLayoutHeightPx + clampMilestoneChartDomHeight). */
+    #milestone-chart {
+      min-height: 0;
+      margin-top: 0;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+    /* Deliverables scatter markers use #chart-tooltip; hide Plotly’s native hover label only. */
     #milestone-chart .hovertext {
       display: none !important;
     }
+    /* Deliverables dots: scale is applied in JS on SVG transform (Plotly owns path transform for position). */
     .lower-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.85fr); gap: var(--sp-3); margin-top: var(--sp-6); align-items: start; }
     .detail-panel, .meta-panel { padding: clamp(var(--sp-3), 2.5vw, calc(var(--sp-2) + var(--sp-3))); }
     .detail-head { display: flex; flex-wrap: wrap; gap: var(--sp-2); align-items: baseline; justify-content: space-between; }
@@ -1926,6 +1933,7 @@
             Plotly.relayout(ms, { shapes: JSON.parse(mj) });
           } catch (e) { /* ignore */ }
         }
+        setMilestoneScatterColumnMarkerSizes(ms, null);
       }
     }
 
@@ -2807,21 +2815,6 @@
       return [rowRect, colRect, ...rules, cellOutline];
     }
 
-    /** z in (0,1) band per row so discrete row colors map cleanly on one heatmap. */
-    function buildMilestoneDeliverableColorscale(nRows) {
-      if (nRows <= 0) return [[0, 'rgba(0,0,0,0)'], [1, 'rgba(0,0,0,0)']];
-      const scale = [];
-      for (let ri = 0; ri < nRows; ri++) {
-        const t0 = ri / nRows;
-        const t1 = (ri + 1) / nRows;
-        const c = mileColorsBySlug[mileSlugs[ri]] || '#9dabbc';
-        scale.push([t0, c]);
-        if (ri < nRows - 1) scale.push([t1 - 1e-9, c]);
-      }
-      scale.push([1, mileColorsBySlug[mileSlugs[nRows - 1]] || '#9dabbc']);
-      return scale;
-    }
-
     /**
      * Paper x0/x1 for one month column on the **milestone** plot (must match that figure’s _size + xgap lattice).
      * Do not reuse matrix _fullLayout for shapes drawn on #milestone-chart — different margin.t/b changes nothing for gs.w,
@@ -2863,7 +2856,10 @@
       }
       if (!colX) return;
       const dedupe = `${monthKey}\0${colX.x0}\0${colX.x1}`;
-      if (ms._milestoneHoverColKey === dedupe) return;
+      if (ms._milestoneHoverColKey === dedupe) {
+        setMilestoneScatterColumnMarkerSizes(ms, monthKey);
+        return;
+      }
       ms._milestoneHoverColKey = dedupe;
       let base;
       try {
@@ -2886,6 +2882,113 @@
       try {
         Plotly.relayout(ms, { shapes: base.concat([colRect]) });
       } catch (e) { /* ignore */ }
+      setMilestoneScatterColumnMarkerSizes(ms, monthKey);
+    }
+
+    /** Keep #milestone-chart box height = Plotly layout height so larger markers do not shift the pane / scroll strip. */
+    function clampMilestoneChartDomHeight(ms) {
+      if (!ms || !Number.isFinite(ms._milestoneLayoutHeightPx) || ms._milestoneLayoutHeightPx <= 0) return;
+      const h = `${Math.round(ms._milestoneLayoutHeightPx)}px`;
+      ms.style.height = h;
+      ms.style.maxHeight = h;
+    }
+
+    /** Strip trailing uniform `scale(a)` / `scale(a,a)` from an SVG transform list (our column emphasis). */
+    function milestoneStripTrailingScaleAttr(tf) {
+      let s = String(tf || '').trim();
+      const re = /\s+scale\([\d.]+(?:,\s*[\d.]+)?\)\s*$/;
+      let prev;
+      do {
+        prev = s;
+        s = s.replace(re, '').trim();
+      } while (s !== prev);
+      return s;
+    }
+
+    /**
+     * Grow dots in the active month column by appending `scale(s,s)` to each marker path’s SVG `transform`
+     * (Plotly sets `translate(x,y)` on `path.point`; CSS transform is unreliable on SVG here).
+     */
+    function applyMilestoneScatterPointColumnScale(ms) {
+      if (!ms || !ms._milestoneScatterMode || !Array.isArray(ms._milestoneScatterX)) return;
+      const xs = ms._milestoneScatterX;
+      if (!xs.length) return;
+      const hkRaw = ms._milestoneHighlightColumnKey;
+      const hk =
+        hkRaw != null && hkRaw !== '' ? String(hkRaw) : '';
+      const n = xs.length;
+      const svg = ms.querySelector('svg.main-svg') || ms.querySelector('svg');
+      if (!svg) return;
+      const sc = svg.querySelector('.scatterlayer');
+      if (!sc) return;
+      const traces = sc.querySelectorAll(':scope > g.trace');
+      let nodes = [];
+      for (let t = 0; t < traces.length; t++) {
+        const pg = traces[t].querySelector(':scope > g.points');
+        if (!pg) continue;
+        let arr = Array.from(pg.querySelectorAll(':scope > path.point'));
+        if (arr.length !== n) {
+          arr = Array.from(pg.querySelectorAll('path')).filter(
+            (p) => p.classList && p.classList.contains('point')
+          );
+        }
+        if (arr.length === n) {
+          nodes = arr;
+          break;
+        }
+      }
+      if (nodes.length !== n) return;
+      const s = MILESTONE_COLUMN_POINT_DOM_SCALE;
+      for (let i = 0; i < n; i++) {
+        const el = nodes[i];
+        const base = milestoneStripTrailingScaleAttr(el.getAttribute('transform'));
+        const on = Boolean(hk && String(xs[i]) === hk);
+        el.setAttribute('transform', on ? `${base} scale(${s},${s})`.trim() : base);
+      }
+    }
+
+    /**
+     * Column emphasis: fixed `marker.size` + fixed `marker.line.width`; apparent “radius” via SVG transform scale on `path.point`.
+     */
+    function setMilestoneScatterColumnMarkerSizes(ms, highlightMonthKey) {
+      if (!ms || !ms._milestoneScatterMode || !Array.isArray(ms._milestoneScatterX)) return;
+      const xs = ms._milestoneScatterX;
+      const fills = ms._milestoneScatterMarkerColors;
+      if (!xs.length || !Array.isArray(fills) || fills.length !== xs.length) return;
+      const hk =
+        highlightMonthKey != null && highlightMonthKey !== '' ? String(highlightMonthKey) : '';
+      ms._milestoneHighlightColumnKey = hk;
+      const offOp = 0.34;
+      const onOp = 1;
+      const opacities = hk ? xs.map((x) => (String(x) === hk ? onOp : offOp)) : xs.map(() => onOp);
+      const lineW = 2;
+      const lineWidths = xs.map(() => lineW);
+      const lineColors = hk
+        ? xs.map((x, i) => (String(x) === hk ? 'rgba(255,255,255,0.7)' : fills[i]))
+        : fills.map((c) => c);
+      const finish = () => {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            applyMilestoneScatterPointColumnScale(ms);
+            clampMilestoneChartDomHeight(ms);
+          });
+        });
+      };
+      try {
+        const ret = Plotly.restyle(
+          ms,
+          {
+            'marker.opacity': [opacities],
+            'marker.line.width': [lineWidths],
+            'marker.line.color': [lineColors]
+          },
+          [0]
+        );
+        if (ret && typeof ret.then === 'function') ret.then(finish);
+        else finish();
+      } catch (e) {
+        finish();
+      }
     }
 
     /**
@@ -2962,7 +3065,7 @@
       return { idx, xKey, bbox };
     }
 
-    /** Deliverables heatmap: same xgap column lattice as matrix; null in margins or between-column gaps. */
+    /** Deliverables scatter / cell lattice: same xgap column layout as matrix; scatter mode returns null for empty cells. */
     function milestoneHitTestCellFromClientXY(gd, clientX, clientY) {
       if (!gd || !gd._fullLayout) return null;
       const gs = gd._fullLayout._size;
@@ -3004,6 +3107,14 @@
         lx1 = lx0 + slotW;
       }
       const xKey = months[colIndex];
+      const rowLabel = mileRows[idx];
+      if (
+        gd._milestoneScatterMode &&
+        gd._milestoneHitKeys instanceof Set &&
+        !gd._milestoneHitKeys.has(`${xKey}\0${rowLabel}`)
+      ) {
+        return null;
+      }
       const gLeft = gd.offsetLeft + gd.clientLeft;
       const gTop = gd.offsetTop + gd.clientTop;
       const paperYTop = 1 - idx / n;
@@ -3824,7 +3935,7 @@
       applyMatrixProjectHeavyContent(heavyHtml, false);
     }
 
-    /** Milestone / deliverables heatmap: same #chart-tooltip shell + immediate full body as matrix rows. */
+    /** Milestone / deliverables markers: same #chart-tooltip shell + immediate full body as matrix rows. */
     function showMilestoneHeatmapTooltip(payload) {
       const { month, rowLabel, heavyHtml, bbox, gd, pointerEvent, gridHint, rowIndex, rowCount } = payload;
       if (!chartTooltip || month == null || !rowLabel || !heavyHtml) return;
@@ -4008,7 +4119,11 @@
         : null;
       const lh = labels ? labels.offsetHeight : 0;
       const sh = scroll ? scroll.offsetHeight : 0;
-      const ph = plotDiv ? plotDiv.offsetHeight : 0;
+      let ph = plotDiv ? plotDiv.offsetHeight : 0;
+      if (plotDiv && plotDiv.id === 'milestone-chart') {
+        const cap = Number(plotDiv._milestoneLayoutHeightPx);
+        if (Number.isFinite(cap) && cap > 0) ph = Math.min(ph, cap);
+      }
       const strip = Math.max(sh, ph);
       const measured = Math.max(lh, strip);
       const fb = Math.max(1, Math.round(Number(formulaFallbackPx) || 0));
@@ -4294,6 +4409,8 @@
      * month ticks are hidden; horizontal brick lattice still matches matrix (same plotWidth, margin.l/r, xgap).
      */
     const MILESTONE_PLOT_MARGIN_TOP = 8;
+    /** Visual scale for deliverables dots in the hovered/highlighted month column (SVG transform on path.point, not marker.size). */
+    const MILESTONE_COLUMN_POINT_DOM_SCALE = 1.55;
 
     /** Inspector-open plot: floor for min brick width in max() with proportional heatWidth (full dataset stays in view). */
     const MATRIX_INSPECTOR_MIN_PX_PER_COL = 16;
@@ -4885,22 +5002,31 @@
 
       const xTickCfgM = buildMatrixXAxisTickConfig(visibleMonths, pw, MATRIX_PLOT_MARGIN_LR);
 
-      const z = [];
-      const text = [];
+      const msX = [];
+      const msY = [];
+      const msText = [];
+      const msColors = [];
+      const milestoneHitKeys = new Set();
+      const markerPx = Math.max(8, Math.min(14, Math.round(rowHeight * 0.38)));
+      /* One fixed Plotly marker size for all points — column emphasis is opacity + stroke only (no bbox shift). */
+      const milestoneMarkerLayoutPx = markerPx;
       for (let ri = 0; ri < nMile; ri++) {
         const row = mileRows[ri];
         const slug = mileSlugs[ri];
-        const blurb = (data.delivMilestoneHover && data.delivMilestoneHover[slug]) || `Month includes a <code>deliv:${escapeHtml(slug)}</code> line in the summary.`;
-        const zr = [];
-        const tr = [];
+        const blurb =
+          (data.delivMilestoneHover && data.delivMilestoneHover[slug]) ||
+          `Month includes a <code>deliv:${escapeHtml(slug)}</code> line in the summary.`;
+        const c = mileColorsBySlug[slug] || '#9dabbc';
         for (let i = 0; i < visibleCount; i++) {
           const fullIdx = visibleStartIdx + i;
-          const hit = Boolean(mileSeries[row][fullIdx]);
-          zr.push(hit ? (ri + 0.5) / Math.max(1, nMile) : null);
-          tr.push(hit ? blurb : '');
+          if (!mileSeries[row][fullIdx]) continue;
+          const monthKey = visibleMonths[i];
+          msX.push(monthKey);
+          msY.push(row);
+          msText.push(blurb);
+          msColors.push(c);
+          milestoneHitKeys.add(`${monthKey}\0${row}`);
         }
-        z.push(zr);
-        text.push(tr);
       }
 
       const milestonePlotHeight = mileMt + mileMb + nMile * rowHeight;
@@ -4939,28 +5065,56 @@
       const mileChartEl = document.getElementById('milestone-chart');
       if (mileChartEl) {
         mileChartEl._milestoneHoverColKey = '';
+        mileChartEl._milestoneHighlightColumnKey = '';
         mileChartEl._milestoneHoverBandKey = '';
         mileChartEl._milestoneVisibleMonths = visibleMonths;
         mileChartEl._milestoneRowCount = nMile;
         mileChartEl._milestoneColGeom = { xgap: xg };
         mileChartEl._milestoneBaseShapesJson = JSON.stringify(mileShapes);
+        mileChartEl._milestoneScatterMode = true;
+        mileChartEl._milestoneHitKeys = milestoneHitKeys;
+        mileChartEl._milestoneScatterX = msX.length > 0 ? msX.slice() : [visibleMonths[0]];
+        mileChartEl._milestoneScatterMarkerColors =
+          msX.length > 0 ? msColors.slice() : ['rgba(0,0,0,0)'];
+        mileChartEl._milestoneScatterMarkerLayoutPx = milestoneMarkerLayoutPx;
+        mileChartEl._milestoneLayoutHeightPx = milestonePlotHeight;
+        clampMilestoneChartDomHeight(mileChartEl);
       }
 
-      Plotly.newPlot('milestone-chart', [{
-        type: 'heatmap',
-        x: visibleMonths,
-        y: mileRows,
-        z,
-        zmin: 0,
-        zmax: 1,
-        colorscale: buildMilestoneDeliverableColorscale(nMile),
-        showscale: false,
-        xgap: xg,
-        ygap: matrixHeatmapYGap,
-        zsmooth: false,
-        text,
-        hovertemplate: '%{text}<extra></extra>'
-      }], {
+      const milestoneTraces =
+        msX.length > 0
+          ? [
+              {
+                type: 'scatter',
+                mode: 'markers',
+                x: msX,
+                y: msY,
+                text: msText,
+                hovertemplate: '%{text}<extra></extra>',
+                cliponaxis: true,
+                marker: {
+                  symbol: 'circle',
+                  size: milestoneMarkerLayoutPx,
+                  color: msColors,
+                  line: { width: 2, color: msColors },
+                  opacity: 1
+                }
+              }
+            ]
+          : [
+              {
+                type: 'scatter',
+                mode: 'markers',
+                x: [visibleMonths[0]],
+                y: [mileRows[0]],
+                cliponaxis: true,
+                marker: { size: 0, opacity: 0 },
+                hoverinfo: 'skip',
+                showlegend: false
+              }
+            ];
+
+      Plotly.newPlot('milestone-chart', milestoneTraces, {
         width: pw,
         height: Math.max(120, milestonePlotHeight),
         paper_bgcolor: 'rgba(0,0,0,0)',
@@ -5021,6 +5175,15 @@
       }).then(() => {
         const mileChart = document.getElementById('milestone-chart');
         if (!mileChart) return;
+        clampMilestoneChartDomHeight(mileChart);
+        if (!mileChart._milestoneScaleAfterPlotBound) {
+          mileChart._milestoneScaleAfterPlotBound = true;
+          mileChart.on('plotly_afterplot', () => {
+            applyMilestoneScatterPointColumnScale(mileChart);
+          });
+        }
+        mileChart._milestoneHighlightColumnKey = '';
+        applyMilestoneScatterPointColumnScale(mileChart);
         const milePane = document.querySelector('.milestone-shell.timeline-pane');
         const syncMilePaneHeight = () =>
           syncTimelinePaneHeightToDom(milePane, milestonePlotHeight);
@@ -5036,22 +5199,34 @@
             domEv && typeof domEv.clientX === 'number' ? domEv.clientX : lastPointerClientX;
           const hcy =
             domEv && typeof domEv.clientY === 'number' ? domEv.clientY : lastPointerClientY;
-          const hitM = milestoneHitTestCellFromClientXY(mileChart, hcx, hcy);
-          if (!hitM || hitM.idx < 0 || hitM.idx >= nMile) {
+          const pts = ev && ev.points;
+          const curve0 = mileChart.data && mileChart.data[0];
+          const scatterPt =
+            pts &&
+            pts.length > 0 &&
+            curve0 &&
+            curve0.type === 'scatter' &&
+            pts[0].curveNumber === 0
+              ? pts[0]
+              : null;
+          if (!scatterPt || scatterPt.x == null || scatterPt.y == null) {
             scheduleMatrixHoverExit();
             return;
           }
-          const xKey = hitM.xKey;
-          const rowIdx = hitM.idx;
-          const yKey = mileRows[rowIdx];
-          const colIdx = visibleMonths.indexOf(xKey);
-          const td0 = mileChart.data && mileChart.data[0];
-          const textGrid = td0 && td0.text;
-          const heavyHtml =
-            textGrid && colIdx >= 0 && textGrid[rowIdx]
-              ? String(textGrid[rowIdx][colIdx] || '').trim()
-              : '';
-          if (!heavyHtml) return;
+          const xKey = typeof scatterPt.x === 'string' ? scatterPt.x : String(scatterPt.x);
+          const yKey = typeof scatterPt.y === 'string' ? scatterPt.y : String(scatterPt.y);
+          const rowIdx = mileRows.indexOf(yKey);
+          const heavyHtml = scatterPt.text != null ? String(scatterPt.text).trim() : '';
+          if (rowIdx < 0 || !heavyHtml) {
+            scheduleMatrixHoverExit();
+            return;
+          }
+          const hitM = milestoneHitTestCellFromClientXY(mileChart, hcx, hcy);
+          if (!hitM || hitM.idx !== rowIdx || hitM.xKey !== xKey) {
+            scheduleMatrixHoverExit();
+            return;
+          }
+          setMilestoneScatterColumnMarkerSizes(mileChart, xKey);
           cancelMatrixHoverExit();
           const provRoot = document.getElementById('provenance-overlay');
           if (provRoot && !provRoot.hidden && provRoot.classList.contains('provenance-overlay--hover')) {
@@ -5154,6 +5329,7 @@
               Plotly.relayout(mileChart, { shapes: JSON.parse(mj) });
             } catch (e) { /* ignore */ }
           }
+          setMilestoneScatterColumnMarkerSizes(mileChart, null);
           mileChart._milestoneHoverBandKey = '';
           const mll = document.getElementById('milestone-labels');
           if (mll) Array.from(mll.children).forEach((el) => el.classList.remove('hover-row-affordance'));
