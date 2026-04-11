@@ -2778,6 +2778,9 @@
           ? visibleMonthsOverride
           : (gd && (gd._milestoneVisibleMonths || gd._matrixVisibleMonths));
       let colX = colXOverride || null;
+      if (!colX && gd && gd._milestoneScatterMode) {
+        colX = milestonePaperColumnXForMonthKey(gd, monthKey);
+      }
       if (!colX) colX = matrixPaperColumnXFromHoverBbox(gd, hoverBbox);
       if (!colX && months) {
         const mi = months.indexOf(monthKey);
@@ -2815,10 +2818,26 @@
       return [rowRect, colRect, ...rules, cellOutline];
     }
 
+    /** Horizontal center of category `monthKey` in plot-area px (same frame as `_size`), or NaN. */
+    function milestoneCategoryCenterPx(ms, monthKey, mi) {
+      const xa = ms && ms._fullLayout && ms._fullLayout.xaxis;
+      const gs = ms && ms._fullLayout && ms._fullLayout._size;
+      if (!xa || !gs || !(gs.w > 0) || typeof xa.c2p !== 'function') return NaN;
+      const tries = [monthKey, mi];
+      for (let k = 0; k < tries.length; k++) {
+        const v = tries[k];
+        if (v === undefined || v === null) continue;
+        try {
+          const cx = xa.c2p(v);
+          if (Number.isFinite(cx)) return cx;
+        } catch (e) { /* next */ }
+      }
+      return NaN;
+    }
+
     /**
-     * Paper x0/x1 for one month column on the **milestone** plot (must match that figure’s _size + xgap lattice).
-     * Do not reuse matrix _fullLayout for shapes drawn on #milestone-chart — different margin.t/b changes nothing for gs.w,
-     * but using matrix bbox + matrix gs vs milestone gs was shifting column guides far left of the real bricks.
+     * Paper x0/x1 for one month column on the **milestone** plot: band width from the xgap lattice, but **centered**
+     * on Plotly’s category position (`xaxis.c2p`) so fills line up with scatter markers (lattice edges alone can sit left).
      */
     function milestonePaperColumnXForMonthKey(ms, monthKey) {
       if (!ms || !ms._fullLayout || monthKey == null || monthKey === '') return null;
@@ -2835,10 +2854,20 @@
           : 0;
       const cw = (gs.w - Math.max(0, ncols - 1) * xgap) / Math.max(1, ncols);
       if (!Number.isFinite(cw) || cw <= 0) return null;
-      const x0px = mi * (cw + xgap);
-      const x1px = x0px + cw;
+      const halfPaper = cw / gs.w / 2;
+      const cxPx = milestoneCategoryCenterPx(ms, monthKey, mi);
+      let centerPaper;
+      if (Number.isFinite(cxPx)) {
+        centerPaper = cxPx / gs.w;
+      } else {
+        const x0px = mi * (cw + xgap);
+        centerPaper = (x0px + cw / 2) / gs.w;
+      }
       const clamp = (t) => Math.max(0, Math.min(1, t));
-      return { x0: clamp(x0px / gs.w), x1: clamp(x1px / gs.w) };
+      return {
+        x0: clamp(centerPaper - halfPaper),
+        x1: clamp(centerPaper + halfPaper)
+      };
     }
 
     function relayoutMilestoneColumnHighlight(matrixGd, monthKey, hoverBbox) {
@@ -5247,7 +5276,8 @@
           if (mch && mb) {
             try {
               const mbase = JSON.parse(mb);
-              let colX = matrixPaperColumnXFromHoverBbox(mileChart, hitM.bbox);
+              let colX = milestonePaperColumnXForMonthKey(mileChart, xKey);
+              if (!colX) colX = matrixPaperColumnXFromHoverBbox(mileChart, hitM.bbox);
               if (!colX) {
                 const mi = visibleMonths.indexOf(xKey);
                 const nc = Math.max(1, visibleMonths.length);
