@@ -2624,19 +2624,63 @@
       if (currentYear !== null) {
         yearRanges.push({ year: currentYear, start: startMonth, end: months[months.length - 1] });
       }
-      return yearRanges.filter((_, i) => i % 2 === 0).map(range => ({
-        type: 'rect',
-        xref: 'x',
-        yref: 'paper',
-        x0: range.start,
-        x1: range.end,
-        y0: 0,
-        y1: 1,
-        fillcolor: 'rgba(255,255,255,0.03)',
-        line: { width: 0 },
-        layer: 'below'
-      }));
+      return yearRanges
+        .filter((_, i) => i % 2 === 0)
+        .map((range) => {
+          const i0 = months.indexOf(range.start);
+          const i1 = months.indexOf(range.end);
+          if (i0 < 0 || i1 < 0 || i1 < i0) return null;
+          return {
+            type: 'rect',
+            xref: 'x',
+            yref: 'paper',
+            x0: i0 - 0.5,
+            x1: i1 + 0.5,
+            y0: 0,
+            y1: 1,
+            fillcolor: 'rgba(255,255,255,0.03)',
+            line: { width: 0 },
+            layer: 'below'
+          };
+        })
+        .filter(Boolean);
     }
+
+    /*
+     * --------------------------------------------------------------------------
+     * Column highlight sync — matrix (#matrix-chart) + milestone (#milestone-chart)
+     * --------------------------------------------------------------------------
+     * UX: Both strips share one horizontally scroll-linked month axis; the amber column should read as one vertical
+     * band across heatmap and deliverables dots (same paper x0/x1 for the same monthKey in the same visible slice).
+     *
+     * Entry points (who draws column / crosshair fills):
+     * 1. Matrix cell hover — applyMatrixHoverOrTooltipPayload → one paper colX from the matrix chart first, passed as
+     *    colXOverride to matrixHoverBandShapes and as colXPaper to relayoutMilestoneColumnHighlight so the lower strip
+     *    uses the exact same x0/x1 (avoids subtle _size/c2p drift between figures while scrubbing horizontally).
+     * 2. Milestone dot hover — plotly_hover on #milestone-chart → matrixHoverBandShapes(milestone) + colOnly rect on
+     *    matrix (milestoneColFill) via milestonePaperColumnXForMonthKey first.
+     * 3. Unhover — restore base JSON shapes on each chart; clear milestone scatter scale state.
+     * 4. Inspector / pinned month — renderMatrix pushes matrixHoverBandShapes(..., colXOverride from
+     *    matrixPaperColumnXFromLattice) when bbox is absent; renderMatrix/renderMilestones add
+     *    matrixInspectorColumnOnlyRuleShapes / matrixPinnedOffWindowEdgeShapes for vertical rules when needed.
+     *
+     * colX / horizontal span sources (prefer axis-consistent math so top and bottom match Plotly traces):
+     * - milestonePaperColumnXForMonthKey(gd, monthKey) — matrix: category x; milestone: linear month index with the
+     *   same [-0.5, n-0.5] range. Uses xaxis.c2p(mi±0.5) → paper (see milestoneXDataToPaperX) + milestoneClampPaperSpan.
+     *   Requires matching visible months, margins, width, and xgap on both figures.
+     * - matrixPaperColumnXFromHoverBbox — fallback from Plotly hover pixel bbox (heatmap cell edges).
+     * - matrixPaperColumnXFromLattice — inspector override / offline lattice (innerW + xgap), no live _fullLayout.
+     * - Last resort: mi/ncols uniform slots in matrixHoverBandShapes.
+     *
+     * Paired render contract: renderMatrix calls renderMilestones(matrixMarginBottom, plotWidth, matrixXGapTrace)
+     * so visibleMonths, plot width, MATRIX_PLOT_MARGIN_LR, and heatmap xgap stay aligned per frame. Deliverables
+     * scatter uses **linear** x = month index with range [-0.5, n-0.5] (same binning as heatmap category axes) so
+     * marker centers line up with heatmap bricks; `_milestoneScatterX` still stores month strings for hit/scale logic.
+     *
+     * Manual QA: hover matrix vs milestone on left / middle / right visible months; toggle inspector + scroll so the
+     * leading gutter applies — column edges should stay vertically aligned across both strips.
+     * --------------------------------------------------------------------------
+     */
 
     /**
      * Shape xref "paper" uses _fullLayout._size: x_pixel = gs.l + gs.w * paperX (not layout.width).
@@ -2778,9 +2822,7 @@
           ? visibleMonthsOverride
           : (gd && (gd._milestoneVisibleMonths || gd._matrixVisibleMonths));
       let colX = colXOverride || null;
-      if (!colX && gd && gd._milestoneScatterMode) {
-        colX = milestonePaperColumnXForMonthKey(gd, monthKey);
-      }
+      if (!colX) colX = milestonePaperColumnXForMonthKey(gd, monthKey);
       if (!colX) colX = matrixPaperColumnXFromHoverBbox(gd, hoverBbox);
       if (!colX && months) {
         const mi = months.indexOf(monthKey);
@@ -2818,63 +2860,98 @@
       return [rowRect, colRect, ...rules, cellOutline];
     }
 
-    /** Horizontal center of category `monthKey` in plot-area px (same frame as `_size`), or NaN. */
-    function milestoneCategoryCenterPx(ms, monthKey, mi) {
+    /**
+     * Milestone x data → shape `xref: paper` fraction [0,1] (matches Plotly’s axis + `_size`, not raw `c2p / gs.w` when domain ≠ [0,1]).
+     */
+    function milestoneXDataToPaperX(ms, dataVal) {
       const xa = ms && ms._fullLayout && ms._fullLayout.xaxis;
       const gs = ms && ms._fullLayout && ms._fullLayout._size;
       if (!xa || !gs || !(gs.w > 0) || typeof xa.c2p !== 'function') return NaN;
-      const tries = [monthKey, mi];
-      for (let k = 0; k < tries.length; k++) {
-        const v = tries[k];
-        if (v === undefined || v === null) continue;
-        try {
-          const cx = xa.c2p(v);
-          if (Number.isFinite(cx)) return cx;
-        } catch (e) { /* next */ }
+      let cx;
+      try {
+        cx = xa.c2p(dataVal);
+      } catch (e) {
+        return NaN;
       }
-      return NaN;
+      if (!Number.isFinite(cx)) return NaN;
+      if (Number.isFinite(xa._offset)) {
+        return (xa._offset + cx - gs.l) / gs.w;
+      }
+      return cx / gs.w;
     }
 
     /**
-     * Paper x0/x1 for one month column on the **milestone** plot: band width from the xgap lattice, but **centered**
-     * on Plotly’s category position (`xaxis.c2p`) so fills line up with scatter markers (lattice edges alone can sit left).
+     * Clamp a [x0,x1] paper span to [0,1] without shifting the centroid when possible (avoids left-column skew from
+     * clamping x0 and x1 independently, which made dots look progressively right of the highlight toward the left edge).
      */
-    function milestonePaperColumnXForMonthKey(ms, monthKey) {
-      if (!ms || !ms._fullLayout || monthKey == null || monthKey === '') return null;
-      const months = ms._milestoneVisibleMonths;
+    function milestoneClampPaperSpan(x0, x1) {
+      const lo = Math.min(x0, x1);
+      const hi = Math.max(x0, x1);
+      const w = hi - lo;
+      if (!(w > 0) || !Number.isFinite(w)) {
+        return { x0: Math.max(0, Math.min(1, lo)), x1: Math.max(0, Math.min(1, hi)) };
+      }
+      const c = (lo + hi) / 2;
+      let a = c - w / 2;
+      let b = c + w / 2;
+      if (a < 0) {
+        b -= a;
+        a = 0;
+      }
+      if (b > 1) {
+        a -= b - 1;
+        b = 1;
+        if (a < 0) a = 0;
+      }
+      return { x0: a, x1: b };
+    }
+
+    /**
+     * Paper x0/x1 for one month column on a chart with the same categorical month axis as the paired strip
+     * (#milestone-chart or #matrix-chart): category bin edges via xaxis.c2p(mi ± 0.5) so fills match trace placement;
+     * symmetric clamp when the span crosses 0 or 1.
+     */
+    function milestonePaperColumnXForMonthKey(gd, monthKey) {
+      if (!gd || !gd._fullLayout || monthKey == null || monthKey === '') return null;
+      const months = gd._milestoneVisibleMonths || gd._matrixVisibleMonths;
       if (!months || !months.length) return null;
       const mi = months.indexOf(monthKey);
       if (mi < 0) return null;
-      const gs = ms._fullLayout._size;
+      const gs = gd._fullLayout._size;
       if (!gs || !(gs.w > 0)) return null;
       const ncols = months.length;
+      const geom = gd._milestoneColGeom || gd._matrixColGeom;
       const xgap =
-        ms._milestoneColGeom && Number.isFinite(Number(ms._milestoneColGeom.xgap)) && Number(ms._milestoneColGeom.xgap) >= 0
-          ? Number(ms._milestoneColGeom.xgap)
-          : 0;
+        geom && Number.isFinite(Number(geom.xgap)) && Number(geom.xgap) >= 0 ? Number(geom.xgap) : 0;
       const cw = (gs.w - Math.max(0, ncols - 1) * xgap) / Math.max(1, ncols);
       if (!Number.isFinite(cw) || cw <= 0) return null;
+      const edLo = milestoneXDataToPaperX(gd, mi - 0.5);
+      const edHi = milestoneXDataToPaperX(gd, mi + 0.5);
+      if (Number.isFinite(edLo) && Number.isFinite(edHi) && edHi > edLo) {
+        return milestoneClampPaperSpan(edLo, edHi);
+      }
       const halfPaper = cw / gs.w / 2;
-      const cxPx = milestoneCategoryCenterPx(ms, monthKey, mi);
-      let centerPaper;
-      if (Number.isFinite(cxPx)) {
-        centerPaper = cxPx / gs.w;
-      } else {
+      let centerPaper = milestoneXDataToPaperX(gd, monthKey);
+      if (!Number.isFinite(centerPaper)) centerPaper = milestoneXDataToPaperX(gd, mi);
+      if (!Number.isFinite(centerPaper)) {
         const x0px = mi * (cw + xgap);
         centerPaper = (x0px + cw / 2) / gs.w;
       }
-      const clamp = (t) => Math.max(0, Math.min(1, t));
-      return {
-        x0: clamp(centerPaper - halfPaper),
-        x1: clamp(centerPaper + halfPaper)
-      };
+      return milestoneClampPaperSpan(centerPaper - halfPaper, centerPaper + halfPaper);
     }
 
-    function relayoutMilestoneColumnHighlight(matrixGd, monthKey, hoverBbox) {
+    function relayoutMilestoneColumnHighlight(matrixGd, monthKey, hoverBbox, colXPaper) {
       const ms = document.getElementById('milestone-chart');
       if (!ms || !ms._milestoneBaseShapesJson) return;
       const months = matrixGd && matrixGd._matrixVisibleMonths;
-      let colX = milestonePaperColumnXForMonthKey(ms, monthKey);
+      let colX =
+        colXPaper &&
+        typeof colXPaper === 'object' &&
+        Number.isFinite(colXPaper.x0) &&
+        Number.isFinite(colXPaper.x1)
+          ? colXPaper
+          : null;
+      if (!colX) colX = milestonePaperColumnXForMonthKey(ms, monthKey);
       if (!colX && matrixGd && hoverBbox) {
         colX = matrixPaperColumnXFromHoverBbox(matrixGd, hoverBbox);
       }
@@ -3230,6 +3307,8 @@
         String(pinSel.month) !== '' &&
         pinSel.project;
       /* With a persisted cell selection, use inspector-style hover bands (no opaque cross-fill) so pin outlines stay visible. */
+      let colXSynced = milestonePaperColumnXForMonthKey(chart, monthKeyForBands);
+      if (!colXSynced) colXSynced = matrixPaperColumnXFromHoverBbox(chart, bbox);
       const bands = matrixHoverBandShapes(
         idx,
         monthKeyForBands,
@@ -3237,7 +3316,8 @@
         chart,
         bbox,
         hasActivePin ? visibleMonths : undefined,
-        hasActivePin ? 'inspector' : undefined
+        hasActivePin ? 'inspector' : undefined,
+        colXSynced
       );
       const merged = base.concat(bands);
       try {
@@ -3245,7 +3325,7 @@
       } catch (e) {
         chart._matrixHoverBandKey = '';
       }
-      relayoutMilestoneColumnHighlight(chart, monthKeyForBands, bbox);
+      relayoutMilestoneColumnHighlight(chart, monthKeyForBands, bbox, colXSynced);
     }
     /** Row bands + midlines in paper y so they track categorical heatmap rows (same idea as matrix row tints). */
     function makeMilestoneLaneShapes() {
@@ -5000,8 +5080,13 @@
       const xg = Number.isFinite(heatmapXGap) && heatmapXGap >= 0 ? heatmapXGap : matrixHeatmapXGap;
 
       const xTickCfgM = buildMatrixXAxisTickConfig(visibleMonths, pw, MATRIX_PLOT_MARGIN_LR);
+      const matrixXTickTextM =
+        xTickCfgM.ticktext.length === visibleMonths.length
+          ? xTickCfgM.ticktext
+          : visibleMonths.map((_, i) => xTickCfgM.ticktext[i] ?? '');
 
       const msX = [];
+      const msXNum = [];
       const msY = [];
       const msText = [];
       const msColors = [];
@@ -5021,6 +5106,7 @@
           if (!mileSeries[row][fullIdx]) continue;
           const monthKey = visibleMonths[i];
           msX.push(monthKey);
+          msXNum.push(i);
           msY.push(row);
           msText.push(blurb);
           msColors.push(c);
@@ -5084,7 +5170,7 @@
               {
                 type: 'scatter',
                 mode: 'markers',
-                x: msX,
+                x: msXNum,
                 y: msY,
                 text: msText,
                 hovertemplate: '%{text}<extra></extra>',
@@ -5102,7 +5188,7 @@
               {
                 type: 'scatter',
                 mode: 'markers',
-                x: [visibleMonths[0]],
+                x: [0],
                 y: [mileRows[0]],
                 cliponaxis: true,
                 marker: { size: 0, opacity: 0 },
@@ -5134,9 +5220,11 @@
         dragmode: false,
         font: { family: 'Manrope, sans-serif', size: 13, color: '#edf3fb' },
         xaxis: {
-          type: 'category',
-          categoryorder: 'array',
-          categoryarray: visibleMonths,
+          type: 'linear',
+          range: [-0.5, Math.max(0, visibleCount - 1) + 0.5],
+          tickmode: 'array',
+          tickvals: visibleMonths.map((_, i) => i),
+          ticktext: matrixXTickTextM,
           side: 'top',
           tickfont: xTickCfgM.tickfont,
           tickangle: xTickCfgM.tickangle,
@@ -5210,7 +5298,14 @@
             scheduleMatrixHoverExit();
             return;
           }
-          const xKey = typeof scatterPt.x === 'string' ? scatterPt.x : String(scatterPt.x);
+          let xKey;
+          if (typeof scatterPt.x === 'number' && Number.isFinite(scatterPt.x)) {
+            const ir = Math.round(scatterPt.x);
+            xKey =
+              ir >= 0 && ir < visibleMonths.length ? visibleMonths[ir] : String(scatterPt.x);
+          } else {
+            xKey = typeof scatterPt.x === 'string' ? scatterPt.x : String(scatterPt.x);
+          }
           const yKey = typeof scatterPt.y === 'string' ? scatterPt.y : String(scatterPt.y);
           const rowIdx = mileRows.indexOf(yKey);
           const heavyHtml = scatterPt.text != null ? String(scatterPt.text).trim() : '';
