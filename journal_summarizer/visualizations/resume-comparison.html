@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Resume vs. JD Comparison — Sr. UX Designer, Connect</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="workbench.css" />
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; color: var(--text); font-family: "Manrope", system-ui, sans-serif;
+      background:
+        radial-gradient(circle at 14% 14%, rgba(140, 195, 255, 0.16), transparent 24%),
+        radial-gradient(circle at 86% 16%, rgba(255, 186, 104, 0.12), transparent 22%),
+        radial-gradient(circle at 78% 82%, rgba(128, 226, 162, 0.11), transparent 24%),
+        linear-gradient(180deg, #090c11 0%, var(--bg) 100%);
+    }
+    .wrap { max-width: min(1320px, 100%); margin: 0 auto; padding: var(--sp-3) clamp(var(--sp-3), 4vw, var(--sp-5)) var(--sp-6); }
+    h1 { font-family: "Cormorant Garamond", serif; font-weight: 600; font-size: 32px; line-height: 1.15; margin: 0 0 4px; }
+    .subtitle { color: var(--muted); font-size: var(--text-md); margin: 0 0 var(--sp-4); }
+    .panel {
+      border: 1px solid var(--line); border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.018), rgba(255,255,255,0.01));
+      box-shadow: 0 20px 56px var(--shadow); overflow: hidden; margin-bottom: var(--sp-4);
+    }
+    .panel-title {
+      font-family: "Cormorant Garamond", serif; font-weight: 600; font-size: 22px;
+      padding: var(--sp-3) var(--sp-3) var(--sp-1); margin: 0;
+    }
+    .panel-desc { color: var(--muted); font-size: var(--text-sm); padding: 0 var(--sp-3) var(--sp-2); margin: 0; }
+    .chart-container { padding: 0 var(--sp-1) var(--sp-2); }
+    .totals-row {
+      display: flex; gap: var(--sp-3); padding: 0 var(--sp-3) var(--sp-4); flex-wrap: wrap;
+    }
+    .total-card {
+      flex: 1; min-width: 200px; border: 1px solid var(--line); border-radius: 12px;
+      padding: var(--sp-2) var(--sp-3); background: rgba(255,255,255,0.015);
+    }
+    .total-card .label { font-size: var(--text-xs); color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+    .total-card .score { font-family: "Cormorant Garamond", serif; font-size: 40px; font-weight: 700; line-height: 1; }
+    .total-card .pct { font-size: var(--text-md); color: var(--muted); margin-left: 6px; }
+    .total-card.pdf .score { color: var(--pdf); }
+    .total-card.connect .score { color: var(--prototype); }
+    .legend-row { display: flex; gap: var(--sp-3); padding: var(--sp-1) var(--sp-3) var(--sp-2); align-items: center; }
+    .legend-swatch { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+    .legend-label { font-size: var(--text-sm); color: var(--muted); margin-left: 6px; }
+
+    table.detail {
+      width: 100%; border-collapse: collapse; font-size: var(--text-sm);
+    }
+    table.detail th {
+      text-align: left; font-weight: 600; font-size: var(--text-xs); color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.06em;
+      padding: var(--sp-1) var(--sp-2); border-bottom: 1px solid var(--line);
+    }
+    table.detail td {
+      padding: 8px var(--sp-2); border-bottom: 1px solid rgba(38,50,66,0.4); vertical-align: top;
+    }
+    table.detail tr:last-child td { border-bottom: none; }
+    table.detail .cat-header td {
+      font-weight: 700; font-size: var(--text-sm); color: var(--presentation);
+      padding-top: var(--sp-2); border-bottom: 1px solid var(--line);
+    }
+    td.score-cell { text-align: center; font-weight: 600; font-variant-numeric: tabular-nums; min-width: 44px; }
+    td.score-cell.s0 { color: #6e7681; }
+    td.score-cell.s1 { color: #d29aff; }
+    td.score-cell.s2 { color: #ffba68; }
+    td.score-cell.s3 { color: #80e2a2; }
+    .delta-pos { color: var(--prototype); font-weight: 700; }
+    .delta-zero { color: var(--muted); }
+    .bar-inline {
+      display: inline-block; height: 6px; border-radius: 3px; vertical-align: middle; margin-left: 6px;
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Resume ↔ JD Scoring</h1>
+  <p class="subtitle">Sr. UX Designer, Connect — PlayStation &nbsp;·&nbsp; Two resumes scored against 30 rubric items &nbsp;·&nbsp; Scale 0–3</p>
+
+  <div class="totals-row">
+    <div class="total-card pdf">
+      <div class="label">PDF (Games Resume)</div>
+      <div><span class="score">36</span><span class="pct">/ 111 &nbsp;(32%)</span></div>
+    </div>
+    <div class="total-card connect">
+      <div class="label">Connect Resume (Tailored)</div>
+      <div><span class="score">91</span><span class="pct">/ 111 &nbsp;(82%)</span></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2 class="panel-title">Category Comparison</h2>
+    <p class="panel-desc">Grouped bar chart — scores by JD section. Max score per category shown in grey.</p>
+    <div class="legend-row">
+      <span class="legend-swatch" style="background:var(--pdf)"></span><span class="legend-label">PDF (Games)</span>
+      <span class="legend-swatch" style="background:var(--prototype)"></span><span class="legend-label">Connect (Tailored)</span>
+      <span class="legend-swatch" style="background:rgba(255,255,255,0.08)"></span><span class="legend-label">Max possible</span>
+    </div>
+    <div class="chart-container" id="bar-chart" style="height:340px;"></div>
+  </div>
+
+  <div class="panel">
+    <h2 class="panel-title">Radar Profile</h2>
+    <p class="panel-desc">Normalized to percentage of max possible per category.</p>
+    <div class="chart-container" id="radar-chart" style="height:460px;"></div>
+  </div>
+
+  <div class="panel">
+    <h2 class="panel-title">Item-Level Detail</h2>
+    <p class="panel-desc">Every rubric item scored 0–3. &nbsp; <span style="color:#6e7681">0 no signal</span> · <span style="color:#d29aff">1 weak</span> · <span style="color:#ffba68">2 visible</span> · <span style="color:#80e2a2">3 strong</span></p>
+    <div style="overflow-x:auto; padding: 0 var(--sp-1) var(--sp-2);">
+      <table class="detail" id="detail-table"></table>
+    </div>
+  </div>
+</div>
+
+<script>
+const DATA = {
+  categories: [
+    { name: "Role Description Signals", max: 36, items: [
+      { label: "Systems thinker", pdf: 1, connect: 3 },
+      { label: "Identity frameworks / account services", pdf: 0, connect: 3 },
+      { label: "Safety policies", pdf: 0, connect: 0 },
+      { label: "Platform technologies", pdf: 1, connect: 2 },
+      { label: "Trust across regions and devices", pdf: 0, connect: 2 },
+      { label: "Research, experimentation, measurable outcomes", pdf: 0, connect: 2 },
+      { label: "Thrive in ambiguity", pdf: 0, connect: 3 },
+      { label: "Accounts and Identity", pdf: 0, connect: 3 },
+      { label: "Family management", pdf: 0, connect: 0 },
+      { label: "Self-service and support tools", pdf: 0, connect: 3 },
+      { label: "Compliance, privacy, safety", pdf: 0, connect: 2 },
+      { label: "Scale globally across surfaces and regions", pdf: 1, connect: 3 },
+    ]},
+    { name: "Responsibilities", max: 33, items: [
+      { label: "Own UX for a core platform surface or journey", pdf: 2, connect: 3 },
+      { label: "Lead design concept → launch (console, web, companion)", pdf: 2, connect: 3 },
+      { label: "Translate complex platform constraints → intuitive UX", pdf: 1, connect: 3 },
+      { label: "Define interaction models, nav patterns, scalable frameworks", pdf: 2, connect: 3 },
+      { label: "Partner with Product, Engineering, Research", pdf: 1, connect: 2 },
+      { label: "Reduce ambiguity via rapid prototyping & validation", pdf: 1, connect: 3 },
+      { label: "Contribute to / evolve platform design systems", pdf: 2, connect: 3 },
+      { label: "Facilitate critiques & drive design execution", pdf: 0, connect: 3 },
+      { label: "Mentor designers, elevate craft & systems thinking", pdf: 0, connect: 2 },
+      { label: "Present design decisions to stakeholders", pdf: 0, connect: 2 },
+      { label: "Balance innovation with usability, accessibility, consistency", pdf: 1, connect: 2 },
+    ]},
+    { name: "Requirements", max: 27, items: [
+      { label: "BA/BS or equivalent experience", pdf: 2, connect: 2 },
+      { label: "5+ years product/UX design inc. platform work", pdf: 3, connect: 3 },
+      { label: "Portfolio (interaction, motion, visuals)", pdf: 1, connect: 1 },
+      { label: "Shipping complex multi-surface experiences", pdf: 2, connect: 3 },
+      { label: "Strong systems thinking & interaction design", pdf: 1, connect: 3 },
+      { label: "Operate independently in ambiguous environments", pdf: 0, connect: 3 },
+      { label: "Collaborating with cross-functional partners", pdf: 1, connect: 3 },
+      { label: "High Figma proficiency (components, tokens, etc.)", pdf: 1, connect: 3 },
+      { label: "Clear communication & presentation skills", pdf: 0, connect: 2 },
+    ]},
+    { name: "Bonus Qualifications", max: 15, items: [
+      { label: "PlayStation ecosystem understanding", pdf: 2, connect: 3 },
+      { label: "Leading products concept → launch at scale", pdf: 3, connect: 3 },
+      { label: "Player behaviors, gaming culture, industry trends", pdf: 3, connect: 2 },
+      { label: "Globally distributed cross-functional teams", pdf: 1, connect: 2 },
+      { label: "Scalable, localized experiences for intl. markets", pdf: 1, connect: 3 },
+    ]},
+  ]
+};
+
+/* ── Grouped Bar Chart ── */
+const catNames = DATA.categories.map(c => c.name);
+const catMax   = DATA.categories.map(c => c.max);
+const catPdf   = DATA.categories.map(c => c.items.reduce((s,i) => s + i.pdf, 0));
+const catConn  = DATA.categories.map(c => c.items.reduce((s,i) => s + i.connect, 0));
+
+Plotly.newPlot("bar-chart", [
+  { x: catNames, y: catMax, name: "Max", type: "bar", marker: { color: "rgba(255,255,255,0.06)", line: { color: "rgba(255,255,255,0.1)", width: 1 } }, hovertemplate: "%{x}<br>Max: %{y}<extra></extra>" },
+  { x: catNames, y: catPdf, name: "PDF (Games)", type: "bar", marker: { color: "#d29aff" }, hovertemplate: "%{x}<br>PDF: %{y}<extra></extra>" },
+  { x: catNames, y: catConn, name: "Connect", type: "bar", marker: { color: "#80e2a2" }, hovertemplate: "%{x}<br>Connect: %{y}<extra></extra>" },
+], {
+  barmode: "group",
+  paper_bgcolor: "rgba(0,0,0,0)", plot_bgcolor: "rgba(0,0,0,0)",
+  font: { family: "Manrope, system-ui, sans-serif", color: "#9dabbc", size: 11 },
+  margin: { t: 16, b: 80, l: 40, r: 16 },
+  xaxis: { tickangle: -15, gridcolor: "rgba(38,50,66,0.4)", linecolor: "var(--line)" },
+  yaxis: { gridcolor: "rgba(38,50,66,0.3)", linecolor: "var(--line)", dtick: 5 },
+  legend: { orientation: "h", y: 1.12, font: { size: 11 } },
+  bargap: 0.25, bargroupgap: 0.08,
+}, { responsive: true, displayModeBar: false });
+
+/* ── Radar Chart ── */
+const radarLabels = catNames.concat([catNames[0]]);
+const pdfPct  = catPdf.map((v, i) => Math.round(v / catMax[i] * 100));
+const connPct = catConn.map((v, i) => Math.round(v / catMax[i] * 100));
+pdfPct.push(pdfPct[0]);
+connPct.push(connPct[0]);
+
+Plotly.newPlot("radar-chart", [
+  { type: "scatterpolar", r: pdfPct, theta: radarLabels, fill: "toself", name: "PDF (Games)",
+    fillcolor: "rgba(210,154,255,0.12)", line: { color: "#d29aff", width: 2 },
+    marker: { size: 6, color: "#d29aff" } },
+  { type: "scatterpolar", r: connPct, theta: radarLabels, fill: "toself", name: "Connect",
+    fillcolor: "rgba(128,226,162,0.12)", line: { color: "#80e2a2", width: 2 },
+    marker: { size: 6, color: "#80e2a2" } },
+], {
+  polar: {
+    radialaxis: { range: [0, 100], ticksuffix: "%", gridcolor: "rgba(38,50,66,0.35)", linecolor: "transparent", tickfont: { size: 10 } },
+    angularaxis: { gridcolor: "rgba(38,50,66,0.35)", linecolor: "rgba(38,50,66,0.5)", tickfont: { size: 11 } },
+    bgcolor: "rgba(0,0,0,0)",
+  },
+  paper_bgcolor: "rgba(0,0,0,0)",
+  font: { family: "Manrope, system-ui, sans-serif", color: "#9dabbc", size: 11 },
+  margin: { t: 40, b: 40, l: 80, r: 80 },
+  legend: { orientation: "h", y: -0.05, font: { size: 11 } },
+  showlegend: true,
+}, { responsive: true, displayModeBar: false });
+
+/* ── Detail Table ── */
+const tbl = document.getElementById("detail-table");
+let html = `<thead><tr><th style="width:50%">Rubric Item</th><th style="width:15%">PDF</th><th style="width:15%">Connect</th><th style="width:20%">Delta</th></tr></thead><tbody>`;
+
+for (const cat of DATA.categories) {
+  html += `<tr class="cat-header"><td colspan="4">${cat.name}</td></tr>`;
+  for (const item of cat.items) {
+    const d = item.connect - item.pdf;
+    const dClass = d > 0 ? "delta-pos" : "delta-zero";
+    const dText  = d > 0 ? `+${d}` : d === 0 ? "—" : `${d}`;
+    const barW   = d > 0 ? d * 28 : 0;
+    const barColor = d > 0 ? "#80e2a2" : "transparent";
+    html += `<tr>
+      <td>${item.label}</td>
+      <td class="score-cell s${item.pdf}">${item.pdf}</td>
+      <td class="score-cell s${item.connect}">${item.connect}</td>
+      <td><span class="${dClass}">${dText}</span><span class="bar-inline" style="width:${barW}px;background:${barColor}"></span></td>
+    </tr>`;
+  }
+}
+
+const totalPdf = DATA.categories.reduce((s,c) => s + c.items.reduce((ss,i) => ss + i.pdf, 0), 0);
+const totalConn = DATA.categories.reduce((s,c) => s + c.items.reduce((ss,i) => ss + i.connect, 0), 0);
+const totalMax = DATA.categories.reduce((s,c) => s + c.max, 0);
+html += `<tr class="cat-header"><td>TOTAL</td><td class="score-cell" style="color:var(--pdf)">${totalPdf} / ${totalMax}</td><td class="score-cell" style="color:var(--prototype)">${totalConn} / ${totalMax}</td><td><span class="delta-pos">+${totalConn - totalPdf}</span></td></tr>`;
+html += `</tbody>`;
+tbl.innerHTML = html;
+</script>
+</body>
+</html>

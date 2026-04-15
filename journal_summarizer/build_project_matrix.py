@@ -883,6 +883,12 @@ def main() -> None:
         help="HTML file to patch with generated JSON",
     )
     ap.add_argument(
+        "--triage-html",
+        type=Path,
+        default=Path(__file__).resolve().parent / "visualizations" / "evidence-triage.html",
+        help="Second HTML file to patch with the same payload (evidence triage viewer). Skip if missing.",
+    )
+    ap.add_argument(
         "--provenance",
         type=Path,
         default=Path(__file__).resolve().parent / "visualizations" / "provenance.html",
@@ -926,14 +932,21 @@ def main() -> None:
         sys.exit(1)
 
     splice_html(args.html, payload, prov_subset)
+    if args.triage_html.is_file():
+        splice_html(args.triage_html, payload, prov_subset)
+    elif args.triage_html.exists():
+        print(f"Warning: triage HTML path is not a file: {args.triage_html}", file=sys.stderr)
     if not args.provenance.is_file():
         print(f"Missing provenance HTML: {args.provenance}", file=sys.stderr)
         sys.exit(1)
     splice_provenance_html(args.provenance, prov_subset)
-    print(
-        f"Wrote data -> {args.html} ({payload['summaryCount']} summaries, {len(payload['months'])} months); "
-        f"provenance -> {args.provenance}"
+    msg = (
+        f"Wrote data -> {args.html} ({payload['summaryCount']} summaries, {len(payload['months'])} months)"
     )
+    if args.triage_html.is_file():
+        msg += f"; triage -> {args.triage_html}"
+    msg += f"; provenance -> {args.provenance}"
+    print(msg)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,29 @@
+{
+  "Job evaluation runner prompt": {
+    "prefix": "jobeval",
+    "body": [
+      "You are evaluating Gary Boodhoo for a specific role.",
+      "",
+      "Read and follow:",
+      "- @JOB_EVALUATION_TEMPLATE.md",
+      "- @JOB_EVALUATION_REFERENCES.md",
+      "",
+      "Job description input:",
+      "- ${1:(paste JD text here) OR (@path/to/job description file)}",
+      "",
+      "Task:",
+      "Produce the full report using the exact PART 1–6 headings defined in JOB_EVALUATION_TEMPLATE.md.",
+      "",
+      "Constraints:",
+      "- Print header metadata first, including template_version copied from JOB_EVALUATION_TEMPLATE.md.",
+      "- Be blunt and realistic. No flattery.",
+      "- Separate fit on paper vs actual capability.",
+      "- Use both resume variants in PART 2 (connect md + games pdf).",
+      "- Use portfolio URLs from JOB_EVALUATION_REFERENCES.md in PART 4.",
+      "- In PART 3, include at least 2 short quotes total from summaries/dumps (with file paths).",
+      "- If sources conflict, call it out.",
+      "- End with the two short paragraphs: why hire / why not hire."
+    ],
+    "description": "Insert canonical job evaluation runner prompt (repo-local snippet)"
+  }
+}

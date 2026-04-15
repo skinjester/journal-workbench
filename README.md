@@ -46,6 +46,21 @@ Optional: `--html path/to.html` or `--summaries summaries/ --stdout` to inspect 
 - **Python** 3.9+  
 - Dependencies: `journal_summarizer/requirements.txt` (`PyYAML`, `rich`, `python-dateutil`)
 
+## Resume To Google Doc
+
+If you want to turn a local Markdown resume into a Google Doc, use:
+
+```bash
+cd journal_summarizer
+pip install -r requirements.txt
+python3 scripts/resume_to_google_doc.py \
+  --input ../resumes/gboodhoo-resume-connect.md \
+  --title "Gary Boodhoo Resume" \
+  --credentials ../google-docs-credentials.json
+```
+
+On first run the script opens a browser for Google OAuth, caches a token locally, and prints the new Google Doc URL.
+
 ---
 
 This repository is private; keep `config.yaml` paths and any journal content out of commits if they reference machines or accounts you do not intend to share.
