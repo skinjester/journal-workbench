@@ -1,0 +1,225 @@
+
+Based on the uploaded document "boundaries of the interface-0201.pptx," here is the content converted into Markdown format:
+
+Boundaries of the Interface
+This research identifies visual strategies to support KESTREL’s augmented reality-themed user experience. Defining a formal language for this concept enables evaluation of the FUTURISM the studio aspires toward. We are familiar with the smart home, but how will we experience the SMART CITY? How is augmented reality RE-PRESENTED to Players and Characters in a videogame? 
++3
+
+POSTURE
+
+Who is the Narrator? 
+
+
+Does my Character know this? 
+
+
+Does my Character feel this? 
+
+REFERENCE FRAME
+
+What coordinates is this attached to? 
+
+AUGMENTED REALITY IN A VIDEOGAME WORLD
+“The television screen is the retina of the mind's eye. Therefore, the television screen is part of the physical structure of the brain. Therefore, whatever appears on the television screen emerges as raw experience for those who watch it. Therefore, television is reality, and reality is less than television.” 
+
+— (Videodrome 1983, David Cronenberg) 
+
+RETINA OF THE MIND’S EYE
+
+Player: The aspect of an individual’s personality that engages with the game and measures success in terms of the narrative and the rules.
+
+
+World: An environment embodying physical properties and constraints inherent to the narrative and rules of the game. (e.g., for a board game, this would be the board itself) . Many video games construct a model of a fictional world with varying degrees of fidelity to the real world, including simulated physics and lighting. Game entities and objectives occupy space in the model, which also constrains their movements. The World may also be thought of as an absolute coordinate system.
++4
+
+
+Character: Fictional entities in a game whose actions and motivations are dictated by the Player, other Characters, or by the game itself. The Player Character is a special character who serves as a stand-in for the Player. Characters, like other physical game entities, have unique reference frames derived from the World reference frame.
++2
+
+Definitions
+Postures
+
+Literal Posture: A user interface is presented to the Player from a Character’s point of view as part of the story. The Player is literally seeing through the Character’s eyes or hearing their thoughts.
++1
+
+
+Metric Posture: A user interface is attached to the World or a local reference frame and enhances the Player’s spatial awareness of a Character’s surroundings.
+
+
+Expressionist Posture: The user interface conveys an emotional state to the Player using visual properties of the display.
+
+
+Formal Posture: The user interface represents game status, concepts, and utilities to the Player by fashioning a coded resemblance.
+
+Reference Frames
+
+Camera: Points in the World are projected into the bounds of a viewport. The Camera often behaves as a Character in its own right—controlled by the Player while being constrained by the World. Cameras have unique reference frames derived from the World.
++2
+
+
+Screen: The World and its game entities are viewed by the Player as pixels (instead of objects) displayed on a 2-dimensional screen. Positions, rotations, and translations are considered in terms of (x,y) coordinates.
++1
+
+Visual Postures Summary
+Representations of the user interface will often overlap, but one of these postures will tend to be dominant:
+
+Posture	Definition	Symbols/Representations
+Literal	What a character perceives in the world	Holograms, Projections, Objects
+Metric	What the player measures in surroundings	Pathfinding, Measurements, Metrics
+Expressionist	What a character feels in the game	Effects, Moods, Glitch
+Formal	What the player knows about the rules	Resemblances, Metaphors, Symbols
+Reference Frame Coordination
+Representations of the USER INTERFACE will be anchored to one of these coordinate systems:
+
+
+World: Labels are attached to the geometry of the world.
+
+
+Object: Labels are attached to the geometry of a specific object.
+
+
+Camera: Panels are anchored to the camera’s reference frame to keep them player-facing during movement.
+
+
+Screen Space: All visual elements are anchored to (x,y) screen coordinates.
+
+theres a lot of missing information try again
+
+Boundaries of the Interface
+Research Objective
+This research identifies visual strategies to support KESTREL’s augmented reality-themed user experience. Defining a formal language for this concept enables the evaluation of the futurism the studio aspires toward. While smart homes are becoming familiar, this research explores how individuals will experience a "Smart City" and how augmented reality is represented to both players and characters within a video game.
++2
+
+Core Framework
+The framework is built around two primary questions for any given UI element:
+
+
+Posture: Who is the narrator? Does my character know or feel this? 
++1
+
+
+Reference Frame: What coordinates is this attached to? 
+
+Definitions of Key Entities
+
+Player: The aspect of an individual’s personality that engages with the game and measures success based on the narrative and rules.
+
+
+World: An environment embodying physical properties and constraints inherent to the narrative and rules. In board games, this is the board itself. In video games, it is often a fictional model with varying fidelity, simulated physics, and lighting that acts as an absolute coordinate system.
++3
+
+
+Character: Fictional entities whose actions are dictated by the player, other characters, or the game itself. The "Player Character" serves as a specific stand-in for the player. Characters have unique reference frames derived from the world reference frame.
++2
+
+Visual Postures
+Representations of the user interface often overlap, but one posture usually remains dominant.
+
+Posture	Definition	Narrated By	Features
+Literal	
+What a character perceives in the world .
+
+A Character
+
+Holograms, projections, objects, and decals .
+
+Metric	
+What the player measures in a character’s surroundings.
+
+The Environment
+
+Measurements, paths, and locators .
+
+Expressionist	
+What a character feels in the game .
+
+The Author(s)
+
+Effects, moods, aspirations, and glitches .
+
+Formal	
+What the player knows about the rules .
+
+The Rules
+
+Resemblances, metaphors, maps, frameworks, and symbols .
+
+Reference Frames
+The reference frame is the coordinate system to which a UI element is bound.
+
+
+World: Labels or visual elements are attached directly to the geometry of the world.
+
+
+Object: Labels are attached to the geometry of a specific object, maintaining a personal reference frame independent of world position.
++1
+
+
+Camera: Points in the world project into a viewport. Panels are anchored to this frame to stay player-facing during movement.
++1
+
+
+Screen Space: Visual elements are viewed as pixels on a 2D screen. Coordinates are described as (x,y) values relative to the edges of the screen.
++2
+
+Comparative Case Studies
+Literal vs. Formal Posture
+
+Fallout 4 Pip-Boy: Normally, the HUD is a coded overlay in screen space (Formal). However, when the player steps into Power Armor, the HUD becomes a Literal representation of looking out from inside the armor.
++1
+
+
+Dead Space: The holographic inventory menu literally emanates from Isaac Clarke’s armor. It acts as a light source and moves with him, allowing the player to look over his shoulder to see exactly what the character sees.
++4
+
+Screen Space vs. Camera Space
+
+The Division: An inventory menu appears in a panel anchored to camera space. While it may look like the character is viewing it, the narrative does not support that conclusion; instead, it is a dashboard representation for the player.
++1
+
+"Crossing the Boundaries" Interaction Sequences
+Sequence 1: Finding a Hidden Object
+This sequence demonstrates how layers overlap to provide multidimensional feedback.
+
+
+Look for clues: Object Metric (boundary radius measures environment).
+
+
+Activate "Second Sight": World Literal (character sees highlights).
+
+
+Found Target: Screen Metric (measures the screen).
+
+
+Approach/Examine: Camera Form (always faces player in camera viewport).
+
+
+Found/Interact with Object: Screen Form.
+
+Sequence 2: Finding a Merchant
+
+Merchant icon on compass: Screen Metric (measures environment).
++1
+
+
+Center field of view: Screen Form (text label).
++1
+
+
+Identify on map: Screen Form (city map and icons).
++1
+
+
+Merchant is offscreen/over there: Screen Metric and Object Metric.
++1
+
+
+Merchant greets character: Screen Form (text label).
++1
+
+
+Approach to start conversation: Screen Form (interaction prompt).
++1
+
+
+Conversation/Merchant system: Screen Form (exposes game system to player)
