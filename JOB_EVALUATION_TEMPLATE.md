@@ -1,10 +1,13 @@
 # Job evaluation template (canonical)
 
-`template_version`: **v1.0.0**  
-`last_updated`: **2026-04-16**
+`template_version`: **v1.3.0**  
+`last_updated`: **2026-04-15**
 
 ## Changelog
 
+- **v1.3.0 (2026-04-15)**: PART 4 is **one synthesized portfolio narrative for the JD** (no per-URL subsections). Full URL review remains required for diligence via header metadata + `evidence_sources_used`.
+- **v1.2.0 (2026-04-15)**: Require explicit review coverage for **every** canonical portfolio URL listed in `JOB_EVALUATION_REFERENCES.md` (PART 4 + evidence accounting).
+- **v1.1.0 (2026-04-15)**: Persist each evaluation report under `job-evaluation-reports/` with `.eval.md` naming + date-based collision filenames.
 - **v1.0.0 (2026-04-16)**: Initial canonical template + references split (`JOB_EVALUATION_REFERENCES.md`).
 
 ## What this file is for
@@ -68,13 +71,51 @@ Rules:
 
 ## Output format (always use these headings)
 
+### Output artifact (required)
+
+Write the **entire** evaluation (including the “Header metadata” section) to a new markdown file under:
+
+- [`job-evaluation-reports/`](job-evaluation-reports/)
+
+#### Filename rules
+
+Let `<JD>` be the **basename only** (no directories) of the job description source file.
+
+Examples:
+
+- JD path: `job descriptions/Lead UX, Gamebreaking` → `<JD>` = `Lead UX, Gamebreaking`
+- JD path: `job descriptions-processed/Manager Design Systems, PlayStation` → `<JD>` = `Manager Design Systems, PlayStation`
+
+Default output path:
+
+- `job-evaluation-reports/<JD>.eval.md`
+
+Collision / re-run policy:
+
+1. If `job-evaluation-reports/<JD>.eval.md` does **not** exist, write that path.
+2. If it **does** exist, write instead:
+   - `job-evaluation-reports/<JD>.eval - YYYY-MM-DD.md`
+   - Use the authoritative “today” date provided by the environment/user context. If unknown, use the date in `last_updated` at the top of this file **only as a last resort**, and say you did so in header metadata.
+3. If the dated file also exists (multiple runs same day), append an incrementing suffix:
+   - `job-evaluation-reports/<JD>.eval - YYYY-MM-DD - 2.md`
+   - `job-evaluation-reports/<JD>.eval - YYYY-MM-DD - 3.md`
+   - …
+
+Chat output policy:
+
+- Prefer a short confirmation in chat with the **repo-relative path** of the written report.
+- Only paste the full report into chat if the user explicitly asks for it.
+
 ### Header metadata (always print first)
 
 - `template_version`: (copy from top of this file)
 - `job`: (company + title if known)
 - `jd_source`: (pasted text vs `@path/to/file`)
+- `output_report_path`: (repo-relative path of the markdown file you wrote)
 - `resume_versions_evaluated`: (list)
 - `portfolio_evaluated`: yes/no (default yes, using references doc URLs)
+- `portfolio_pages_required`: (copy the full deduped portfolio URL list from `JOB_EVALUATION_REFERENCES.md`)
+- `portfolio_pages_reviewed`: (checklist of the same URLs, each marked **Reviewed** or **Failed to fetch** with a one-line note)
 - `evidence_sources_used`: (bullet list of paths/URLs actually used)
 
 ### PART 1 — What the role is really asking for
@@ -132,10 +173,41 @@ Constraints:
 
 Using the portfolio URLs in [`JOB_EVALUATION_REFERENCES.md`](JOB_EVALUATION_REFERENCES.md):
 
-- what the portfolio proves that resumes/journals do not
-- whether the portfolio reduces key hiring risks for *this JD* (which ones)
-- what still does not map (be explicit)
-- call out any claims that look hard to defend without receipts
+#### Required diligence (hard requirement — does not mean “write a page-by-page report”)
+
+You must still treat the **Portfolio (public)** URL list in `JOB_EVALUATION_REFERENCES.md` as the canonical **mandatory review set** for your own analysis:
+
+- **Internally review every URL** in that list (dedupe identical URLs) before writing PART 4.
+- In **Header metadata**, `evidence_sources_used` must include **every** portfolio URL from that list **unless** you mark one as **Failed to fetch** (see below). Cherry-picking only 1–2 portfolio pages in your analysis is not allowed.
+
+#### PART 4 written output (synthesis only)
+
+The **body of PART 4** must read as **one coherent hiring-manager view of what the portfolio proves for this JD**, not a catalog of pages.
+
+**Do not** include per-URL blocks such as `#### Portfolio: <url>` with repeated “proves / does not prove / doubts / anchors” grids.
+
+Use **only** these subheadings inside PART 4 (in this order):
+
+1. `#### What the portfolio proves for this JD`  
+   - Integrated narrative: craft, systems thinking, scope, shipped-adjacent proof, and any JD-specific fit.  
+   - You may name **at most 2–4** case-study URLs inline where they carry the argument (e.g. “the ESO case study shows …”). Do not walk every URL.
+
+2. `#### What the portfolio does not prove (or only weakly supports) for this JD`  
+   - Gaps, adjacency, missing domains, or weak evidence vs the JD’s explicit/desired lines.
+
+3. `#### Hiring risks the portfolio reduces vs leaves open`  
+   - Short, decisive bullets tied to *this* role.
+
+4. `#### Credibility and receipts` (optional, keep short)  
+   - Call out any aggregate or hard-to-verify claims; separate **marketing** from **demonstrated** proof.
+
+Optional appendix (only if useful, max ~15 lines):
+
+- `#### Portfolio coverage (audit)` — a **single compact table**: one row per required portfolio URL, columns `URL | Status (Reviewed / Failed to fetch) | Note (≤12 words)`. No prose per row beyond the Note cell.
+
+Fetch failures / blocked pages:
+
+- Mark **Failed to fetch** in `portfolio_pages_reviewed` and in the optional audit table. Say what you could not verify in **Credibility and receipts** or **What the portfolio does not prove**, not in a per-page essay.
 
 ### PART 5 — Combined verdict
 
@@ -221,6 +293,7 @@ After scoring, explicitly answer:
 1. Bump `template_version` + add a changelog entry at the top of this file.
 2. Re-run evaluations by starting a fresh chat (or fork) and pasting the **Runner prompt** below.
 3. Always restate `template_version` in the output header metadata.
+4. Re-runs should create a **new** report file using the collision rules under **Output artifact (required)** (do not silently overwrite prior reports).
 
 ---
 
@@ -239,14 +312,15 @@ Job description input:
 - (paste JD text here) OR (@path/to/job description file)
 
 Task:
-Produce the full report using the exact PART 1–6 headings defined in JOB_EVALUATION_TEMPLATE.md.
+Write the full report to `job-evaluation-reports/` using the Output artifact rules in JOB_EVALUATION_TEMPLATE.md (naming + collisions), and ensure the report uses the exact PART 1–6 headings defined in JOB_EVALUATION_TEMPLATE.md.
 
 Constraints:
-- Print header metadata first, including template_version copied from JOB_EVALUATION_TEMPLATE.md.
+- Print header metadata first (inside the written report file), including template_version copied from JOB_EVALUATION_TEMPLATE.md, plus `output_report_path`.
+- Populate `portfolio_pages_required`, `portfolio_pages_reviewed`, and ensure `evidence_sources_used` accounts for **all** canonical portfolio URLs in `JOB_EVALUATION_REFERENCES.md` (or marks fetch failures explicitly).
 - Be blunt and realistic. No flattery.
 - Separate fit on paper vs actual capability.
 - Use both resume variants in PART 2 (connect md + games pdf).
-- Use portfolio URLs from JOB_EVALUATION_REFERENCES.md in PART 4.
+- In PART 4, follow **Required diligence** + **PART 4 written output (synthesis only)** in JOB_EVALUATION_TEMPLATE.md (integrated narrative; no per-URL subsections; no cherry-picking which pages you reviewed).
 - In PART 3, include at least 2 short quotes total from summaries/dumps (with file paths).
 - If sources conflict, call it out.
 - End with the two short paragraphs: why hire / why not hire.

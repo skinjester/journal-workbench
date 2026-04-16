@@ -1,0 +1,28 @@
+---
+description: Job evaluation mode (read canonical template + references; write markdown report under job-evaluation-reports/)
+globs:
+  - "job descriptions/**"
+  - "job descriptions-processed/**"
+  - "job-evaluation-reports/**"
+  - "JOB_EVALUATION_TEMPLATE.md"
+  - "JOB_EVALUATION_REFERENCES.md"
+  - "JOB_EVAL_CHAT_COMMAND.md"
+alwaysApply: false
+---
+
+# Job evaluation (repo workflow)
+
+If the user is doing a **job fit evaluation** (explicitly or implicitly) against a job description, you must:
+
+1. Read and follow:
+   - `JOB_EVALUATION_TEMPLATE.md`
+   - `JOB_EVALUATION_REFERENCES.md`
+2. Treat the job description as coming from:
+   - an attached/`@`-referenced JD file under `job descriptions/**` or `job descriptions-processed/**`, OR
+   - pasted JD text in chat (only if no JD file is referenced)
+3. Produce the evaluation using the **exact PART 1–6 headings** defined in `JOB_EVALUATION_TEMPLATE.md`.
+4. **Write the full report to disk** as a new markdown file under `job-evaluation-reports/` using the naming + collision rules in `JOB_EVALUATION_TEMPLATE.md` (do not only print the report in chat).
+
+Chat output policy:
+
+- Prefer a short confirmation in chat with the **repo-relative output path**, unless the user explicitly asks for the full report in chat.

@@ -15,6 +15,8 @@ If a path moves, update it here and bump `JOB_EVALUATION_TEMPLATE.md`’s `templ
 
 Use the live site as the primary craft/proof surface (case studies, artifacts, narrative).
 
+Canonical portfolio pages (deduped). Treat as the mandatory review set **unless** you explicitly add more URLs in chat. The evaluator must **review all of these** for diligence; the written PART 4 in `JOB_EVALUATION_TEMPLATE.md` is a **single synthesized narrative** for the JD (v1.3.0+), not a page-by-page report.
+
 - [`https://www.garyb.design/`](https://www.garyb.design/)
 - [`https://www.garyb.design/products/elderscrollsonline`](https://www.garyb.design/products/elderscrollsonline)
 - [`https://www.garyb.design/products/madden`](https://www.garyb.design/products/madden)
@@ -53,6 +55,14 @@ Job-specific JD text should be pasted in chat **or** referenced via a workspace 
 
 - Typical location: [`job descriptions/`](job%20descriptions/)
 - Optional processed notes: [`job descriptions-processed/`](job%20descriptions-processed/)
+
+## Evaluation outputs (generated)
+
+Each evaluation run should write a standalone markdown report here:
+
+- [`job-evaluation-reports/`](job-evaluation-reports/)
+
+See [`job-evaluation-reports/README.md`](job-evaluation-reports/README.md) for naming and collision rules.
 
 ## Evidence rules (short)
 
