@@ -42,13 +42,19 @@ class VerdictRule:
     pattern: re.Pattern[str]
 
 
-# Leading rating phrase for summary table cells (after label strip); longer alternations first.
+# Leading rating phrase (single match at start of remainder); kept for edge fallbacks.
 _RATING_AT_START = re.compile(
     r"^\s*((?:Very\s+)?(?:"
     r"Medium(?:[-–—]High|\s+High)|"
     r"Medium|High|Low|"
     r"N/A|TBD|Unknown"
     r"))\b",
+    re.IGNORECASE,
+)
+
+# Scan full verdict text for all tier tokens (Medium–High before bare Medium). Used to pick highest tier.
+_ALL_RATING_TOKENS_RE = re.compile(
+    r"\b(?:Very\s+High|High|Medium(?:[-–—]High|\s+High)|Medium|Low|Unknown|N/A|TBD)\b",
     re.IGNORECASE,
 )
 
@@ -136,23 +142,80 @@ def extract_part5_section(text: str) -> str:
     return "\n".join(out).strip()
 
 
+def _normalize_rating_token_for_table(raw: str) -> str:
+    """Canonical spelling for overview cells (en dash in Medium–High)."""
+    s = re.sub(r"\s+", " ", raw.strip())
+    low = s.lower().replace("–", "-").replace("—", "-")
+    if low.startswith("very high"):
+        return "Very High"
+    if low == "high":
+        return "High"
+    if low in ("medium-high", "medium high") or low.replace(" ", "") in ("mediumhigh", "medium-high"):
+        return "Medium–High"
+    if low == "medium":
+        return "Medium"
+    if low == "low":
+        return "Low"
+    if low == "unknown":
+        return "Unknown"
+    if low == "n/a":
+        return "N/A"
+    if low == "tbd":
+        return "TBD"
+    return s.rstrip(".,;:")
+
+
+def _rating_tier_rank(token: str) -> int:
+    """
+    Higher = better / stronger tier for overview when multiple ratings appear in one line.
+    Unknown / N/A / TBD rank below substantive High/Medium/Low tiers.
+    """
+    n = _normalize_rating_token_for_table(token).lower().replace("–", "-").replace("—", "-")
+    order = (
+        "very high",
+        "high",
+        "medium-high",
+        "medium",
+        "low",
+        "unknown",
+        "n/a",
+        "tbd",
+    )
+    try:
+        # Higher index in tuple = lower rank score; invert so max() picks best tier
+        idx = order.index(n)
+    except ValueError:
+        return -1
+    return 100 - idx  # very high -> 100, tbd -> 92
+
+
 def rating_only_for_summary(cell_after_label: str) -> str:
     """
-    Keep only the leading rating (High, Medium-High, etc.) for at-a-glance table cells.
-    Drops parentheticals and prose after the rating.
+    One cell value for the summary table: a single tier (High, Medium–High, Unknown, …).
+
+    If the verdict text lists multiple tiers (e.g. semicolons: Medium–High for X; Medium for Y),
+    uses the **highest** tier. If exactly one explicit Unknown / N/A / TBD appears with no higher
+    tier, that value is shown.
     """
     t = cell_after_label.strip()
     if not t:
         return ""
-    t = t.split("(", 1)[0].strip()
-    t = t.split("[", 1)[0].strip()
-    if " — " in t:
-        t = t.split(" — ", 1)[0].strip()
-    m = _RATING_AT_START.match(t)
+
+    found = [m.group(0) for m in _ALL_RATING_TOKENS_RE.finditer(t)]
+    if found:
+        best = max(found, key=lambda tok: (_rating_tier_rank(tok), len(tok)))
+        return _normalize_rating_token_for_table(best)
+
+    # No known tier token: legacy single-token / first-word fallback
+    t2 = t.split("(", 1)[0].strip()
+    t2 = t2.split("[", 1)[0].strip()
+    if " — " in t2:
+        t2 = t2.split(" — ", 1)[0].strip()
+    m = _RATING_AT_START.match(t2)
     if m:
         out = re.sub(r"\s+", " ", m.group(1).strip())
-        return out.rstrip(".,;:")
-    first = t.split(None, 1)[0] if t else ""
+        return _normalize_rating_token_for_table(out)
+    first = t2.split(None, 1)[0] if t2 else ""
     return first.rstrip(".,;:") if first else ""
 
 
@@ -174,6 +237,10 @@ def verdict_line_to_table_cell(line: str, column: str) -> str:
 def extract_verdict_lines(part5: str) -> Dict[str, str]:
     """
     Return mapping column key -> raw markdown line (trimmed), for the five verdict bullets.
+
+    Supports:
+    - list bullets: ``- **Fit on paper:** **High**``
+    - bold-only paragraphs (no leading ``- ``): ``**Fit on paper:** **High**``
     """
     found: Dict[str, str] = {}
     if not part5:
@@ -181,9 +248,15 @@ def extract_verdict_lines(part5: str) -> Dict[str, str]:
 
     for raw_line in part5.splitlines():
         line = raw_line.strip()
-        if not line.startswith("- "):
+        if not line:
             continue
-        payload = line[2:].strip()
+        if line.startswith("|"):
+            continue
+        if line.startswith("- "):
+            payload = line[2:].strip()
+        else:
+            payload = line
+
         for rule in VERDICT_RULES:
             if rule.pattern.match(payload):
                 # First win keeps the line (stable if duplicates exist)

@@ -50,7 +50,7 @@ def test_verdict_line_to_table_cell_strips_labels() -> None:
         cj.verdict_line_to_table_cell(
             "- **Actual capability (inferred)**: Medium-High", "Capability"
         )
-        == "Medium-High"
+        == "Medium–High"
     )
     assert (
         cj.verdict_line_to_table_cell(
@@ -64,7 +64,16 @@ def test_rating_only_for_summary_drops_tail_prose() -> None:
     assert cj.rating_only_for_summary("High") == "High"
     assert cj.rating_only_for_summary("Medium–High (notes here)") == "Medium–High"
     assert cj.rating_only_for_summary("High for senior game UX work") == "High"
-    assert cj.rating_only_for_summary("Medium-High. More text.") == "Medium-High"
+    assert cj.rating_only_for_summary("Medium-High. More text.") == "Medium–High"
+
+
+def test_rating_only_for_summary_picks_highest_of_multiple() -> None:
+    s = (
+        "Medium–High for game UX leadership; Medium for mobile CoD-specific execution."
+    )
+    assert cj.rating_only_for_summary(s) == "Medium–High"
+    assert cj.rating_only_for_summary("Medium for A; High for B") == "High"
+    assert cj.rating_only_for_summary("Unknown (x); Medium (y)") == "Medium"
 
 
 def test_verdict_line_long_bullet_is_rating_only() -> None:
@@ -95,6 +104,29 @@ def test_extract_part5_and_verdicts() -> None:
     verdicts = cj.extract_verdict_lines(part5)
     assert len(verdicts) == 5
     assert "Fit on Paper" in verdicts
+
+
+def test_extract_verdict_lines_bold_paragraphs_without_list_markers() -> None:
+    """Some eval reports use bold paragraphs for PART 5 verdicts instead of markdown list bullets."""
+    part5 = """
+## PART 5 — Combined verdict
+
+**Fit on paper:** **High** (notes)
+
+**Actual capability (inferred):** **Medium–High** (notes)
+
+**Likelihood of recruiter screen:** **Low**
+
+**Likelihood of hiring manager screen:** **Fine**
+
+**Likelihood of panel loop survival:** **Medium**
+
+#### Three strongest reasons
+"""
+    verdicts = cj.extract_verdict_lines(part5)
+    assert len(verdicts) == 5
+    assert "Fit on Paper" in verdicts
+    assert verdicts["Fit on Paper"].startswith("**Fit on paper:**")
 
 
 def test_snapshot_and_mutation(tmp_path: Path) -> None:
