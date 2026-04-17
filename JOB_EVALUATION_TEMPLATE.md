@@ -1,10 +1,12 @@
 # Job evaluation template (canonical)
 
-`template_version`: **v1.3.0**  
-`last_updated`: **2026-04-15**
+`template_version`: **v1.4.0**  
+`last_updated`: **2026-04-16**
 
 ## Changelog
 
+- **v1.4.0 (2026-04-16)**: Add scanability defaults for report writing, require clearer internal substructure in dense sections, and fix stale `resumes/gboodhoo-resume-games.pdf` references to `resumes/gboodhoo-resume-games.md`.
+- **v1.3.1 (2026-04-15)**: Update canonical games resume reference from `resumes/gboodhoo-resume-games.pdf` to `resumes/gboodhoo-resume-games.md`.
 - **v1.3.0 (2026-04-15)**: PART 4 is **one synthesized portfolio narrative for the JD** (no per-URL subsections). Full URL review remains required for diligence via header metadata + `evidence_sources_used`.
 - **v1.2.0 (2026-04-15)**: Require explicit review coverage for **every** canonical portfolio URL listed in `JOB_EVALUATION_REFERENCES.md` (PART 4 + evidence accounting).
 - **v1.1.0 (2026-04-15)**: Persist each evaluation report under `job-evaluation-reports/` with `.eval.md` naming + date-based collision filenames.
@@ -61,6 +63,20 @@ Rules:
 - Do not rewrite the resume or portfolio unless explicitly asked.
 - When citing journal/summary evidence, prefer **short quotes** and always label the source file path.
 
+## Writing style defaults (important)
+
+The report should be easy to scan quickly by a tired human reader.
+
+Defaults:
+
+- Prefer **short paragraphs** over long dense blocks.
+- Use **real subheadings** inside each PART when they improve scanability.
+- Turn repeated evaluative labels into **bullets with bold labels** or `####` subheads.
+- In dense sections, start with a **one-line takeaway** when helpful.
+- Use bullets for lists of strengths, risks, gaps, and recommendations.
+- Keep the tone blunt, but keep the formatting clean and readable.
+- Do **not** pad the report with filler transitions or repetitive restatement.
+
 ## Evidence quality ladder (how much weight to give)
 
 1. **Public portfolio artifacts** (strong for craft, interaction/system thinking, narrative clarity)
@@ -70,6 +86,10 @@ Rules:
 5. **Long chat transcripts in `contexts/`** (good for intent/prototyping; weak for org-scale outcomes unless corroborated)
 
 ## Output format (always use these headings)
+
+### Global formatting expectations
+
+Keep the required PART 1-6 headings exactly as written below. Within those parts, you may add short subheadings and bullets to improve readability, but do not add extra top-level PART sections or convert the report into a giant wall of prose.
 
 ### Output artifact (required)
 
@@ -128,12 +148,20 @@ Extract:
 - what a hiring team is optimizing for in screening
 - likely doubts/risks for a candidate coming from your background unless proven otherwise
 
+Preferred internal structure for readability:
+
+- `#### The explicit asks`
+- `#### The implied asks`
+- `#### What "great" looks like for this role`
+- `#### What a hiring team is optimizing for in screening`
+- `#### Likely doubts unless proven otherwise`
+
 ### PART 2 — Resume evaluation only (two-pass)
 
 Evaluate **each** resume variant independently:
 
 - [`resumes/gboodhoo-resume-connect.md`](resumes/gboodhoo-resume-connect.md)
-- [`resumes/gboodhoo-resume-games.pdf`](resumes/gboodhoo-resume-games.pdf)
+- [`resumes/gboodhoo-resume-games.md`](resumes/gboodhoo-resume-games.md)
 
 For each resume, include:
 
@@ -148,6 +176,10 @@ Then add a **comparative** subsection:
 
 - which resume is closer to *this JD*
 - whether you should apply with one primary resume + portfolio, or actually need a third variant
+
+Formatting preference:
+
+- For each resume block, prefer bold lead labels such as `**Interview likelihood from this resume alone:**`, `**Strongest signals:**`, `**Weakest / missing signals:**`, and so on, instead of burying everything in plain text.
 
 ### PART 3 — Monthly summaries + raw journals (supporting evidence)
 
@@ -168,6 +200,7 @@ Constraints:
 
 - If you cite a dump/summary, include **at least 2 short quotes** total across PART 3 (more if helpful).
 - Label each quote with file path.
+- Prefer subheads such as `#### Behavioral patterns`, `#### Leadership and influence evidence`, `#### Direct ambiguity-navigation evidence`, `#### Evidence that strengthens the resume`, `#### Evidence that weakens or complicates the resume story`, and `#### Net read from journals`.
 
 ### PART 4 — Portfolio evaluation (hiring manager lens)
 
@@ -227,6 +260,10 @@ Then:
 - 3 strongest reasons to reject
 - misleveling / mispositioning read (overleveled, underleveled, too game-specific, too IC, too diffuse, etc.)
 
+Formatting preference:
+
+- Use subheads for these three blocks so the verdict is easy to skim.
+
 ### PART 6 — Rubric scoring + weighted synthesis
 
 Score each dimension **High/Medium/Low** using the rubric below, then compute a weighted overall read (qualitative is fine; be consistent).
@@ -243,6 +280,12 @@ End with:
 
 - **Why they might hire you** (1 short paragraph)
 - **Why they might not** (1 short paragraph)
+
+Formatting preference:
+
+- Prefer a `#### Weighted synthesis` subhead followed by concise question-and-answer bullets.
+- Prefer a `#### Actionable output` subhead.
+- Under `Actionable output`, prefer short subheads for themes to emphasize, themes to de-emphasize, bullets to rewrite, missing signals, interview stories, and blunt recommendation.
 
 ## Rubric (score each High / Medium / Low)
 
@@ -319,9 +362,10 @@ Constraints:
 - Populate `portfolio_pages_required`, `portfolio_pages_reviewed`, and ensure `evidence_sources_used` accounts for **all** canonical portfolio URLs in `JOB_EVALUATION_REFERENCES.md` (or marks fetch failures explicitly).
 - Be blunt and realistic. No flattery.
 - Separate fit on paper vs actual capability.
-- Use both resume variants in PART 2 (connect md + games pdf).
+- Use both resume variants in PART 2 (connect md + games md).
 - In PART 4, follow **Required diligence** + **PART 4 written output (synthesis only)** in JOB_EVALUATION_TEMPLATE.md (integrated narrative; no per-URL subsections; no cherry-picking which pages you reviewed).
 - In PART 3, include at least 2 short quotes total from summaries/dumps (with file paths).
 - If sources conflict, call it out.
 - End with the two short paragraphs: why hire / why not hire.
+- Prefer readable internal formatting: short paragraphs, bullets where natural, and subheads inside dense sections.
 ```

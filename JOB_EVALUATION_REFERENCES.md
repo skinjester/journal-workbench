@@ -8,7 +8,7 @@ If a path moves, update it here and bump `JOB_EVALUATION_TEMPLATE.md`’s `templ
 
 - [`resumes/gboodhoo-resume-connect.md`](resumes/gboodhoo-resume-connect.md)
   - Primary “platform / systems / trust moments” positioning.
-- [`resumes/gboodhoo-resume-games.pdf`](resumes/gboodhoo-resume-games.pdf)
+- [`resumes/gboodhoo-resume-games.md`](resumes/gboodhoo-resume-games.md)
   - Alternate positioning (more game-forward). Use when evaluating game roles, or when you want the evaluator to sanity-check framing mismatch.
 
 ## Portfolio (public)

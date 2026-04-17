@@ -8,6 +8,7 @@
 |------|------|
 | `journals/` | Place markdown or text journal files here (or point `journals_directory` in config at a vault that contains them). |
 | `journal_summarizer/` | Python CLI, config, parsers, and generated outputs (`summaries/`, optional dumps and visualizations). |
+| `run-job-eval-pipeline.sh` | One-shot job evaluation: batch-evaluate JDs under `job descriptions/` then write a timestamped overview under `job-evaluation-reports/` (see [`job-evaluation-reports/README.md`](job-evaluation-reports/README.md)). |
 | `reporting-template.md` | Section headings aligned with generated reports (Goals, Workstream, Artifacts Delivered, etc.). |
 
 Full feature list, journal timestamp formats, troubleshooting, and advanced flags (`--dry-run`, `--dump-mode`, `--from-dumps`) are documented in [`journal_summarizer/README.md`](journal_summarizer/README.md).

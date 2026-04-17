@@ -118,6 +118,16 @@ None identified
 *Closing paragraph after editorial pass in Cursor…*
 ```
 
+## Tests
+
+From `journal_summarizer/` (with dev dependencies installed: `pip install -r requirements.txt`):
+
+```bash
+python3 -m pytest
+```
+
+Includes `tests/test_collate_job_evaluations.py` for the job-evaluation overview collator.
+
 ## Notes
 
 - Large journals are processed in batches for memory; there is no external inference API.
