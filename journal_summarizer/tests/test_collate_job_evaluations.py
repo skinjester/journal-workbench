@@ -170,9 +170,66 @@ def test_allocate_overview_path_singular_record(tmp_path: Path) -> None:
     assert p.name.endswith("(1).md")
 
 
+def test_tier_cell_to_numeric() -> None:
+    assert cj.tier_cell_to_numeric("High") == 99.0
+    assert cj.tier_cell_to_numeric("Medium–High") == 98.0
+    assert cj.tier_cell_to_numeric("Medium") == 97.0
+    assert cj.tier_cell_to_numeric("Unknown") == 95.0
+    assert cj.tier_cell_to_numeric("TBD") == 93.0
+    assert cj.tier_cell_to_numeric("") is None
+    assert cj.tier_cell_to_numeric("Good") is None
+
+
+def test_build_collated_rows_one_report(tmp_path: Path) -> None:
+    jd = "Role X"
+    (tmp_path / f"{jd}.eval.md").write_text(
+        """# Header metadata
+- `job`: Test Job
+
+### PART 5 — Combined verdict
+
+- **Fit on paper:** **High**
+- **Actual capability (inferred):** **Medium**
+- **Likelihood of recruiter screen:** **Low**
+- **Likelihood of hiring manager screen:** **Medium**
+- **Likelihood of panel loop survival:** **High**
+
+### PART 6 — x
+""",
+        encoding="utf-8",
+    )
+    rows = cj.build_collated_rows(tmp_path, tmp_path)
+    assert len(rows) == 1
+    assert rows[0].jd_key == jd
+
+
 def test_warn_unparsed_eval_markdown(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     (tmp_path / "bad.eval.extra.md").write_text("x", encoding="utf-8")
     cj.warn_unparsed_eval_markdown(tmp_path)
     err = capsys.readouterr().err
     assert "unparsed" in err
     assert "bad.eval.extra.md" in err
+
+
+def test_write_overview_chart_html_smoke(tmp_path: Path) -> None:
+    pytest.importorskip("plotly")
+    jd = "Role Viz"
+    (tmp_path / f"{jd}.eval.md").write_text(
+        """### PART 5 — Combined verdict
+- **Fit on paper:** **High**
+- **Actual capability (inferred):** **Medium**
+- **Likelihood of recruiter screen:** **Medium**
+- **Likelihood of hiring manager screen:** **Medium**
+- **Likelihood of panel loop survival:** **Medium**
+### PART 6
+""",
+        encoding="utf-8",
+    )
+    rows = cj.build_collated_rows(tmp_path, tmp_path)
+    import job_eval_overview_html as viz
+
+    out = tmp_path / "dash.html"
+    viz.write_overview_chart_html(out, rows, tmp_path, "job-evaluation-reports/test.md")
+    text = out.read_text(encoding="utf-8")
+    assert "plotly" in text.lower()
+    assert "Heatmap" in text

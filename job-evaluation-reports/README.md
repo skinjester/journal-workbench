@@ -130,6 +130,25 @@ Run from the repo root:
 python3 journal_summarizer/scripts/collate_job_evaluations.py
 ```
 
+### Plotly HTML dashboard (optional)
+
+Same data as the summary table, as an interactive **standalone HTML** file (six views: heatmap, grouped bars, radar, parallel coordinates, dot plots, bump chart). Requires `plotly` (see `journal_summarizer/requirements.txt`).
+
+```bash
+pip install -r journal_summarizer/requirements.txt
+python3 journal_summarizer/scripts/collate_job_evaluations.py --html
+```
+
+Writes `_OVERVIEW-<timestamp>(<n>).html` next to the markdown when `--out` is omitted, or `<your-out>.html` if you used `--out path.md`. Use `--html-out path/to/custom.html` to set the HTML path explicitly.
+
+The **radar** view can get crowded with many jobs; use the Plotly **legend** to toggle traces. The markdown overview remains the canonical text artifact.
+
+To include HTML from the full pipeline (Stage 2 only or after Stage 1):
+
+```bash
+./run-job-eval-pipeline.sh --stage2-only --html
+```
+
 To pin a **fixed** path (overwrites that file each time), pass `--out` (optional; most runs should omit this so each collate run keeps a new timestamped file):
 
 ```bash

@@ -12,6 +12,7 @@ Dedupe policy:
 
 Output:
   Markdown with a summary table + per-job sections containing PART 5 verdict lines only.
+  Optional `--html` / `--html-out`: standalone Plotly HTML dashboard (see `job_eval_overview_html.py`).
 """
 
 from __future__ import annotations
@@ -56,6 +57,15 @@ _RATING_AT_START = re.compile(
 _ALL_RATING_TOKENS_RE = re.compile(
     r"\b(?:Very\s+High|High|Medium(?:[-–—]High|\s+High)|Medium|Low|Unknown|N/A|TBD)\b",
     re.IGNORECASE,
+)
+
+# Summary table / chart column order (must match `VerdictRule.column` strings).
+VERDICT_TABLE_COLUMNS: Tuple[str, ...] = (
+    "Fit on Paper",
+    "Capability",
+    "Recruiter Screen",
+    "Hiring Manager Screen",
+    "Panel Loop Survival",
 )
 
 VERDICT_RULES: Tuple[VerdictRule, ...] = (
@@ -232,6 +242,22 @@ def verdict_line_to_table_cell(line: str, column: str) -> str:
             after = rule.pattern.sub("", s).strip()
             return rating_only_for_summary(after)
     return rating_only_for_summary(s)
+
+
+def tier_cell_to_numeric(cell: str) -> Optional[float]:
+    """
+    Map a summary-table cell string (post-`verdict_line_to_table_cell`) to a numeric score for charts.
+    Uses the same tier ordering as `_rating_tier_rank` (higher = better substantive fit).
+    Returns None if empty or not a recognized tier token.
+    """
+    t = (cell or "").strip()
+    if not t:
+        return None
+    canon = _normalize_rating_token_for_table(t)
+    r = _rating_tier_rank(canon)
+    if r < 0:
+        return None
+    return float(r)
 
 
 def extract_verdict_lines(part5: str) -> Dict[str, str]:
@@ -419,15 +445,7 @@ def build_overview(repo_root: Path, rows: List[CollatedRow]) -> str:
     lines.append("")
     lines.append("## Summary table")
     lines.append("")
-    headers = [
-        "JD key",
-        "Report",
-        "Fit on Paper",
-        "Capability",
-        "Recruiter Screen",
-        "Hiring Manager Screen",
-        "Panel Loop Survival",
-    ]
+    headers = ["JD key", "Report", *VERDICT_TABLE_COLUMNS]
     lines.append(md_table_row(headers))
     lines.append(md_table_row(["---"] * len(headers)))
 
@@ -436,19 +454,8 @@ def build_overview(repo_root: Path, rows: List[CollatedRow]) -> str:
 
     for r in rows:
         report_link = f"[{r.report_rel}]({r.report_rel})"
-        lines.append(
-            md_table_row(
-                [
-                    r.jd_key,
-                    report_link,
-                    short_verdict("Fit on Paper", r.verdicts),
-                    short_verdict("Capability", r.verdicts),
-                    short_verdict("Recruiter Screen", r.verdicts),
-                    short_verdict("Hiring Manager Screen", r.verdicts),
-                    short_verdict("Panel Loop Survival", r.verdicts),
-                ]
-            )
-        )
+        cells = [r.jd_key, report_link] + [short_verdict(col, r.verdicts) for col in VERDICT_TABLE_COLUMNS]
+        lines.append(md_table_row(cells))
 
     lines.append("")
     lines.append("## PART 5 verdict lines (per job)")
@@ -472,14 +479,7 @@ def build_overview(repo_root: Path, rows: List[CollatedRow]) -> str:
             lines.append("_Could not find PART 5 verdict bullets._")
             lines.append("")
             continue
-        order = [
-            "Fit on Paper",
-            "Capability",
-            "Recruiter Screen",
-            "Hiring Manager Screen",
-            "Panel Loop Survival",
-        ]
-        for label in order:
+        for label in VERDICT_TABLE_COLUMNS:
             line = r.verdicts.get(label, "")
             if line:
                 lines.append(line)
@@ -488,6 +488,37 @@ def build_overview(repo_root: Path, rows: List[CollatedRow]) -> str:
         lines.append("")
 
     return "\n".join(lines).rstrip() + "\n"
+
+
+def build_collated_rows(reports_dir: Path, repo_root: Path) -> List[CollatedRow]:
+    """Scan reports_dir, dedupe by JD basename, return one CollatedRow per job (sorted by jd_key)."""
+    warn_unparsed_eval_markdown(reports_dir)
+    candidates = list(iter_candidate_reports(reports_dir))
+    chosen = choose_latest_per_group(candidates)
+
+    rows: List[CollatedRow] = []
+    for jd_key in sorted(chosen.keys()):
+        path = chosen[jd_key]
+        text = path.read_text(encoding="utf-8", errors="replace")
+        job_title = extract_job_title(text)
+        jd_source = extract_jd_source(text)
+        inferred_jd = jd_basename_from_source(jd_source)
+        jd_mismatch = bool(inferred_jd and inferred_jd != jd_key)
+
+        part5 = extract_part5_section(text)
+        verdicts = extract_verdict_lines(part5)
+        rows.append(
+            CollatedRow(
+                jd_key=jd_key,
+                job_title=job_title,
+                jd_source=jd_source,
+                jd_inferred=inferred_jd,
+                jd_mismatch=jd_mismatch,
+                report_rel=rel_posix(repo_root, path),
+                verdicts=verdicts,
+            )
+        )
+    return rows
 
 
 def main() -> int:
@@ -514,6 +545,17 @@ def main() -> int:
             "(local time, n = number of jobs in the table)."
         ),
     )
+    parser.add_argument(
+        "--html",
+        action="store_true",
+        help="Also write a Plotly HTML dashboard next to the markdown (same stem, .html).",
+    )
+    parser.add_argument(
+        "--html-out",
+        type=Path,
+        default=None,
+        help="Explicit path for the HTML dashboard (overrides --html default naming).",
+    )
     args = parser.parse_args()
 
     repo_root: Path = args.repo_root.resolve()
@@ -522,33 +564,7 @@ def main() -> int:
     if not reports_dir.is_dir():
         raise SystemExit(f"Reports dir not found: {reports_dir}")
 
-    warn_unparsed_eval_markdown(reports_dir)
-
-    candidates = list(iter_candidate_reports(reports_dir))
-    chosen = choose_latest_per_group(candidates)
-
-    rows: List[CollatedRow] = []
-    for jd_key in sorted(chosen.keys()):
-        path = chosen[jd_key]
-        text = path.read_text(encoding="utf-8", errors="replace")
-        job_title = extract_job_title(text)
-        jd_source = extract_jd_source(text)
-        inferred_jd = jd_basename_from_source(jd_source)
-        jd_mismatch = bool(inferred_jd and inferred_jd != jd_key)
-
-        part5 = extract_part5_section(text)
-        verdicts = extract_verdict_lines(part5)
-        rows.append(
-            CollatedRow(
-                jd_key=jd_key,
-                job_title=job_title,
-                jd_source=jd_source,
-                jd_inferred=inferred_jd,
-                jd_mismatch=jd_mismatch,
-                report_rel=rel_posix(repo_root, path),
-                verdicts=verdicts,
-            )
-        )
+    rows = build_collated_rows(reports_dir, repo_root)
 
     if args.out is not None:
         out_path = args.out.resolve()
@@ -557,7 +573,28 @@ def main() -> int:
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(build_overview(repo_root, rows), encoding="utf-8")
-    print(f"Wrote {out_path.relative_to(repo_root)} ({len(rows)} jobs)")
+    print(f"Wrote {rel_posix(repo_root, out_path)} ({len(rows)} jobs)")
+
+    if args.html or args.html_out is not None:
+        if args.html_out is not None:
+            html_path = args.html_out.resolve()
+        else:
+            html_path = out_path.with_suffix(".html")
+        try:
+            from job_eval_overview_html import write_overview_chart_html
+        except ImportError as e:
+            raise SystemExit(
+                "Plotly is required for --html / --html-out. Install: pip install -r journal_summarizer/requirements.txt"
+            ) from e
+
+        write_overview_chart_html(
+            html_path,
+            rows,
+            repo_root,
+            overview_md_rel=rel_posix(repo_root, out_path),
+        )
+        print(f"Wrote {rel_posix(repo_root, html_path)} ({len(rows)} jobs)")
+
     return 0
 
 

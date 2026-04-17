@@ -92,6 +92,17 @@ def main() -> int:
             "_OVERVIEW-<YYYYMMDD-HHMMSS>(<n>).md in job-evaluation-reports/)."
         ),
     )
+    parser.add_argument(
+        "--html",
+        action="store_true",
+        help="Stage 2: also pass --html to collate (Plotly dashboard beside the overview .md).",
+    )
+    parser.add_argument(
+        "--html-out",
+        type=Path,
+        default=None,
+        help="Stage 2: pass --html-out to collate (explicit HTML path).",
+    )
     args = parser.parse_args()
 
     repo = (args.repo or repo).resolve()
@@ -138,6 +149,10 @@ def main() -> int:
         cmd2 = [py, str(collate_script), "--repo-root", str(repo)]
         if args.out is not None:
             cmd2.extend(["--out", str(args.out)])
+        if args.html:
+            cmd2.append("--html")
+        if args.html_out is not None:
+            cmd2.extend(["--html-out", str(args.html_out)])
         print("=== Stage 2: collate overview ===", flush=True)
         s2 = subprocess.call(cmd2, cwd=str(repo))
 
