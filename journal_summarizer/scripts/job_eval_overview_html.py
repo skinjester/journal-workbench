@@ -7,7 +7,6 @@ Expects to be imported from `collate_job_evaluations` with the same `sys.path` (
 
 from __future__ import annotations
 
-import datetime as dt
 import html as html_module
 from pathlib import Path
 from typing import List, Optional, Sequence, Tuple
@@ -32,6 +31,46 @@ MUTED = "#94a8c6"
 ACCENT = "#77e6ff"
 ACCENT_2 = "#9b7cff"
 SERIES = ["#77e6ff", "#9b7cff", "#55d6be", "#ff8a65", "#ffd166", "#ff6fae", "#64b5f6", "#c3f73a"]
+
+# Single-hue blues; stops spaced for roughly equal perceived lightness steps (reads cleanly in grayscale).
+HEATMAP_MONO_COLORSCALE: List[Tuple[float, str]] = [
+    [0.0, "#070b14"],
+    [0.125, "#101e33"],
+    [0.25, "#17304c"],
+    [0.375, "#214566"],
+    [0.5, "#2f5d82"],
+    [0.625, "#44769c"],
+    [0.75, "#6794b5"],
+    [0.875, "#9cb9d4"],
+    [1.0, "#dceaf7"],
+]
+
+
+def _heatmap_left_margin_px(jobs: Sequence[str]) -> int:
+    """Space for full job titles on the heatmap Y-axis (template default l=56 clips long labels)."""
+    if not jobs:
+        return 220
+    longest = max(len(j) for j in jobs)
+    # ~5.2px per character at tick font 10px; snug so no dead space to the left.
+    return min(340, max(160, int(longest * 5.2) + 8))
+
+
+def _wrap_dim_label(label: str, max_first_line: int = 10) -> str:
+    """Split a dimension label at a natural word boundary for 2-line heatmap column headers."""
+    words = label.split()
+    if len(words) <= 1 or len(label) <= max_first_line:
+        return label
+    mid = len(label) // 2
+    best_i = 0
+    best_dist = float("inf")
+    pos = 0
+    for i, w in enumerate(words[:-1]):
+        pos += len(w) + 1
+        dist = abs(pos - mid)
+        if dist < best_dist:
+            best_dist = dist
+            best_i = i
+    return " ".join(words[: best_i + 1]) + "<br>" + " ".join(words[best_i + 1 :])
 
 
 def _with_alpha(hex_color: str, alpha: float) -> str:
@@ -234,32 +273,33 @@ def _bottom_summary(
 
 def _fig_heatmap(jobs: List[str], dims: List[str], z: List[List[Optional[float]]], z_text: List[List[str]]) -> go.Figure:
     z_plot = [[(v if v is not None else float("nan")) for v in row] for row in z]
+    wrapped_dims = [_wrap_dim_label(d) for d in dims]
     fig = go.Figure(
         data=go.Heatmap(
             z=z_plot,
             x=dims,
             y=jobs,
-            text=z_text,
-            texttemplate="%{text}",
-            hovertemplate="%{y}<br>%{x}<br>%{text}<extra></extra>",
-            colorscale=[
-                [0.0, "#182033"],
-                [0.25, "#273556"],
-                [0.5, "#44558f"],
-                [0.75, "#7658da"],
-                [1.0, "#74f0dd"],
-            ],
+            customdata=z_text,
+            hovertemplate="%{y}<br>%{x}<br>%{customdata}<br>Tier score %{z:.0f}<extra></extra>",
+            colorscale=HEATMAP_MONO_COLORSCALE,
             zmin=90,
             zmax=100,
-            colorbar=dict(title=dict(text="Score", font=dict(color=MUTED)), tickfont=dict(color=MUTED)),
+            colorbar=dict(title=dict(text="Tier score", font=dict(color=MUTED)), tickfont=dict(color=MUTED)),
         )
     )
     fig.update_layout(
         title="Heatmap — jobs × dimensions",
-        xaxis_title="Dimension",
-        yaxis_title="Job",
-        height=max(360, 28 * len(jobs) + 120),
-        xaxis=dict(side="top"),
+        xaxis_title="",
+        yaxis_title="",
+        height=max(360, 28 * len(jobs) + 160),
+        xaxis=dict(
+            side="top",
+            tickangle=0,
+            tickmode="array",
+            tickvals=dims,
+            ticktext=wrapped_dims,
+            tickfont=dict(size=11),
+        ),
     )
     return fig
 
@@ -375,7 +415,6 @@ def write_overview_chart_html(
         raise ValueError("rows is empty; nothing to chart")
 
     jobs, dims, z, z_text = _score_matrix(rows)
-    now = dt.datetime.now().astimezone().strftime("%Y-%m-%d %H:%M %Z")
     studio_template = _studio_template()
     best_job, strongest_dim = _top_summary(jobs, dims, z)
     worst_job, weakest_dim = _bottom_summary(jobs, dims, z)
@@ -387,7 +426,7 @@ def write_overview_chart_html(
     figures: List[Tuple[str, str, go.Figure]] = [
         (
             "Heatmap",
-            "Dense overview: color encodes the same tier score as the markdown table.",
+            "Dense overview: monochrome luminance maps tier score (same numeric band as the markdown table); hover for wording.",
             _fig_heatmap(jobs, dims, z, z_text),
         ),
         (
@@ -404,6 +443,16 @@ def write_overview_chart_html(
 
     for i, (title, blurb, fig) in enumerate(figures):
         fig.update_layout(template=studio_template, font=dict(size=12))
+        if title == "Heatmap":
+            lm = _heatmap_left_margin_px(jobs)
+            fig.update_layout(
+                margin=dict(l=lm, r=110, t=140, b=20),
+                yaxis=dict(
+                    automargin=False,
+                    tickfont=dict(size=10, color=MUTED),
+                    title=None,
+                ),
+            )
         chunk = fig.to_html(
             full_html=False,
             include_plotlyjs="cdn" if i == 0 else False,
@@ -478,28 +527,6 @@ def write_overview_chart_html(
       height: 360px;
       background: radial-gradient(circle, rgba(119, 230, 255, 0.16), transparent 68%);
       pointer-events: none;
-    }}
-    .eyebrow {{
-      margin: 0 0 12px;
-      color: var(--accent);
-      text-transform: uppercase;
-      letter-spacing: 0.18em;
-      font-size: 0.72rem;
-      font-weight: 700;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px 16px;
-      align-items: center;
-    }}
-    .eyebrow code {{
-      color: var(--text);
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 999px;
-      padding: 0.2rem 0.6rem;
-      font-size: 0.7rem;
-      letter-spacing: 0.04em;
-      text-transform: none;
     }}
     h1 {{
       margin: 0;
@@ -643,7 +670,8 @@ def write_overview_chart_html(
         linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)),
         var(--panel-alt);
       border: 1px solid rgba(255,255,255,0.05);
-      overflow: hidden;
+      overflow-x: auto;
+      overflow-y: hidden;
     }}
     .plotly-graph-div {{ border-radius: 16px; }}
     .modebar {{
@@ -664,10 +692,6 @@ def write_overview_chart_html(
 <body>
   <div class="page">
     <header class="hero">
-      <p class="eyebrow">
-        <span>Generated {html_module.escape(now)}</span>
-        <span>Source overview <code>{html_module.escape(overview_md_rel)}</code></span>
-      </p>
       <h1>Job evaluation comparative views</h1>
       <p class="lede">A polished dark-mode review board for comparing role fit across the current evaluation set.</p>
       <div class="hero-meta">
