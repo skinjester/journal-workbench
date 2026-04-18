@@ -232,4 +232,4 @@ def test_write_overview_chart_html_smoke(tmp_path: Path) -> None:
     viz.write_overview_chart_html(out, rows, tmp_path, "job-evaluation-reports/test.md")
     text = out.read_text(encoding="utf-8")
     assert "plotly" in text.lower()
-    assert "Heatmap" in text
+    assert "Dot matrix" in text

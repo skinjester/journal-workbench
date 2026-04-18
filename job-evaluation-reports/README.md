@@ -58,7 +58,7 @@ make job-eval
 | `make job-eval-fresh` | Re-run the agent for **every** JD (`--no-skip-existing`), then collate. |
 | `make job-eval-overview` | **Stage 2 only** — collate from existing reports into a new timestamped overview. |
 
-Pipeline flags (see `python3 journal_summarizer/scripts/run_job_eval_pipeline.py --help`): `--dry-run` (Stage 1 preview only; **no** new overview file), `--only GLOB`, `--stage1-only`, `--stage2-only`, `--no-skip-existing`, `--out`, etc.
+Pipeline flags (see `python3 journal_summarizer/scripts/run_job_eval_pipeline.py --help`): `--dry-run` (Stage 1 preview only; **no** new overview file), `--only GLOB`, `--stage1-only`, `--stage2-only`, `--no-skip-existing`, `--model MODEL`, `--out`, etc.
 
 If Stage 1 has partial failures, Stage 2 still runs so your overview stays in sync with whatever reports exist.
 
@@ -70,7 +70,7 @@ Prerequisites:
 - Authenticated for non-interactive runs: e.g. `agent login` / `agent status`, or `CURSOR_API_KEY` per [CLI parameters](https://cursor.com/docs/cli/reference/parameters).
 - Run from the **repo root** (or pass `--repo`).
 
-The driver invokes `agent --print --force --trust --workspace <repo> "<prompt>"` once per job-description file under `job descriptions/`. Each prompt instructs the agent to read the template, references, chat command, that JD file, and to **write** the full report here using the same naming rules as a manual run.
+The driver invokes `agent --print --force --trust --workspace <repo> "<prompt>"` once per job-description file under `job descriptions/`. If you pass `--model MODEL`, the driver also forwards `agent --model MODEL`. Each prompt instructs the agent to read the template, references, chat command, that JD file, and to **write** the full report here using the same naming rules as a manual run.
 
 `--force` and `--trust` grant the agent broad approval to run tools and modify files in the workspace. Use only on a **trusted** checkout.
 
@@ -92,6 +92,7 @@ Useful flags:
 | `--log PATH` | JSONL run log (default: `_batch_runs.jsonl` in this folder). |
 | `--timeout SEC` | Per-JD timeout (default 2400). |
 | `--agent-bin PATH` | Use a specific `agent` binary. |
+| `--model MODEL` | Force a specific Cursor Agent model for Stage 1, e.g. `--model gpt-5.4-medium`. |
 
 Exit codes: `0` all JD steps succeeded and output was verified; `1` one or more agent failures or “exit 0 but no report written” cases; `2` bad `--repo` / `--jd-dir` or JD path outside repo; `3` no job-description files matched; `127` `agent` not found on `PATH`.
 
@@ -101,6 +102,12 @@ Example (one role, dry run):
 
 ```bash
 python3 journal_summarizer/scripts/batch_job_evaluations.py --dry-run --only '*Riot*'
+```
+
+Example (full rerun with an explicit model):
+
+```bash
+./run-job-eval-pipeline.sh --no-skip-existing --model gpt-5.4-medium
 ```
 
 ### Stage 2 — Collated overview

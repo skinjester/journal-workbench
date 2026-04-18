@@ -90,7 +90,7 @@ def _studio_template() -> go.layout.Template:
             plot_bgcolor="rgba(0,0,0,0)",
             font=dict(color=TEXT, family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif", size=12),
             title=dict(x=0.02, xanchor="left", font=dict(size=20, color=TEXT)),
-            margin=dict(l=56, r=28, t=72, b=52),
+            margin=dict(l=56, r=28, t=32, b=52),
             legend=dict(
                 bgcolor="rgba(0,0,0,0)",
                 borderwidth=0,
@@ -226,7 +226,11 @@ def _radar_radial_range(z: Sequence[Sequence[Optional[float]]]) -> Tuple[float, 
     return max(85.5, lo - pad), min(101.5, hi + pad)
 
 
-def _top_summary(jobs: Sequence[str], dims: Sequence[str], z: Sequence[Sequence[Optional[float]]]) -> Tuple[str, str]:
+def _best_overall_job(
+    jobs: Sequence[str],
+    z: Sequence[Sequence[Optional[float]]],
+) -> str:
+    """Job with the highest mean tier score across dimensions."""
     best_job = jobs[0]
     best_avg = -1.0
     for i, job in enumerate(jobs):
@@ -234,64 +238,95 @@ def _top_summary(jobs: Sequence[str], dims: Sequence[str], z: Sequence[Sequence[
         if avg is not None and avg > best_avg:
             best_avg = avg
             best_job = job
-
-    best_dim = dims[0]
-    best_dim_avg = -1.0
-    for j, dim in enumerate(dims):
-        avg = _mean_non_null([row[j] for row in z])
-        if avg is not None and avg > best_dim_avg:
-            best_dim_avg = avg
-            best_dim = dim
-    return best_job, best_dim
+    return best_job
 
 
-def _bottom_summary(
+def _lowest_overall_job(
     jobs: Sequence[str],
-    dims: Sequence[str],
     z: Sequence[Sequence[Optional[float]]],
-) -> Tuple[str, str]:
-    """Return (lowest-overall job, that job's weakest-scoring dimension)."""
+) -> str:
+    """Job with the lowest mean tier score across dimensions."""
     worst_job = jobs[0]
     worst_avg = float("inf")
-    worst_idx = 0
     for i, job in enumerate(jobs):
         avg = _mean_non_null(z[i])
         if avg is not None and avg < worst_avg:
             worst_avg = avg
             worst_job = job
-            worst_idx = i
-
-    worst_dim = dims[0]
-    worst_dim_val = float("inf")
-    for j, dim in enumerate(dims):
-        v = z[worst_idx][j] if worst_idx < len(z) and j < len(z[worst_idx]) else None
-        if v is not None and v < worst_dim_val:
-            worst_dim_val = v
-            worst_dim = dim
-    return worst_job, worst_dim
+    return worst_job
 
 
 def _fig_heatmap(jobs: List[str], dims: List[str], z: List[List[Optional[float]]], z_text: List[List[str]]) -> go.Figure:
-    z_plot = [[(v if v is not None else float("nan")) for v in row] for row in z]
+    """
+    Dot matrix: each cell is a circle whose size AND color both encode the tier score.
+    Larger + lighter = stronger signal; smaller + darker = weaker.
+    """
+    # Score bounds for normalization — use actual data range (not arbitrary 90-100).
+    flat = [v for row in z for v in row if v is not None]
+    v_lo = min(flat) if flat else 90.0
+    v_hi = max(flat) if flat else 100.0
+    v_span = v_hi - v_lo if v_hi > v_lo else 1.0
+
+    DOT_MIN, DOT_MAX = 10.0, 34.0   # marker.size range (pixels diameter)
+    COLOR_LO, COLOR_HI = 90.0, 100.0  # colorscale anchor range
+
     wrapped_dims = [_wrap_dim_label(d) for d in dims]
+
+    xs: List[str] = []
+    ys: List[str] = []
+    sizes: List[float] = []
+    colors: List[float] = []
+    hovers: List[str] = []
+
+    for i, job in enumerate(jobs):
+        for j, dim in enumerate(dims):
+            v = z[i][j]
+            score = v if v is not None else v_lo
+            norm = (score - v_lo) / v_span
+            sz = DOT_MIN + norm * (DOT_MAX - DOT_MIN)
+            tier_label = (z_text[i][j] if z_text and i < len(z_text) and j < len(z_text[i]) else "—") or "—"
+            xs.append(dim)
+            ys.append(job)
+            sizes.append(sz)
+            colors.append(score)
+            hovers.append(f"{job}<br>{dim}<br>{tier_label}<extra></extra>")
+
     fig = go.Figure(
-        data=go.Heatmap(
-            z=z_plot,
-            x=dims,
-            y=jobs,
-            customdata=z_text,
-            hovertemplate="%{y}<br>%{x}<br>%{customdata}<br>Tier score %{z:.0f}<extra></extra>",
-            colorscale=HEATMAP_MONO_COLORSCALE,
-            zmin=90,
-            zmax=100,
-            colorbar=dict(title=dict(text="Tier score", font=dict(color=MUTED)), tickfont=dict(color=MUTED)),
+        data=go.Scatter(
+            x=xs,
+            y=ys,
+            mode="markers",
+            marker=dict(
+                size=sizes,
+                color=colors,
+                colorscale=HEATMAP_MONO_COLORSCALE,
+                cmin=COLOR_LO,
+                cmax=COLOR_HI,
+                colorbar=dict(
+                    orientation="h",
+                    x=0.5,
+                    xanchor="center",
+                    y=-0.08,
+                    yanchor="top",
+                    len=0.6,
+                    thickness=10,
+                    title=dict(
+                        text="Tier score",
+                        side="top",
+                        font=dict(color=MUTED, size=10),
+                    ),
+                    tickfont=dict(color=MUTED, size=9),
+                    tickvals=[90, 92, 94, 96, 98, 100],
+                ),
+                line=dict(width=0),
+            ),
+            hovertemplate=hovers,
+            showlegend=False,
         )
     )
+
     fig.update_layout(
-        title="Heatmap — jobs × dimensions",
-        xaxis_title="",
-        yaxis_title="",
-        height=max(360, 28 * len(jobs) + 160),
+        height=max(380, 36 * len(jobs) + 160),
         xaxis=dict(
             side="top",
             tickangle=0,
@@ -299,6 +334,16 @@ def _fig_heatmap(jobs: List[str], dims: List[str], z: List[List[Optional[float]]
             tickvals=dims,
             ticktext=wrapped_dims,
             tickfont=dict(size=11),
+            showgrid=True,
+            gridcolor="rgba(151,173,210,0.10)",
+            zeroline=False,
+        ),
+        yaxis=dict(
+            tickfont=dict(size=10),
+            autorange="reversed",
+            showgrid=True,
+            gridcolor="rgba(151,173,210,0.10)",
+            zeroline=False,
         ),
     )
     return fig
@@ -328,10 +373,6 @@ def _fig_radar(jobs: List[str], dims: List[str], z: List[List[Optional[float]]])
             )
         )
     fig.update_layout(
-        title=dict(
-            text="Radar — one trace per job (radial axis zoomed to this cohort)",
-            font=dict(size=16),
-        ),
         polar=dict(
             radialaxis=dict(
                 visible=True,
@@ -355,16 +396,18 @@ def _fig_dot_plots(
     jobs, z, z_text = _sort_jobs_for_dot_plots(jobs, z, z_text)
     n_dims = len(dims)
     x0, x1 = _tier_score_x_range(z)
-    mid_col = (n_dims + 1) // 2
+    wrapped_titles = [_wrap_dim_label(d) for d in dims]
+    wrapped_titles = [_wrap_dim_label(d) for d in dims]
     fig = make_subplots(
         rows=1,
         cols=n_dims,
-        subplot_titles=dims,
+        subplot_titles=wrapped_titles,
         horizontal_spacing=0.04,
         shared_yaxes=True,
     )
     for j in range(n_dims):
         xs = [z[i][j] if z[i][j] is not None else float("nan") for i in range(len(jobs))]
+        colors = [float(v) if v is not None else float(x0) for v in [z[i][j] for i in range(len(jobs))]]
         cd: Optional[List[str]] = None
         ht = "%{y}<br>%{x:.0f}<extra></extra>"
         if z_text:
@@ -375,7 +418,15 @@ def _fig_dot_plots(
                 x=xs,
                 y=jobs,
                 mode="markers",
-                marker=dict(size=11, color=SERIES[j % len(SERIES)], line=dict(width=1, color="rgba(255,255,255,0.18)")),
+                marker=dict(
+                    size=11,
+                    color=colors,
+                    colorscale=HEATMAP_MONO_COLORSCALE,
+                    cmin=90.0,
+                    cmax=100.0,
+                    showscale=False,
+                    line=dict(width=1, color="rgba(255,255,255,0.10)"),
+                ),
                 customdata=cd,
                 hovertemplate=ht,
                 showlegend=False,
@@ -384,22 +435,21 @@ def _fig_dot_plots(
             col=j + 1,
         )
         fig.update_xaxes(
-            title_text="Tier score" if j + 1 == mid_col else "",
+            title_text="",
             range=[x0, x1],
-            nticks=8,
+            showticklabels=False,
+            showgrid=True,
             row=1,
             col=j + 1,
         )
-    fig.update_yaxes(row=1, col=1, automargin=True, tickfont=dict(size=10))
+    fig.update_yaxes(row=1, col=1, automargin=True, tickfont=dict(size=10, color=MUTED))
     for c in range(2, n_dims + 1):
         fig.update_yaxes(showticklabels=False, row=1, col=c)
+    # Match subplot title font to the dot-matrix column header style.
+    fig.update_annotations(font=dict(size=11, color=TEXT))
     fig.update_layout(
-        title=dict(
-            text="Dot plots — one panel per dimension (rows: mean tier score, high → low)",
-            font=dict(size=16),
-        ),
         height=max(480, 22 * len(jobs) + 80),
-        margin=dict(l=220, r=20, t=88, b=56),
+        margin=dict(l=220, r=20, t=68, b=40),
     )
     return fig
 
@@ -416,8 +466,8 @@ def write_overview_chart_html(
 
     jobs, dims, z, z_text = _score_matrix(rows)
     studio_template = _studio_template()
-    best_job, strongest_dim = _top_summary(jobs, dims, z)
-    worst_job, weakest_dim = _bottom_summary(jobs, dims, z)
+    best_job = _best_overall_job(jobs, z)
+    worst_job = _lowest_overall_job(jobs, z)
     avg_all = _mean_non_null([_mean_non_null(row) for row in z]) or 0.0
     mean_tier_label = _mean_numeric_to_nearest_tier_label(avg_all)
 
@@ -425,8 +475,8 @@ def write_overview_chart_html(
     nav_links: List[str] = []
     figures: List[Tuple[str, str, go.Figure]] = [
         (
-            "Heatmap",
-            "Dense overview: monochrome luminance maps tier score (same numeric band as the markdown table); hover for wording.",
+            "Dot matrix",
+            "Each cell is a circle: size and color both encode tier score. Larger + lighter = stronger signal. Hover for the ordinal verdict label.",
             _fig_heatmap(jobs, dims, z, z_text),
         ),
         (
@@ -436,21 +486,22 @@ def write_overview_chart_html(
         ),
         (
             "Dot plots",
-            "Five small multiples for quick within-dimension comparison. Rows sort by mean tier score; job labels only on the left.",
+            "Five small multiples for quick within-dimension comparison. Rows sort by mean tier score.",
             _fig_dot_plots(jobs, dims, z, z_text),
         ),
     ]
 
     for i, (title, blurb, fig) in enumerate(figures):
         fig.update_layout(template=studio_template, font=dict(size=12))
-        if title == "Heatmap":
+        if title == "Dot matrix":
             lm = _heatmap_left_margin_px(jobs)
             fig.update_layout(
-                margin=dict(l=lm, r=110, t=140, b=20),
+                margin=dict(l=lm, r=28, t=64, b=64),
                 yaxis=dict(
                     automargin=False,
                     tickfont=dict(size=10, color=MUTED),
                     title=None,
+                    autorange="reversed",
                 ),
             )
         chunk = fig.to_html(
@@ -551,10 +602,14 @@ def write_overview_chart_html(
       flex-wrap: wrap;
       gap: 14px;
     }}
-    .hero-meta .row-break {{
-      flex-basis: 100%;
-      height: 0;
-      width: 0;
+    .hero-meta .metric-pair {{
+      flex: 1 1 100%;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }}
+    .hero-meta .metric-pair .metric {{
+      min-width: 0;
     }}
     .metric {{
       min-width: 170px;
@@ -636,7 +691,7 @@ def write_overview_chart_html(
       grid-template-columns: auto 1fr;
       gap: 16px;
       align-items: start;
-      margin-bottom: 18px;
+      margin-bottom: 8px;
     }}
     .viz-kicker {{
       min-width: 50px;
@@ -664,7 +719,7 @@ def write_overview_chart_html(
       font-size: 0.97rem;
     }}
     .chart-shell {{
-      padding: 10px 8px 0;
+      padding: 2px 8px 0;
       border-radius: 20px;
       background:
         linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)),
@@ -686,6 +741,7 @@ def write_overview_chart_html(
       .viz-card {{ padding: 18px; border-radius: 20px; }}
       .viz-head {{ grid-template-columns: 1fr; }}
       .viz-kicker {{ width: 50px; }}
+      .hero-meta .metric-pair {{ grid-template-columns: 1fr; }}
     }}
   </style>
 </head>
@@ -702,13 +758,9 @@ def write_overview_chart_html(
           <strong>{html_module.escape(mean_tier_label)}</strong>
           <small class="metric-hint">Nearest ordinal label · not a percentage score</small>
         </div>
-        <div class="metric"><span class="label">Top overall</span><strong>{html_module.escape(best_job)}</strong></div>
-        <div class="metric"><span class="label">Strongest dimension</span><strong>{html_module.escape(strongest_dim)}</strong></div>
-        <div class="row-break" aria-hidden="true"></div>
-        <div class="metric"><span class="label">Lowest overall</span><strong>{html_module.escape(worst_job)}</strong></div>
-        <div class="metric" title="Lowest-scoring verdict dimension for the lowest-overall job.">
-          <span class="label">Its weakest dimension</span>
-          <strong>{html_module.escape(weakest_dim)}</strong>
+        <div class="metric-pair">
+          <div class="metric"><span class="label">Top overall</span><strong>{html_module.escape(best_job)}</strong></div>
+          <div class="metric"><span class="label">Lowest overall</span><strong>{html_module.escape(worst_job)}</strong></div>
         </div>
       </div>
       <nav class="quick-nav">{"".join(nav_links)}</nav>

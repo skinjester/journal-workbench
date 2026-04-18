@@ -1,14 +1,13 @@
-## Header metadata
-
-- `template_version`: **v1.4.0**
-- `job`: CD PROJEKT RED — Lead UX Designer (Project Sirius — Boston, MA)
+# Header metadata
+- `template_version`: v1.4.0
+- `job`: CD PROJEKT RED - Lead UX Designer
 - `jd_source`: `@job descriptions/Lead UX, CD Projekt Red`
 - `output_report_path`: `job-evaluation-reports/Lead UX, CD Projekt Red.eval.md`
 - `resume_versions_evaluated`:
   - `resumes/gboodhoo-resume-connect.md`
   - `resumes/gboodhoo-resume-games.md`
-- `portfolio_evaluated`: **yes**
-- `portfolio_pages_required` (deduped):
+- `portfolio_evaluated`: yes
+- `portfolio_pages_required`:
   - `https://www.garyb.design/`
   - `https://www.garyb.design/products/elderscrollsonline`
   - `https://www.garyb.design/products/madden`
@@ -20,22 +19,24 @@
   - `https://www.garyb.design/research/deepdream-gdc`
   - `https://www.garyb.design/research/quest-tracker`
 - `portfolio_pages_reviewed`:
-  - `https://www.garyb.design/` — **Reviewed** (homepage narrative, featured work, testimonials)
-  - `https://www.garyb.design/products/elderscrollsonline` — **Reviewed** (console UX system, audit/matrix, patterns, stakeholder quotes)
-  - `https://www.garyb.design/products/madden` — **Reviewed** (EA Sports design system, scale, documentation role)
-  - `https://www.garyb.design/products/sims3` — **Reviewed** (meta + title/description via fetch; Framer page confirms Game Entry / onboarding framing)
-  - `https://www.garyb.design/products/starwars` — **Reviewed** (Lua UI, targeting prototype, production constraints)
-  - `https://www.garyb.design/products/xoholo` — **Reviewed** (Unreal/TouchDesigner pipeline, spatial constraints)
-  - `https://www.garyb.design/products/deepdream` — **Reviewed** (installation UX, motion thresholds, reliability)
-  - `https://www.garyb.design/research/circular-buffer` — **Reviewed** (buffer design, integration narrative)
-  - `https://www.garyb.design/research/deepdream-gdc` — **Reviewed** (GDC-floor UX constraints, legibility vs latency)
-  - `https://www.garyb.design/research/quest-tracker` — **Reviewed** (multiplayer quest journal, Unreal prototype, preproduction ambiguity)
+  - `https://www.garyb.design/` - Reviewed: frames the portfolio around systems, mentoring, product, and research.
+  - `https://www.garyb.design/products/elderscrollsonline` - Reviewed: strongest direct proof for console replatforming, IA, and lead UX.
+  - `https://www.garyb.design/products/madden` - Reviewed: proves shared design-system leadership and scale.
+  - `https://www.garyb.design/products/sims3` - Reviewed: shows tooling, modular flows, and content-system clarity.
+  - `https://www.garyb.design/products/starwars` - Reviewed: proves in-engine prototyping and platform-constrained UX execution.
+  - `https://www.garyb.design/products/xoholo` - Reviewed: shows spatial pipeline thinking and technical-art collaboration.
+  - `https://www.garyb.design/products/deepdream` - Reviewed: proves behavioral prototyping, live interaction tuning, and public-facing explanation.
+  - `https://www.garyb.design/research/circular-buffer` - Reviewed: shows iterative problem solving and interaction continuity work.
+  - `https://www.garyb.design/research/deepdream-gdc` - Reviewed: shows audience-legibility, live-demo constraints, and communication under pressure.
+  - `https://www.garyb.design/research/quest-tracker` - Reviewed: most relevant multiplayer preproduction proof for narrative system design.
 - `evidence_sources_used`:
   - `job descriptions/Lead UX, CD Projekt Red`
   - `resumes/gboodhoo-resume-connect.md`
   - `resumes/gboodhoo-resume-games.md`
-  - `summaries 2026-04/2015-03.md`
-  - `journal_summarizer/monthly_dumps/2015-02.md`
+  - `summaries 2026-04/2019-06.md`
+  - `summaries 2026-04/2020-12.md`
+  - `journal_summarizer/monthly_dumps/2013-09.md`
+  - `journal_summarizer/monthly_dumps/2014-10.md`
   - `https://www.garyb.design/`
   - `https://www.garyb.design/products/elderscrollsonline`
   - `https://www.garyb.design/products/madden`
@@ -47,264 +48,251 @@
   - `https://www.garyb.design/research/deepdream-gdc`
   - `https://www.garyb.design/research/quest-tracker`
 
----
-
 ### PART 1 — What the role is really asking for
 
 #### The explicit asks
-
-- **End-to-end UX leadership for a multiplayer Witcher-universe game**: own “visual, interactive, and workflow” experience—not just UI polish—reporting to the Design Director.
-- **Partner with Lead UI Artist** on screens/layouts that stay cohesive, accessible, and production-ready.
-- **Lead a UX design sub-team**: hire/mentor/process (wording implies people leadership, not only IC ownership).
-- **Hands-on systems work**: layouts, navigation, interaction guidelines, prototyping (Figma-class tooling implied), documentation, production alignment.
-- **Player-feedback loop**: playtests plus collaboration with UX Research and other inputs (marketing/community).
-- **Engine-adjacent**: interest in implementing/refining UX in **Unreal Engine** is called out (nice-to-have depth for prototyping in-engine).
+- Lead UX for a new AAA multiplayer game in the Witcher universe.
+- Own overall user experience across visual design, interaction design, workflow design, and navigation.
+- Work cross-departmentally with UI art, research, production, and design leadership.
+- Build and guide a team of UX designers while establishing inclusive best practices.
+- Run playtests, digest player feedback, and iterate quickly.
+- Produce clean documentation and communicate clearly with the rest of the team.
 
 #### The implied asks
-
-- **Multiplayer UX literacy**: flows that hold up under social play, session churn, and long-term retention—not only single-player clarity.
-- **Studio integration at AAA cadence**: Jira/Confluence-style hygiene, reviews, dependency management with production—without being rescued by title history alone.
-- **Inclusive design as practice**, not slogan: navigation and readability under real hardware and accessibility expectations.
-- **Boston on-site culture**: hybrid/full-time in Boston; relocation or commute realism matters in screening even if not in the rubric.
+- This is a preproduction-to-production role, not a pixel-polishing role.
+- They want someone who can make ambiguous game systems legible fast.
+- Multiplayer implies social, navigation, economy, and menu clarity matter a lot.
+- They want someone who can partner with UI art without fighting for ownership.
+- They probably care about console readability, controller-first flow, and accessibility.
+- The "Lead" title implies enough seniority to steer direction, not just execute tickets.
 
 #### What "great" looks like for this role
-
-- A **credible lead**: designers know what “good” looks like, schedules don’t slip silently, and UI/UX/UR/Production share one mental model of priorities.
-- **Observable iteration**: playtests and research visibly change the experience; the lead can articulate *what* changed and *why*.
-- **Portfolio that shows systems + taste**: not only beautiful frames—traceable information architecture, interaction models, and shipped-scale thinking.
+- A lead who can define UX patterns early, then hold them together as scope shifts.
+- Someone who can translate research and playtest input into cleaner player journeys.
+- A designer who can prototype, document, and argue for decisions without hand-waving.
+- Someone with shipped AAA credibility, not just conceptual taste.
+- A collaborator who can keep design, art, production, and engineering pointed at one model.
 
 #### What a hiring team is optimizing for in screening
-
-- **AAA ship + ~5+ years UX with leadership seasoning** (non-negotiable on paper for many reviewers).
-- **Multiplayer exposure** as a fast filter (nice-to-have in the JD but often treated as a strong signal).
-- **Unreal** as a tie-breaker for implementation credibility.
-- **Clarity of leadership**: “lead” can mean different things; they will look for **managing/growing UX ICs**, not only senior IC influence.
+- Fast proof of shipped game UX, especially console and multiplayer-adjacent work.
+- Clear evidence you can lead, not just contribute.
+- Signs you understand IA, controller navigation, and UI complexity at scale.
+- Evidence you are readable in a team setting: feedback, docs, critique, alignment.
+- Confidence you can work in the studio's production rhythm and in Boston.
 
 #### Likely doubts unless proven otherwise
-
-- **People-management proof**: staff UX lead roles often want explicit “built/guided a UX team” receipts; influence-without-headcount reads weaker.
-- **Recency of AAA studio leadership**: long contract tenure can look like **consulting agility** or like **distance from internal politics**—depends on the reader.
-- **Location**: SF → Boston is a real friction point for a role that stresses on-site hybrid.
-- **Franchise fit**: Project Sirius is its own product; deep Witcher lore passion is hard to infer from materials focused on other titles.
-
----
+- Whether the candidate has recent enough AAA game shipping proof for 2026 expectations.
+- Whether the candidate has explicit multiplayer UX depth beyond broad live-service work.
+- Whether they are more systems/UX generalist than current game-specific lead.
+- Whether they have done enough direct playtest/research loop ownership.
+- Whether leadership means people management or mostly influence-through-work.
 
 ### PART 2 — Resume evaluation only (two-pass)
 
 #### `resumes/gboodhoo-resume-connect.md`
+**Interview likelihood from this resume alone:** Medium.
 
-**Interview likelihood from this resume alone:** **Medium** — Strong platform/systems story and ESO console impact, but the headline is “Senior UX Designer — Platforms & Systems,” not “Lead UX,” and multiplayer/social framing is thinner than the JD’s center of gravity.
+It is credible, senior, and clearly game-adjacent, but it reads like a platform/systems UX profile first and a game UX lead second. A recruiter can bucket it quickly, but the bucket is more "senior UX designer for systems and live service" than "Lead UX Designer for a AAA multiplayer game."
 
-**Strongest signals:** Live-service and cross-surface UX at scale (ESO); trust/commerce/account flows; analytics/support-informed iteration; explicit leadership-through-standards language.
+**Strongest signals:**
+- ESO PS4/Xbox launch, live-service scale, and cross-surface account/commerce work.
+- Leadership through standards, critique, and mentoring.
+- Clear collaboration with product, engineering, research, and QA.
+- A long game history that makes the candidate look durable, not academic.
 
-**Weakest / missing signals:** Unreal called out only lightly in skills; no explicit “Led UX designers” headcount; multiplayer/social systems as a headline competency is underplayed vs. identity/commerce.
+**Weakest / missing signals:**
+- The summary does not shout "multiplayer game lead" up front.
+- No explicit playtest/research loop ownership.
+- No Unreal mention in the top-level framing.
+- No current AAA shipping context.
 
-**Vague/passive/dated language:** “Worked as an embedded senior designer” is accurate but reads **consulting-forward**; Skinjester block bundles many clients without hierarchy of impact.
+**Vague / passive / dated language:**
+- "Worked as an embedded senior designer" is soft and generic.
+- "Relevant client work includes" reads like consulting filler.
+- Several bullets rely on broad claims instead of hard outcomes.
 
-**Archetype read:** Senior/Staff IC leaning **systems + platform UX** with **influence leadership** more than people management.
+**Archetype read:**
+- Systems / IC lead / platform specialist.
 
-**Recruiter bucket (fast):** “Senior UX, live services / accounts / cross-platform” — might **miss** “Lead UX for a multiplayer AAA” unless the reader lingers on ESO.
-
----
+**Recruiter bucket quickly?**
+- Yes, but bucketed as a senior systems UX person, not automatically as this exact lead game role.
 
 #### `resumes/gboodhoo-resume-games.md`
+**Interview likelihood from this resume alone:** High.
 
-**Interview likelihood from this resume alone:** **Medium–High** — Title line **Lead UX Designer**, explicit **Unreal** in skills, and **Project Kestrel** Unreal prototyping align with the JD’s game-forward and engine-interest cues. ESO is positioned as leadership for console launch and live service.
+This is much closer to the JD. It leads with game UX leadership, live-service work, in-engine prototyping, documentation, and systems thinking. The resume already looks like someone who can own a game UX area rather than simply contribute to one.
 
-**Strongest signals:** Multiple AAA credits; ESO UX lead; Unreal prototyping for unreleased co-op RPG; Madden → EA Sports systems lineage; multiplayer-relevant line items (e.g., KingsRoad) present in the experience stack.
+**Strongest signals:**
+- Explicit lead UX positioning for live-service, action RPG, and co-op productions.
+- ESO replatforming and Kestrel feature UX show shipped and preproduction depth.
+- Unreal UMG prototyping, HTML5 review packaging, and cross-studio critique.
+- Commerce, onboarding, HUD, and documentation breadth.
 
-**Weakest / missing signals:** Still light on **explicit team size / direct reports** for UX; Sirius wants “build/support/guide a team of UX designers”—that needs evidence outside the resume or in conversation.
+**Weakest / missing signals:**
+- Still light on explicit people management.
+- Not enough current-year proof for a 2026 AAA multiplayer role.
+- Some older entries are dense and may be hard for a recruiter to skim.
 
-**Vague/passive/dated language:** “Comfortable walking into a production” is strong color but not a metric; contract studio block remains dense.
+**Vague / passive / dated language:**
+- "shipped work that reduces engineering ambiguity" is true-sounding but abstract.
+- A few lines sound a little too self-authored and polished.
+- Older credits could be tightened so the newest, most relevant game proof leads.
 
-**Archetype read:** **Lead game UX / systems UX** with implementation literacy (Lua historically; Unreal called out).
+**Archetype read:**
+- Lead IC / systems / strategist / game UX generalist.
 
-**Recruiter bucket (fast):** “Lead UX, shipped AAA, MMO/console”—**closer** to the posting’s first-pass keyword match.
+**Recruiter bucket quickly?**
+- Yes, as a lead UX designer for games, systems, and live-service experiences.
 
----
-
-#### Comparative (for this JD)
-
-- **Closer resume:** **`resumes/gboodhoo-resume-games.md`** — title, Unreal, and game-centric framing match Lead UX + multiplayer + engine interest more cleanly than the connect resume.
-- **Third variant?** Not strictly required if you tighten the games resume’s **people-leadership** and **multiplayer UX** bullets; a third variant would only help if you want a **pure “UX leadership (people)”** page-one story without diluting craft proof.
-
----
+#### Comparative
+- The games resume is clearly closer to this JD.
+- Use the games resume as primary with the portfolio; the connect resume is too platform-centric for this role.
+- A third variant is not required, but the top of the games resume should keep the multiplayer / lead / UX ownership story even louder.
 
 ### PART 3 — Monthly summaries + raw journals (supporting evidence)
 
 #### Behavioral patterns
-
-Cross-functional rhythm shows up as a default operating mode: specs, build verification, and documentation threads running in parallel with engineering and partner studios.
+- The journals show a repeated pattern of turning vague work into documented, reviewable systems.
+- The work is not just design ideation; it is review cadence, handoff structure, and implementation-minded documentation.
+- The candidate repeatedly uses prototypes and docs to force decisions earlier.
 
 #### Leadership and influence evidence
-
-The ESO-era summary work shows **delegation and coordination** across UI engineering, external partner UI teams, and feature areas (e.g., routing work and tracking groupings), which supports an “informal lead” read even when headcount isn’t stated.
+- In `summaries 2026-04/2019-06.md`, the month is summarized as: "You published Kestrel AR and UI Unreal builds to HTML5 on S3 for browser walkthroughs and scoped the sprint around ambient AR, prompts, vendor UI, and Sprung widgets."
+- In `summaries 2026-04/2020-12.md`, the month is summarized as: "You wrapped up Kestrel for Sprung with the equipment bundle, flow slide, and MOD prototype, closed invoices and the delivery checklist, and noted in the journal that you were rolling off while thinking about portfolio and what you could show publicly in 2021."
+- That is leadership through packaging, sequencing, and handoff, not just making artifacts.
 
 #### Direct ambiguity-navigation evidence
-
-Console launch-era journaling includes concrete engineering collaboration and prioritization under release pressure—useful for “iterate in the live game” expectations.
+- `journal_summarizer/monthly_dumps/2013-09.md`: "it would be great to get this prototyped by engineering sooner than later."
+- `journal_summarizer/monthly_dumps/2014-10.md`: "back in Axure working on skills prototype, adding paging of class skills when you're looking at a skill list"
+- Those lines show a designer who pushes uncertain ideas into something testable rather than waiting for perfect requirements.
 
 #### Evidence that strengthens the resume
-
-From the **monthly summary** for March 2015 (ESO RC / live-service crunch):
-
-> “**Logged Crown Store playtest feedback** (audio, crown icon scale, buy-crowns layout, preview/L2R2 edge cases, scroll affordance, mount preview sink, collections deep link) and action items (player menu grouping store/collections, hint bar positions, remove misleading inventory capacity).”
-
-Source: `summaries 2026-04/2015-03.md`
-
-That lines up with the JD’s playtest-and-iterate loop and cross-system navigation clarity—exactly the kind of “observed behavior → UI adjustments” muscle they describe.
-
-From **raw journal** entries (February 2015):
-
-> “worked with Jason to validate the revised tooltip foprmatting. It looks good. Significantly more readable.”
-
-Source: `journal_summarizer/monthly_dumps/2015-02.md`
-
-Small quote, but it’s receipts for **tight collaboration with engineering** and **readability as an outcome**—relevant to inclusive, legible UI at scale.
+- The raw journals support the resume's claims about systems design, prototype thinking, and cross-functional review.
+- The summary files also support the idea that documentation is part of the work, not an afterthought.
+- This aligns well with the JD's need for design docs, playtests, and iterative collaboration.
 
 #### Evidence that weakens or complicates the resume story
-
-Journals are **self-authored** and **ESO-period heavy**; they do not by themselves prove current CDPR-scale team leadership or Unreal shipping practice today. They **support** craft and process, not headcount.
+- The strongest contemporaneous evidence is older, which matters for a 2026 AAA lead role.
+- The evidence is broader than pure game UX: some of it is art installation / creative coding work.
+- There is very little that specifically proves current multiplayer UX leadership in a modern AAA studio.
 
 #### Net read from journals
-
-The monthly summaries and dumps reinforce a **hands-on lead**: playtests, documentation, cross-discipline iteration, and systematic follow-through—strong for **capability**. They do **not** replace explicit proof of **managing a UX team** in the last few years.
-
----
+- The candidate has real hands-on depth, but the journals make them look like a strong systems designer first and a current multiplayer lead second.
+- The gap is not capability; it is recency and role-specific signaling.
 
 ### PART 4 — Portfolio evaluation (hiring manager lens)
 
 #### What the portfolio proves for this JD
-
-Taken together, the site makes a **AAA-experienced systems UX designer** case with **shipped-scale** examples. The **ESO case study** (`https://www.garyb.design/products/elderscrollsonline`) is the anchor: controller-first mental models, audit/mapping to de-risk scope, modular panel system, and couch-distance readability—directly adjacent to “navigation, game flow, moment-to-moment clarity” in the JD. **Madden** (`https://www.garyb.design/products/madden`) reinforces **documentation-as-leverage** and **cross-studio alignment**—useful for “inclusive best practices and methodologies” if framed as standards leadership rather than only visual rules.
-
-**Unreal-adjacent proof** shows up outside traditional UI shipping: **XOHOLO** (`https://www.garyb.design/products/xoholo`) demonstrates Unreal/TouchDesigner pipeline thinking under brutal spatial constraints; the **quest journal** research piece (`https://www.garyb.design/research/quest-tracker`) explicitly includes **Unreal gameplay prototyping** for a multiplayer-adjacent feature concept—helpful for the JD’s Unreal interest, with the caveat the project was canceled. **DeepDream** (`https://www.garyb.design/products/deepdream`), **circular-buffer** (`https://www.garyb.design/research/circular-buffer`), and **GDC** (`https://www.garyb.design/research/deepdream-gdc`) prove **interaction design under reliability constraints** (latency, failure modes, legibility)—transferable to networked UX problems even though the domain isn’t Witcher.
-
-**Sims 3** (`https://www.garyb.design/products/sims3`) supports onboarding/entry-system thinking; **Star Wars: TFU** (`https://www.garyb.design/products/starwars`) supports implementation-close UI work (Lua) and prototyping discipline.
+The portfolio proves that the candidate can do the actual work this role needs: break down complex game systems, make them controller-readable, prototype them early, and package the result for critique. The strongest fit is `https://www.garyb.design/products/elderscrollsonline`, which directly shows console replatforming, IA, readable menus, and design-system thinking for a live-service RPG. `https://www.garyb.design/research/quest-tracker` is the best preproduction analogue for Sirius because it shows narrative-system thinking, quest structure, and early UX invention in a multiplayer game context. `https://www.garyb.design/products/starwars` adds proof that he can prototype in-engine and live within platform and performance constraints. `https://www.garyb.design/products/madden` proves he has already done systematization at franchise scale, which is relevant even if the genre is different.
 
 #### What the portfolio does not prove (or only weakly supports) for this JD
-
-- **People leadership at scale**: testimonials show influence, not org-chart ownership of a UX department.
-- **Multiplayer-specific UX for a current-gen CDPR production**: ESO is the strongest multiplayer proof; other pieces are single-player, installation art, or canceled preproduction.
-- **Day-to-day Unreal UI feature implementation** as a sustained production line—interest and prototypes exist, but this is not a portfolio of shipped Unreal UI features for a recent AAA title.
+It does not clearly prove recent multiplayer shipping on a modern AAA pipeline. It also does not show explicit ownership of playtests or user research operations at the level the JD hints at. The portfolio is strong on systems and implementation, weaker on named people management, and mostly silent on current Unreal UX feature ownership in a studio setting. The creative-technology and installation work is interesting, but it is adjacent, not direct evidence for Sirius.
 
 #### Hiring risks the portfolio reduces vs leaves open
-
-- **Reduces:** Systems thinking, documentation habits, playtest-driven iteration (especially via ESO narrative + journals), ability to communicate UX rationale with artifacts.
-- **Leaves open:** Whether you will **build and run a UX team** in a new studio culture; **Boston relocation**; **Sirius-specific** creative direction fit.
+- Reduces risk that the candidate cannot handle large, messy systems.
+- Reduces risk that they cannot communicate with engineering, art, and production.
+- Reduces risk that they will be lost in controller-first navigation or console readability.
+- Leaves open whether they have enough current multiplayer-game practice.
+- Leaves open whether they can lead a UX team through active playtest and research loops.
 
 #### Credibility and receipts
-
-Portfolio claims are **generally consistent** with resume credits; the main credibility gap is interpretive: **“lead”** in case studies must be mapped carefully to **team leadership** vs **discipline leadership**—hiring managers will separate those.
+The portfolio is credible because it combines case-study narrative with concrete artifacts and strong testimonials. It still leans on self-authored framing, so the strongest proof is the repeated pattern across ESO, Madden, Star Wars, and quest-tracker rather than any single page. The external quotes help, but the core signal is consistency: this is a designer who knows how to turn ambiguity into structure.
 
 #### Portfolio coverage (audit)
-
 | URL | Status | Note |
-|-----|--------|------|
-| `https://www.garyb.design/` | Reviewed | Homepage + index of case studies |
-| `https://www.garyb.design/products/elderscrollsonline` | Reviewed | Primary AAA systems narrative |
-| `https://www.garyb.design/products/madden` | Reviewed | Cross-studio systems/docs proof |
-| `https://www.garyb.design/products/sims3` | Reviewed | Onboarding/entry systems |
-| `https://www.garyb.design/products/starwars` | Reviewed | Implementation-close UI + Lua |
-| `https://www.garyb.design/products/xoholo` | Reviewed | Unreal pipeline + spatial UX |
-| `https://www.garyb.design/products/deepdream` | Reviewed | Reliability + interaction tuning |
-| `https://www.garyb.design/research/circular-buffer` | Reviewed | Systems R&D supporting install UX |
-| `https://www.garyb.design/research/deepdream-gdc` | Reviewed | High-traffic UX constraints |
-| `https://www.garyb.design/research/quest-tracker` | Reviewed | Multiplayer feature UX + Unreal proto |
-
----
+| --- | --- | --- |
+| `https://www.garyb.design/` | Reviewed | Positions systems, mentoring, product, and research. |
+| `https://www.garyb.design/products/elderscrollsonline` | Reviewed | Direct console replatforming and UX leadership proof. |
+| `https://www.garyb.design/products/madden` | Reviewed | Shared design-system leadership at franchise scale. |
+| `https://www.garyb.design/products/sims3` | Reviewed | Modular flows and tool-driven UX clarity. |
+| `https://www.garyb.design/products/starwars` | Reviewed | In-engine prototyping and platform-constrained execution. |
+| `https://www.garyb.design/products/xoholo` | Reviewed | Spatial pipeline and cross-discipline technical collaboration. |
+| `https://www.garyb.design/products/deepdream` | Reviewed | Live interaction tuning and public-facing explanation. |
+| `https://www.garyb.design/research/circular-buffer` | Reviewed | Iterative continuity problem solved cleanly. |
+| `https://www.garyb.design/research/deepdream-gdc` | Reviewed | Legibility under live-demo pressure. |
+| `https://www.garyb.design/research/quest-tracker` | Reviewed | Best multiplayer preproduction and narrative-system analogue. |
 
 ### PART 5 — Combined verdict
 
-#### Verdict table
+#### Verdict
+- **Fit on paper:** High
+- **Actual capability (inferred):** High
+- **Likelihood of recruiter screen:** High
+- **Likelihood of hiring manager screen:** High
+- **Likelihood of panel loop survival:** Medium
 
-- **Fit on paper:** **High**
-- **Actual capability (inferred):** **High**
-- **Likelihood of recruiter screen:** **Medium–High**
-- **Likelihood of hiring manager screen:** **Medium–High**
-- **Likelihood of panel loop survival:** **Medium** (leadership scope and relocation will be tested)
+#### 3 strongest reasons to advance
+- He has already led AAA game UX on ESO and can show it with both resume and portfolio proof.
+- He has the systems, documentation, and prototype discipline this role needs in preproduction.
+- He has enough multiplayer/live-service adjacency to make this feel like a real match, not a stretch.
 
-#### Three strongest reasons to advance
-
-- **Shipped AAA credibility** with a **strong multiplayer systems UX exemplar** (ESO) that matches the role’s “navigation + flow + clarity” core.
-- **Artifacts show end-to-end thinking**: audits, patterns, documentation, and iteration—not only comps.
-- **Unreal interest is backed** by prototypes and technical art/UX crossover work, even if not a full shipped Unreal UI reel.
-
-#### Three strongest reasons to reject
-
-- **Ambiguity on UX people-management**: the JD asks to **guide a team of UX designers**; the strongest public story is **discipline leadership + embedded senior/lead IC impact**.
-- **Geography**: role emphasizes Boston on-site; SF-based history raises **relocation/commute** scrutiny.
-- **Domain distance**: no direct CDPR/Witcher production credit; **Sirius** must be sold as transferable craft, not assumed affinity.
+#### 3 strongest reasons to reject
+- The freshest proof is not as recent as a 2026 AAA lead panel might prefer.
+- The evidence for explicit playtest/research ownership is thinner than the JD implies.
+- The candidate reads as a lead IC / systems generalist more than a people manager.
 
 #### Misleveling / mispositioning read
-
-- **Slight title tension:** long consulting tenure can read as **staff IC** even when the work was lead-caliber—make **team leadership** explicit or risk being scoped as “strong principal” instead of “people lead.”
-- Not **too game-specific** for this posting; the risk is the opposite: **not multiplayer-forward enough** in the connect resume path.
-
----
+- This does not look overleveled for the role.
+- It looks slightly under-signaled on current multiplayer and team leadership, but not underqualified.
+- The main risk is being read as a broad systems designer instead of a focused game UX lead for a specific AAA production.
 
 ### PART 6 — Rubric scoring + weighted synthesis
 
-#### Rubric scores (High / Medium / Low)
-
-1. **Problem Match:** **High**
-2. **Relevant Proof:** **High**
-3. **Recency:** **Medium** (strongest studio-lead proof concentrated in ESO era; contract work is recent but heterogeneous)
-4. **Role Readability:** **Medium–High** on games resume; **Medium** on connect resume
-5. **Differentiation:** **High** (MMO console UX depth is uncommon)
-6. **Risk Factors:** **Medium** (people-leadership clarity, location, Unreal shipping depth)
-7. **Narrative Coherence:** **High**
-8. **ATS / recruiter hygiene:** **Pass** (clear sections; games resume maps keywords better)
-
 #### Weighted synthesis
+- **What problem is this job hiring for?** A UX lead who can make a new multiplayer RPG feel intuitive, readable, and shippable across teams.
+- **Where have you solved that problem before?** ESO is the closest direct match; quest-tracker, Star Wars, and Madden reinforce the same systems-and-clarity pattern.
+- **Does the primary resume make that obvious in the first 20 seconds?** Yes, if the games resume is used; no, if the connect resume is the first thing seen.
+- **What would make someone hesitate?** Recency, explicit multiplayer-playtest leadership, and whether "lead" means people management or influence.
+- **Does the whole story hang together?** Yes. It is one story about reducing complexity in games and complex systems, not a pile of unrelated projects.
 
-- **What problem is this job hiring for?** A **lead** who can **define and defend** UX quality for a multiplayer AAA experience while **building UX practice** inside a large production machine (UI art, UR, production).
-- **Where have you solved that problem before?** **ESO** (multiplayer UX systems, console transition, live-service iteration) is the closest match; **EA Sports** supports standards at scale; **quest tracker** shows early multiplayer feature thinking in Unreal.
-- **Does the primary resume make that obvious in the first 20 seconds?** Use **`resumes/gboodhoo-resume-games.md`**—put **Lead UX + multiplayer + Unreal interest** above the fold; the connect resume under-indexes those hooks.
-- **What would make someone hesitate?** **Team leadership** receipts and **Boston** practicality.
-- **Does the whole story hang together?** Yes: resume ↔ portfolio ↔ journals align on **systems UX + iteration + cross-functional execution**; the gap is **explicit UX org leadership**.
+#### Scores
+- **Problem Match:** High
+- **Relevant Proof:** High
+- **Recency:** Medium
+- **Role Readability:** High
+- **Differentiation:** High
+- **Risk Factors:** Medium
+- **Narrative Coherence:** High
+- **ATS / recruiter hygiene:** Pass
 
 #### Actionable output
-
 **Themes to emphasize**
-
-- Multiplayer/live-service UX judgment backed by **ESO** receipts.
-- **Standards, documentation, reviews** as leadership—not only screens.
-- **Playtest → change** loops (journals reinforce this).
+- Console-first readability.
+- Shipping and leading on ESO.
+- Prototypes, docs, and review loops that reduce ambiguity.
+- Multiplayer/narrative-system thinking from quest-tracker.
+- Collaboration with engineering, art, production, and QA.
 
 **Themes to de-emphasize**
+- Generic product-design framing.
+- Creative coding that does not help the game UX story.
+- Old consulting entries that make the resume feel too broad.
+- Any language that makes the work sound purely visual instead of system-level.
 
-- Non-game installation art as a **primary** argument (supporting color only).
-- Over-focusing on commerce/identity flows from the connect resume unless tied back to **player trust and UI clarity** in multiplayer contexts.
-
-**5 bullets to rewrite (examples)**
-
-- Add **headcount/scope** language where truthful: “Partnered with / coordinated / mentored …” tied to outcomes.
-- One bullet that names **Unreal prototyping** and what decisions it accelerated (Kestrel + quest tracker already hint—make it scannable).
-- Replace consulting-density with **one Sirius-facing sentence**: why multiplayer UX systems are your lane.
-- Explicit **playtest + research translation** hook (journals help).
-- Clarify **Boston** intent (relocating vs. already planning move)—if true.
+**5 bullets to rewrite**
+- Pull the strongest AAA game UX proof higher on the primary resume.
+- Add "multiplayer" and "playtests" explicitly near the top of the games resume.
+- Tighten older consulting bullets so they do not dilute the lead-game story.
+- Replace abstract phrasing with one more concrete shipped outcome where possible.
+- Make team influence sound more like leadership and less like general collaboration.
 
 **3 missing signals to make explicit**
-
-- **People leadership** (hiring, 1:1s, staffing plans) if any exists—if not, say how you led **without** authority.
-- **Recent AAA** or large-team **Unreal UX** involvement if available in any form.
-- **Multiplayer social flows** (parties, comms, matchmaking-adjacent UX) if you can claim it without overselling.
+- Current multiplayer UX leadership.
+- Explicit playtest / research loop ownership.
+- Direct people-management or clearly scoped team leadership.
 
 **5 interview stories to prepare**
+- ESO console replatforming and controller-first navigation.
+- Kestrel preproduction and Unreal prototype packaging for cross-studio critique.
+- Quest-tracker ambiguity mapping and narrative-system structuring.
+- Madden design-system scaling across franchises and studios.
+- A conflict or alignment story where you changed engineering or art direction without losing the team.
 
-- ESO: **controller-first redesign** and how you won scope.
-- ESO: **Crown Store / playtest** iteration loop (journal-backed).
-- Madden/EA Sports: **cross-studio standards** and conflict resolution.
-- Quest journal: **ambiguous preproduction** + Unreal prototype decisions.
-- A **people leadership** story: reviews, mentoring, or scaling critique—pick the strongest honest example.
-
-**Blunt recommendation:** **Apply after targeted resume edits** — you are **credible on craft and AAA systems UX**, but the posting’s **team-lead** bar and **location** need a deliberate, upfront answer on paper.
+**Blunt recommendation**
+- Apply after targeted resume edits.
 
 **Why they might hire you**
-
-You bring a rare combination: **documented multiplayer-scale UX systems work** with **shipping discipline**, strong **portfolio receipts**, and **engine-adjacent prototyping literacy** that maps onto modern Unreal pipelines—exactly the kind of profile a Sirius team could bet on if they believe you will **scale others**, not only yourself.
+They can see a designer who has already solved the same class of problem: turn ugly, complex game systems into something players can actually use, then keep the team aligned while the work changes shape.
 
 **Why they might not**
-
-The role is explicitly **people leadership** in a **new Boston studio context**; if they cannot verify **UX team building** quickly, they may prefer a candidate with **more recent, on-sheet management** or **more local/Unreal-production-native** leadership—and **relocation** can end the process before craft is debated.
+They may want a more recent, explicitly multiplayer-first lead with clearer playtest ownership and current AAA production signals than this package currently foregrounds.

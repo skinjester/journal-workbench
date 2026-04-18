@@ -2,74 +2,75 @@ GARY BOODHOO
 garyb.design | San Francisco, CA | gboodhoo@gmail.com | 415-802-4076
 
 LEAD UX DESIGNER
-I design game UX that makes complex systems clear to players and manageable for teams. From concept through implementation, I see features through and take responsibility for how they perform. That includes setting standards, giving UX direction across disciplines, and building documentation teams can rely on. I'm comfortable walking into a production and figuring out where UX needs to start.
+I design game UX that makes complex systems clear to players and manageable for teams. From concept through implementation, I see features through and take responsibility for how they perform. That includes setting standards, aligning cross-functional teams around clear UX decisions, and building documentation teams can rely on. I can step into a production, identify where UX needs to start, and bring structure to the work.
 
 SELECTED WORK
-Led the replatforming of The Elder Scrolls Online UX from PC to PlayStation and Xbox, establishing controller-first interaction patterns and modular UI structures that remain foundational to the live service today.
+Led the replatforming of The Elder Scrolls Online UX from PC to PlayStation and Xbox, establishing controller-first patterns and reusable UI structures that remain foundational to the live service.
 
-Designed feature UX for Project Kestrel, an unreleased online co-op action RPG, with ZeniMax Online Studios and Sprung Studios. Built interactive Unreal prototypes so the team could evaluate spatial UX in-engine during product incubation.
+Defined and prototyped core interaction models for Project Kestrel, an unreleased online co-op action RPG, with ZeniMax Online Studios and Sprung Studios. Built interactive Unreal prototypes to explore spatial UX during product incubation.
 
 Designed the Game Entry onboarding experience for The Sims 3, creating reusable content templates and interaction patterns that improved player understanding and streamlined content production.
 
 CORE COMPETENCIES
-Game UX Leadership: UX strategy, design systems, documentation, UX direction.
-Systems Design: Live-service UX, scalable UI, controller-first navigation, commerce, onboarding.
-Prototyping: Functional prototyping, interactive wireframes, code-driven demos.
+Game UX Leadership — UX strategy, design systems, documentation, cross-functional alignment
+System Design — Live-service UX/UI, commerce, onboarding, progression
+Concepting — Interactive wireframes, functional prototypes, code-driven demos
 
 TECHNICAL SKILLS
-Design: Figma (components, tokens, pattern documentation), Framer, Adobe Creative Suite, Mural
-Prototyping: Unreal Engine, TouchDesigner
-Code: Python, Lua, React, HTML/CSS
+Design — Figma, Framer, Adobe Creative Cloud, Unreal Engine, TouchDesigner
+Development — Python, Lua, React, HTML/CSS
 
 EXPERIENCE
 Skinjester Studio — Founder & Principal Product Designer
 2016–2025 • San Francisco, CA
-Game UX: Feature design and interactive Unreal prototypes for Project Kestrel with ZeniMax Online Studios.
-Live-service UX: Crown Store commerce, editorial, and platform UX for The Elder Scrolls Online across web and game client.
-VR: Menu, lobby, and gameplay UX in Unreal for Redpill VR.
-Product incubation: UX frameworks and indoor-mapping prototypes for Iveda Pinpoint with WRLD3D.
+- Defined and prototyped core interaction models for Project Kestrel with ZeniMax Online Studios, giving the team a concrete UX direction during early development and reducing ambiguity in feature design.
+- Designed live-service commerce, editorial, and platform UX for The Elder Scrolls Online across web and game client, improving clarity in purchasing and content discovery and supporting ongoing player engagement.
+- Shaped menu, lobby, and onboarding UX in Unreal for Redpill VR, turning early concepts into usable flows for evaluation and iteration in production.
+- Built UX frameworks and indoor-mapping prototypes for Iveda Pinpoint with WRLD3D, helping stakeholders evaluate product direction before committing engineering resources.
 
 ZeniMax Online Studios — User Experience Lead, The Elder Scrolls Online (ESO)
 2013–2016 • Cockeysville, MD
-Led UX/UI for ESO's console launch and ongoing live-service evolution.
-Led reviews for studio and external partners to keep production on track.
-Designed and prototyped commerce UX across game client and web, supporting millions of players.
+- Led UX/UI for ESO’s console launch and ongoing live-service development, adapting a dense PC-native MMORPG into a controller-first experience for PlayStation and Xbox.
+- Directed reviews across internal teams and external partners, aligning UX decisions with production realities and helping keep development on track.
+- Designed and prototyped front-end, navigation, and commerce flows across game client and web, giving teams clearer interaction patterns to implement and extend over time.
 
 RealU — User Experience Consultant, Otherland
 2012–2013 • Singapore
-Led UX/UI for Otherland, a free-to-play sci-fi MMORPG, helping a stalled project move forward through design direction, prototyping, and sprint reviews that built internal alignment and led to continued investor funding.
+- Led UX/UI for Otherland, helping a stalled MMORPG regain momentum through design direction, prototyping, and structured review, supporting continued investor funding.
 
 Rumble Games — User Experience Designer
 2011–2012 • Redwood City, CA
-Designed browser-based interfaces for social gameplay, helping establish UX workflows and visual direction during early development of KingsRoad, a free-to-play multiplayer RPG on Facebook's game platform.
+- Designed browser-based interfaces for KingsRoad, shaping UX workflows and visual design.
 
 Osterhout Design Group — Product Designer
 2010–2011 • San Francisco
-Designed AR interaction demos for early wearable hardware, translating optical and sensor constraints into discoverable spatial behaviors for scenarios developed with military contractors.
+- Designed AR interaction demos for early wearable hardware, translating optical and sensor constraints into discoverable spatial behaviors for scenarios developed with military contractors.
 
 Serious Business — User Experience Designer
 2009–2010 • San Francisco
-Designed UX and features for early social games on Facebook, helping shape interaction patterns native to social-network play.
+- Designed UX and features for early Facebook social games.
 
 Nihilistic Software — Senior User Interface Designer, Zombie Apocalypse
 2008–2009 • Novato, CA
-Designed game UI for Zombie Apocalypse (Konami, PS3/Xbox 360) using Scaleform and proprietary tooling. Developed touchscreen and gestural interface prototypes for pre-release PlayStation Vita hardware.
+- Developed touchscreen and gestural interface prototypes for pre-release PlayStation Vita hardware using Scaleform and proprietary tooling.
 
 Electronic Arts — User Experience Consultant, The Sims 3
 2008 • Redwood Shores, CA
-Designed the Game Entry onboarding experience for The Sims 3, creating reusable content templates and interaction patterns that improved player understanding and streamlined content production.
+- Designed the Game Entry onboarding experience for The Sims 3, creating reusable content templates and interaction patterns that improved player understanding and streamlined content production.
 
 LucasArts — Senior UX/UI Designer, Star Wars: The Force Unleashed
 2006–2008 • San Francisco
-Led UI design for Star Wars: The Force Unleashed on PlayStation 3 and Xbox 360, working with cross-functional teams on scripting and localization for international launch.
+- Led UI design for Star Wars: The Force Unleashed on PlayStation 3 and Xbox 360, working with cross-functional teams on scripting and localization for international launch.
 
 Rainbow Studios — Senior User Interface Designer
 2005–2006 • Greater Phoenix Area
-Visual development and front-end prototyping for MX vs ATV Untamed, an off-road racing game published by THQ for PlayStation 3 and Xbox 360.
+- Visual development and front-end prototyping for MX vs ATV Untamed, published by THQ
 
 Electronic Arts Tiburon — Senior User Interface Designer, Madden NFL
 2001–2005 • Maitland, FL
-Progressed from contributor to lead interface designer on Madden NFL across annual releases, scripting and validating hundreds of screens for launch under first-party certification. Mentored incoming designers on component reuse, layout standards, and review practices that helped teams build faster within EA Sports' studio-wide design system.
+- Progressed from contributor to lead interface designer on Madden NFL across annual releases.
+- Scripted and validated hundreds of screens for launch under first-party certification.
+- Co-developed EA Sports’ studio-wide design system with a multi-studio team, and mentored designers on component reuse, layout standards, and review practices that helped teams build faster.
 
 EDUCATION
 Full Sail University (A.S., Video Production) · Massachusetts College of Art and Design (Studio for Interrelated Media) · CooperU Interaction Design Practicum

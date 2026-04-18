@@ -5,7 +5,8 @@ Stage 1: run one Cursor Agent evaluation per job-description file.
 Requires the Cursor Agent CLI (`agent`) on PATH, authenticated for non-interactive use.
 See job-evaluation-reports/README.md for prerequisites and examples.
 
-This script does not call cloud LLMs directly; it shells out to `agent` with --print --force --trust.
+This script does not call cloud LLMs directly; it shells out to `agent` with
+--print --force --trust (and optionally --model).
 """
 
 from __future__ import annotations
@@ -130,6 +131,11 @@ def main() -> int:
         default=None,
         help="Path to agent executable (default: CURSOR_AGENT_BIN or first of agent, cursor-agent on PATH).",
     )
+    parser.add_argument(
+        "--model",
+        default=None,
+        help="Pass an explicit model through to `agent --model` (for example: gpt-5.4-medium).",
+    )
     args = parser.parse_args()
 
     repo = (args.repo or _default_repo_root()).resolve()
@@ -204,11 +210,14 @@ def main() -> int:
             "--trust",
             "--workspace",
             str(repo),
-            prompt,
         ]
+        if args.model is not None:
+            cmd.extend(["--model", args.model])
+        cmd.append(prompt)
 
         if args.dry_run:
-            print("[dry-run] would run:", " ".join(cmd[:6]), f'"... ({len(prompt)} chars)"')
+            prefix = " ".join(cmd[:-1])
+            print("[dry-run] would run:", prefix, f'"... ({len(prompt)} chars)"')
             continue
 
         print(f"run: {jd_rel}")
