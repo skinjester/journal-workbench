@@ -30,7 +30,7 @@ Skinjester Studio — Founder & Principal Product Designer
 
 ZeniMax Online Studios — User Experience Lead, The Elder Scrolls Online (ESO)
 2013–2016 • Cockeysville, MD
-- Led UX/UI for ESO’s console launch and ongoing live-service development, adapting a dense PC-native MMORPG into a controller-first experience for PlayStation and Xbox.
+- Led UX/UI for ESO’s console launch and ongoing live-service development, owning features from early concept through implementation and long-term evolution of the live service.
 - Directed reviews across internal teams and external partners, aligning UX decisions with production realities and helping keep development on track.
 - Designed and prototyped front-end, navigation, and commerce flows across game client and web, giving teams clearer interaction patterns to implement and extend over time.
 
