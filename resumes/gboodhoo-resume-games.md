@@ -56,7 +56,7 @@ Nihilistic Software — Senior User Interface Designer, Zombie Apocalypse
 
 Electronic Arts — User Experience Consultant, The Sims 3
 2008 • Redwood Shores, CA
-- Designed the Game Entry onboarding experience for The Sims 3, creating reusable content templates and interaction patterns that improved player understanding and streamlined content production.
+- Designed the Game Entry onboarding experience for The Sims 3, creating reusable content templates, interaction patterns, and documentation that helped teams produce and extend content more consistently.
 
 LucasArts — Senior UX/UI Designer, Star Wars: The Force Unleashed
 2006–2008 • San Francisco
@@ -68,7 +68,7 @@ Rainbow Studios — Senior User Interface Designer
 
 Electronic Arts Tiburon — Senior User Interface Designer, Madden NFL
 2001–2005 • Maitland, FL
-- Progressed from contributor to lead interface designer on Madden NFL across annual releases.
+- Progressed from contributor to lead interface designer on Madden NFL, owning interface work from early design through implementation across annual releases.
 - Scripted and validated hundreds of screens for launch under first-party certification.
 - Co-developed EA Sports’ studio-wide design system with a multi-studio team, and mentored designers on component reuse, layout standards, and review practices that helped teams build faster.
 
