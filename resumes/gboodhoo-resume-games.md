@@ -9,7 +9,7 @@ Led the replatforming of The Elder Scrolls Online UX from PC to PlayStation and 
 
 Defined and prototyped core interaction models for Project Kestrel, an unreleased online co-op action RPG, with ZeniMax Online Studios and Sprung Studios. Built interactive Unreal prototypes to explore spatial UX during product incubation.
 
-Designed the Game Entry onboarding experience for The Sims 3, creating reusable content templates and interaction patterns that improved player understanding and streamlined content production.
+Designed the Game Entry onboarding experience for The Sims 3, creating reusable content templates, interaction patterns, and documentation that helped teams produce and extend content more consistently.
 
 CORE COMPETENCIES
 Game UX Leadership — UX strategy, design systems, documentation, cross-functional alignment
@@ -56,7 +56,8 @@ Nihilistic Software — Senior User Interface Designer, Zombie Apocalypse
 
 Electronic Arts — User Experience Consultant, The Sims 3
 2008 • Redwood Shores, CA
-- Designed the Game Entry onboarding experience for The Sims 3, creating reusable content templates, interaction patterns, and documentation that helped teams produce and extend content more consistently.
+- Designed the Game Entry onboarding experience for The Sims 3, helping new players start quickly while supporting deeper configuration for returning players.
+- Created experience maps and JavaScript prototypes that helped the team align on how content moved through the system.
 
 LucasArts — Senior UX/UI Designer, Star Wars: The Force Unleashed
 2006–2008 • San Francisco
