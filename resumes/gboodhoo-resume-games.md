@@ -2,7 +2,7 @@ GARY BOODHOO
 garyb.design | San Francisco, CA | gboodhoo@gmail.com | 415-802-4076
 
 LEAD UX DESIGNER
-I’ve led UX for titles including The Elder Scrolls Online and Star Wars: The Force Unleashed, and helped shape early product direction through prototyping and interaction design on other projects. I work with teams to prioritize UX, reduce ambiguity, and give features a clearer path to implementation.
+I’ve led UX for titles including The Elder Scrolls Online and Star Wars: The Force Unleashed, and defined early UX direction through prototyping and interaction design on new game projects. I work with teams to prioritize UX, reduce ambiguity, and give features a clearer path to implementation.
 
 SELECTED WORK
 Led the replatforming of The Elder Scrolls Online UX from PC to PlayStation and Xbox, establishing controller-first patterns and reusable UI structures that remain foundational to the live service.
@@ -23,7 +23,7 @@ Development — Python, Lua, React, HTML/CSS
 EXPERIENCE
 Skinjester Studio — Founder & Principal Product Designer
 2016–2025 • San Francisco, CA
-- Worked with client teams across a range of interactive products to clarify priorities, shape early UX direction, and keep feature work aligned with development realities.
+- Led game UX consulting engagements, clarifying priorities, shaping early direction, and keeping feature work aligned with development realities.
 - Designed live-service commerce, editorial, and platform UX for The Elder Scrolls Online across web and game client, improving clarity in purchasing and content discovery and supporting ongoing player engagement.
 - Built UX frameworks and indoor-mapping prototypes for Iveda Pinpoint with WRLD3D, helping stakeholders evaluate product direction before committing engineering resources.
 
