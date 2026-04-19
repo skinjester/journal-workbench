@@ -2,7 +2,7 @@ GARY BOODHOO
 garyb.design | San Francisco, CA | gboodhoo@gmail.com | 415-802-4076
 
 LEAD UX DESIGNER
-I’ve led UX for titles including The Elder Scrolls Online and Star Wars: The Force Unleashed, and helped shape early product direction through prototyping and interaction design on other projects. I identify where UX will have the most impact in production and help teams move forward with clear direction.
+I’ve led UX for titles including The Elder Scrolls Online and Star Wars: The Force Unleashed, and helped shape early product direction through prototyping and interaction design on other projects. I work with teams to prioritize UX, reduce ambiguity, and give features a clearer path to implementation.
 
 SELECTED WORK
 Led the replatforming of The Elder Scrolls Online UX from PC to PlayStation and Xbox, establishing controller-first patterns and reusable UI structures that remain foundational to the live service.
@@ -51,7 +51,7 @@ Serious Business — User Experience Designer
 
 Nihilistic Software — Senior User Interface Designer, Zombie Apocalypse
 2008–2009 • Novato, CA
-- Developed touchscreen and gestural interface prototypes for pre-release PlayStation Vita hardware using Scaleform and proprietary tooling.
+- Advanced the HUD and front-end UX for Zombie Apocalypse mid-development, applying a narrative-driven broadcast style and refining the interface for 4-player local co-op.
 
 Electronic Arts — User Experience Consultant, The Sims 3
 2008 • Redwood Shores, CA
@@ -60,7 +60,7 @@ Electronic Arts — User Experience Consultant, The Sims 3
 
 LucasArts — Senior UX/UI Designer, Star Wars: The Force Unleashed
 2006–2008 • San Francisco
-- Led UI design for Star Wars: The Force Unleashed on PlayStation 3 and Xbox 360, working with cross-functional teams on scripting and localization for international launch.
+- Led UI design and in-engine implementation for Star Wars: The Force Unleashed on PlayStation 3 and Xbox 360, building systems for combat, progression, and localization from concept through launch.
 
 Rainbow Studios — Senior User Interface Designer
 2005–2006 • Greater Phoenix Area
