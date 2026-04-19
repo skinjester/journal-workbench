@@ -12,9 +12,9 @@ Defined and prototyped core interaction models for Project Kestrel, an unrelease
 Designed the Game Entry onboarding experience for The Sims 3, creating reusable content templates, interaction patterns, and documentation that helped teams produce and extend content more consistently.
 
 CORE COMPETENCIES
-Game UX Leadership — UX strategy, design systems, documentation, cross-functional alignment
-System Design — Live-service UX/UI, commerce, onboarding, progression
-Concepting — Interactive wireframes, functional prototypes, code-driven demos
+UX Leadership — strategy, systems, mentorship, prioritization
+System Design — live-service UX/UI, commerce, onboarding, progression
+Concepting — interactive wireframes, functional prototypes, code-driven demos
 
 TECHNICAL SKILLS
 Design — Figma, Framer, Adobe Creative Cloud, Unreal Engine, TouchDesigner
@@ -23,16 +23,15 @@ Development — Python, Lua, React, HTML/CSS
 EXPERIENCE
 Skinjester Studio — Founder & Principal Product Designer
 2016–2025 • San Francisco, CA
-- Prototyped Project Kestrel UX with ZeniMax Online Studios, giving the team concrete direction during early development and reducing ambiguity in feature design.
+- Worked with client teams across a range of interactive products to clarify priorities, shape early UX direction, and keep feature work aligned with development realities.
 - Designed live-service commerce, editorial, and platform UX for The Elder Scrolls Online across web and game client, improving clarity in purchasing and content discovery and supporting ongoing player engagement.
-- Shaped menu, lobby, and onboarding UX in Unreal for Redpill VR, turning early concepts into usable flows for evaluation and iteration in production.
 - Built UX frameworks and indoor-mapping prototypes for Iveda Pinpoint with WRLD3D, helping stakeholders evaluate product direction before committing engineering resources.
 
 ZeniMax Online Studios — User Experience Lead, The Elder Scrolls Online (ESO)
 2013–2016 • Cockeysville, MD
 - Led UX/UI for ESO’s console launch and ongoing live-service development, owning features from early concept through implementation and long-term evolution of the live service.
 - Directed reviews across internal teams and external partners, aligning UX decisions with production realities and helping keep development on track.
-- Designed and prototyped front-end, navigation, and commerce flows across game client and web, giving teams clearer interaction patterns to implement and extend over time.
+- Designed and refined multiplayer systems for ESO including player trading, guild navigation, and commerce, using reviews and playtests to reduce friction in controller-first flows.
 
 RealU — User Experience Consultant, Otherland
 2012–2013 • Singapore
@@ -71,7 +70,7 @@ Electronic Arts Tiburon — Senior User Interface Designer, Madden NFL
 2001–2005 • Maitland, FL
 - Progressed from contributor to lead interface designer on Madden NFL, owning interface work from early design through implementation across annual releases.
 - Scripted and validated hundreds of screens for launch under first-party certification.
-- Co-developed EA Sports’ studio-wide design system with a multi-studio team, and mentored designers on component reuse, layout standards, and review practices that helped teams build faster.
+- Co-developed and maintained EA Sports’ shared UI design system across four studios, mentoring designers and giving engineering and QA a single source of truth for implementation.
 
 EDUCATION
 Full Sail University (A.S., Video Production) · Massachusetts College of Art and Design (Studio for Interrelated Media) · CooperU Interaction Design Practicum
