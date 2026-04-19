@@ -37,9 +37,9 @@ RealU — User Experience Consultant, Otherland
 2012–2013 • Singapore
 - Led UX/UI for Otherland, helping a stalled MMORPG regain momentum through design direction, prototyping, and structured review, supporting continued investor funding.
 
-Rumble Games — User Experience Designer
+Rumble Games — User Experience Designer, KingsRoad
 2011–2012 • Redwood City, CA
-- Designed browser-based interfaces for KingsRoad, shaping UX workflows and visual design.
+Browser-based game UX and interface design.
 
 Osterhout Design Group — Product Designer
 2010–2011 • San Francisco
@@ -47,7 +47,7 @@ Osterhout Design Group — Product Designer
 
 Serious Business — User Experience Designer
 2009–2010 • San Francisco
-- Designed UX and features for early Facebook social games.
+UX and feature design for early social games.
 
 Nihilistic Software — Senior User Interface Designer, Zombie Apocalypse
 2008–2009 • Novato, CA
@@ -62,9 +62,9 @@ LucasArts — Senior UX/UI Designer, Star Wars: The Force Unleashed
 2006–2008 • San Francisco
 - Led UI design and in-engine implementation for Star Wars: The Force Unleashed on PlayStation 3 and Xbox 360, building systems for combat, progression, and localization from concept through launch.
 
-Rainbow Studios — Senior User Interface Designer
+Rainbow Studios — Senior User Interface Designer, MX vs ATV Untamed
 2005–2006 • Greater Phoenix Area
-- Visual development and front-end prototyping for MX vs ATV Untamed, published by THQ
+Visual development and front-end prototyping.
 
 Electronic Arts Tiburon — Senior User Interface Designer, Madden NFL
 2001–2005 • Maitland, FL
