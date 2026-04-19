@@ -2,7 +2,7 @@ GARY BOODHOO
 garyb.design | San Francisco, CA | gboodhoo@gmail.com | 415-802-4076
 
 LEAD UX DESIGNER
-I design game UX that makes complex systems clear to players and manageable for teams. From concept through implementation, I see features through and take responsibility for how they perform. That includes setting standards, aligning cross-functional teams around clear UX decisions, and building documentation teams can rely on. I can step into a production, identify where UX needs to start, and bring structure to the work.
+I’ve led UX for titles including The Elder Scrolls Online and Star Wars: The Force Unleashed, and helped shape early product direction through prototyping and interaction design on other projects. I step into productions, identify where UX will have the most impact, and help teams build from a clear starting point.
 
 SELECTED WORK
 Led the replatforming of The Elder Scrolls Online UX from PC to PlayStation and Xbox, establishing controller-first patterns and reusable UI structures that remain foundational to the live service.

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Job evaluation comparison</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0a0f1a;
+      --panel: #101826;
+      --panel-alt: #0d1422;
+      --border: rgba(151, 173, 210, 0.16);
+      --text: #ecf3ff;
+      --muted: #94a8c6;
+      --accent: #77e6ff;
+      --accent-2: #9b7cff;
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.38);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(119, 230, 255, 0.14), transparent 32%),
+        radial-gradient(circle at top right, rgba(155, 124, 255, 0.16), transparent 28%),
+        linear-gradient(180deg, #09101a 0%, var(--bg) 46%, #070b13 100%);
+    }
+    .page {
+      width: min(1440px, calc(100vw - 40px));
+      margin: 0 auto;
+      padding: 36px 0 72px;
+    }
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 36px;
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      background:
+        linear-gradient(135deg, rgba(16, 24, 38, 0.96), rgba(10, 15, 26, 0.94)),
+        linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
+      box-shadow: var(--shadow);
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -10% -45% auto;
+      width: 360px;
+      height: 360px;
+      background: radial-gradient(circle, rgba(119, 230, 255, 0.16), transparent 68%);
+      pointer-events: none;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(1.75rem, 3.4vw, 3.5rem);
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+    .lede {
+      max-width: 64ch;
+      margin: 16px 0 0;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.65;
+    }
+    .hero-meta {
+      margin-top: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+    .hero-meta .metric-pair {
+      flex: 1 1 100%;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .hero-meta .metric-pair .metric {
+      min-width: 0;
+    }
+    .metric {
+      min-width: 170px;
+      padding: 16px 18px;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      backdrop-filter: blur(14px);
+    }
+    .metric .label {
+      display: block;
+      color: var(--muted);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+    .metric strong {
+      display: block;
+      font-size: 1.3rem;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+    }
+    .metric small.metric-hint {
+      display: block;
+      margin-top: 6px;
+      font-size: 0.72rem;
+      font-weight: 500;
+      line-height: 1.35;
+      color: var(--muted);
+      letter-spacing: 0.01em;
+    }
+    .submeta {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+    .submeta code {
+      color: var(--text);
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 999px;
+      padding: 0.2rem 0.5rem;
+    }
+    .quick-nav {
+      margin-top: 22px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .quick-nav a {
+      color: var(--text);
+      text-decoration: none;
+      padding: 0.7rem 0.95rem;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+    }
+    .quick-nav a:hover {
+      transform: translateY(-1px);
+      border-color: rgba(119, 230, 255, 0.34);
+      background: rgba(119, 230, 255, 0.08);
+    }
+    .dashboard {
+      margin-top: 22px;
+      display: grid;
+      gap: 22px;
+    }
+    .viz-card {
+      padding: 24px;
+      border-radius: 24px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(16, 24, 38, 0.92), rgba(11, 18, 32, 0.94));
+      box-shadow: var(--shadow);
+    }
+    .viz-head {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 16px;
+      align-items: start;
+      margin-bottom: 8px;
+    }
+    .viz-kicker {
+      min-width: 50px;
+      height: 50px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(119, 230, 255, 0.14), rgba(155, 124, 255, 0.16));
+      border: 1px solid rgba(255,255,255,0.07);
+      color: var(--accent);
+      font-weight: 800;
+      letter-spacing: 0.08em;
+    }
+    .viz-copy h2 {
+      margin: 2px 0 6px;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+    .blurb {
+      margin: 0;
+      max-width: 72ch;
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: 0.97rem;
+    }
+    .chart-shell {
+      padding: 2px 8px 0;
+      border-radius: 20px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)),
+        var(--panel-alt);
+      border: 1px solid rgba(255,255,255,0.05);
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+    .plotly-graph-div { border-radius: 16px; }
+    .modebar {
+      background: rgba(7, 12, 22, 0.62) !important;
+      border: 1px solid rgba(255,255,255,0.08) !important;
+      border-radius: 12px !important;
+      backdrop-filter: blur(12px);
+    }
+    @media (max-width: 900px) {
+      .page { width: min(100vw - 24px, 1440px); padding-top: 20px; }
+      .hero { padding: 24px; border-radius: 22px; }
+      .viz-card { padding: 18px; border-radius: 20px; }
+      .viz-head { grid-template-columns: 1fr; }
+      .viz-kicker { width: 50px; }
+      .hero-meta .metric-pair { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <h1>Job evaluation comparative views</h1>
+      <p class="lede">A polished dark-mode review board for comparing role fit across the current evaluation set.</p>
+      <div class="hero-meta">
+        <div class="metric"><span class="label">Jobs in scope</span><strong>1</strong></div>
+        <div class="metric"><span class="label">Verdict dimensions</span><strong>5</strong></div>
+        <div class="metric" title="Ordinal tiers use an internal ~93–100 mapping for charting. Shown value is the tier nearest the batch mean—not a 0–100% grade.">
+          <span class="label">Mean verdict tier</span>
+          <strong>High</strong>
+          <small class="metric-hint">Nearest ordinal label · not a percentage score</small>
+        </div>
+        <div class="metric-pair">
+          <div class="metric"><span class="label">Top overall</span><strong>Lead UX, CD Projekt Red</strong></div>
+          <div class="metric"><span class="label">Lowest overall</span><strong>Lead UX, CD Projekt Red</strong></div>
+        </div>
+      </div>
+      <nav class="quick-nav"><a href="#viz-0">Dot matrix</a><a href="#viz-1">Radar</a><a href="#viz-2">Dot plots</a></nav>
+    </header>
+    <main class="dashboard">
+      <section class="viz-card" id="viz-0">  <div class="viz-head">    <div class="viz-kicker">01</div>    <div class="viz-copy">      <h2>Dot matrix</h2>      <p class="blurb">Each cell is a circle: size and color both encode tier score. Larger + lighter = stronger signal. Hover for the ordinal verdict label.</p>    </div>  </div>  <div class="chart-shell"><div>                        <script>window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+        <script charset="utf-8" src="https://cdn.plot.ly/plotly-3.5.0.min.js" integrity="sha256-fHbNLP+GlIXN+efbQec78UkemUz3NJp7UmfGxC1tNxs=" crossorigin="anonymous"></script>                <div id="23089d91-2435-4f87-b8e0-fee2d31a1ac3" class="plotly-graph-div" style="height:380px; width:100%;"></div>            <script>                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("23089d91-2435-4f87-b8e0-fee2d31a1ac3")) {                    Plotly.newPlot(                        "23089d91-2435-4f87-b8e0-fee2d31a1ac3",                        [{"hovertemplate":["Lead UX, CD Projekt Red\u003cbr\u003eFit on Paper\u003cbr\u003eHigh\u003cextra\u003e\u003c\u002fextra\u003e","Lead UX, CD Projekt Red\u003cbr\u003eCapability\u003cbr\u003eHigh\u003cextra\u003e\u003c\u002fextra\u003e","Lead UX, CD Projekt Red\u003cbr\u003eRecruiter Screen\u003cbr\u003eHigh\u003cextra\u003e\u003c\u002fextra\u003e","Lead UX, CD Projekt Red\u003cbr\u003eHiring Manager Screen\u003cbr\u003eHigh\u003cextra\u003e\u003c\u002fextra\u003e","Lead UX, CD Projekt Red\u003cbr\u003ePanel Loop Survival\u003cbr\u003eMedium\u003cextra\u003e\u003c\u002fextra\u003e"],"marker":{"cmax":100.0,"cmin":90.0,"color":[99.0,99.0,99.0,99.0,97.0],"colorbar":{"len":0.6,"orientation":"h","thickness":10,"tickfont":{"color":"#94a8c6","size":9},"tickvals":[90,92,94,96,98,100],"title":{"font":{"color":"#94a8c6","size":10},"side":"top","text":"Tier score"},"x":0.5,"xanchor":"center","y":-0.08,"yanchor":"top"},"colorscale":[[0.0,"#070b14"],[0.125,"#101e33"],[0.25,"#17304c"],[0.375,"#214566"],[0.5,"#2f5d82"],[0.625,"#44769c"],[0.75,"#6794b5"],[0.875,"#9cb9d4"],[1.0,"#dceaf7"]],"line":{"width":0},"size":[34.0,34.0,34.0,34.0,10.0]},"mode":"markers","showlegend":false,"x":["Fit on Paper","Capability","Recruiter Screen","Hiring Manager Screen","Panel Loop Survival"],"y":["Lead UX, CD Projekt Red","Lead UX, CD Projekt Red","Lead UX, CD Projekt Red","Lead UX, CD Projekt Red","Lead UX, CD Projekt Red"],"type":"scatter"}],                        {"template":{"layout":{"colorway":["#77e6ff","#9b7cff","#55d6be","#ff8a65","#ffd166","#ff6fae","#64b5f6","#c3f73a"],"font":{"color":"#ecf3ff","family":"Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif","size":12},"hoverlabel":{"bgcolor":"#0b1220","bordercolor":"rgba(119, 230, 255, 0.28)","font":{"color":"#ecf3ff"}},"legend":{"bgcolor":"rgba(0,0,0,0)","borderwidth":0,"font":{"color":"#94a8c6"},"title":{"font":{"color":"#ecf3ff"}}},"margin":{"b":52,"l":56,"r":28,"t":32},"paper_bgcolor":"rgba(0,0,0,0)","plot_bgcolor":"rgba(0,0,0,0)","polar":{"angularaxis":{"gridcolor":"rgba(151, 173, 210, 0.12)","linecolor":"rgba(151, 173, 210, 0.18)","tickfont":{"color":"#94a8c6"}},"bgcolor":"rgba(0,0,0,0)","radialaxis":{"gridcolor":"rgba(151, 173, 210, 0.12)","linecolor":"rgba(151, 173, 210, 0.18)","tickfont":{"color":"#94a8c6"}}},"title":{"font":{"color":"#ecf3ff","size":20},"x":0.02,"xanchor":"left"},"xaxis":{"gridcolor":"rgba(151, 173, 210, 0.12)","linecolor":"rgba(151, 173, 210, 0.18)","tickfont":{"color":"#94a8c6"},"title":{"font":{"color":"#94a8c6"}},"zerolinecolor":"rgba(151, 173, 210, 0.12)"},"yaxis":{"gridcolor":"rgba(151, 173, 210, 0.12)","linecolor":"rgba(151, 173, 210, 0.18)","tickfont":{"color":"#94a8c6"},"title":{"font":{"color":"#94a8c6"}},"zerolinecolor":"rgba(151, 173, 210, 0.12)"}}},"xaxis":{"tickfont":{"size":11},"side":"top","tickangle":0,"tickmode":"array","tickvals":["Fit on Paper","Capability","Recruiter Screen","Hiring Manager Screen","Panel Loop Survival"],"ticktext":["Fit on\u003cbr\u003ePaper","Capability","Recruiter\u003cbr\u003eScreen","Hiring\u003cbr\u003eManager Screen","Panel Loop\u003cbr\u003eSurvival"],"showgrid":true,"gridcolor":"rgba(151,173,210,0.10)","zeroline":false},"yaxis":{"tickfont":{"size":10,"color":"#94a8c6"},"autorange":"reversed","showgrid":true,"gridcolor":"rgba(151,173,210,0.10)","zeroline":false,"automargin":false,"title":{}},"height":380,"font":{"size":12},"margin":{"l":160,"r":28,"t":64,"b":64}},                        {"displayModeBar": true, "responsive": true, "displaylogo": false}                    )                };            </script>        </div></div></section><section class="viz-card" id="viz-1">  <div class="viz-head">    <div class="viz-kicker">02</div>    <div class="viz-copy">      <h2>Radar</h2>      <p class="blurb">Shape of each job across dimensions. Radial axis is zoomed to this run’s min/max tier scores so differences read larger; toggle traces in the legend when overlap is still dense. Missing dimensions use score 90.</p>    </div>  </div>  <div class="chart-shell"><div>                            <div id="cf677416-a8bc-4ab9-832b-868c115dde57" class="plotly-graph-div" style="height:560px; width:100%;"></div>            <script>                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("cf677416-a8bc-4ab9-832b-868c115dde57")) {                    Plotly.newPlot(                        "cf677416-a8bc-4ab9-832b-868c115dde57",                        [{"fill":"toself","fillcolor":"rgba(119, 230, 255, 0.08)","hovertemplate":"%{fullData.name}\u003cbr\u003e%{theta}: %{r:.0f}\u003cextra\u003e\u003c\u002fextra\u003e","line":{"color":"#77e6ff","width":2},"mode":"lines","name":"Lead UX, CD Projekt Red","opacity":0.72,"r":[99.0,99.0,99.0,99.0,97.0,99.0],"theta":["Fit on Paper","Capability","Recruiter Screen","Hiring Manager Screen","Panel Loop Survival","Fit on Paper"],"type":"scatterpolar"}],                        {"template":{"layout":{"colorway":["#77e6ff","#9b7cff","#55d6be","#ff8a65","#ffd166","#ff6fae","#64b5f6","#c3f73a"],"font":{"color":"#ecf3ff","family":"Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif","size":12},"hoverlabel":{"bgcolor":"#0b1220","bordercolor":"rgba(119, 230, 255, 0.28)","font":{"color":"#ecf3ff"}},"legend":{"bgcolor":"rgba(0,0,0,0)","borderwidth":0,"font":{"color":"#94a8c6"},"title":{"font":{"color":"#ecf3ff"}}},"margin":{"b":52,"l":56,"r":28,"t":32},"paper_bgcolor":"rgba(0,0,0,0)","plot_bgcolor":"rgba(0,0,0,0)","polar":{"angularaxis":{"gridcolor":"rgba(151, 173, 210, 0.12)","linecolor":"rgba(151, 173, 210, 0.18)","tickfont":{"color":"#94a8c6"}},"bgcolor":"rgba(0,0,0,0)","radialaxis":{"gridcolor":"rgba(151, 173, 210, 0.12)","linecolor":"rgba(151, 173, 210, 0.18)","tickfont":{"color":"#94a8c6"}}},"title":{"font":{"color":"#ecf3ff","size":20},"x":0.02,"xanchor":"left"},"xaxis":{"gridcolor":"rgba(151, 173, 210, 0.12)","linecolor":"rgba(151, 173, 210, 0.18)","tickfont":{"color":"#94a8c6"},"title":{"font":{"color":"#94a8c6"}},"zerolinecolor":"rgba(151, 173, 210, 0.12)"},"yaxis":{"gridcolor":"rgba(151, 173, 210, 0.12)","linecolor":"rgba(151, 173, 210, 0.18)","tickfont":{"color":"#94a8c6"},"title":{"font":{"color":"#94a8c6"}},"zerolinecolor":"rgba(151, 173, 210, 0.12)"}}},"polar":{"radialaxis":{"visible":true,"range":[96.9,99.1],"dtick":0.5,"tickformat":".1f"}},"legend":{"font":{"size":9},"tracegroupgap":0},"height":560,"font":{"size":12}},                        {"displayModeBar": true, "responsive": true, "displaylogo": false}                    )                };            </script>        </div></div></section><section class="viz-card" id="viz-2">  <div class="viz-head">    <div class="viz-kicker">03</div>    <div class="viz-copy">      <h2>Dot plots</h2>      <p class="blurb">Five small multiples for quick within-dimension comparison. Rows sort by mean tier score.</p>    </div>  </div>  <div class="chart-shell"><div>                            <div id="c94580f5-4773-40a3-8de2-91ddb90bcf3b" class="plotly-graph-div" style="height:480px; width:100%;"></div>            <script>                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("c94580f5-4773-40a3-8de2-91ddb90bcf3b")) {                    Plotly.newPlot(                        "c94580f5-4773-40a3-8de2-91ddb90bcf3b",                        [{"customdata":["High"],"hovertemplate":"%{y}\u003cbr\u003e%{customdata}\u003cbr\u003escore %{x:.0f}\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"cmax":100.0,"cmin":90.0,"color":[99.0],"colorscale":[[0.0,"#070b14"],[0.125,"#101e33"],[0.25,"#17304c"],[0.375,"#214566"],[0.5,"#2f5d82"],[0.625,"#44769c"],[0.75,"#6794b5"],[0.875,"#9cb9d4"],[1.0,"#dceaf7"]],"line":{"color":"rgba(255,255,255,0.10)","width":1},"showscale":false,"size":11},"mode":"markers","showlegend":false,"x":[99.0],"y":["Lead UX, CD Projekt Red"],"type":"scatter","xaxis":"x","yaxis":"y"},{"customdata":["High"],"hovertemplate":"%{y}\u003cbr\u003e%{customdata}\u003cbr\u003escore %{x:.0f}\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"cmax":100.0,"cmin":90.0,"color":[99.0],"colorscale":[[0.0,"#070b14"],[0.125,"#101e33"],[0.25,"#17304c"],[0.375,"#214566"],[0.5,"#2f5d82"],[0.625,"#44769c"],[0.75,"#6794b5"],[0.875,"#9cb9d4"],[1.0,"#dceaf7"]],"line":{"color":"rgba(255,255,255,0.10)","width":1},"showscale":false,"size":11},"mode":"markers","showlegend":false,"x":[99.0],"y":["Lead UX, CD Projekt Red"],"type":"scatter","xaxis":"x2","yaxis":"y2"},{"customdata":["High"],"hovertemplate":"%{y}\u003cbr\u003e%{customdata}\u003cbr\u003escore %{x:.0f}\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"cmax":100.0,"cmin":90.0,"color":[99.0],"colorscale":[[0.0,"#070b14"],[0.125,"#101e33"],[0.25,"#17304c"],[0.375,"#214566"],[0.5,"#2f5d82"],[0.625,"#44769c"],[0.75,"#6794b5"],[0.875,"#9cb9d4"],[1.0,"#dceaf7"]],"line":{"color":"rgba(255,255,255,0.10)","width":1},"showscale":false,"size":11},"mode":"markers","showlegend":false,"x":[99.0],"y":["Lead UX, CD Projekt Red"],"type":"scatter","xaxis":"x3","yaxis":"y3"},{"customdata":["High"],"hovertemplate":"%{y}\u003cbr\u003e%{customdata}\u003cbr\u003escore %{x:.0f}\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"cmax":100.0,"cmin":90.0,"color":[99.0],"colorscale":[[0.0,"#070b14"],[0.125,"#101e33"],[0.25,"#17304c"],[0.375,"#214566"],[0.5,"#2f5d82"],[0.625,"#44769c"],[0.75,"#6794b5"],[0.875,"#9cb9d4"],[1.0,"#dceaf7"]],"line":{"color":"rgba(255,255,255,0.10)","width":1},"showscale":false,"size":11},"mode":"markers","showlegend":false,"x":[99.0],"y":["Lead UX, CD Projekt Red"],"type":"scatter","xaxis":"x4","yaxis":"y4"},{"customdata":["Medium"],"hovertemplate":"%{y}\u003cbr\u003e%{customdata}\u003cbr\u003escore %{x:.0f}\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"cmax":100.0,"cmin":90.0,"color":[97.0],"colorscale":[[0.0,"#070b14"],[0.125,"#101e33"],[0.25,"#17304c"],[0.375,"#214566"],[0.5,"#2f5d82"],[0.625,"#44769c"],[0.75,"#6794b5"],[0.875,"#9cb9d4"],[1.0,"#dceaf7"]],"line":{"color":"rgba(255,255,255,0.10)","width":1},"showscale":false,"size":11},"mode":"markers","showlegend":false,"x":[97.0],"y":["Lead UX, CD Projekt Red"],"type":"scatter","xaxis":"x5","yaxis":"y5"}],                        {"template":{"layout":{"colorway":["#77e6ff","#9b7cff","#55d6be","#ff8a65","#ffd166","#ff6fae","#64b5f6","#c3f73a"],"font":{"color":"#ecf3ff","family":"Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif","size":12},"hoverlabel":{"bgcolor":"#0b1220","bordercolor":"rgba(119, 230, 255, 0.28)","font":{"color":"#ecf3ff"}},"legend":{"bgcolor":"rgba(0,0,0,0)","borderwidth":0,"font":{"color":"#94a8c6"},"title":{"font":{"color":"#ecf3ff"}}},"margin":{"b":52,"l":56,"r":28,"t":32},"paper_bgcolor":"rgba(0,0,0,0)","plot_bgcolor":"rgba(0,0,0,0)","polar":{"angularaxis":{"gridcolor":"rgba(151, 173, 210, 0.12)","linecolor":"rgba(151, 173, 210, 0.18)","tickfont":{"color":"#94a8c6"}},"bgcolor":"rgba(0,0,0,0)","radialaxis":{"gridcolor":"rgba(151, 173, 210, 0.12)","linecolor":"rgba(151, 173, 210, 0.18)","tickfont":{"color":"#94a8c6"}}},"title":{"font":{"color":"#ecf3ff","size":20},"x":0.02,"xanchor":"left"},"xaxis":{"gridcolor":"rgba(151, 173, 210, 0.12)","linecolor":"rgba(151, 173, 210, 0.18)","tickfont":{"color":"#94a8c6"},"title":{"font":{"color":"#94a8c6"}},"zerolinecolor":"rgba(151, 173, 210, 0.12)"},"yaxis":{"gridcolor":"rgba(151, 173, 210, 0.12)","linecolor":"rgba(151, 173, 210, 0.18)","tickfont":{"color":"#94a8c6"},"title":{"font":{"color":"#94a8c6"}},"zerolinecolor":"rgba(151, 173, 210, 0.12)"}}},"xaxis":{"anchor":"y","domain":[0.0,0.16799999999999998],"title":{"text":""},"range":[96.3,99.7],"showticklabels":false,"showgrid":true},"yaxis":{"anchor":"x","domain":[0.0,1.0],"tickfont":{"size":10,"color":"#94a8c6"},"automargin":true},"xaxis2":{"anchor":"y2","domain":[0.208,0.376],"title":{"text":""},"range":[96.3,99.7],"showticklabels":false,"showgrid":true},"yaxis2":{"anchor":"x2","domain":[0.0,1.0],"matches":"y","showticklabels":false},"xaxis3":{"anchor":"y3","domain":[0.416,0.584],"title":{"text":""},"range":[96.3,99.7],"showticklabels":false,"showgrid":true},"yaxis3":{"anchor":"x3","domain":[0.0,1.0],"matches":"y","showticklabels":false},"xaxis4":{"anchor":"y4","domain":[0.624,0.792],"title":{"text":""},"range":[96.3,99.7],"showticklabels":false,"showgrid":true},"yaxis4":{"anchor":"x4","domain":[0.0,1.0],"matches":"y","showticklabels":false},"xaxis5":{"anchor":"y5","domain":[0.832,1.0],"title":{"text":""},"range":[96.3,99.7],"showticklabels":false,"showgrid":true},"yaxis5":{"anchor":"x5","domain":[0.0,1.0],"matches":"y","showticklabels":false},"annotations":[{"font":{"size":11,"color":"#ecf3ff"},"showarrow":false,"text":"Fit on\u003cbr\u003ePaper","x":0.08399999999999999,"xanchor":"center","xref":"paper","y":1.0,"yanchor":"bottom","yref":"paper"},{"font":{"size":11,"color":"#ecf3ff"},"showarrow":false,"text":"Capability","x":0.292,"xanchor":"center","xref":"paper","y":1.0,"yanchor":"bottom","yref":"paper"},{"font":{"size":11,"color":"#ecf3ff"},"showarrow":false,"text":"Recruiter\u003cbr\u003eScreen","x":0.5,"xanchor":"center","xref":"paper","y":1.0,"yanchor":"bottom","yref":"paper"},{"font":{"size":11,"color":"#ecf3ff"},"showarrow":false,"text":"Hiring\u003cbr\u003eManager Screen","x":0.708,"xanchor":"center","xref":"paper","y":1.0,"yanchor":"bottom","yref":"paper"},{"font":{"size":11,"color":"#ecf3ff"},"showarrow":false,"text":"Panel Loop\u003cbr\u003eSurvival","x":0.9159999999999999,"xanchor":"center","xref":"paper","y":1.0,"yanchor":"bottom","yref":"paper"}],"margin":{"l":220,"r":20,"t":68,"b":40},"height":480,"font":{"size":12}},                        {"displayModeBar": true, "responsive": true, "displaylogo": false}                    )                };            </script>        </div></div></section>
+    </main>
+  </div>
+</body>
+</html>
