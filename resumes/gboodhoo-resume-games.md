@@ -23,7 +23,7 @@ Development — Python, Lua, React, HTML/CSS
 EXPERIENCE
 Skinjester Studio — Founder & Principal Product Designer
 2016–2025 • San Francisco, CA
-- Defined and prototyped core interaction models for Project Kestrel with ZeniMax Online Studios, giving the team a concrete UX direction during early development and reducing ambiguity in feature design.
+- Prototyped Project Kestrel UX with ZeniMax Online Studios, giving the team concrete direction during early development and reducing ambiguity in feature design.
 - Designed live-service commerce, editorial, and platform UX for The Elder Scrolls Online across web and game client, improving clarity in purchasing and content discovery and supporting ongoing player engagement.
 - Shaped menu, lobby, and onboarding UX in Unreal for Redpill VR, turning early concepts into usable flows for evaluation and iteration in production.
 - Built UX frameworks and indoor-mapping prototypes for Iveda Pinpoint with WRLD3D, helping stakeholders evaluate product direction before committing engineering resources.
