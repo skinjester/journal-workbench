@@ -6,6 +6,8 @@ If a path moves, update it here and bump `JOB_EVALUATION_TEMPLATE.md`’s `templ
 
 ## Resume(s)
 
+Both files are read for **PART 2** (compare). For **PART 5 headline verdicts** and rubric scoring tied to the application package, the evaluator selects **one** `primary_resume_for_verdict` per `JOB_EVALUATION_TEMPLATE.md` (v1.5.0+). Headline tiers are grounded in **that resume + portfolio**—not private journals.
+
 - [`resumes/gboodhoo-resume-connect.md`](resumes/gboodhoo-resume-connect.md)
   - Primary “platform / systems / trust moments” positioning.
 - [`resumes/gboodhoo-resume-games.md`](resumes/gboodhoo-resume-games.md)

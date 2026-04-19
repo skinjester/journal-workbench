@@ -68,8 +68,9 @@ The job description for this run is:
 
 Requirements (summarized from JOB_EVAL_CHAT_COMMAND.md):
 - Write the FULL report under job-evaluation-reports/ using the template naming + collision rules.
-- Use the exact PART 1 through PART 6 headings from JOB_EVALUATION_TEMPLATE.md.
-- Use both resume variants from JOB_EVALUATION_REFERENCES.md; review every portfolio URL listed there; include header metadata and evidence accounting per template.
+- Use the exact PART 1 through PART 6 headings from JOB_EVALUATION_TEMPLATE.md (v1.5.0+).
+- PART 2: evaluate both resume variants; select primary_resume_for_verdict per template. PART 5 headline verdict lines must be grounded in primary resume + portfolio only; PART 3 journals inform resume/portfolio tuning, not tier inflation.
+- Review every portfolio URL listed in JOB_EVALUATION_REFERENCES.md; include header metadata (including primary_resume_for_verdict) and evidence accounting per template.
 - Include at least 2 short quotes total from summaries or monthly dumps in PART 3, each with repo-relative file paths (use the folders listed under JOB_EVALUATION_REFERENCES.md).
 
 After the report file is written, end your reply with a single line exactly in this form (fill in the real path):

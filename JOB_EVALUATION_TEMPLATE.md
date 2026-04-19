@@ -1,10 +1,11 @@
 # Job evaluation template (canonical)
 
-`template_version`: **v1.4.0**  
-`last_updated`: **2026-04-16**
+`template_version`: **v1.5.0**  
+`last_updated`: **2026-04-18**
 
 ## Changelog
 
+- **v1.5.0 (2026-04-18)**: After PART 2, select a **primary resume** for PART 5–6. **Headline verdict tiers (PART 5) and rubric scores tied to “the application package”** must be derived from **that primary resume + portfolio only**—what a candidate submits. Journals/summaries (PART 3) inform **resume/portfolio tuning** and honesty; they **must not** upgrade PART 5 headline tiers unless the same claim is supportable from resume+portfolio. Redefine PART 5 **Actual capability (inferred)** as capability **verifiable from primary resume + portfolio**, not private logs.
 - **v1.4.0 (2026-04-16)**: Add scanability defaults for report writing, require clearer internal substructure in dense sections, and fix stale `resumes/gboodhoo-resume-games.pdf` references to `resumes/gboodhoo-resume-games.md`.
 - **v1.3.1 (2026-04-15)**: Update canonical games resume reference from `resumes/gboodhoo-resume-games.pdf` to `resumes/gboodhoo-resume-games.md`.
 - **v1.3.0 (2026-04-15)**: PART 4 is **one synthesized portfolio narrative for the JD** (no per-URL subsections). Full URL review remains required for diligence via header metadata + `evidence_sources_used`.
@@ -57,7 +58,7 @@ You are a **hiring manager** or **staffing committee member**, not a cheerleader
 Rules:
 
 - Be blunt and realistic. No flattery. No “you got this” pep talk.
-- Separate **fit on paper** from **actual capability** (journals/portfolio can exceed the resume; the resume can oversell or undersell).
+- Separate **fit on paper** from **verifiable capability from submittable materials** (primary resume + portfolio). Journals may show more than the page shows—call that out in PART 3 / PART 6 tuning, not as hidden upgrades to PART 5 headline tiers.
 - If sources conflict, say so explicitly (what contradicts what, and why it matters).
 - If something is ambiguous, state the **assumption** you are making.
 - Do not rewrite the resume or portfolio unless explicitly asked.
@@ -78,6 +79,12 @@ Defaults:
 - Do **not** pad the report with filler transitions or repetitive restatement.
 
 ## Evidence quality ladder (how much weight to give)
+
+### For PART 5 headline verdicts and collated overview scoring
+
+Use **only** what employers can see from an application: **primary resume** (see PART 2) **+ portfolio URLs** in `JOB_EVALUATION_REFERENCES.md`. Do not let private journal detail **raise** those headline tiers unless the same proof appears on resume or portfolio.
+
+### For narrative depth, patterns, and resume/portfolio fine-tuning (PART 3, PART 6 actionable output)
 
 1. **Public portfolio artifacts** (strong for craft, interaction/system thinking, narrative clarity)
 2. **Resume** (strong for how a screener will bucket you in 15–30 seconds)
@@ -132,7 +139,8 @@ Chat output policy:
 - `job`: (company + title if known)
 - `jd_source`: (pasted text vs `@path/to/file`)
 - `output_report_path`: (repo-relative path of the markdown file you wrote)
-- `resume_versions_evaluated`: (list)
+- `resume_versions_evaluated`: (list both `resumes/gboodhoo-resume-connect.md` and `resumes/gboodhoo-resume-games.md` when evaluated in PART 2)
+- `primary_resume_for_verdict`: (single repo-relative path—the resume selected in PART 2 as authoritative for PART 5–6 headline scoring; must be one of the two resume paths above)
 - `portfolio_evaluated`: yes/no (default yes, using references doc URLs)
 - `portfolio_pages_required`: (copy the full deduped portfolio URL list from `JOB_EVALUATION_REFERENCES.md`)
 - `portfolio_pages_reviewed`: (checklist of the same URLs, each marked **Reviewed** or **Failed to fetch** with a one-line note)
@@ -177,13 +185,24 @@ Then add a **comparative** subsection:
 - which resume is closer to *this JD*
 - whether you should apply with one primary resume + portfolio, or actually need a third variant
 
+Then add **`#### Primary resume for PART 5–6 (authoritative)`** (required):
+
+- Set **`primary_resume_for_verdict`** to exactly one path: `resumes/gboodhoo-resume-connect.md` **or** `resumes/gboodhoo-resume-games.md`.
+- **Selection rules** (apply in order; state which step decided it):
+  1. Prefer the resume **closer to this JD** (from the comparative subsection above).
+  2. If still tied, prefer the higher **Interview likelihood from this resume alone** (High beats Medium beats Low).
+  3. If still tied, state the tie-break in one explicit sentence (no silent pick).
+- One short line: this choice is the **application-facing** resume for headline scoring in PART 5–6; the other resume remains in PART 2 for comparison only.
+
 Formatting preference:
 
 - For each resume block, prefer bold lead labels such as `**Interview likelihood from this resume alone:**`, `**Strongest signals:**`, `**Weakest / missing signals:**`, and so on, instead of burying everything in plain text.
 
 ### PART 3 — Monthly summaries + raw journals (supporting evidence)
 
-Goal: show what you *actually did* beyond resume marketing.
+**Purpose boundary:** PART 3 supports **alignment with the JD**, behavioral honesty, and **resume/portfolio fine-tuning** (what to add, cite, or surface publicly). It is **not** an alternate scoring track: do **not** use journal strength to justify higher PART 5 headline tiers unless the same claim is supportable from **primary resume + portfolio**.
+
+Goal: show what you *actually did* beyond resume marketing, and what is **under-visible** until you update the resume or site.
 
 Use sources from [`JOB_EVALUATION_REFERENCES.md`](JOB_EVALUATION_REFERENCES.md), prioritizing months/files that directly support the JD’s pain points.
 
@@ -244,15 +263,25 @@ Fetch failures / blocked pages:
 
 ### PART 5 — Combined verdict
 
-Integrate resume + journals + portfolio.
+**Scoring basis:** The five verdict lines below are the **headline tiers** used for overview/collate. They must reflect **only the submittable application package**: **`primary_resume_for_verdict` + portfolio** (public case studies and proof on the site). **PART 3 journals/summaries do not increase these tiers** unless the same capability is **verifiable** from resume or portfolio (e.g. named shipped work on the resume, demos on the site).
 
-Deliver:
+Before the five bullets, add a short intro paragraph stating: (a) which resume is primary, (b) that headline verdicts are **resume+portfolio-grounded**, (c) that extra depth from journals appears in PART 3 / PART 6 tuning, not as a parallel “hidden” score.
+
+**Definitions:**
+
+- **Fit on paper:** High/Medium/Low for **`primary_resume_for_verdict` only** (the non-primary resume stays in PART 2 only—do **not** emit a second `Fit on paper` line for it).
+- **Actual capability (inferred):** High/Medium/Low for capability **inferred from primary resume + portfolio evidence employers can verify**—not “stronger in private logs than on the page.” If journals suggest more than public materials show, say that under PART 3 / **Credibility gap** style notes in PART 6, not as inflating this line.
+- **Recruiter / HM / panel likelihoods:** As a hiring team would read you from **resume + portfolio**, not from journals they never receive.
+
+Deliver **exactly one** line per dimension using these labels (so downstream collation can parse):
 
 - Fit on paper: High/Medium/Low
 - Actual capability (inferred): High/Medium/Low
 - Likelihood of recruiter screen: High/Medium/Low
 - Likelihood of hiring manager screen: High/Medium/Low
 - Likelihood of panel loop survival: High/Medium/Low (if applicable; if unknown, say Unknown)
+
+Do **not** duplicate the five verdict labels for the non-primary resume. Optional: `#### Non-primary resume (reference only)` in prose without repeating `**Fit on paper:**` etc.
 
 Then:
 
@@ -266,11 +295,11 @@ Formatting preference:
 
 ### PART 6 — Rubric scoring + weighted synthesis
 
-Score each dimension **High/Medium/Low** using the rubric below, then compute a weighted overall read (qualitative is fine; be consistent).
+Score each dimension **High/Medium/Low** using the rubric below. **Base rubric cells on primary resume + portfolio** for anything about proof, coherence of the *application story*, and role readability. Use PART 3 journal evidence in **Actionable output** (what to add to resume/site, stories to prepare) and in narrative notes—not to inflate rubric scores beyond what resume+portfolio support.
 
 Finally:
 
-- **Actionable output** (tight): themes to emphasize, themes to de-emphasize, 5 bullets to rewrite, 3 missing signals to make explicit, 5 interview stories to prepare (pull from journals/portfolio), and a blunt recommendation:
+- **Actionable output** (tight): themes to emphasize, themes to de-emphasize, 5 bullets to rewrite, 3 missing signals to make explicit, 5 interview stories to prepare (pull from **portfolio + journals** for *preparation*; journals inform **tuning**, not headline PART 5 tiers), and a blunt recommendation:
   - apply as-is
   - apply after targeted resume edits
   - apply, but odds are low
@@ -295,7 +324,7 @@ Does the background solve the JD’s real pains (not the buzzwords)?
 
 ### 2) Relevant Proof (20%)
 
-Shipped/clarified/changed outcomes with credible receipts (portfolio, journals, named scope).
+Shipped/clarified/changed outcomes with credible receipts **on the primary resume and/or portfolio**. Journals may list additional work to **surface publicly** later; they do not substitute for missing resume/portfolio proof in this cell.
 
 ### 3) Recency (15%)
 
@@ -315,7 +344,7 @@ What would make a HM hesitate (gaps, adjacency, credibility holes)?
 
 ### 7) Narrative Coherence (5%)
 
-Do resume/portfolio/journals tell one consistent story, or a pile of projects?
+Do **primary resume + portfolio** tell one coherent application story for this JD? (You may note journal-vs-public gaps in PART 3 / Actionable output—this cell scores the **submittable** story.)
 
 ### 8) ATS / recruiter hygiene (pass/fail)
 
@@ -326,10 +355,10 @@ Pass/fail only: headings, scanability, keyword sanity (not stuffing), parse risk
 After scoring, explicitly answer:
 
 - **What problem is this job hiring for?**
-- **Where have you solved that problem before?**
+- **Where does resume + portfolio show you solving that problem** (employer-visible proof)?
 - **Does the primary resume make that obvious in the first 20 seconds?**
-- **What would make someone hesitate?**
-- **Does the whole story hang together?**
+- **What would make someone hesitate** based only on resume + portfolio?
+- **Does the submittable story hang together?** (If journals add nuance, put under tuning/actions, not as a second “true” score.)
 
 ## Re-run workflow (when this template changes)
 
@@ -358,13 +387,13 @@ Task:
 Write the full report to `job-evaluation-reports/` using the Output artifact rules in JOB_EVALUATION_TEMPLATE.md (naming + collisions), and ensure the report uses the exact PART 1–6 headings defined in JOB_EVALUATION_TEMPLATE.md.
 
 Constraints:
-- Print header metadata first (inside the written report file), including template_version copied from JOB_EVALUATION_TEMPLATE.md, plus `output_report_path`.
+- Print header metadata first (inside the written report file), including template_version copied from JOB_EVALUATION_TEMPLATE.md, plus `output_report_path`, `resume_versions_evaluated`, and **`primary_resume_for_verdict`**.
 - Populate `portfolio_pages_required`, `portfolio_pages_reviewed`, and ensure `evidence_sources_used` accounts for **all** canonical portfolio URLs in `JOB_EVALUATION_REFERENCES.md` (or marks fetch failures explicitly).
 - Be blunt and realistic. No flattery.
-- Separate fit on paper vs actual capability.
-- Use both resume variants in PART 2 (connect md + games md).
+- Use both resume variants in PART 2 (connect md + games md); then select **`primary_resume_for_verdict`** per PART 2 rules.
+- PART 5 headline verdict lines (five bullets) must be grounded in **primary resume + portfolio only**; PART 3 journals inform tuning, not tier inflation. See PART 5 definitions for **Actual capability (inferred)**.
 - In PART 4, follow **Required diligence** + **PART 4 written output (synthesis only)** in JOB_EVALUATION_TEMPLATE.md (integrated narrative; no per-URL subsections; no cherry-picking which pages you reviewed).
-- In PART 3, include at least 2 short quotes total from summaries/dumps (with file paths).
+- In PART 3, include at least 2 short quotes total from summaries/dumps (with file paths); keep PART 3 in the “tuning / honesty” lane per template.
 - If sources conflict, call it out.
 - End with the two short paragraphs: why hire / why not hire.
 - Prefer readable internal formatting: short paragraphs, bullets where natural, and subheads inside dense sections.
