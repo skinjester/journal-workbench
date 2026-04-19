@@ -18,6 +18,7 @@ import os
 import shutil
 import subprocess
 import sys
+import threading
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -82,6 +83,40 @@ def _append_jsonl(path: Path, row: dict[str, Any]) -> None:
         f.write(json.dumps(row, ensure_ascii=False) + "\n")
 
 
+def _run_agent_with_heartbeat(
+    cmd: list[str],
+    cwd: str,
+    timeout: int | None,
+    jd_label: str,
+    heartbeat_sec: float,
+) -> subprocess.CompletedProcess[str]:
+    """
+    Run the agent with inherited stdio. The Cursor agent often buffers output until
+    completion; a background heartbeat prints elapsed time so the terminal does not look hung.
+    """
+    if heartbeat_sec <= 0:
+        return subprocess.run(cmd, cwd=cwd, text=True, timeout=timeout)
+
+    stop = threading.Event()
+    t0 = time.time()
+
+    def _heartbeat_loop() -> None:
+        while not stop.wait(timeout=heartbeat_sec):
+            elapsed = time.time() - t0
+            print(
+                f"  ... still running ({jd_label}): {elapsed:.0f}s elapsed",
+                flush=True,
+            )
+
+    hb = threading.Thread(target=_heartbeat_loop, daemon=True)
+    hb.start()
+    try:
+        return subprocess.run(cmd, cwd=cwd, text=True, timeout=timeout)
+    finally:
+        stop.set()
+        hb.join(timeout=2.0)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Batch-run job evaluations via Cursor Agent CLI.")
     parser.add_argument(
@@ -136,6 +171,16 @@ def main() -> int:
         default=None,
         help="Pass an explicit model through to `agent --model` (for example: gpt-5.4-medium).",
     )
+    parser.add_argument(
+        "--heartbeat-sec",
+        type=float,
+        default=30.0,
+        metavar="SEC",
+        help=(
+            "While each agent run is in progress, print a status line every SEC seconds "
+            "(elapsed time). Set to 0 to disable. Default: 30."
+        ),
+    )
     args = parser.parse_args()
 
     repo = (args.repo or _default_repo_root()).resolve()
@@ -175,8 +220,9 @@ def main() -> int:
     reports_dir = repo / "job-evaluation-reports"
     run_id = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H-%M-%SZ")
     failures = 0
+    total_jobs = len(jd_files)
 
-    for jd_path in jd_files:
+    for job_index, jd_path in enumerate(jd_files, start=1):
         try:
             jd_rel = jd_path.relative_to(repo).as_posix()
         except ValueError:
@@ -220,13 +266,25 @@ def main() -> int:
             print("[dry-run] would run:", prefix, f'"... ({len(prompt)} chars)"')
             continue
 
-        print(f"run: {jd_rel}")
+        model_note = args.model if args.model is not None else "(CLI default)"
+        hb_note = f"every {args.heartbeat_sec:g}s" if args.heartbeat_sec > 0 else "off"
+        print("", flush=True)
+        print(
+            f"=== Job {job_index}/{total_jobs}: {jd_rel} ===",
+            flush=True,
+        )
+        print(f"    model: {model_note}", flush=True)
+        print(
+            f"    progress: heartbeat {hb_note} (agent may print nothing until done)",
+            flush=True,
+        )
         try:
-            proc = subprocess.run(
+            proc = _run_agent_with_heartbeat(
                 cmd,
                 cwd=str(repo),
-                text=True,
                 timeout=args.timeout,
+                jd_label=jd_base,
+                heartbeat_sec=args.heartbeat_sec,
             )
         except subprocess.TimeoutExpired:
             failures += 1
@@ -241,6 +299,12 @@ def main() -> int:
             _append_jsonl(log_path, row)
             print(f"error: timeout after {args.timeout}s: {jd_rel}", file=sys.stderr)
             continue
+
+        elapsed_done = time.time() - ts_start
+        print(
+            f"=== finished: {jd_base} ({elapsed_done:.1f}s, exit {proc.returncode}) ===",
+            flush=True,
+        )
 
         ok = proc.returncode == 0
         output_verified = False

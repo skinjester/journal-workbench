@@ -58,7 +58,7 @@ make job-eval
 | `make job-eval-fresh` | Re-run the agent for **every** JD (`--no-skip-existing`), then collate. |
 | `make job-eval-overview` | **Stage 2 only** — collate from existing reports into a new timestamped overview. |
 
-Pipeline flags (see `python3 journal_summarizer/scripts/run_job_eval_pipeline.py --help`): `--dry-run` (Stage 1 preview only; **no** new overview file), `--only GLOB`, `--stage1-only`, `--stage2-only`, `--no-skip-existing`, `--model MODEL`, `--out`, etc.
+Pipeline flags (see `python3 journal_summarizer/scripts/run_job_eval_pipeline.py --help`): `--dry-run` (Stage 1 preview only; **no** new overview file), `--only GLOB`, `--stage1-only`, `--stage2-only`, `--no-skip-existing`, `--model MODEL`, `--heartbeat-sec SEC`, `--out`, etc.
 
 If Stage 1 has partial failures, Stage 2 still runs so your overview stays in sync with whatever reports exist.
 
@@ -93,6 +93,7 @@ Useful flags:
 | `--timeout SEC` | Per-JD timeout (default 2400). |
 | `--agent-bin PATH` | Use a specific `agent` binary. |
 | `--model MODEL` | Force a specific Cursor Agent model for Stage 1, e.g. `--model gpt-5.4-medium`. |
+| `--heartbeat-sec SEC` | Print a **still running** line every `SEC` seconds while each agent invocation runs (default **30**; use **0** to disable). The agent often buffers output until completion; this makes long runs visible. |
 
 Exit codes: `0` all JD steps succeeded and output was verified; `1` one or more agent failures or “exit 0 but no report written” cases; `2` bad `--repo` / `--jd-dir` or JD path outside repo; `3` no job-description files matched; `127` `agent` not found on `PATH`.
 

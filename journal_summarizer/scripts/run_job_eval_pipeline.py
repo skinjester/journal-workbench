@@ -89,6 +89,16 @@ def main() -> int:
         help="Stage 1: pass an explicit model through to `agent --model`.",
     )
     parser.add_argument(
+        "--heartbeat-sec",
+        type=float,
+        default=None,
+        metavar="SEC",
+        help=(
+            "Stage 1: forwarded to batch_job_evaluations.py "
+            "(status line every SEC seconds while agent runs; omit for batch default 30; 0 disables)."
+        ),
+    )
+    parser.add_argument(
         "--out",
         type=Path,
         default=None,
@@ -143,6 +153,8 @@ def main() -> int:
             cmd.extend(["--agent-bin", args.agent_bin])
         if args.model is not None:
             cmd.extend(["--model", args.model])
+        if args.heartbeat_sec is not None:
+            cmd.extend(["--heartbeat-sec", str(args.heartbeat_sec)])
 
         print("=== Stage 1: batch job evaluations ===", flush=True)
         s1 = subprocess.call(cmd, cwd=str(repo))
