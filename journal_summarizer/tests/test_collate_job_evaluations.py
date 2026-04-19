@@ -83,16 +83,23 @@ def test_verdict_line_long_bullet_is_rating_only() -> None:
     assert cj.verdict_line_to_table_cell(line, "Fit on Paper") == "Medium–High"
 
 
+def test_verdict_line_narrative_coherence_column() -> None:
+    line = "- **Narrative coherence (for this JD):** **Low** (scattershot proof)."
+    assert cj.verdict_line_to_table_cell(line, "Narrative Coherence") == "Low"
+    line2 = "- **Narrative coherence:** **High**"
+    assert cj.verdict_line_to_table_cell(line2, "Narrative Coherence") == "High"
+
+
 def test_extract_part5_and_verdicts() -> None:
     text = """# x
 
 ### PART 5 — Combined verdict
 
-- **Fit on paper**: Good.
-- **Actual capability**: OK.
-- **Likelihood of recruiter screen**: Maybe.
-- **Likelihood of hiring manager screen**: Fine.
-- **Likelihood of panel loop survival**: Low.
+- **Fit on paper**: High.
+- **Actual capability (inferred)**: Medium.
+- **Narrative coherence (for this JD)**: Medium.
+- **Likelihood of recruiter screen**: Low.
+- **Likelihood of hiring manager screen**: High.
 
 #### 3 strongest reasons
 
@@ -104,6 +111,7 @@ def test_extract_part5_and_verdicts() -> None:
     verdicts = cj.extract_verdict_lines(part5)
     assert len(verdicts) == 5
     assert "Fit on Paper" in verdicts
+    assert "Narrative Coherence" in verdicts
 
 
 def test_extract_verdict_lines_bold_paragraphs_without_list_markers() -> None:
@@ -115,11 +123,11 @@ def test_extract_verdict_lines_bold_paragraphs_without_list_markers() -> None:
 
 **Actual capability (inferred):** **Medium–High** (notes)
 
+**Narrative coherence (for this JD):** **Medium**
+
 **Likelihood of recruiter screen:** **Low**
 
 **Likelihood of hiring manager screen:** **Fine**
-
-**Likelihood of panel loop survival:** **Medium**
 
 #### Three strongest reasons
 """
@@ -180,6 +188,15 @@ def test_tier_cell_to_numeric() -> None:
     assert cj.tier_cell_to_numeric("Good") is None
 
 
+def test_tier_cell_to_chart_numeric_spread() -> None:
+    assert cj.tier_cell_to_chart_numeric("Very High") == 92.0
+    assert cj.tier_cell_to_chart_numeric("High") == 80.0
+    assert cj.tier_cell_to_chart_numeric("Medium–High") == 62.0
+    assert cj.tier_cell_to_chart_numeric("Medium") == 40.0
+    assert cj.tier_cell_to_chart_numeric("Low") == 15.0
+    assert cj.tier_cell_to_chart_numeric("Unknown") == 28.0
+
+
 def test_build_collated_rows_one_report(tmp_path: Path) -> None:
     jd = "Role X"
     (tmp_path / f"{jd}.eval.md").write_text(
@@ -190,9 +207,9 @@ def test_build_collated_rows_one_report(tmp_path: Path) -> None:
 
 - **Fit on paper:** **High**
 - **Actual capability (inferred):** **Medium**
+- **Narrative coherence (for this JD):** **Medium**
 - **Likelihood of recruiter screen:** **Low**
 - **Likelihood of hiring manager screen:** **Medium**
-- **Likelihood of panel loop survival:** **High**
 
 ### PART 6 — x
 """,
@@ -218,9 +235,9 @@ def test_write_overview_chart_html_smoke(tmp_path: Path) -> None:
         """### PART 5 — Combined verdict
 - **Fit on paper:** **High**
 - **Actual capability (inferred):** **Medium**
+- **Narrative coherence (for this JD):** **Medium**
 - **Likelihood of recruiter screen:** **Medium**
 - **Likelihood of hiring manager screen:** **Medium**
-- **Likelihood of panel loop survival:** **Medium**
 ### PART 6
 """,
         encoding="utf-8",
@@ -233,3 +250,4 @@ def test_write_overview_chart_html_smoke(tmp_path: Path) -> None:
     text = out.read_text(encoding="utf-8")
     assert "plotly" in text.lower()
     assert "Dot matrix" in text
+    assert "batch rank" in text.lower()

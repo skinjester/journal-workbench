@@ -63,9 +63,9 @@ _ALL_RATING_TOKENS_RE = re.compile(
 VERDICT_TABLE_COLUMNS: Tuple[str, ...] = (
     "Fit on Paper",
     "Capability",
+    "Narrative Coherence",
     "Recruiter Screen",
     "Hiring Manager Screen",
-    "Panel Loop Survival",
 )
 
 VERDICT_RULES: Tuple[VerdictRule, ...] = (
@@ -81,16 +81,19 @@ VERDICT_RULES: Tuple[VerdictRule, ...] = (
         ),
     ),
     VerdictRule(
+        "Narrative Coherence",
+        re.compile(
+            r"^\*{0,2}Narrative coherence(?:\s*\(for this JD\))?\*{0,2}\s*:\s*",
+            re.IGNORECASE,
+        ),
+    ),
+    VerdictRule(
         "Recruiter Screen",
         re.compile(r"^\*{0,2}Likelihood of recruiter screen\*{0,2}\s*:\s*", re.IGNORECASE),
     ),
     VerdictRule(
         "Hiring Manager Screen",
         re.compile(r"^\*{0,2}Likelihood of hiring manager screen\*{0,2}\s*:\s*", re.IGNORECASE),
-    ),
-    VerdictRule(
-        "Panel Loop Survival",
-        re.compile(r"^\*{0,2}Likelihood of panel loop survival\*{0,2}\s*:\s*", re.IGNORECASE),
     ),
 )
 
@@ -260,9 +263,37 @@ def tier_cell_to_numeric(cell: str) -> Optional[float]:
     return float(r)
 
 
+def tier_cell_to_chart_numeric(cell: str) -> Optional[float]:
+    """
+    Map an ordinal verdict cell to a **wide** 0–100 score for HTML charts only.
+
+    Collated markdown tables still show the ordinal label; this spread avoids squeezing
+    all tiers into a 92–100 band. Unknown / N/A / TBD sit below Low.
+    """
+    t = (cell or "").strip()
+    if not t:
+        return None
+    canon = _normalize_rating_token_for_table(t)
+    n = canon.lower().replace("–", "-").replace("—", "-")
+    chart: Dict[str, float] = {
+        "very high": 92.0,
+        "high": 80.0,
+        "medium-high": 62.0,
+        "medium": 40.0,
+        "low": 15.0,
+        "unknown": 28.0,
+        "n/a": 22.0,
+        "tbd": 18.0,
+    }
+    if n not in chart:
+        return None
+    return chart[n]
+
+
 def extract_verdict_lines(part5: str) -> Dict[str, str]:
     """
-    Return mapping column key -> raw markdown line (trimmed), for the five verdict bullets.
+    Return mapping column key -> raw markdown line (trimmed), for PART 5 verdict bullets
+    (Fit on Paper through Hiring Manager Screen, including Narrative Coherence).
 
     Supports:
     - list bullets: ``- **Fit on paper:** **High**``

@@ -17,7 +17,7 @@ from plotly.subplots import make_subplots
 from collate_job_evaluations import (
     VERDICT_TABLE_COLUMNS,
     CollatedRow,
-    tier_cell_to_numeric,
+    tier_cell_to_chart_numeric,
     verdict_line_to_table_cell,
 )
 
@@ -137,7 +137,7 @@ def _score_matrix(rows: Sequence[CollatedRow]) -> Tuple[List[str], List[str], Li
         for d in dims:
             cell = verdict_line_to_table_cell(r.verdicts.get(d, ""), d)
             row_txt.append(cell if cell.strip() else "—")
-            row_vals.append(tier_cell_to_numeric(cell))
+            row_vals.append(tier_cell_to_chart_numeric(cell))
         z.append(row_vals)
         z_text.append(row_txt)
     return jobs, dims, z, z_text
@@ -148,7 +148,7 @@ def _mean_non_null(values: Sequence[Optional[float]]) -> Optional[float]:
     return (sum(xs) / len(xs)) if xs else None
 
 
-# Anchors for mapping batch numeric mean → readable tier label (same encoding as charts; ~93–100, not “percent correct”).
+# Anchors for mapping batch numeric mean → readable tier label (chart-wide 0–100 encoding).
 _MEAN_TIER_ANCHOR_LABELS: Tuple[str, ...] = (
     "Very High",
     "High",
@@ -159,13 +159,13 @@ _MEAN_TIER_ANCHOR_LABELS: Tuple[str, ...] = (
 
 
 def _mean_numeric_to_nearest_tier_label(avg: float) -> str:
-    """Nearest substantive verdict tier to the internal numeric mean (avoids implying a 0–100% grade)."""
+    """Nearest substantive verdict tier to the chart numeric mean (wide 0–100 ordinal map)."""
     if avg <= 0:
         return "—"
     best_label = "—"
     best_dist = float("inf")
     for label in _MEAN_TIER_ANCHOR_LABELS:
-        n = tier_cell_to_numeric(label)
+        n = tier_cell_to_chart_numeric(label)
         if n is None:
             continue
         dist = abs(avg - n)
@@ -192,18 +192,18 @@ def _sort_jobs_for_dot_plots(
 
 
 def _tier_score_x_range(z: Sequence[Sequence[Optional[float]]]) -> Tuple[float, float]:
-    """Pad min/max tier numeric scores so dots are not crushed into one vertical strip."""
+    """Pad min/max chart scores (0–100) so dots are not crushed into one vertical strip."""
     flat = [v for row in z for v in row if v is not None]
     if not flat:
-        return 89.0, 101.0
+        return 0.0, 100.0
     lo, hi = min(flat), max(flat)
     span = hi - lo
-    pad = max(0.55, span * 0.35) if span > 1e-9 else 1.0
-    return max(89.0, lo - pad), min(101.0, hi + pad)
+    pad = max(2.0, span * 0.35) if span > 1e-9 else 4.0
+    return max(0.0, lo - pad), min(100.0, hi + pad)
 
 
-# Imputed tier score for missing cells in radar (must stay aligned with `_fig_radar`).
-_RADAR_MISSING_SCORE = 90.0
+# Imputed chart score for missing cells in radar (aligned with unknown-tier chart encoding).
+_RADAR_MISSING_SCORE = 28.0
 
 
 def _radar_radial_range(z: Sequence[Sequence[Optional[float]]]) -> Tuple[float, float]:
@@ -216,14 +216,14 @@ def _radar_radial_range(z: Sequence[Sequence[Optional[float]]]) -> Tuple[float, 
         for v in row:
             vals.append(float(v) if v is not None else _RADAR_MISSING_SCORE)
     if not vals:
-        return 88.0, 102.0
+        return -2.0, 102.0
     lo, hi = min(vals), max(vals)
     span = hi - lo
     if span < 1e-9:
-        pad = 1.05
-        return max(85.5, lo - pad), min(101.5, hi + pad)
-    pad = max(0.08, span * 0.05)
-    return max(85.5, lo - pad), min(101.5, hi + pad)
+        pad = 4.0
+        return max(0.0, lo - pad), min(100.0, hi + pad)
+    pad = max(1.0, span * 0.08)
+    return max(0.0, lo - pad), min(100.0, hi + pad)
 
 
 def _best_overall_job(
@@ -256,19 +256,20 @@ def _lowest_overall_job(
     return worst_job
 
 
+DOT_MARKER_MIN_PX = 10.0
+DOT_MARKER_MAX_PX = 34.0
+# Chart encoding for missing / unparsed cells (matches unknown-tier spread in tier_cell_to_chart_numeric).
+_HEATMAP_MISSING_SCORE = 28.0
+
+
 def _fig_heatmap(jobs: List[str], dims: List[str], z: List[List[Optional[float]]], z_text: List[List[str]]) -> go.Figure:
     """
-    Dot matrix: each cell is a circle whose size AND color both encode the tier score.
-    Larger + lighter = stronger signal; smaller + darker = weaker.
-    """
-    # Score bounds for normalization — use actual data range (not arbitrary 90-100).
-    flat = [v for row in z for v in row if v is not None]
-    v_lo = min(flat) if flat else 90.0
-    v_hi = max(flat) if flat else 100.0
-    v_span = v_hi - v_lo if v_hi > v_lo else 1.0
+    Dot matrix: each cell is a circle whose size AND color both encode the chart tier score (0–100).
 
-    DOT_MIN, DOT_MAX = 10.0, 34.0   # marker.size range (pixels diameter)
-    COLOR_LO, COLOR_HI = 90.0, 100.0  # colorscale anchor range
+    Size uses a **fixed** 0–100 scale (not cohort min/max) so identical ordinals get identical dots;
+    color uses the same score on a 0–100 colorscale.
+    """
+    COLOR_LO, COLOR_HI = 0.0, 100.0
 
     wrapped_dims = [_wrap_dim_label(d) for d in dims]
 
@@ -281,9 +282,9 @@ def _fig_heatmap(jobs: List[str], dims: List[str], z: List[List[Optional[float]]
     for i, job in enumerate(jobs):
         for j, dim in enumerate(dims):
             v = z[i][j]
-            score = v if v is not None else v_lo
-            norm = (score - v_lo) / v_span
-            sz = DOT_MIN + norm * (DOT_MAX - DOT_MIN)
+            score = float(v) if v is not None else _HEATMAP_MISSING_SCORE
+            norm = max(0.0, min(1.0, score / 100.0))
+            sz = DOT_MARKER_MIN_PX + norm * (DOT_MARKER_MAX_PX - DOT_MARKER_MIN_PX)
             tier_label = (z_text[i][j] if z_text and i < len(z_text) and j < len(z_text[i]) else "—") or "—"
             xs.append(dim)
             ys.append(job)
@@ -311,12 +312,143 @@ def _fig_heatmap(jobs: List[str], dims: List[str], z: List[List[Optional[float]]
                     len=0.6,
                     thickness=10,
                     title=dict(
-                        text="Tier score",
+                        text="Chart score (ordinal → 0–100)",
                         side="top",
                         font=dict(color=MUTED, size=10),
                     ),
                     tickfont=dict(color=MUTED, size=9),
-                    tickvals=[90, 92, 94, 96, 98, 100],
+                    tickvals=[0, 20, 40, 60, 80, 100],
+                ),
+                line=dict(width=0),
+            ),
+            hovertemplate=hovers,
+            showlegend=False,
+        )
+    )
+
+    fig.update_layout(
+        height=max(380, 36 * len(jobs) + 160),
+        xaxis=dict(
+            side="top",
+            tickangle=0,
+            tickmode="array",
+            tickvals=dims,
+            ticktext=wrapped_dims,
+            tickfont=dict(size=11),
+            showgrid=True,
+            gridcolor="rgba(151,173,210,0.10)",
+            zeroline=False,
+        ),
+        yaxis=dict(
+            tickfont=dict(size=10),
+            autorange="reversed",
+            showgrid=True,
+            gridcolor="rgba(151,173,210,0.10)",
+            zeroline=False,
+        ),
+    )
+    return fig
+
+
+def _column_percentile_ranks(z: List[List[Optional[float]]]) -> List[List[Optional[float]]]:
+    """
+    Per column, average-rank percentile in [0, 1] for non-missing scores (ties get mean rank).
+    Missing cells stay None.
+    """
+    if not z or not z[0]:
+        return []
+    n_rows = len(z)
+    n_cols = len(z[0])
+    out: List[List[Optional[float]]] = [[None] * n_cols for _ in range(n_rows)]
+    for j in range(n_cols):
+        pairs: List[Tuple[float, int]] = []
+        for i in range(n_rows):
+            v = z[i][j]
+            if v is not None:
+                pairs.append((float(v), i))
+        m = len(pairs)
+        if m == 0:
+            continue
+        if m == 1:
+            out[pairs[0][1]][j] = 0.5
+            continue
+        pairs.sort(key=lambda x: x[0])
+        a = 0
+        while a < m:
+            b = a + 1
+            while b < m and pairs[b][0] == pairs[a][0]:
+                b += 1
+            avg_r = (a + b - 1) / 2.0
+            denom = max(1.0, float(m - 1))
+            for t in range(a, b):
+                row_i = pairs[t][1]
+                out[row_i][j] = avg_r / denom
+            a = b
+    return out
+
+
+def _fig_heatmap_batch_rank(
+    jobs: List[str],
+    dims: List[str],
+    z: List[List[Optional[float]]],
+    z_text: List[List[str]],
+    pct: List[List[Optional[float]]],
+) -> go.Figure:
+    """
+    Dot matrix: marker **size** encodes within-batch rank per column; **color** still encodes chart score.
+    """
+    COLOR_LO, COLOR_HI = 0.0, 100.0
+    wrapped_dims = [_wrap_dim_label(d) for d in dims]
+
+    xs: List[str] = []
+    ys: List[str] = []
+    sizes: List[float] = []
+    colors: List[float] = []
+    hovers: List[str] = []
+
+    for i, job in enumerate(jobs):
+        for j, dim in enumerate(dims):
+            v = z[i][j]
+            score = float(v) if v is not None else _HEATMAP_MISSING_SCORE
+            pr = pct[i][j]
+            norm = float(pr) if pr is not None else 0.0
+            sz = DOT_MARKER_MIN_PX + norm * (DOT_MARKER_MAX_PX - DOT_MARKER_MIN_PX)
+            tier_label = (z_text[i][j] if z_text and i < len(z_text) and j < len(z_text[i]) else "—") or "—"
+            rank_note = f"{100.0 * norm:.0f}th pct" if pr is not None else "—"
+            xs.append(dim)
+            ys.append(job)
+            sizes.append(sz)
+            colors.append(score)
+            hovers.append(
+                f"{job}<br>{dim}<br>{tier_label}<br>Batch rank (column): {rank_note}<extra></extra>"
+            )
+
+    fig = go.Figure(
+        data=go.Scatter(
+            x=xs,
+            y=ys,
+            mode="markers",
+            marker=dict(
+                size=sizes,
+                color=colors,
+                colorscale=HEATMAP_MONO_COLORSCALE,
+                cmin=COLOR_LO,
+                cmax=COLOR_HI,
+                colorbar=dict(
+                    orientation="h",
+                    x=0.5,
+                    xanchor="center",
+                    y=-0.08,
+                    yanchor="top",
+                    len=0.6,
+                    thickness=10,
+                    title=dict(
+                        text="Chart score (color); size = batch rank",
+                        side="top",
+                        font=dict(color=MUTED, size=10),
+                    ),
+                    tickfont=dict(color=MUTED, size=9),
+                    tickvals=[0, 20, 40, 60, 80, 100],
                 ),
                 line=dict(width=0),
             ),
@@ -352,7 +484,12 @@ def _fig_heatmap(jobs: List[str], dims: List[str], z: List[List[Optional[float]]
 def _fig_radar(jobs: List[str], dims: List[str], z: List[List[Optional[float]]]) -> go.Figure:
     r0, r1 = _radar_radial_range(z)
     span = r1 - r0
-    dtick = 0.5 if span <= 5.0 else 1.0
+    if span <= 8.0:
+        dtick = 2.0
+    elif span <= 20.0:
+        dtick = 5.0
+    else:
+        dtick = 10.0
     fig = go.Figure()
     theta = list(dims) + [dims[0]]
     for i, job in enumerate(jobs):
@@ -397,7 +534,6 @@ def _fig_dot_plots(
     n_dims = len(dims)
     x0, x1 = _tier_score_x_range(z)
     wrapped_titles = [_wrap_dim_label(d) for d in dims]
-    wrapped_titles = [_wrap_dim_label(d) for d in dims]
     fig = make_subplots(
         rows=1,
         cols=n_dims,
@@ -407,7 +543,9 @@ def _fig_dot_plots(
     )
     for j in range(n_dims):
         xs = [z[i][j] if z[i][j] is not None else float("nan") for i in range(len(jobs))]
-        colors = [float(v) if v is not None else float(x0) for v in [z[i][j] for i in range(len(jobs))]]
+        colors = [
+            float(v) if v is not None else _HEATMAP_MISSING_SCORE
+            for v in [z[i][j] for i in range(len(jobs))]]
         cd: Optional[List[str]] = None
         ht = "%{y}<br>%{x:.0f}<extra></extra>"
         if z_text:
@@ -422,7 +560,7 @@ def _fig_dot_plots(
                     size=11,
                     color=colors,
                     colorscale=HEATMAP_MONO_COLORSCALE,
-                    cmin=90.0,
+                    cmin=0.0,
                     cmax=100.0,
                     showscale=False,
                     line=dict(width=1, color="rgba(255,255,255,0.10)"),
@@ -460,7 +598,7 @@ def write_overview_chart_html(
     repo_root: Path,
     overview_md_rel: str,
 ) -> None:
-    """Write a single HTML file with three Plotly views."""
+    """Write a single HTML file with Plotly views (dot matrix, optional batch rank, radar, dot plots)."""
     if not rows:
         raise ValueError("rows is empty; nothing to chart")
 
@@ -470,30 +608,37 @@ def write_overview_chart_html(
     worst_job = _lowest_overall_job(jobs, z)
     avg_all = _mean_non_null([_mean_non_null(row) for row in z]) or 0.0
     mean_tier_label = _mean_numeric_to_nearest_tier_label(avg_all)
+    pct = _column_percentile_ranks(z)
 
-    sections: List[str] = []
-    nav_links: List[str] = []
+    n_dim = len(dims)
     figures: List[Tuple[str, str, go.Figure]] = [
         (
             "Dot matrix",
-            "Each cell is a circle: size and color both encode tier score. Larger + lighter = stronger signal. Hover for the ordinal verdict label.",
+            "Each cell is a circle: size and color encode the ordinal tier mapped to a 0–100 chart score (wide spread). Hover for the verdict label.",
             _fig_heatmap(jobs, dims, z, z_text),
         ),
         (
+            "Dot matrix (batch rank)",
+            "Same chart scores for color; marker size encodes within-batch rank in each column (0 = weakest in this overview, 1 = strongest). Not an absolute grade—useful when many cells share the same ordinal.",
+            _fig_heatmap_batch_rank(jobs, dims, z, z_text, pct),
+        ),
+        (
             "Radar",
-            "Shape of each job across dimensions. Radial axis is zoomed to this run’s min/max tier scores so differences read larger; toggle traces in the legend when overlap is still dense. Missing dimensions use score 90.",
+            "Shape of each job across dimensions. Radial axis is zoomed to this run’s min/max chart scores; toggle traces in the legend when overlap is still dense. Missing dimensions use the same placeholder as unknown-tier (28).",
             _fig_radar(jobs, dims, z),
         ),
         (
             "Dot plots",
-            "Five small multiples for quick within-dimension comparison. Rows sort by mean tier score.",
+            f"{n_dim} small multiples for quick within-dimension comparison. Rows sort by mean chart score.",
             _fig_dot_plots(jobs, dims, z, z_text),
         ),
     ]
 
+    sections: List[str] = []
+    nav_links: List[str] = []
     for i, (title, blurb, fig) in enumerate(figures):
         fig.update_layout(template=studio_template, font=dict(size=12))
-        if title == "Dot matrix":
+        if title == "Dot matrix" or title.startswith("Dot matrix ("):
             lm = _heatmap_left_margin_px(jobs)
             fig.update_layout(
                 margin=dict(l=lm, r=28, t=64, b=64),

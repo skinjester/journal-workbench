@@ -1,10 +1,12 @@
 # Job evaluation template (canonical)
 
-`template_version`: **v1.5.0**  
-`last_updated`: **2026-04-18**
+`template_version`: **v1.7.0**  
+`last_updated`: **2026-04-19**
 
 ## Changelog
 
+- **v1.7.0 (2026-04-19)**: Add **Narrative coherence (for this JD)** as the fifth PART 5 headline verdict—whether **primary resume + portfolio** tell one coherent application story for this posting (distinct from fit-on-paper match and from proof depth). Collated overview/charts use **five** verdict columns. HTML dashboards use a **wider chart encoding** of ordinals plus an optional **within-batch rank** view for comparing roles in one overview.
+- **v1.6.0 (2026-04-19)**: Remove **Likelihood of panel loop survival** from PART 5 headline verdicts. It is too process-dependent and speculative to score from resume/portfolio/JD; interview-loop nuance belongs in PART 6 **Actionable output** if useful. Collated overview now uses **four** verdict columns.
 - **v1.5.0 (2026-04-18)**: After PART 2, select a **primary resume** for PART 5–6. **Headline verdict tiers (PART 5) and rubric scores tied to “the application package”** must be derived from **that primary resume + portfolio only**—what a candidate submits. Journals/summaries (PART 3) inform **resume/portfolio tuning** and honesty; they **must not** upgrade PART 5 headline tiers unless the same claim is supportable from resume+portfolio. Redefine PART 5 **Actual capability (inferred)** as capability **verifiable from primary resume + portfolio**, not private logs.
 - **v1.4.0 (2026-04-16)**: Add scanability defaults for report writing, require clearer internal substructure in dense sections, and fix stale `resumes/gboodhoo-resume-games.pdf` references to `resumes/gboodhoo-resume-games.md`.
 - **v1.3.1 (2026-04-15)**: Update canonical games resume reference from `resumes/gboodhoo-resume-games.pdf` to `resumes/gboodhoo-resume-games.md`.
@@ -263,7 +265,7 @@ Fetch failures / blocked pages:
 
 ### PART 5 — Combined verdict
 
-**Scoring basis:** The five verdict lines below are the **headline tiers** used for overview/collate. They must reflect **only the submittable application package**: **`primary_resume_for_verdict` + portfolio** (public case studies and proof on the site). **PART 3 journals/summaries do not increase these tiers** unless the same capability is **verifiable** from resume or portfolio (e.g. named shipped work on the resume, demos on the site).
+**Scoring basis:** The **five** verdict lines below are the **headline tiers** used for overview/collate. They must reflect **only the submittable application package**: **`primary_resume_for_verdict` + portfolio** (public case studies and proof on the site). **PART 3 journals/summaries do not increase these tiers** unless the same capability is **verifiable** from resume or portfolio (e.g. named shipped work on the resume, demos on the site).
 
 Before the five bullets, add a short intro paragraph stating: (a) which resume is primary, (b) that headline verdicts are **resume+portfolio-grounded**, (c) that extra depth from journals appears in PART 3 / PART 6 tuning, not as a parallel “hidden” score.
 
@@ -271,15 +273,16 @@ Before the five bullets, add a short intro paragraph stating: (a) which resume i
 
 - **Fit on paper:** High/Medium/Low for **`primary_resume_for_verdict` only** (the non-primary resume stays in PART 2 only—do **not** emit a second `Fit on paper` line for it).
 - **Actual capability (inferred):** High/Medium/Low for capability **inferred from primary resume + portfolio evidence employers can verify**—not “stronger in private logs than on the page.” If journals suggest more than public materials show, say that under PART 3 / **Credibility gap** style notes in PART 6, not as inflating this line.
-- **Recruiter / HM / panel likelihoods:** As a hiring team would read you from **resume + portfolio**, not from journals they never receive.
+- **Narrative coherence (for this JD):** High/Medium/Low for whether **primary resume + portfolio** present **one coherent application story for this specific JD**—not scattershot proof or a story that fits a different role better. (Related to rubric **Narrative Coherence**; this headline is the verdict-tier summary for the package-as-story.)
+- **Recruiter / HM screen likelihoods:** As a hiring team would read you from **resume + portfolio**, not from journals they never receive. (Do **not** add a separate “panel loop survival” headline—process varies too much to score from materials alone; if useful, discuss onsite/panel/design-test risk briefly under PART 6 **Actionable output** or **mispositioning**.)
 
 Deliver **exactly one** line per dimension using these labels (so downstream collation can parse):
 
 - Fit on paper: High/Medium/Low
 - Actual capability (inferred): High/Medium/Low
+- Narrative coherence (for this JD): High/Medium/Low
 - Likelihood of recruiter screen: High/Medium/Low
 - Likelihood of hiring manager screen: High/Medium/Low
-- Likelihood of panel loop survival: High/Medium/Low (if applicable; if unknown, say Unknown)
 
 Do **not** duplicate the five verdict labels for the non-primary resume. Optional: `#### Non-primary resume (reference only)` in prose without repeating `**Fit on paper:**` etc.
 
@@ -391,7 +394,7 @@ Constraints:
 - Populate `portfolio_pages_required`, `portfolio_pages_reviewed`, and ensure `evidence_sources_used` accounts for **all** canonical portfolio URLs in `JOB_EVALUATION_REFERENCES.md` (or marks fetch failures explicitly).
 - Be blunt and realistic. No flattery.
 - Use both resume variants in PART 2 (connect md + games md); then select **`primary_resume_for_verdict`** per PART 2 rules.
-- PART 5 headline verdict lines (five bullets) must be grounded in **primary resume + portfolio only**; PART 3 journals inform tuning, not tier inflation. See PART 5 definitions for **Actual capability (inferred)**.
+- PART 5 headline verdict lines (**five** bullets, including **Narrative coherence (for this JD)**) must be grounded in **primary resume + portfolio only**; PART 3 journals inform tuning, not tier inflation. See PART 5 definitions for **Actual capability (inferred)** and **Narrative coherence (for this JD)**.
 - In PART 4, follow **Required diligence** + **PART 4 written output (synthesis only)** in JOB_EVALUATION_TEMPLATE.md (integrated narrative; no per-URL subsections; no cherry-picking which pages you reviewed).
 - In PART 3, include at least 2 short quotes total from summaries/dumps (with file paths); keep PART 3 in the “tuning / honesty” lane per template.
 - If sources conflict, call it out.

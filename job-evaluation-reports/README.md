@@ -169,7 +169,7 @@ What it does:
 - **Dedupes** multiple reports for the same `<JD>` basename by picking the **latest file modification time** (`mtime`).
 - Extracts:
   - `` `job` `` from the header metadata
-  - the **PART 5 verdict lines only** (the five “likelihood / fit” bullets), with a link to the full report
+  - the **PART 5 verdict lines only** (the five “likelihood / fit / narrative” bullets), with a link to the full report
 
 Filename contract (important for dedupe):
 
