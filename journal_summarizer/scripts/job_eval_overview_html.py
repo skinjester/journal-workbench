@@ -9,12 +9,14 @@ Expects to be imported from `collate_job_evaluations` with the same `sys.path` (
 
 from __future__ import annotations
 
+import datetime as dt
 import html as html_module
+import re
+from collections import Counter
 from pathlib import Path
 from typing import List, Optional, Sequence, Tuple
 
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 
 from collate_job_evaluations import (
     CHART_SCORE_COLUMNS,
@@ -29,6 +31,104 @@ from collate_job_evaluations import (
 
 
 MINI_FAMILY_GLYPH = "\u25c7"
+
+# ``Foo.eval - YYYY-MM-DD.md`` or ``… - N.md``; else file mtime → calendar day.
+_EVAL_REPORT_DATE_IN_NAME = re.compile(r" - (\d{4}-\d{2}-\d{2})(?: - \d+)?\.md$", re.IGNORECASE)
+
+
+def _path_for_row_report(repo_root: Path, report_rel: str) -> Path:
+    p = (repo_root / report_rel).resolve()
+    return p if p.is_file() else Path(report_rel)
+
+
+def _calendar_date_for_eval_report(path: Path) -> dt.date:
+    m = _EVAL_REPORT_DATE_IN_NAME.search(path.name)
+    if m:
+        try:
+            return dt.datetime.strptime(m.group(1), "%Y-%m-%d").date()
+        except ValueError:
+            pass
+    try:
+        st = path.stat()
+        return dt.datetime.fromtimestamp(st.st_mtime, tz=dt.timezone.utc).astimezone().date()
+    except (OSError, ValueError):
+        return dt.date.today()
+
+
+def _fig_hero_report_dates(
+    rows: Sequence[CollatedRow],
+    repo_root: Path,
+) -> Tuple[go.Figure, int]:
+    """One bar per unique calendar day: height = number of evals whose report maps to that day."""
+    c: Counter[dt.date] = Counter()
+    for r in rows:
+        c[_calendar_date_for_eval_report(_path_for_row_report(repo_root, r.report_rel))] += 1
+    ordered = sorted(c.items())
+    labels = [d.isoformat() for d, _ in ordered]
+    vals = [k for _, k in ordered]
+    n = max(1, len(labels))
+    y_max = max(vals) if vals else 0
+    # Numeric x so we can set range with extra room on the right: bars start at the left
+    # (categorical + single day centers one fat bar; linear + padded xmax pins it left).
+    x_pos = list(range(n))
+    x_max = (n - 1) + 0.5 + 2.75
+    # Slender chart: less width per day; narrow bars via bargap + Bar width.
+    min_w = int(min(2000, max(320, n * 22 + 140)))
+    fig = go.Figure(
+        data=go.Bar(
+            x=x_pos,
+            y=vals,
+            width=0.22,
+            customdata=labels,
+            text=[str(v) for v in vals] if (vals and y_max <= 4) else None,
+            textposition="auto",
+            textfont=dict(size=8, color=PAGE_BG),
+            marker=dict(color=ACCENT, line=dict(width=0), opacity=0.9),
+            hovertemplate="%{customdata}<br>Reports: %{y}<extra></extra>",
+        )
+    )
+    # Tight y headroom so the strip stays short; avoid huge empty band above the bar.
+    y_hi = (y_max * 1.04 + 0.35) if y_max else 1.0
+    fig.update_layout(
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(255,255,255,0.03)",
+        margin=dict(l=40, r=2, t=0, b=20),
+        height=64,
+        width=min_w,
+        autosize=False,
+        showlegend=False,
+        bargap=0.72,
+    )
+    fig.update_xaxes(
+        title=dict(text="Report date", font=dict(size=8, color=MUTED), standoff=2),
+        type="linear",
+        range=(-0.5, x_max),
+        tickmode="array",
+        tickvals=x_pos,
+        ticktext=labels,
+        tickfont=dict(size=7, color=MUTED),
+        tickangle=-28 if n > 4 else 0,
+        showline=False,
+        mirror=False,
+        showgrid=True,
+        gridcolor="rgba(151,173,210,0.08)",
+        automargin=True,
+        zeroline=False,
+    )
+    fig.update_yaxes(
+        title=dict(text="Reports", font=dict(size=8, color=MUTED), standoff=2),
+        range=(0, y_hi),
+        dtick=1 if y_max <= 5 else max(1, (y_max + 2) // 3),
+        tickfont=dict(size=7, color=MUTED),
+        showline=False,
+        showgrid=True,
+        gridcolor="rgba(151,173,210,0.1)",
+        # Default y=0 "zeroline" reads as a thick white bar along the bottom of the plot.
+        zeroline=False,
+        rangemode="tozero",
+        fixedrange=True,
+    )
+    return fig, min_w
 
 
 CHART_SCORE_COLUMN_WEIGHTS: dict[str, float] = {
@@ -99,6 +199,19 @@ HEATMAP_WIDTH_PX_PER_CATEGORY = 54
 HEATMAP_WIDTH_EXTRA_PX = 260
 # Vertical pixels per job row (grid cell); larger = more space between dots and grid lines.
 HEATMAP_ROW_HEIGHT_PX = 46
+
+# Grouped horizontal bars: target ~2px-thick stripes; figure height is derived from job count × row budget.
+GROUPED_BAR_STRIPE_PX = 2.0
+GROUPED_BAR_INNER_GAP_PX = 1.0
+GROUPED_BAR_ROW_PAD_PX = 10.0
+
+
+def _grouped_bar_row_height_px(n_dim: int) -> int:
+    """Vertical pixels budget per job row so dimension stripes render near ``GROUPED_BAR_STRIPE_PX`` tall."""
+    if n_dim <= 0:
+        return 20
+    inner = max(0, n_dim - 1) * GROUPED_BAR_INNER_GAP_PX
+    return int(n_dim * GROUPED_BAR_STRIPE_PX + inner + GROUPED_BAR_ROW_PAD_PX)
 
 
 def _heatmap_figure_width_px(n_dims: int) -> int:
@@ -553,85 +666,6 @@ def _fig_radar(jobs: List[str], dims: List[str], z: List[List[Optional[float]]])
     return fig
 
 
-def _fig_dot_plots(
-    jobs: List[str],
-    dims: List[str],
-    z: List[List[Optional[float]]],
-    z_text: Optional[List[List[str]]] = None,
-) -> go.Figure:
-    jobs, z, z_text = _sort_jobs_for_dot_plots(jobs, dims, z, z_text)
-    n_dims = len(dims)
-    # Fixed 0–100 x range so the full chart-score scale is visible; a zoomed min–max made the
-    # left edge read as a non-zero "floor" and sat dots flush against the job labels.
-    x_lo, x_hi = 0.0, 100.0
-    wrapped_titles = [_wrap_dim_label(d) for d in dims]
-    fig = make_subplots(
-        rows=1,
-        cols=n_dims,
-        subplot_titles=wrapped_titles,
-        horizontal_spacing=0.022,
-        shared_yaxes=True,
-    )
-    for j in range(n_dims):
-        xs = [z[i][j] if z[i][j] is not None else float("nan") for i in range(len(jobs))]
-        colors = [
-            float(v) if v is not None else _HEATMAP_MISSING_SCORE
-            for v in [z[i][j] for i in range(len(jobs))]]
-        cd: Optional[List[str]] = None
-        ht = "%{y}<br>%{x:.0f}<extra></extra>"
-        if z_text:
-            cd = [z_text[i][j] if j < len(z_text[i]) else "" for i in range(len(jobs))]
-            ht = "%{y}<br>%{customdata}<br>score %{x:.0f}<extra></extra>"
-        fig.add_trace(
-            go.Scatter(
-                x=xs,
-                y=jobs,
-                mode="markers",
-                marker=dict(
-                    size=11,
-                    color=colors,
-                    colorscale=HEATMAP_MONO_COLORSCALE,
-                    cmin=0.0,
-                    cmax=100.0,
-                    showscale=False,
-                    line=dict(width=1, color="rgba(255,255,255,0.10)"),
-                ),
-                customdata=cd,
-                hovertemplate=ht,
-                showlegend=False,
-            ),
-            row=1,
-            col=j + 1,
-        )
-        fig.update_xaxes(
-            title_text="",
-            range=[x_lo, x_hi],
-            dtick=20,
-            showticklabels=False,
-            showgrid=True,
-            gridcolor="rgba(151, 173, 210, 0.10)",
-            row=1,
-            col=j + 1,
-        )
-    # ticklabelstandoff: gap between the y tick labels and the plot (so long job titles do not run into the grid).
-    fig.update_yaxes(
-        row=1,
-        col=1,
-        automargin=True,
-        tickfont=dict(size=10, color=MUTED),
-        ticklabelstandoff=16,
-    )
-    for c in range(2, n_dims + 1):
-        fig.update_yaxes(showticklabels=False, row=1, col=c)
-    # Match subplot title font to the dot-matrix column header style.
-    fig.update_annotations(font=dict(size=11, color=TEXT))
-    fig.update_layout(
-        height=max(480, 22 * len(jobs) + 80),
-        margin=dict(l=300, r=20, t=52, b=40),
-    )
-    return fig
-
-
 def _fig_job_grouped_bars(
     jobs: List[str],
     dims: List[str],
@@ -664,19 +698,19 @@ def _fig_job_grouped_bars(
                 orientation="h",
                 marker=dict(
                     color=colors,
-                    opacity=0.94,
-                    line=dict(width=1.25, color="rgba(255,255,255,0.28)"),
+                    opacity=1.0,
+                    line=dict(width=0),
                 ),
                 customdata=custom,
                 hovertemplate="%{y}<br>" + html_module.escape(dim) + "<br>%{customdata}<br>score %{x:.0f}<extra></extra>",
             )
         )
-    # bargroupgap: lower → thicker stripes per dimension inside each job row (many dims = needs small gap).
-    # bargap: higher → more vertical space between job rows.
+    # bargroupgap / bargap: with a tall enough figure (see write_overview_chart_html), stripes sit near 2px;
+    # slightly higher bargroupgap keeps dimension stripes visually distinct without outlines.
     fig.update_layout(
         barmode="group",
-        bargap=0.28,
-        bargroupgap=0.035,
+        bargap=0.16,
+        bargroupgap=0.10,
         xaxis=dict(
             title=None,
             range=[0.0, 100.0],
@@ -690,6 +724,7 @@ def _fig_job_grouped_bars(
             autorange="reversed",
             tickfont=dict(size=10, color=MUTED),
             ticklabelposition="outside left",
+            ticklabelstandoff=14,
             showgrid=True,
             gridcolor="rgba(151,173,210,0.08)",
             zeroline=False,
@@ -718,7 +753,7 @@ def write_overview_chart_html(
     repo_root: Path,
     overview_md_rel: str,
 ) -> None:
-    """Write a single HTML file with Plotly views (dot matrix, radar, grouped bars, dot plots)."""
+    """Write a single HTML file with Plotly views (dot matrix, radar, grouped bars)."""
     if not rows:
         raise ValueError("rows is empty; nothing to chart")
 
@@ -729,7 +764,6 @@ def write_overview_chart_html(
         for r in rows
     }
     display_jobs = [label_by_key.get(j, j) for j in jobs]
-    has_mini = any(_is_mini_family_model(r.model_used) for r in rows)
 
     studio_template = _studio_template()
     best_job = _best_overall_job(display_jobs, dims, z)
@@ -743,7 +777,6 @@ def write_overview_chart_html(
         ("Dot matrix", _fig_heatmap(display_jobs, dims, z, z_text)),
         ("Radar", _fig_radar(display_jobs, dims, z)),
         ("Grouped bars", _fig_job_grouped_bars(display_jobs, dims, z, z_text)),
-        ("Dot plots", _fig_dot_plots(display_jobs, dims, z, z_text)),
     ]
 
     sections: List[str] = []
@@ -781,23 +814,17 @@ def write_overview_chart_html(
             )
         elif title == "Grouped bars":
             lm = _heatmap_left_margin_px(jobs)
-            # Tall rows so ~11 grouped traces are stripes thick enough to read; scales with dimension count.
-            row_px = max(92, min(124, int(6.9 * n_dim + 26)))
+            row_px = _grouped_bar_row_height_px(n_dim)
             fig.update_layout(
                 width=max(1080, min(2200, 900 + n_dim * 18)),
-                height=max(640, min(5600, row_px * len(jobs) + 280)),
+                height=max(420, min(9000, row_px * len(jobs) + 320)),
                 autosize=False,
                 margin=dict(l=lm, r=24, t=32, b=168),
-            )
-        elif title == "Dot plots":
-            fig.update_layout(
-                width=max(1000, min(6200, 96 * n_dim + 200)),
-                autosize=False,
             )
         responsive = not heatmap_wide
         chunk = fig.to_html(
             full_html=False,
-            include_plotlyjs="cdn" if i == 0 else False,
+            include_plotlyjs=False,
             config={"displayModeBar": True, "responsive": responsive, "displaylogo": False},
         )
         nav_links.append(f'<a href="#viz-{i}">{html_module.escape(title)}</a>')
@@ -815,6 +842,20 @@ def write_overview_chart_html(
         )
 
     nav_tabs = "".join(nav_links)
+
+    hero_fig, hero_min_w = _fig_hero_report_dates(rows, repo_root)
+    hero_fig.update_layout(
+        font=dict(
+            color=TEXT,
+            family="Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif",
+            size=12,
+        )
+    )
+    hero_chunk = hero_fig.to_html(
+        full_html=False,
+        include_plotlyjs="cdn",
+        config={"displayModeBar": False, "responsive": True, "displaylogo": False},
+    )
 
     doc = f"""<!DOCTYPE html>
 <html lang="en">
@@ -884,12 +925,19 @@ def write_overview_chart_html(
       text-overflow: ellipsis;
       max-width: 100%;
     }}
-    .lede {{
-      max-width: 64ch;
-      margin: 16px 0 0;
-      color: var(--muted);
-      font-size: 1rem;
-      line-height: 1.65;
+    .hero-timeline {{
+      position: relative;
+      z-index: 1;
+      margin-top: 22px;
+      max-width: 100%;
+    }}
+    .hero-timeline-scroll {{
+      max-width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+    }}
+    .hero-timeline-scroll .plotly-graph-div {{
+      min-width: var(--tl-min, 100%);
     }}
     .hero-summary {{
       position: relative;
@@ -1065,7 +1113,14 @@ def write_overview_chart_html(
   <div class="page">
     <header class="hero">
       <h1>Job evaluation comparative views</h1>
-      <p class="lede">A polished dark-mode review board for comparing role fit across the current evaluation set.{html_module.escape(" " + MINI_FAMILY_GLYPH + " marks reports evaluated by a Mini-tier model (tier ceiling tends to be generous).") if has_mini else ""}</p>
+      <div
+        class="hero-timeline"
+        style="--tl-min: {hero_min_w}px"
+        role="region"
+        aria-label="Count of eval reports by calendar day (date from report filename, otherwise file date)"
+      >
+        <div class="hero-timeline-scroll">{hero_chunk}</div>
+      </div>
       <div class="hero-summary" role="region" aria-label="Batch summary">
         <div class="summary-grid">
           <div class="summary-item">

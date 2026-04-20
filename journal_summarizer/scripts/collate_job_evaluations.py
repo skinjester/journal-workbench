@@ -156,7 +156,7 @@ RUBRIC_RULES: Tuple[VerdictRule, ...] = (
 
 COMBINED_CHART_COLUMNS: Tuple[str, ...] = VERDICT_TABLE_COLUMNS + RUBRIC_TABLE_COLUMNS
 
-# HTML charts (dot matrix, radar, dot plots): omit pass/fail ATS row and Risk Factors (still in rubric / tables).
+# HTML charts (dot matrix, radar, grouped bars): omit pass/fail ATS row and Risk Factors (still in rubric / tables).
 _CHART_OMIT_COLUMNS: frozenset[str] = frozenset({"ATS / recruiter hygiene", "Risk Factors"})
 CHART_SCORE_COLUMNS: Tuple[str, ...] = tuple(c for c in COMBINED_CHART_COLUMNS if c not in _CHART_OMIT_COLUMNS)
 
