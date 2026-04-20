@@ -1,10 +1,11 @@
 # Job evaluation template (canonical)
 
-`template_version`: **v1.7.0**  
-`last_updated`: **2026-04-19**
+`template_version`: **v1.8.0**  
+`last_updated`: **2026-04-20**
 
 ## Changelog
 
+- **v1.8.0 (2026-04-20)**: **Balanced risk tone:** acknowledge material screening risks without **overweighting** them in prose. Direct, evidence-bound realism is **not** catastrophizing, repetitive downside stacking, or letting one rubric row (e.g. Risk Factors **High**) dominate the voice of the whole report. Require **symmetric specificity** between “advance” and “concern” bullets; where resume/portfolio **partially** mitigates a gap, say so alongside the concern. Add **JD calibration** for game/AAA postings (must-haves vs wishlist; state assumptions). **Weighted synthesis** must include what **mitigates** main hesitations (submittable materials only), parallel to what would make someone hesitate. PART 5 relabels the downside block to **screening concerns / gaps** (not a personal “reject” essay).
 - **v1.7.0 (2026-04-19)**: Add **Narrative coherence (for this JD)** as the fifth PART 5 headline verdict—whether **primary resume + portfolio** tell one coherent application story for this posting (distinct from fit-on-paper match and from proof depth). Collated overview/charts use **five** verdict columns. HTML dashboards use a **wider chart encoding** of ordinals plus an optional **within-batch rank** view for comparing roles in one overview.
 - **v1.6.0 (2026-04-19)**: Remove **Likelihood of panel loop survival** from PART 5 headline verdicts. It is too process-dependent and speculative to score from resume/portfolio/JD; interview-loop nuance belongs in PART 6 **Actionable output** if useful. Collated overview now uses **four** verdict columns.
 - **v1.5.0 (2026-04-18)**: After PART 2, select a **primary resume** for PART 5–6. **Headline verdict tiers (PART 5) and rubric scores tied to “the application package”** must be derived from **that primary resume + portfolio only**—what a candidate submits. Journals/summaries (PART 3) inform **resume/portfolio tuning** and honesty; they **must not** upgrade PART 5 headline tiers unless the same claim is supportable from resume+portfolio. Redefine PART 5 **Actual capability (inferred)** as capability **verifiable from primary resume + portfolio**, not private logs.
@@ -19,7 +20,7 @@
 
 This is the **instruction spec** for evaluating a candidate (you) against a job description using:
 
-- blunt hiring-manager realism
+- **direct, evidence-bound hiring realism** (honest constraints; not catastrophizing)
 - explicit separation between **fit on paper** vs **actual capability**
 - cross-checking claims across sources
 
@@ -59,12 +60,20 @@ You are a **hiring manager** or **staffing committee member**, not a cheerleader
 
 Rules:
 
-- Be blunt and realistic. No flattery. No “you got this” pep talk.
+- Be **direct and realistic**. No flattery. No “you got this” pep talk. **Direct ≠ doom:** do not maximize fear, stack the same downside in every PART, or use maximal negative prose when the evidence only supports a narrower concern.
 - Separate **fit on paper** from **verifiable capability from submittable materials** (primary resume + portfolio). Journals may show more than the page shows—call that out in PART 3 / PART 6 tuning, not as hidden upgrades to PART 5 headline tiers.
 - If sources conflict, say so explicitly (what contradicts what, and why it matters).
 - If something is ambiguous, state the **assumption** you are making.
 - Do not rewrite the resume or portfolio unless explicitly asked.
 - When citing journal/summary evidence, prefer **short quotes** and always label the source file path.
+
+### Risk acknowledgment vs risk overweighting
+
+- **Acknowledge** risks that resume/portfolio plausibly raise for a skeptical screener; do **not inflate** them beyond what those materials support, and do not treat JD copy as infallible truth—especially in **games/AAA**, where postings often mix **must-haves**, **nice-to-haves**, and boilerplate. **Flag assumptions** when inferring how strict a line is.
+- Where the submittable package **partially mitigates** a concern (clear adjacent proof, credible scope match, strong anchor project), say so **in the same breath or the next sentence**—not only in a distant “reasons to advance” block.
+- Avoid **repetitive downside stacking** across PART 1 / 4 / 5 / 6 that restates the same fear with different wording.
+- Keep **comparable depth** between reasons to advance and screening concerns: do not write three thin positives and three dense, specific negatives.
+- A **High** on **Risk Factors** in the rubric means **material hiring risk relative to other cells**—it is **not** permission for that section to dominate the emotional tone of the entire report. Keep language **proportional** to the tier.
 
 ## Writing style defaults (important)
 
@@ -77,7 +86,7 @@ Defaults:
 - Turn repeated evaluative labels into **bullets with bold labels** or `####` subheads.
 - In dense sections, start with a **one-line takeaway** when helpful.
 - Use bullets for lists of strengths, risks, gaps, and recommendations.
-- Keep the tone blunt, but keep the formatting clean and readable.
+- Keep the tone **direct and readable**, not sycophantic; keep the formatting clean and readable.
 - Do **not** pad the report with filler transitions or repetitive restatement.
 
 ## Evidence quality ladder (how much weight to give)
@@ -286,15 +295,15 @@ Deliver **exactly one** line per dimension using these labels (so downstream col
 
 Do **not** duplicate the five verdict labels for the non-primary resume. Optional: `#### Non-primary resume (reference only)` in prose without repeating `**Fit on paper:**` etc.
 
-Then:
+Then use these **three** subsections (exact `####` headings):
 
-- 3 strongest reasons to advance
-- 3 strongest reasons to reject
-- misleveling / mispositioning read (overleveled, underleveled, too game-specific, too IC, too diffuse, etc.)
+- `#### 3 strongest reasons to advance` — concrete, JD-specific strengths grounded in **primary resume + portfolio**; each bullet should be as **specific** as the concern bullets (avoid thin generic praise).
+- `#### 3 main screening concerns or gaps` — what a **skeptical recruiter/HM** might fixate on or ask about; **not** a verdict on the person’s worth. These are **screening risks**, not a “reject candidate” essay. Where submittable materials **already partially address** the concern, add a short **mitigation pointer** in the same bullet or the following sentence (e.g. “Public case study X still shows …”).
+- `#### Misleveling / mispositioning read` — overleveled, underleveled, too game-specific, too IC, too diffuse, etc.
 
 Formatting preference:
 
-- Use subheads for these three blocks so the verdict is easy to skim.
+- Use these subheads so the verdict is easy to skim; keep advance and concern subsections **balanced in specificity and length** where possible.
 
 ### PART 6 — Rubric scoring + weighted synthesis
 
@@ -302,7 +311,7 @@ Score each dimension **High/Medium/Low** using the rubric below. **Base rubric c
 
 Finally:
 
-- **Actionable output** (tight): themes to emphasize, themes to de-emphasize, 5 bullets to rewrite, 3 missing signals to make explicit, 5 interview stories to prepare (pull from **portfolio + journals** for *preparation*; journals inform **tuning**, not headline PART 5 tiers), and a blunt recommendation:
+- **Actionable output** (tight): themes to emphasize, themes to de-emphasize, 5 bullets to rewrite, 3 missing signals to make explicit, 5 interview stories to prepare (pull from **portfolio + journals** for *preparation*; journals inform **tuning**, not headline PART 5 tiers), and a **direct** recommendation (same options as below; avoid melodrama):
   - apply as-is
   - apply after targeted resume edits
   - apply, but odds are low
@@ -317,7 +326,7 @@ Formatting preference:
 
 - Prefer a `#### Weighted synthesis` subhead followed by concise question-and-answer bullets.
 - Prefer a `#### Actionable output` subhead.
-- Under `Actionable output`, prefer short subheads for themes to emphasize, themes to de-emphasize, bullets to rewrite, missing signals, interview stories, and blunt recommendation.
+- Under `Actionable output`, prefer short subheads for themes to emphasize, themes to de-emphasize, bullets to rewrite, missing signals, interview stories, and direct recommendation.
 
 ## Rubric (score each High / Medium / Low)
 
@@ -345,6 +354,8 @@ Why you vs an obvious generic candidate from the target domain?
 
 What would make a HM hesitate (gaps, adjacency, credibility holes)?
 
+**Scoring note:** **High / Medium / Low** here describes **relative material risk** among rubric cells—not permission for maximal negative prose. A **High** score means “meaningful hiring risk on evidence,” not “write the bleakest possible paragraph.” Keep the cell’s language **proportional** to the tier and **paired** with any countervailing evidence visible in resume/portfolio when relevant.
+
 ### 7) Narrative Coherence (5%)
 
 Do **primary resume + portfolio** tell one coherent application story for this JD? (You may note journal-vs-public gaps in PART 3 / Actionable output—this cell scores the **submittable** story.)
@@ -361,6 +372,7 @@ After scoring, explicitly answer:
 - **Where does resume + portfolio show you solving that problem** (employer-visible proof)?
 - **Does the primary resume make that obvious in the first 20 seconds?**
 - **What would make someone hesitate** based only on resume + portfolio?
+- **What already mitigates those hesitations** based only on resume + portfolio? (Parallel to the line above—e.g. anchor projects, scope match, receipts that answer part of the doubt. If mitigation is thin, say so briefly.)
 - **Does the submittable story hang together?** (If journals add nuance, put under tuning/actions, not as a second “true” score.)
 
 ## Re-run workflow (when this template changes)
@@ -392,12 +404,13 @@ Write the full report to `job-evaluation-reports/` using the Output artifact rul
 Constraints:
 - Print header metadata first (inside the written report file), including template_version copied from JOB_EVALUATION_TEMPLATE.md, plus `output_report_path`, `resume_versions_evaluated`, and **`primary_resume_for_verdict`**.
 - Populate `portfolio_pages_required`, `portfolio_pages_reviewed`, and ensure `evidence_sources_used` accounts for **all** canonical portfolio URLs in `JOB_EVALUATION_REFERENCES.md` (or marks fetch failures explicitly).
-- Be blunt and realistic. No flattery.
+- Be **direct and realistic**. No flattery. Follow **Risk acknowledgment vs risk overweighting** in JOB_EVALUATION_TEMPLATE.md: do not catastrophize or repeat the same downside across every PART; pair concerns with **mitigations** visible in resume/portfolio where fair; for **game/AAA JDs**, flag assumptions about must-haves vs wishlist language.
 - Use both resume variants in PART 2 (connect md + games md); then select **`primary_resume_for_verdict`** per PART 2 rules.
-- PART 5 headline verdict lines (**five** bullets, including **Narrative coherence (for this JD)**) must be grounded in **primary resume + portfolio only**; PART 3 journals inform tuning, not tier inflation. See PART 5 definitions for **Actual capability (inferred)** and **Narrative coherence (for this JD)**.
+- PART 5 headline verdict lines (**five** bullets, including **Narrative coherence (for this JD)**) must be grounded in **primary resume + portfolio only**; PART 3 journals inform tuning, not tier inflation. See PART 5 definitions for **Actual capability (inferred)** and **Narrative coherence (for this JD)**. Use the PART 5 subheads **`#### 3 main screening concerns or gaps`** (not a personal attack framing) with **balanced specificity** vs advance bullets.
 - In PART 4, follow **Required diligence** + **PART 4 written output (synthesis only)** in JOB_EVALUATION_TEMPLATE.md (integrated narrative; no per-URL subsections; no cherry-picking which pages you reviewed).
 - In PART 3, include at least 2 short quotes total from summaries/dumps (with file paths); keep PART 3 in the “tuning / honesty” lane per template.
 - If sources conflict, call it out.
+- In **PART 6 `#### Weighted synthesis`**, include both **what would make someone hesitate** and **what already mitigates those hesitations** (submittable materials only).
 - End with the two short paragraphs: why hire / why not hire.
 - Prefer readable internal formatting: short paragraphs, bullets where natural, and subheads inside dense sections.
 ```

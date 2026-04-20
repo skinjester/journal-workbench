@@ -20,7 +20,7 @@ If the user is doing a **job fit evaluation** (explicitly or implicitly) against
 2. Treat the job description as coming from:
    - an attached/`@`-referenced JD file under `job descriptions/**` or `job descriptions-processed/**`, OR
    - pasted JD text in chat (only if no JD file is referenced)
-3. Produce the evaluation using the **exact PART 1–6 headings** defined in `JOB_EVALUATION_TEMPLATE.md` (v1.7.0+: PART 2 picks `primary_resume_for_verdict`; PART 5 has **five** headline verdict lines from **primary resume + portfolio**, including **Narrative coherence (for this JD)**; PART 3 journals for tuning, not inflating headline scores).
+3. Produce the evaluation using the **exact PART 1–6 headings** defined in `JOB_EVALUATION_TEMPLATE.md` (v1.8.0+: PART 2 picks `primary_resume_for_verdict`; PART 5 has **five** headline verdict lines from **primary resume + portfolio**, including **Narrative coherence (for this JD)**; **balanced risk tone**—acknowledge screening risks without overweighting negative prose; PART 3 journals for tuning, not inflating headline scores).
 4. **Write the full report to disk** as a new markdown file under `job-evaluation-reports/` using the naming + collision rules in `JOB_EVALUATION_TEMPLATE.md` (do not only print the report in chat).
 
 Chat output policy:
