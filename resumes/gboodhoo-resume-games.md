@@ -2,12 +2,12 @@ GARY BOODHOO
 garyb.design | San Francisco, CA | gboodhoo@gmail.com | 415-802-4076
 
 LEAD UX DESIGNER
-I’ve led UX for titles including The Elder Scrolls Online and Star Wars: The Force Unleashed, and defined early UX direction through prototyping and interaction design on new game projects. I work with teams to prioritize UX, reduce ambiguity, and give features a clearer path to implementation.
+Lead game UX designer with shipped AAA credits across live-service, multiplayer, onboarding, progression, and front-end systems. Led controller-first UX for The Elder Scrolls Online console launch, shaped interaction direction for new game projects through prototyping, and partnered with design, engineering, QA, and production to bring complex player flows into development.
 
 SELECTED WORK
 Led the replatforming of The Elder Scrolls Online UX from PC to PlayStation and Xbox, establishing controller-first patterns and reusable UI structures that remain foundational to the live service.
 
-Defined and prototyped core interaction models for Project Kestrel, an unreleased online co-op action RPG, with ZeniMax Online Studios and Sprung Studios. Built interactive Unreal prototypes to explore spatial UX during product incubation.
+Defined and prototyped core interaction models for Project Kestrel, an unreleased online co-op action RPG, with ZeniMax Online Studios and Sprung Studios. Built interactive Unreal prototypes to explore spatial UX, navigation, and early player journey concepts during product incubation.
 
 Designed the Game Entry onboarding experience for The Sims 3, creating reusable content templates, interaction patterns, and documentation that helped teams produce and extend content more consistently.
 
@@ -23,15 +23,15 @@ Development — Python, Lua, React, HTML/CSS
 EXPERIENCE
 Skinjester Studio — Founder & Principal Product Designer
 2016–2025 • San Francisco, CA
-- Led game UX consulting engagements, clarifying priorities, shaping early direction, and keeping feature work aligned with development realities.
-- Designed live-service commerce, editorial, and platform UX for The Elder Scrolls Online across web and game client, improving clarity in purchasing and content discovery and supporting ongoing player engagement.
-- Built UX frameworks and indoor-mapping prototypes for Iveda Pinpoint with WRLD3D, helping stakeholders evaluate product direction before committing engineering resources.
+- Led game UX consulting engagements for live-service and in-development titles, setting interaction direction, aligning stakeholders, and turning ambiguous feature areas into implementable player flows.
+- Designed live-service commerce, editorial, and platform UX for The Elder Scrolls Online across web and game client, mapping account, purchase, help, and console handoff journeys to identify silo breaks and improve purchasing, content discovery, and cross-surface player flows.
+- Built UX frameworks and interactive spatial prototypes for Iveda Pinpoint with WRLD3D, helping teams validate product direction and de-risk decisions before full engineering investment.
 
 ZeniMax Online Studios — User Experience Lead, The Elder Scrolls Online (ESO)
 2013–2016 • Cockeysville, MD
-- Led UX/UI for ESO’s console launch and ongoing live-service development, owning features from early concept through implementation and long-term evolution of the live service.
-- Directed reviews across internal teams and external partners, aligning UX decisions with production realities and helping keep development on track.
-- Designed and refined multiplayer systems for ESO including player trading, guild navigation, and commerce, using reviews and playtests to reduce friction in controller-first flows.
+- Led UX/UI for ESO’s console launch and ongoing live-service development, owning controller-first navigation, menus, commerce, and multiplayer player flows from concept through implementation.
+- Created and maintained a UX design system documenting interaction patterns, layout specs, and use cases that aligned design, engineering, QA, and visual design on repeatable implementation standards.
+- Led cross-functional reviews, authored test plans, and translated audits into revised flows and implementations for ESO systems including player trading, guilds, and the in-game storefront
 
 RealU — User Experience Consultant, Otherland
 2012–2013 • Singapore

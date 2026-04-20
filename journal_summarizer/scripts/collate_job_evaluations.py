@@ -64,8 +64,8 @@ VERDICT_TABLE_COLUMNS: Tuple[str, ...] = (
     "Fit on Paper",
     "Capability",
     "Narrative Coherence",
-    "Recruiter Screen",
-    "Hiring Manager Screen",
+    "Signal Strength (Recruiter)",
+    "Signal Strength (HM)",
 )
 
 VERDICT_RULES: Tuple[VerdictRule, ...] = (
@@ -88,12 +88,18 @@ VERDICT_RULES: Tuple[VerdictRule, ...] = (
         ),
     ),
     VerdictRule(
-        "Recruiter Screen",
-        re.compile(r"^\*{0,2}Likelihood of recruiter screen\*{0,2}\s*:\s*", re.IGNORECASE),
+        "Signal Strength (Recruiter)",
+        re.compile(
+            r"^\*{0,2}(?:Signal strength:\s*Recruiter|Likelihood of recruiter screen)\*{0,2}\s*:\s*",
+            re.IGNORECASE,
+        ),
     ),
     VerdictRule(
-        "Hiring Manager Screen",
-        re.compile(r"^\*{0,2}Likelihood of hiring manager screen\*{0,2}\s*:\s*", re.IGNORECASE),
+        "Signal Strength (HM)",
+        re.compile(
+            r"^\*{0,2}(?:Signal strength:\s*HM|Likelihood of hiring manager screen)\*{0,2}\s*:\s*",
+            re.IGNORECASE,
+        ),
     ),
 )
 
@@ -293,7 +299,7 @@ def tier_cell_to_chart_numeric(cell: str) -> Optional[float]:
 def extract_verdict_lines(part5: str) -> Dict[str, str]:
     """
     Return mapping column key -> raw markdown line (trimmed), for PART 5 verdict bullets
-    (Fit on Paper through Hiring Manager Screen, including Narrative Coherence).
+    (Fit on Paper through signal-strength lines, including Narrative Coherence).
 
     Supports:
     - list bullets: ``- **Fit on paper:** **High**``

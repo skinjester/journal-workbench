@@ -68,8 +68,8 @@ The job description for this run is:
 
 Requirements (summarized from JOB_EVAL_CHAT_COMMAND.md):
 - Write the FULL report under job-evaluation-reports/ using the template naming + collision rules.
-- Use the exact PART 1 through PART 6 headings from JOB_EVALUATION_TEMPLATE.md (v1.8.0+).
-- Follow v1.8.0+ **balanced risk tone** in JOB_EVALUATION_TEMPLATE.md: direct realism without catastrophizing; pair screening concerns with mitigations visible in resume/portfolio where fair; game/AAA JD assumption-flagging as in template.
+- Use the exact PART 1 through PART 6 headings from JOB_EVALUATION_TEMPLATE.md (v1.9.0+).
+- Follow v1.9.0+ **balanced risk tone** and **signal strength** PART 5 lines (Signal strength: Recruiter / HM = fit-signal diagnostics, not predictions) in JOB_EVALUATION_TEMPLATE.md: direct realism without catastrophizing; pair screening concerns with mitigations visible in resume/portfolio where fair; game/AAA JD assumption-flagging as in template.
 - PART 2: evaluate both resume variants; select primary_resume_for_verdict per template. PART 5’s five headline verdict lines (including narrative coherence) must be grounded in primary resume + portfolio only; PART 3 journals inform resume/portfolio tuning, not tier inflation.
 - Review every portfolio URL listed in JOB_EVALUATION_REFERENCES.md; include header metadata (including primary_resume_for_verdict) and evidence accounting per template.
 - Include at least 2 short quotes total from summaries or monthly dumps in PART 3, each with repo-relative file paths (use the folders listed under JOB_EVALUATION_REFERENCES.md).

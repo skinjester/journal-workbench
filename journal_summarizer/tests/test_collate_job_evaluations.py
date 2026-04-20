@@ -54,7 +54,13 @@ def test_verdict_line_to_table_cell_strips_labels() -> None:
     )
     assert (
         cj.verdict_line_to_table_cell(
-            "- **Likelihood of recruiter screen**: Low", "Recruiter Screen"
+            "- **Signal strength: Recruiter**: Low", "Signal Strength (Recruiter)"
+        )
+        == "Low"
+    )
+    assert (
+        cj.verdict_line_to_table_cell(
+            "- **Likelihood of recruiter screen**: Low", "Signal Strength (Recruiter)"
         )
         == "Low"
     )
@@ -98,8 +104,8 @@ def test_extract_part5_and_verdicts() -> None:
 - **Fit on paper**: High.
 - **Actual capability (inferred)**: Medium.
 - **Narrative coherence (for this JD)**: Medium.
-- **Likelihood of recruiter screen**: Low.
-- **Likelihood of hiring manager screen**: High.
+- **Signal strength: Recruiter**: Low.
+- **Signal strength: HM**: High.
 
 #### 3 strongest reasons
 
@@ -125,9 +131,9 @@ def test_extract_verdict_lines_bold_paragraphs_without_list_markers() -> None:
 
 **Narrative coherence (for this JD):** **Medium**
 
-**Likelihood of recruiter screen:** **Low**
+**Signal strength: Recruiter:** **Low**
 
-**Likelihood of hiring manager screen:** **Fine**
+**Signal strength: HM:** **Fine**
 
 #### Three strongest reasons
 """
@@ -208,8 +214,8 @@ def test_build_collated_rows_one_report(tmp_path: Path) -> None:
 - **Fit on paper:** **High**
 - **Actual capability (inferred):** **Medium**
 - **Narrative coherence (for this JD):** **Medium**
-- **Likelihood of recruiter screen:** **Low**
-- **Likelihood of hiring manager screen:** **Medium**
+- **Signal strength: Recruiter:** **Low**
+- **Signal strength: HM:** **Medium**
 
 ### PART 6 — x
 """,
@@ -236,8 +242,8 @@ def test_write_overview_chart_html_smoke(tmp_path: Path) -> None:
 - **Fit on paper:** **High**
 - **Actual capability (inferred):** **Medium**
 - **Narrative coherence (for this JD):** **Medium**
-- **Likelihood of recruiter screen:** **Medium**
-- **Likelihood of hiring manager screen:** **Medium**
+- **Signal strength: Recruiter:** **Medium**
+- **Signal strength: HM:** **Medium**
 ### PART 6
 """,
         encoding="utf-8",
