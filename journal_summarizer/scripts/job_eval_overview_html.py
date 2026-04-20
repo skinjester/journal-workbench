@@ -290,17 +290,6 @@ def _sort_jobs_for_dot_plots(
     return jobs2, z2, zt2
 
 
-def _tier_score_x_range(z: Sequence[Sequence[Optional[float]]]) -> Tuple[float, float]:
-    """Pad min/max chart scores (0–100) so dots are not crushed into one vertical strip."""
-    flat = [v for row in z for v in row if v is not None]
-    if not flat:
-        return 0.0, 100.0
-    lo, hi = min(flat), max(flat)
-    span = hi - lo
-    pad = max(2.0, span * 0.35) if span > 1e-9 else 4.0
-    return max(0.0, lo - pad), min(100.0, hi + pad)
-
-
 # Imputed chart score for missing cells in radar (aligned with unknown-tier chart encoding).
 _RADAR_MISSING_SCORE = 26.0
 
@@ -467,22 +456,7 @@ def _fig_heatmap(jobs: List[str], dims: List[str], z: List[List[Optional[float]]
                 colorscale=HEATMAP_MONO_COLORSCALE,
                 cmin=COLOR_LO,
                 cmax=COLOR_HI,
-                colorbar=dict(
-                    orientation="h",
-                    x=0.5,
-                    xanchor="center",
-                    y=-0.08,
-                    yanchor="top",
-                    len=0.6,
-                    thickness=10,
-                    title=dict(
-                        text="Chart score (ordinal → 0–100)",
-                        side="top",
-                        font=dict(color=MUTED, size=10),
-                    ),
-                    tickfont=dict(color=MUTED, size=9),
-                    tickvals=[0, 20, 40, 60, 80, 100],
-                ),
+                showscale=False,
                 line=dict(width=0),
             ),
             hovertemplate=hovers,
@@ -564,7 +538,7 @@ def _fig_radar(jobs: List[str], dims: List[str], z: List[List[Optional[float]]])
         height=560,
         # Explicit margins so angular labels on every side have room; legend on the right
         # gets its own column via the polar domain above.
-        margin=dict(l=110, r=40, t=40, b=60),
+        margin=dict(l=110, r=40, t=28, b=60),
         legend=dict(
             x=0.66,
             y=0.5,
@@ -587,7 +561,9 @@ def _fig_dot_plots(
 ) -> go.Figure:
     jobs, z, z_text = _sort_jobs_for_dot_plots(jobs, dims, z, z_text)
     n_dims = len(dims)
-    x0, x1 = _tier_score_x_range(z)
+    # Fixed 0–100 x range so the full chart-score scale is visible; a zoomed min–max made the
+    # left edge read as a non-zero "floor" and sat dots flush against the job labels.
+    x_lo, x_hi = 0.0, 100.0
     wrapped_titles = [_wrap_dim_label(d) for d in dims]
     fig = make_subplots(
         rows=1,
@@ -629,20 +605,29 @@ def _fig_dot_plots(
         )
         fig.update_xaxes(
             title_text="",
-            range=[x0, x1],
+            range=[x_lo, x_hi],
+            dtick=20,
             showticklabels=False,
             showgrid=True,
+            gridcolor="rgba(151, 173, 210, 0.10)",
             row=1,
             col=j + 1,
         )
-    fig.update_yaxes(row=1, col=1, automargin=True, tickfont=dict(size=10, color=MUTED))
+    # ticklabelstandoff: gap between the y tick labels and the plot (so long job titles do not run into the grid).
+    fig.update_yaxes(
+        row=1,
+        col=1,
+        automargin=True,
+        tickfont=dict(size=10, color=MUTED),
+        ticklabelstandoff=16,
+    )
     for c in range(2, n_dims + 1):
         fig.update_yaxes(showticklabels=False, row=1, col=c)
     # Match subplot title font to the dot-matrix column header style.
     fig.update_annotations(font=dict(size=11, color=TEXT))
     fig.update_layout(
         height=max(480, 22 * len(jobs) + 80),
-        margin=dict(l=220, r=20, t=68, b=40),
+        margin=dict(l=300, r=20, t=52, b=40),
     )
     return fig
 
@@ -693,7 +678,7 @@ def _fig_job_grouped_bars(
         bargap=0.28,
         bargroupgap=0.035,
         xaxis=dict(
-            title=dict(text="Chart score (ordinal → 0–100)", font=dict(size=11, color=MUTED)),
+            title=None,
             range=[0.0, 100.0],
             showgrid=True,
             gridcolor="rgba(151,173,210,0.10)",
@@ -754,49 +739,26 @@ def write_overview_chart_html(
     mean_tier_label = _mean_numeric_to_nearest_tier_label(avg_all)
 
     n_dim = len(dims)
-    mini_caveat = (
-        f" Rows marked {MINI_FAMILY_GLYPH} were evaluated by a Mini-tier model; "
-        "tier ceiling tends to be generous, so compare like-with-like when possible."
-    ) if has_mini else ""
-    figures: List[Tuple[str, str, go.Figure]] = [
-        (
-            "Dot matrix",
-            "Each cell is a circle: color follows the 0–100 chart score; marker size uses discrete steps by nearest ordinal tier so adjacent tiers are easy to tell apart. Column headers are tilted so the grid stays compact without crowding. Columns are PART 5 verdicts plus rubric tiers (ATS / recruiter hygiene and Risk Factors omitted). Hover for the tier label."
-            + mini_caveat,
-            _fig_heatmap(display_jobs, dims, z, z_text),
-        ),
-        (
-            "Radar",
-            "Shape of each job across dimensions. Radial rings are equally spaced ordinal tiers (outer ring is Very High tier but unlabeled). Toggle traces in the legend when overlap is dense. Missing cells use the unknown-tier score for nearest-tier mapping."
-            + mini_caveat,
-            _fig_radar(display_jobs, dims, z),
-        ),
-        (
-            "Grouped bars",
-            "One horizontal row per job (sorted by weighted mean chart score). Each dimension is a bar in the group: length = 0–100 chart score; fill color = nearest ordinal on a monochrome blue ramp (darker = weaker, lighter = stronger). Rows are tall enough that eleven dimensions read as separate stripes, not a barcode. Legend lists dimensions—click to hide/show. Missing cells use the unknown-tier score."
-            + mini_caveat,
-            _fig_job_grouped_bars(display_jobs, dims, z, z_text),
-        ),
-        (
-            "Dot plots",
-            f"{n_dim} small multiples for quick within-dimension comparison. Rows sort by weighted mean chart score (rubric weights 25/20/15/15/10/5 + equal 20 per PART 5 headline)."
-            + mini_caveat,
-            _fig_dot_plots(display_jobs, dims, z, z_text),
-        ),
+    figures: List[Tuple[str, go.Figure]] = [
+        ("Dot matrix", _fig_heatmap(display_jobs, dims, z, z_text)),
+        ("Radar", _fig_radar(display_jobs, dims, z)),
+        ("Grouped bars", _fig_job_grouped_bars(display_jobs, dims, z, z_text)),
+        ("Dot plots", _fig_dot_plots(display_jobs, dims, z, z_text)),
     ]
 
     sections: List[str] = []
     nav_links: List[str] = []
-    for i, (title, blurb, fig) in enumerate(figures):
+    for i, (title, fig) in enumerate(figures):
         fig.update_layout(template=studio_template, font=dict(size=12))
         heatmap_wide = title == "Dot matrix"
         if heatmap_wide:
             lm = _heatmap_left_margin_px(jobs)
             hw = _heatmap_figure_width_px(n_dim)
+            # Top margin: room for x-axis (side=top) + tilted tick labels only; keep chart snug to the section title.
             fig.update_layout(
                 width=hw,
                 autosize=False,
-                margin=dict(l=lm, r=28, t=168, b=64),
+                margin=dict(l=lm, r=28, t=100, b=64),
                 xaxis=dict(
                     tickangle=HEATMAP_X_TICK_ANGLE,
                     tickfont=dict(size=HEATMAP_DIM_LABEL_FONT_PX, color=MUTED),
@@ -825,7 +787,7 @@ def write_overview_chart_html(
                 width=max(1080, min(2200, 900 + n_dim * 18)),
                 height=max(640, min(5600, row_px * len(jobs) + 280)),
                 autosize=False,
-                margin=dict(l=lm, r=24, t=44, b=168),
+                margin=dict(l=lm, r=24, t=32, b=168),
             )
         elif title == "Dot plots":
             fig.update_layout(
@@ -846,12 +808,13 @@ def write_overview_chart_html(
             f'    <div class="viz-kicker">{i + 1:02d}</div>'
             f'    <div class="viz-copy">'
             f"      <h2>{html_module.escape(title)}</h2>"
-            f'      <p class="blurb">{html_module.escape(blurb)}</p>'
             f"    </div>"
             f"  </div>"
             f'  <div class="{shell_class}">{chunk}</div>'
             f"</section>"
         )
+
+    nav_tabs = "".join(nav_links)
 
     doc = f"""<!DOCTYPE html>
 <html lang="en">
@@ -871,6 +834,8 @@ def write_overview_chart_html(
       --accent: {ACCENT};
       --accent-2: {ACCENT_2};
       --shadow: 0 24px 80px rgba(0, 0, 0, 0.38);
+      /* Align hero summary copy and "On this page" with the same left inset. */
+      --hero-inline-pad: 1.35rem;
     }}
     * {{ box-sizing: border-box; }}
     html {{ scroll-behavior: smooth; }}
@@ -926,51 +891,50 @@ def write_overview_chart_html(
       font-size: 1rem;
       line-height: 1.65;
     }}
-    .hero-meta {{
-      margin-top: 24px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 14px;
+    .hero-summary {{
+      position: relative;
+      z-index: 1;
+      margin-top: 22px;
+      padding: 1.1rem var(--hero-inline-pad);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(0, 0, 0, 0.22);
     }}
-    .hero-meta .metric-pair {{
-      flex: 1 1 100%;
+    .summary-grid {{
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem 1.75rem;
+      align-items: start;
     }}
-    .hero-meta .metric-pair .metric {{
+    .summary-item {{
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
       min-width: 0;
     }}
-    .metric {{
-      min-width: 170px;
-      padding: 16px 18px;
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 18px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
-      backdrop-filter: blur(14px);
-    }}
-    .metric .label {{
+    .summary-k {{
       display: block;
-      color: var(--muted);
-      font-size: 0.78rem;
+      font-size: 0.72rem;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      margin-bottom: 8px;
+      color: var(--muted);
+      font-weight: 600;
     }}
-    .metric strong {{
+    .summary-v {{
       display: block;
-      font-size: 1.3rem;
-      line-height: 1.1;
-      letter-spacing: -0.03em;
+      font-size: 1.12rem;
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      word-break: break-word;
     }}
-    .metric small.metric-hint {{
+    .summary-hint {{
       display: block;
-      margin-top: 6px;
+      margin: 0;
       font-size: 0.72rem;
       font-weight: 500;
-      line-height: 1.35;
+      line-height: 1.4;
       color: var(--muted);
-      letter-spacing: 0.01em;
     }}
     .submeta {{
       margin-top: 18px;
@@ -985,21 +949,47 @@ def write_overview_chart_html(
       padding: 0.2rem 0.5rem;
     }}
     .quick-nav {{
-      margin-top: 22px;
+      position: relative;
+      z-index: 1;
+      margin-top: 0.9rem;
+      /* Same horizontal inset as .hero-summary so labels line up with .summary-k. */
+      padding: 0 var(--hero-inline-pad);
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
+      align-items: center;
+      column-gap: 0.75rem;
+      row-gap: 0.5rem;
     }}
-    .quick-nav a {{
+    .quick-nav-eyebrow {{
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      font-weight: 600;
+      flex-shrink: 0;
+      /* Optical vertical alignment with pill tab cap-height */
+      line-height: 1;
+      padding-top: 0.1rem;
+    }}
+    .quick-nav-tabs {{
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }}
+    .quick-nav-tabs a {{
       color: var(--text);
       text-decoration: none;
+      font-size: 0.9rem;
+      line-height: 1.2;
       padding: 0.7rem 0.95rem;
       border-radius: 999px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
     }}
-    .quick-nav a:hover {{
+    .quick-nav-tabs a:hover {{
       transform: translateY(-1px);
       border-color: rgba(119, 230, 255, 0.34);
       background: rgba(119, 230, 255, 0.08);
@@ -1020,8 +1010,8 @@ def write_overview_chart_html(
       display: grid;
       grid-template-columns: auto 1fr;
       gap: 16px;
-      align-items: start;
-      margin-bottom: 8px;
+      align-items: center;
+      margin-bottom: 2px;
     }}
     .viz-kicker {{
       min-width: 50px;
@@ -1037,19 +1027,12 @@ def write_overview_chart_html(
       letter-spacing: 0.08em;
     }}
     .viz-copy h2 {{
-      margin: 2px 0 6px;
+      margin: 0;
       font-size: 1.25rem;
       letter-spacing: -0.02em;
     }}
-    .blurb {{
-      margin: 0;
-      max-width: 72ch;
-      color: var(--muted);
-      line-height: 1.65;
-      font-size: 0.97rem;
-    }}
     .chart-shell {{
-      padding: 2px 8px 0;
+      padding: 0 8px 0;
       border-radius: 20px;
       background:
         linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)),
@@ -1074,7 +1057,7 @@ def write_overview_chart_html(
       .viz-card {{ padding: 18px; border-radius: 20px; }}
       .viz-head {{ grid-template-columns: 1fr; }}
       .viz-kicker {{ width: 50px; }}
-      .hero-meta .metric-pair {{ grid-template-columns: 1fr; }}
+      .summary-grid {{ grid-template-columns: 1fr; }}
     }}
   </style>
 </head>
@@ -1083,20 +1066,35 @@ def write_overview_chart_html(
     <header class="hero">
       <h1>Job evaluation comparative views</h1>
       <p class="lede">A polished dark-mode review board for comparing role fit across the current evaluation set.{html_module.escape(" " + MINI_FAMILY_GLYPH + " marks reports evaluated by a Mini-tier model (tier ceiling tends to be generous).") if has_mini else ""}</p>
-      <div class="hero-meta">
-        <div class="metric"><span class="label">Jobs in scope</span><strong>{len(rows)}</strong></div>
-        <div class="metric"><span class="label">Verdict dimensions</span><strong>{len(dims)}</strong></div>
-        <div class="metric" title="Ordinal tiers use an internal ~93–100 mapping for charting. Shown value is the tier nearest the batch mean—not a 0–100% grade.">
-          <span class="label">Mean verdict tier</span>
-          <strong>{html_module.escape(mean_tier_label)}</strong>
-          <small class="metric-hint">Nearest ordinal label · not a percentage score</small>
-        </div>
-        <div class="metric-pair">
-          <div class="metric"><span class="label">Top overall</span><strong>{html_module.escape(best_job)}</strong></div>
-          <div class="metric"><span class="label">Lowest overall</span><strong>{html_module.escape(worst_job)}</strong></div>
+      <div class="hero-summary" role="region" aria-label="Batch summary">
+        <div class="summary-grid">
+          <div class="summary-item">
+            <span class="summary-k">Jobs in scope</span>
+            <span class="summary-v">{len(rows)}</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-k">Verdict dimensions</span>
+            <span class="summary-v">{len(dims)}</span>
+          </div>
+          <div class="summary-item" title="Ordinal tiers use an internal ~93–100 mapping for charting. Shown value is the tier nearest the batch mean—not a 0–100% grade.">
+            <span class="summary-k">Mean verdict tier</span>
+            <span class="summary-v">{html_module.escape(mean_tier_label)}</span>
+            <span class="summary-hint">Nearest ordinal label, not a percentage.</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-k">Top overall</span>
+            <span class="summary-v">{html_module.escape(best_job)}</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-k">Lowest overall</span>
+            <span class="summary-v">{html_module.escape(worst_job)}</span>
+          </div>
         </div>
       </div>
-      <nav class="quick-nav">{"".join(nav_links)}</nav>
+      <nav class="quick-nav" aria-label="On this page">
+        <span class="quick-nav-eyebrow">On this page</span>
+        <div class="quick-nav-tabs">{nav_tabs}</div>
+      </nav>
     </header>
     <main class="dashboard">
       {"".join(sections)}
