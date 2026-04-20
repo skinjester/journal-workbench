@@ -11,8 +11,9 @@ Dedupe policy:
   Group by <JD basename> (strip the ".eval..." suffix), pick latest mtime.
 
 Output:
-  Markdown with a summary table + per-job sections containing PART 5 verdict lines only.
-  Optional `--html` / `--html-out`: standalone Plotly HTML dashboard (see `job_eval_overview_html.py`).
+  Markdown with a PART 5-only summary table + per-job PART 5 verdict lines + PART 6 rubric lines.
+  Optional `--html` / `--html-out`: Plotly HTML dashboard with one combined score matrix (PART 5 + PART 6 rubric;
+  see `job_eval_overview_html.py`).
 """
 
 from __future__ import annotations
@@ -21,7 +22,7 @@ import argparse
 import datetime as dt
 import re
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Set, Tuple
 
@@ -33,9 +34,11 @@ REPORT_NAME_RE = re.compile(
 
 JOB_LINE_RE = re.compile(r"^\s*-\s*`job`\s*:\s*(.+?)\s*$")
 JD_SOURCE_LINE_RE = re.compile(r"^\s*-\s*`jd_source`\s*:\s*(.+?)\s*$")
+MODEL_USED_LINE_RE = re.compile(r"^\s*-\s*`model_used`\s*:\s*(.+?)\s*$")
 
 PART5_START_RE = re.compile(r"^#{1,6}\s*PART\s*5\b", re.IGNORECASE)
 PART6_START_RE = re.compile(r"^#{1,6}\s*PART\s*6\b", re.IGNORECASE)
+RUBRIC_HEADING_RE = re.compile(r"^#{4}\s*Rubric\s*$", re.IGNORECASE)
 
 @dataclass(frozen=True)
 class VerdictRule:
@@ -45,17 +48,18 @@ class VerdictRule:
 
 # Leading rating phrase (single match at start of remainder); kept for edge fallbacks.
 _RATING_AT_START = re.compile(
-    r"^\s*((?:Very\s+)?(?:"
-    r"Medium(?:[-–—]High|\s+High)|"
+    r"^\s*((?:Very\s+)?(?:High|Low)|"
+    r"Medium(?:[-–—](?:High|Low)|\s+(?:High|Low))|"
     r"Medium|High|Low|"
-    r"N/A|TBD|Unknown"
-    r"))\b",
+    r"N/A|TBD|Unknown)\b",
     re.IGNORECASE,
 )
 
-# Scan full verdict text for all tier tokens (Medium–High before bare Medium). Used to pick highest tier.
+# Scan full verdict text for all tier tokens (longer phrases before shorter: Very Low before Low, etc.).
 _ALL_RATING_TOKENS_RE = re.compile(
-    r"\b(?:Very\s+High|High|Medium(?:[-–—]High|\s+High)|Medium|Low|Unknown|N/A|TBD)\b",
+    r"\b(?:Very\s+High|Very\s+Low|"
+    r"Medium(?:[-–—]High|\s+High)|Medium(?:[-–—]Low|\s+Low)|"
+    r"High|Medium|Low|Unknown|N/A|TBD)\b",
     re.IGNORECASE,
 )
 
@@ -103,6 +107,70 @@ VERDICT_RULES: Tuple[VerdictRule, ...] = (
     ),
 )
 
+# PART 6 `#### Rubric` bullets (column labels match chart / overview dump).
+RUBRIC_TABLE_COLUMNS: Tuple[str, ...] = (
+    "Problem Match",
+    "Relevant Proof",
+    "Recency",
+    "Role Readability",
+    "Differentiation",
+    "Risk Factors",
+    "Narrative Coherence (rubric)",
+    "ATS / recruiter hygiene",
+)
+
+RUBRIC_RULES: Tuple[VerdictRule, ...] = (
+    VerdictRule(
+        "Problem Match",
+        re.compile(r"^\*{0,2}Problem Match(?:\s*\(\d+%\))?\*{0,2}\s*:\s*", re.IGNORECASE),
+    ),
+    VerdictRule(
+        "Relevant Proof",
+        re.compile(r"^\*{0,2}Relevant Proof(?:\s*\(\d+%\))?\*{0,2}\s*:\s*", re.IGNORECASE),
+    ),
+    VerdictRule(
+        "Recency",
+        re.compile(r"^\*{0,2}Recency(?:\s*\(\d+%\))?\*{0,2}\s*:\s*", re.IGNORECASE),
+    ),
+    VerdictRule(
+        "Role Readability",
+        re.compile(r"^\*{0,2}Role Readability(?:\s*\(\d+%\))?\*{0,2}\s*:\s*", re.IGNORECASE),
+    ),
+    VerdictRule(
+        "Differentiation",
+        re.compile(r"^\*{0,2}Differentiation(?:\s*\(\d+%\))?\*{0,2}\s*:\s*", re.IGNORECASE),
+    ),
+    VerdictRule(
+        "Risk Factors",
+        re.compile(r"^\*{0,2}Risk Factors(?:\s*\(\d+%\))?\*{0,2}\s*:\s*", re.IGNORECASE),
+    ),
+    VerdictRule(
+        "Narrative Coherence (rubric)",
+        re.compile(r"^\*{0,2}Narrative Coherence(?:\s*\(5%\))?\*{0,2}\s*:\s*", re.IGNORECASE),
+    ),
+    VerdictRule(
+        "ATS / recruiter hygiene",
+        re.compile(r"^\*{0,2}ATS\s*/\s*recruiter hygiene\*{0,2}\s*:\s*", re.IGNORECASE),
+    ),
+)
+
+COMBINED_CHART_COLUMNS: Tuple[str, ...] = VERDICT_TABLE_COLUMNS + RUBRIC_TABLE_COLUMNS
+
+# HTML charts (dot matrix, radar, dot plots): omit pass/fail ATS row and Risk Factors (still in rubric / tables).
+_CHART_OMIT_COLUMNS: frozenset[str] = frozenset({"ATS / recruiter hygiene", "Risk Factors"})
+CHART_SCORE_COLUMNS: Tuple[str, ...] = tuple(c for c in COMBINED_CHART_COLUMNS if c not in _CHART_OMIT_COLUMNS)
+
+# Canonical seven-step ordinals (weakest → strongest). Legacy High / Medium / Low still accepted.
+SEVEN_STEP_ORDINALS: Tuple[str, ...] = (
+    "Very Low",
+    "Low",
+    "Medium-Low",
+    "Medium",
+    "Medium-High",
+    "High",
+    "Very High",
+)
+
 
 def _strip_md_noise(s: str) -> str:
     s = s.strip()
@@ -126,6 +194,27 @@ def extract_jd_source(text: str) -> str:
         if m:
             return _strip_md_noise(m.group(1))
     return ""
+
+
+def extract_model_used(text: str) -> str:
+    for line in text.splitlines():
+        m = MODEL_USED_LINE_RE.match(line)
+        if m:
+            return _strip_md_noise(m.group(1))
+    return ""
+
+
+def _is_mini_family_model(model_used: str) -> bool:
+    """Heuristic: true when the evaluator reports a lighter-weight / ceiling-prone model.
+
+    Audit evidence (Coupa JD evaluated twice): Mini-tier outputs cluster near the ceiling
+    while full-size outputs produced honest Mediums on the same inputs. Callers use this
+    to flag the row visually without altering scoring.
+    """
+    if not model_used:
+        return False
+    s = model_used.lower()
+    return any(tok in s for tok in ("mini", " nano", "-nano", "fast"))
 
 
 def jd_basename_from_source(jd_source: str) -> str:
@@ -161,16 +250,50 @@ def extract_part5_section(text: str) -> str:
     return "\n".join(out).strip()
 
 
+def extract_part6_section(text: str) -> str:
+    """Text after the PART 6 heading through end of file (for rubric extraction)."""
+    lines = text.splitlines()
+    start_idx: Optional[int] = None
+    for i, line in enumerate(lines):
+        if PART6_START_RE.match(line.strip()):
+            start_idx = i + 1
+            break
+    if start_idx is None:
+        return ""
+    return "\n".join(lines[start_idx:]).strip()
+
+
+def extract_rubric_subsection(part6: str) -> str:
+    """Content under `#### Rubric` until the next `####` heading."""
+    lines = part6.splitlines()
+    out: List[str] = []
+    in_rubric = False
+    for line in lines:
+        stripped = line.strip()
+        if not in_rubric:
+            if RUBRIC_HEADING_RE.match(stripped):
+                in_rubric = True
+            continue
+        if stripped.startswith('#### ') and not RUBRIC_HEADING_RE.match(stripped):
+            break
+        out.append(line)
+    return "\n".join(out).strip()
+
+
 def _normalize_rating_token_for_table(raw: str) -> str:
-    """Canonical spelling for overview cells (en dash in Medium–High)."""
+    """Canonical spelling for overview cells (ASCII hyphen in Medium-High / Medium-Low)."""
     s = re.sub(r"\s+", " ", raw.strip())
     low = s.lower().replace("–", "-").replace("—", "-")
     if low.startswith("very high"):
         return "Very High"
+    if low.startswith("very low"):
+        return "Very Low"
+    if low in ("medium-high", "medium high") or low.replace(" ", "") in ("mediumhigh", "medium-high"):
+        return "Medium-High"
+    if low in ("medium-low", "medium low") or low.replace(" ", "") in ("mediumlow", "medium-low"):
+        return "Medium-Low"
     if low == "high":
         return "High"
-    if low in ("medium-high", "medium high") or low.replace(" ", "") in ("mediumhigh", "medium-high"):
-        return "Medium–High"
     if low == "medium":
         return "Medium"
     if low == "low":
@@ -187,7 +310,7 @@ def _normalize_rating_token_for_table(raw: str) -> str:
 def _rating_tier_rank(token: str) -> int:
     """
     Higher = better / stronger tier for overview when multiple ratings appear in one line.
-    Unknown / N/A / TBD rank below substantive High/Medium/Low tiers.
+    Supports 7-point substantive scale (Very Low … Very High); Unknown / N/A / TBD below those.
     """
     n = _normalize_rating_token_for_table(token).lower().replace("–", "-").replace("—", "-")
     order = (
@@ -195,7 +318,9 @@ def _rating_tier_rank(token: str) -> int:
         "high",
         "medium-high",
         "medium",
+        "medium-low",
         "low",
+        "very low",
         "unknown",
         "n/a",
         "tbd",
@@ -205,27 +330,25 @@ def _rating_tier_rank(token: str) -> int:
         idx = order.index(n)
     except ValueError:
         return -1
-    return 100 - idx  # very high -> 100, tbd -> 92
+    return 100 - idx
 
 
 def rating_only_for_summary(cell_after_label: str) -> str:
     """
-    One cell value for the summary table: a single tier (High, Medium–High, Unknown, …).
+    One cell value for the summary table: a single tier (Very High … Very Low, Unknown, …).
 
-    If the verdict text lists multiple tiers (e.g. semicolons: Medium–High for X; Medium for Y),
-    uses the **highest** tier. If exactly one explicit Unknown / N/A / TBD appears with no higher
-    tier, that value is shown.
+    If the verdict text lists multiple tiers (e.g. ``Medium — though craft is High``),
+    uses the **first** tier token that appears. This preserves the author's headline
+    judgment rather than letting nuance language upgrade the cell.
     """
     t = cell_after_label.strip()
     if not t:
         return ""
 
-    found = [m.group(0) for m in _ALL_RATING_TOKENS_RE.finditer(t)]
-    if found:
-        best = max(found, key=lambda tok: (_rating_tier_rank(tok), len(tok)))
-        return _normalize_rating_token_for_table(best)
+    m_first = _ALL_RATING_TOKENS_RE.search(t)
+    if m_first:
+        return _normalize_rating_token_for_table(m_first.group(0))
 
-    # No known tier token: legacy single-token / first-word fallback
     t2 = t.split("(", 1)[0].strip()
     t2 = t2.split("[", 1)[0].strip()
     if " — " in t2:
@@ -253,6 +376,34 @@ def verdict_line_to_table_cell(line: str, column: str) -> str:
     return rating_only_for_summary(s)
 
 
+def _normalize_ats_cell(after_label: str) -> str:
+    """Single-cell Pass or Fail for ATS / recruiter hygiene."""
+    s = after_label.strip()
+    if not s:
+        return ""
+    first = s.split(None, 1)[0].lower().rstrip(".,;:")
+    if first.startswith("pass"):
+        return "Pass"
+    if first.startswith("fail"):
+        return "Fail"
+    return ""
+
+
+def rubric_line_to_table_cell(line: str, column: str) -> str:
+    """Rating only (e.g. High), or Pass/Fail for ATS column."""
+    if not line:
+        return ""
+    s = line[2:].strip() if line.startswith("- ") else line.strip()
+    s = _strip_md_noise(s)
+    for rule in RUBRIC_RULES:
+        if rule.column == column:
+            after = rule.pattern.sub("", s).strip()
+            if column == "ATS / recruiter hygiene":
+                return _normalize_ats_cell(after)
+            return rating_only_for_summary(after)
+    return rating_only_for_summary(s)
+
+
 def tier_cell_to_numeric(cell: str) -> Optional[float]:
     """
     Map a summary-table cell string (post-`verdict_line_to_table_cell`) to a numeric score for charts.
@@ -271,25 +422,33 @@ def tier_cell_to_numeric(cell: str) -> Optional[float]:
 
 def tier_cell_to_chart_numeric(cell: str) -> Optional[float]:
     """
-    Map an ordinal verdict cell to a **wide** 0–100 score for HTML charts only.
+    Map an ordinal verdict cell to a 0–100 score for HTML charts.
 
-    Collated markdown tables still show the ordinal label; this spread avoids squeezing
-    all tiers into a 92–100 band. Unknown / N/A / TBD sit below Low.
+    Uses **equal** 14-point spacing across the seven substantive tiers so dot-matrix
+    and color chart positions read linearly and match the radar chart's equal-spaced
+    radial rings. Unknown / N/A / TBD sit below Very Low.
     """
     t = (cell or "").strip()
     if not t:
         return None
+    tl = t.lower()
+    if tl.startswith("pass"):
+        return 92.0
+    if tl.startswith("fail"):
+        return 8.0
     canon = _normalize_rating_token_for_table(t)
     n = canon.lower().replace("–", "-").replace("—", "-")
     chart: Dict[str, float] = {
+        "very low": 8.0,
+        "low": 22.0,
+        "medium-low": 36.0,
+        "medium": 50.0,
+        "medium-high": 64.0,
+        "high": 78.0,
         "very high": 92.0,
-        "high": 80.0,
-        "medium-high": 62.0,
-        "medium": 40.0,
-        "low": 15.0,
-        "unknown": 28.0,
-        "n/a": 22.0,
-        "tbd": 18.0,
+        "unknown": 4.0,
+        "n/a": 3.0,
+        "tbd": 2.0,
     }
     if n not in chart:
         return None
@@ -323,6 +482,33 @@ def extract_verdict_lines(part5: str) -> Dict[str, str]:
         for rule in VERDICT_RULES:
             if rule.pattern.match(payload):
                 # First win keeps the line (stable if duplicates exist)
+                found.setdefault(rule.column, line)
+                break
+
+    return found
+
+
+def extract_rubric_lines(rubric_block: str) -> Dict[str, str]:
+    """
+    Return mapping column key -> raw markdown line for PART 6 `#### Rubric` bullets.
+    """
+    found: Dict[str, str] = {}
+    if not rubric_block:
+        return found
+
+    for raw_line in rubric_block.splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        if line.startswith("|"):
+            continue
+        if line.startswith("- "):
+            payload = line[2:].strip()
+        else:
+            payload = line
+
+        for rule in RUBRIC_RULES:
+            if rule.pattern.match(payload):
                 found.setdefault(rule.column, line)
                 break
 
@@ -471,6 +657,8 @@ class CollatedRow:
     jd_mismatch: bool
     report_rel: str
     verdicts: Dict[str, str]
+    rubric: Dict[str, str] = field(default_factory=dict)
+    model_used: str = ""
 
 
 def build_overview(repo_root: Path, rows: List[CollatedRow]) -> str:
@@ -482,7 +670,7 @@ def build_overview(repo_root: Path, rows: List[CollatedRow]) -> str:
     lines.append("")
     lines.append("## Summary table")
     lines.append("")
-    headers = ["JD key", "Report", *VERDICT_TABLE_COLUMNS]
+    headers = ["JD key", "Report", "Model", *VERDICT_TABLE_COLUMNS]
     lines.append(md_table_row(headers))
     lines.append(md_table_row(["---"] * len(headers)))
 
@@ -491,11 +679,23 @@ def build_overview(repo_root: Path, rows: List[CollatedRow]) -> str:
 
     for r in rows:
         report_link = f"[{r.report_rel}]({r.report_rel})"
-        cells = [r.jd_key, report_link] + [short_verdict(col, r.verdicts) for col in VERDICT_TABLE_COLUMNS]
+        model_cell = r.model_used or "_missing_"
+        if r.model_used and _is_mini_family_model(r.model_used):
+            model_cell = f"◇ {r.model_used}"
+        cells = [r.jd_key, report_link, model_cell] + [
+            short_verdict(col, r.verdicts) for col in VERDICT_TABLE_COLUMNS
+        ]
         lines.append(md_table_row(cells))
 
+    if any(r.model_used and _is_mini_family_model(r.model_used) for r in rows):
+        lines.append("")
+        lines.append(
+            "_◇ evaluated by a Mini-tier model; tier ceiling tends to be generous. "
+            "Compare like-with-like when possible._"
+        )
+
     lines.append("")
-    lines.append("## PART 5 verdict lines (per job)")
+    lines.append("## Per-job detail (PART 5 + PART 6 rubric)")
     lines.append("")
 
     for r in rows:
@@ -514,14 +714,25 @@ def build_overview(repo_root: Path, rows: List[CollatedRow]) -> str:
         lines.append("")
         if not r.verdicts:
             lines.append("_Could not find PART 5 verdict bullets._")
-            lines.append("")
-            continue
-        for label in VERDICT_TABLE_COLUMNS:
-            line = r.verdicts.get(label, "")
-            if line:
-                lines.append(line)
-            else:
-                lines.append(f"- {label}: _missing_")
+        else:
+            for label in VERDICT_TABLE_COLUMNS:
+                line = r.verdicts.get(label, "")
+                if line:
+                    lines.append(line)
+                else:
+                    lines.append(f"- {label}: _missing_")
+        lines.append("")
+        lines.append("PART 6 rubric lines:")
+        lines.append("")
+        if not r.rubric:
+            lines.append("_Could not find PART 6 `#### Rubric` bullets._")
+        else:
+            for label in RUBRIC_TABLE_COLUMNS:
+                line = r.rubric.get(label, "")
+                if line:
+                    lines.append(line)
+                else:
+                    lines.append(f"- {label}: _missing_")
         lines.append("")
 
     return "\n".join(lines).rstrip() + "\n"
@@ -541,9 +752,13 @@ def build_collated_rows(reports_dir: Path, repo_root: Path) -> List[CollatedRow]
         jd_source = extract_jd_source(text)
         inferred_jd = jd_basename_from_source(jd_source)
         jd_mismatch = bool(inferred_jd and inferred_jd != jd_key)
+        model_used = extract_model_used(text)
 
         part5 = extract_part5_section(text)
         verdicts = extract_verdict_lines(part5)
+        part6 = extract_part6_section(text)
+        rubric_block = extract_rubric_subsection(part6)
+        rubric = extract_rubric_lines(rubric_block)
         rows.append(
             CollatedRow(
                 jd_key=jd_key,
@@ -553,6 +768,8 @@ def build_collated_rows(reports_dir: Path, repo_root: Path) -> List[CollatedRow]
                 jd_mismatch=jd_mismatch,
                 report_rel=rel_posix(repo_root, path),
                 verdicts=verdicts,
+                rubric=rubric,
+                model_used=model_used,
             )
         )
     return rows

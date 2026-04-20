@@ -1,21 +1,26 @@
 # Job evaluation template (canonical)
 
-`template_version`: **v1.9.0**  
+`template_version`: **v1.14.0**  
 `last_updated`: **2026-04-20**
 
 ## Changelog
 
-- **v1.9.0 (2026-04-20)**: Rename the last two PART 5 headline verdict lines to **signal strength** (non-predictive): **`Signal strength: Recruiter`** and **`Signal strength: HM`**. These tiers measure **how strong the fit signal is** in **resume + portfolio** at a recruiter-style read vs a hiring-manager-style read—**not** odds of getting a screen or interview. Collated overview column headers: **Signal Strength (Recruiter)** / **Signal Strength (HM)**. Legacy wording *Likelihood of recruiter/hiring manager screen* remains accepted by collation for older reports.
-- **v1.8.0 (2026-04-20)**: **Balanced risk tone:** acknowledge material screening risks without **overweighting** them in prose. Direct, evidence-bound realism is **not** catastrophizing, repetitive downside stacking, or letting one rubric row (e.g. Risk Factors **High**) dominate the voice of the whole report. Require **symmetric specificity** between “advance” and “concern” bullets; where resume/portfolio **partially** mitigates a gap, say so alongside the concern. Add **JD calibration** for game/AAA postings (must-haves vs wishlist; state assumptions). **Weighted synthesis** must include what **mitigates** main hesitations (submittable materials only), parallel to what would make someone hesitate. PART 5 relabels the downside block to **screening concerns / gaps** (not a personal “reject” essay).
-- **v1.7.0 (2026-04-19)**: Add **Narrative coherence (for this JD)** as the fifth PART 5 headline verdict—whether **primary resume + portfolio** tell one coherent application story for this posting (distinct from fit-on-paper match and from proof depth). Collated overview/charts use **five** verdict columns. HTML dashboards use a **wider chart encoding** of ordinals plus an optional **within-batch rank** view for comparing roles in one overview.
-- **v1.6.0 (2026-04-19)**: Remove **Likelihood of panel loop survival** from PART 5 headline verdicts. It is too process-dependent and speculative to score from resume/portfolio/JD; interview-loop nuance belongs in PART 6 **Actionable output** if useful. Collated overview now uses **four** verdict columns.
-- **v1.5.0 (2026-04-18)**: After PART 2, select a **primary resume** for PART 5–6. **Headline verdict tiers (PART 5) and rubric scores tied to “the application package”** must be derived from **that primary resume + portfolio only**—what a candidate submits. Journals/summaries (PART 3) inform **resume/portfolio tuning** and honesty; they **must not** upgrade PART 5 headline tiers unless the same claim is supportable from resume+portfolio. Redefine PART 5 **Actual capability (inferred)** as capability **verifiable from primary resume + portfolio**, not private logs.
-- **v1.4.0 (2026-04-16)**: Add scanability defaults for report writing, require clearer internal substructure in dense sections, and fix stale `resumes/gboodhoo-resume-games.pdf` references to `resumes/gboodhoo-resume-games.md`.
-- **v1.3.1 (2026-04-15)**: Update canonical games resume reference from `resumes/gboodhoo-resume-games.pdf` to `resumes/gboodhoo-resume-games.md`.
-- **v1.3.0 (2026-04-15)**: PART 4 is **one synthesized portfolio narrative for the JD** (no per-URL subsections). Full URL review remains required for diligence via header metadata + `evidence_sources_used`.
-- **v1.2.0 (2026-04-15)**: Require explicit review coverage for **every** canonical portfolio URL listed in `JOB_EVALUATION_REFERENCES.md` (PART 4 + evidence accounting).
-- **v1.1.0 (2026-04-15)**: Persist each evaluation report under `job-evaluation-reports/` with `.eval.md` naming + date-based collision filenames.
-- **v1.0.0 (2026-04-16)**: Initial canonical template + references split (`JOB_EVALUATION_REFERENCES.md`).
+- **v1.14.0 (2026-04-20)**: **Imperative cleanup.** Removed redundant restatements of core rules (journals do not inflate PART 5 tiers; submittable package = primary resume + portfolio; signal strength is not interview odds; balanced specificity; mitigation pairing; Risk Factors is not permission for bleak prose) — each rule now has one canonical location. Added **symmetric scoring notes** on Problem Match, Relevant Proof, and Narrative Coherence so High requires direct evidence (previously only Risk Factors had a tier-moderation note). Made **mitigation pairing conditional** on visible evidence. Added a **PART 5 ↔ PART 6 self-check**. Added a neutral **"hold"** option to the direct recommendation list. Updated sample rubric to demonstrate the seven-step scale. Compressed changelog and shrank the runner prompt.
+- **v1.13.0 (2026-04-20)**: Canonical seven-step ordinals with ASCII hyphens. See PART 5 ordinal tiers note.
+- **v1.12.0 (2026-04-20)**: Header metadata adds `model_used`.
+- **v1.11.0 (2026-04-20)**: Optional seven-step ordinal scale for PART 5 / PART 6 (superseded by v1.13.0 vocabulary).
+- **v1.10.0 (2026-04-20)**: Machine-readable `#### Rubric` subsection required in PART 6 for collation.
+- **v1.9.0 (2026-04-20)**: Rename last two PART 5 verdict lines to `Signal strength: Recruiter` / `Signal strength: HM`.
+- **v1.8.0 (2026-04-20)**: Balanced risk tone — see "Risk acknowledgment vs risk overweighting."
+- **v1.7.0 (2026-04-19)**: Add `Narrative coherence (for this JD)` as fifth PART 5 headline.
+- **v1.6.0 (2026-04-19)**: Remove `Likelihood of panel loop survival` from PART 5 headlines.
+- **v1.5.0 (2026-04-18)**: Select a primary resume after PART 2; PART 5 tiers grounded in that resume + portfolio only.
+- **v1.4.0 (2026-04-16)**: Scanability defaults for report writing; fix stale `.pdf` references.
+- **v1.3.1 (2026-04-15)**: Canonical games resume path updated to `.md`.
+- **v1.3.0 (2026-04-15)**: PART 4 is one synthesized portfolio narrative; no per-URL subsections.
+- **v1.2.0 (2026-04-15)**: Every canonical portfolio URL must be reviewed.
+- **v1.1.0 (2026-04-15)**: Persist reports under `job-evaluation-reports/` with `.eval.md` naming.
+- **v1.0.0 (2026-04-16)**: Initial canonical template + references split.
 
 ## What this file is for
 
@@ -62,19 +67,18 @@ You are a **hiring manager** or **staffing committee member**, not a cheerleader
 Rules:
 
 - Be **direct and realistic**. No flattery. No “you got this” pep talk. **Direct ≠ doom:** do not maximize fear, stack the same downside in every PART, or use maximal negative prose when the evidence only supports a narrower concern.
-- Separate **fit on paper** from **verifiable capability from submittable materials** (primary resume + portfolio). Journals may show more than the page shows—call that out in PART 3 / PART 6 tuning, not as hidden upgrades to PART 5 headline tiers.
+- **Direct realism cuts both ways:** refuse High when proof is adjacent, dated, or inferred. A generous default is as much a failure as a harsh default.
+- Separate **fit on paper** from **verifiable capability from submittable materials**. Journal depth belongs in PART 3 / PART 6 tuning (see PART 3 purpose boundary).
 - If sources conflict, say so explicitly (what contradicts what, and why it matters).
 - If something is ambiguous, state the **assumption** you are making.
 - Do not rewrite the resume or portfolio unless explicitly asked.
-- When citing journal/summary evidence, prefer **short quotes** and always label the source file path.
 
 ### Risk acknowledgment vs risk overweighting
 
 - **Acknowledge** risks that resume/portfolio plausibly raise for a skeptical screener; do **not inflate** them beyond what those materials support, and do not treat JD copy as infallible truth—especially in **games/AAA**, where postings often mix **must-haves**, **nice-to-haves**, and boilerplate. **Flag assumptions** when inferring how strict a line is.
-- Where the submittable package **partially mitigates** a concern (clear adjacent proof, credible scope match, strong anchor project), say so **in the same breath or the next sentence**—not only in a distant “reasons to advance” block.
+- **Mitigation pairing is conditional.** When the primary resume or portfolio **names** a direct mitigation (clear adjacent proof, credible scope match, strong anchor project), say so in the same breath or the next sentence. When no mitigation is visible in submittable materials, **leave the concern bare**—do not manufacture a softener.
 - Avoid **repetitive downside stacking** across PART 1 / 4 / 5 / 6 that restates the same fear with different wording.
 - Keep **comparable depth** between reasons to advance and screening concerns: do not write three thin positives and three dense, specific negatives.
-- A **High** on **Risk Factors** in the rubric means **material hiring risk relative to other cells**—it is **not** permission for that section to dominate the emotional tone of the entire report. Keep language **proportional** to the tier.
 
 ## Writing style defaults (important)
 
@@ -94,7 +98,7 @@ Defaults:
 
 ### For PART 5 headline verdicts and collated overview scoring
 
-Use **only** what employers can see from an application: **primary resume** (see PART 2) **+ portfolio URLs** in `JOB_EVALUATION_REFERENCES.md`. Do not let private journal detail **raise** those headline tiers unless the same proof appears on resume or portfolio.
+Use **only** what employers can see from an application: **primary resume + portfolio URLs** (see PART 5 scoring basis and PART 3 purpose boundary for how journals relate).
 
 ### For narrative depth, patterns, and resume/portfolio fine-tuning (PART 3, PART 6 actionable output)
 
@@ -148,6 +152,7 @@ Chat output policy:
 ### Header metadata (always print first)
 
 - `template_version`: (copy from top of this file)
+- `model_used`: (which AI model produced this report—e.g. product + model name as shown in the chat UI, or `unknown` if not tracked)
 - `job`: (company + title if known)
 - `jd_source`: (pasted text vs `@path/to/file`)
 - `output_report_path`: (repo-relative path of the markdown file you wrote)
@@ -246,24 +251,14 @@ You must still treat the **Portfolio (public)** URL list in `JOB_EVALUATION_REFE
 
 #### PART 4 written output (synthesis only)
 
-The **body of PART 4** must read as **one coherent hiring-manager view of what the portfolio proves for this JD**, not a catalog of pages.
-
-**Do not** include per-URL blocks such as `#### Portfolio: <url>` with repeated “proves / does not prove / doubts / anchors” grids.
+The body of PART 4 is **one coherent hiring-manager view of what the portfolio proves for this JD**. Do **not** write per-URL blocks or repeated "proves / does not prove" grids.
 
 Use **only** these subheadings inside PART 4 (in this order):
 
-1. `#### What the portfolio proves for this JD`  
-   - Integrated narrative: craft, systems thinking, scope, shipped-adjacent proof, and any JD-specific fit.  
-   - You may name **at most 2–4** case-study URLs inline where they carry the argument (e.g. “the ESO case study shows …”). Do not walk every URL.
-
-2. `#### What the portfolio does not prove (or only weakly supports) for this JD`  
-   - Gaps, adjacency, missing domains, or weak evidence vs the JD’s explicit/desired lines.
-
-3. `#### Hiring risks the portfolio reduces vs leaves open`  
-   - Short, decisive bullets tied to *this* role.
-
-4. `#### Credibility and receipts` (optional, keep short)  
-   - Call out any aggregate or hard-to-verify claims; separate **marketing** from **demonstrated** proof.
+1. `#### What the portfolio proves for this JD` — integrated narrative; name case-study URLs inline where they carry the argument.
+2. `#### What the portfolio does not prove (or only weakly supports) for this JD` — gaps vs the JD's explicit / desired lines.
+3. `#### Hiring risks the portfolio reduces vs leaves open` — short, decisive bullets tied to *this* role.
+4. `#### Credibility and receipts` (optional, keep short) — separate **marketing** from **demonstrated** proof.
 
 Optional appendix (only if useful, max ~15 lines):
 
@@ -275,55 +270,64 @@ Fetch failures / blocked pages:
 
 ### PART 5 — Combined verdict
 
-**Scoring basis:** The **five** verdict lines below are the **headline tiers** used for overview/collate. They are **comparative fit diagnostics** (same rubric across jobs; useful before/after resume or portfolio edits)—**not** predictions of interviews, screens, or offers. They must reflect **only the submittable application package**: **`primary_resume_for_verdict` + portfolio** (public case studies and proof on the site). **PART 3 journals/summaries do not increase these tiers** unless the same capability is **verifiable** from resume or portfolio (e.g. named shipped work on the resume, demos on the site).
+**Scoring basis:** The **five** verdict lines below are the **headline tiers** used for overview/collate. They are **comparative fit diagnostics** across jobs — **not** predictions of interviews, screens, or offers. They must reflect **only the submittable application package**: **`primary_resume_for_verdict` + portfolio**. Journals do not raise these tiers (see PART 3 purpose boundary).
 
-Before the five bullets, add a short intro paragraph stating: (a) which resume is primary, (b) that headline verdicts are **resume+portfolio-grounded**, (c) that extra depth from journals appears in PART 3 / PART 6 tuning, not as a parallel “hidden” score.
+**Ordinal tiers:** Use either **High / Medium / Low** or the seven-step scale (weakest → strongest): **very low**, **low**, **medium-low**, **medium**, **medium-high**, **high**, **very high**. Use **ASCII hyphens** in `medium-high` / `medium-low`.
+
+Before the five bullets, add a short intro paragraph stating: (a) which resume is primary, (b) that headline verdicts are resume+portfolio-grounded, (c) that extra depth from journals appears in PART 3 / PART 6 tuning, not as a parallel score.
 
 **Definitions:**
 
-- **Fit on paper:** High/Medium/Low for **`primary_resume_for_verdict` only** (the non-primary resume stays in PART 2 only—do **not** emit a second `Fit on paper` line for it).
-- **Actual capability (inferred):** High/Medium/Low for capability **inferred from primary resume + portfolio evidence employers can verify**—not “stronger in private logs than on the page.” If journals suggest more than public materials show, say that under PART 3 / **Credibility gap** style notes in PART 6, not as inflating this line.
-- **Narrative coherence (for this JD):** High/Medium/Low for whether **primary resume + portfolio** present **one coherent application story for this specific JD**—not scattershot proof or a story that fits a different role better. (Related to rubric **Narrative Coherence**; this headline is the verdict-tier summary for the package-as-story.)
-- **Signal strength: Recruiter:** High/Medium/Low for how strong the **JD fit signal** is when a **recruiter-style read** is applied to **primary resume + portfolio** (keywords, bucket, obvious relevance, red flags)—**signal strength**, not odds of passing a stage.
-- **Signal strength: HM:** High/Medium/Low for how strong the **JD fit signal** is when a **hiring-manager-style read** is applied to the same materials (depth of proof, seniority/scope match, story credibility vs this posting)—**signal strength**, not interview or offer prediction.
+- **Fit on paper:** JD match from the primary resume's first-pass read.
+- **Actual capability (inferred):** capability verifiable from primary resume + portfolio (not from private logs).
+- **Narrative coherence (for this JD):** whether the package tells one coherent application story for this JD, not a scattershot set of proofs.
+- **Signal strength: Recruiter:** how strong the JD fit signal is on a recruiter-style read (keywords, bucket, obvious relevance, red flags).
+- **Signal strength: HM:** how strong the JD fit signal is on a hiring-manager-style read (depth of proof, seniority/scope match, story credibility).
 
-(Do **not** add a separate “panel loop survival” headline—process varies too much to score from materials alone; if useful, discuss onsite/panel/design-test nuance under PART 6 **Actionable output** or **mispositioning**.)
+(Do **not** add a separate "panel loop survival" headline — too process-dependent to score from materials alone.)
 
 Deliver **exactly one** line per dimension using these labels (so downstream collation can parse):
 
-- Fit on paper: High/Medium/Low
-- Actual capability (inferred): High/Medium/Low
-- Narrative coherence (for this JD): High/Medium/Low
-- Signal strength: Recruiter: High/Medium/Low
-- Signal strength: HM: High/Medium/Low
+- Fit on paper: \<tier\>
+- Actual capability (inferred): \<tier\>
+- Narrative coherence (for this JD): \<tier\>
+- Signal strength: Recruiter: \<tier\>
+- Signal strength: HM: \<tier\>
 
 Use this markdown shape (bold the full label so the colon before the tier is unambiguous):
 
-- `- **Signal strength: Recruiter**: High`  
-- `- **Signal strength: HM**: Medium`
+- `- **Signal strength: Recruiter**: High`
+- `- **Signal strength: HM**: Medium-High`
 
 Do **not** duplicate the five verdict labels for the non-primary resume. Optional: `#### Non-primary resume (reference only)` in prose without repeating `**Fit on paper:**` etc.
 
 Then use these **three** subsections (exact `####` headings):
 
-- `#### 3 strongest reasons to advance` — concrete, JD-specific strengths grounded in **primary resume + portfolio**; each bullet should be as **specific** as the concern bullets (avoid thin generic praise).
-- `#### 3 main screening concerns or gaps` — what a **skeptical recruiter/HM** might fixate on or ask about; **not** a verdict on the person’s worth. These are **screening risks**, not a “reject candidate” essay. Where submittable materials **already partially address** the concern, add a short **mitigation pointer** in the same bullet or the following sentence (e.g. “Public case study X still shows …”).
+- `#### 3 strongest reasons to advance` — concrete, JD-specific strengths grounded in primary resume + portfolio.
+- `#### 3 main screening concerns or gaps` — what a skeptical recruiter/HM might fixate on. (See "Risk acknowledgment vs risk overweighting" for how to handle mitigations.)
 - `#### Misleveling / mispositioning read` — overleveled, underleveled, too game-specific, too IC, too diffuse, etc.
 
-Formatting preference:
+Formatting preference: keep advance and concern subsections **balanced in specificity and length**.
 
-- Use these subheads so the verdict is easy to skim; keep advance and concern subsections **balanced in specificity and length** where possible.
+#### PART 5 ↔ PART 6 self-check (required before finalizing)
+
+Before writing the final report, verify the five headline tiers are consistent with the PART 6 rubric you are about to score:
+
+- If **Problem Match**, **Relevant Proof**, **Role Readability**, or **Narrative Coherence** (rubric) lands at **Medium** or lower, the corresponding PART 5 headline(s) **cannot exceed Medium-High**. Reconcile by either adjusting the tier down or adding one sentence in PART 5 prose that explains why the headline can stay higher despite the rubric cell (e.g. the rubric penalty is about recency, not fit).
+- If **Risk Factors** lands at **High** (material hiring risk), **Signal strength: HM** cannot exceed **Medium-High**. Reconcile the same way.
+- If you cannot reconcile, downgrade the headline. Prose overrides are the exception, not the default.
 
 ### PART 6 — Rubric scoring + weighted synthesis
 
-Score each dimension **High/Medium/Low** using the rubric below. **Base rubric cells on primary resume + portfolio** for anything about proof, coherence of the *application story*, and role readability. Use PART 3 journal evidence in **Actionable output** (what to add to resume/site, stories to prepare) and in narrative notes—not to inflate rubric scores beyond what resume+portfolio support.
+Score each dimension using **High / Medium / Low** or the seven-step scale (see PART 5 ordinal note). Rubric cells reflect the submittable package; journal evidence belongs in **Actionable output**, not in these cells.
 
 Finally:
 
-- **Actionable output** (tight): themes to emphasize, themes to de-emphasize, 5 bullets to rewrite, 3 missing signals to make explicit, 5 interview stories to prepare (pull from **portfolio + journals** for *preparation*; journals inform **tuning**, not headline PART 5 tiers), and a **direct** recommendation (same options as below; avoid melodrama):
+- **Actionable output** (tight): themes to emphasize, themes to de-emphasize, **up to 5** bullets to rewrite, **up to 3** missing signals to make explicit, **up to 5** interview stories to prepare, and a **direct** recommendation (pick one; avoid melodrama):
   - apply as-is
   - apply after targeted resume edits
   - apply, but odds are low
+  - **hold — watch for better-fit postings in the same track** (use when the package is strong but this JD specifically asks for capabilities the package does not prove)
   - do not pursue
 
 End with:
@@ -337,19 +341,40 @@ Formatting preference:
 - Prefer a `#### Actionable output` subhead.
 - Under `Actionable output`, prefer short subheads for themes to emphasize, themes to de-emphasize, bullets to rewrite, missing signals, interview stories, and direct recommendation.
 
-## Rubric (score each High / Medium / Low)
+**Collation (required):** Include a `#### Rubric` subsection **before** `#### Weighted synthesis` with **exactly one bullet per row**, in this order, using these **bold label prefixes** (percentages optional but recommended). The **seventh** row must use **Narrative Coherence (5%)** as the label (collated charts show it as **Narrative Coherence (rubric)** to distinguish it from PART 5 narrative coherence). **ATS / recruiter hygiene** must be **Pass** or **Fail** only.
+
+Sample shape (values illustrative — mix of three-step and seven-step tiers demonstrates both scales are accepted):
+
+```text
+#### Rubric
+
+- **Problem Match (25%):** High
+- **Relevant Proof (20%):** Medium-High
+- **Recency (15%):** Medium
+- **Role Readability (15%):** High
+- **Differentiation (10%):** Medium-High
+- **Risk Factors (10%):** Medium
+- **Narrative Coherence (5%):** High
+- **ATS / recruiter hygiene:** Pass
+```
+
+## Rubric (score each High / Medium / Low, or use the seven-step scale)
 
 ### 1) Problem Match (25%)
 
-Does the background solve the JD’s real pains (not the buzzwords)?
+Does the background solve the JD's real pains (not the buzzwords)?
+
+**Scoring note:** **High** means the JD's core asks are named directly on primary resume or portfolio in current, submittable form. If the match is **adjacent** (related domain, related scale, related tools) or **inferred** (supported by journal detail but not visible on the page), cap this cell at **Medium**. If a JD-named required ask is absent from both resume and portfolio, cap at **Medium-Low**.
 
 ### 2) Relevant Proof (20%)
 
-Shipped/clarified/changed outcomes with credible receipts **on the primary resume and/or portfolio**. Journals may list additional work to **surface publicly** later; they do not substitute for missing resume/portfolio proof in this cell.
+Shipped / clarified / changed outcomes with credible receipts **on the primary resume and/or portfolio**. Journals may list additional work to surface publicly later; they do not substitute for missing resume/portfolio proof in this cell.
+
+**Scoring note:** **High** requires direct, unambiguous, date-appropriate receipts on resume or portfolio. If the strongest proof is **older than typical recency expectations for this role**, or is **adjacent to** (not directly named as) the JD's asks, cap at **Medium-High**. Bare claims without portfolio backing cap at **Medium**.
 
 ### 3) Recency (15%)
 
-Is the strongest proof recent enough for the role’s expectations?
+Is the strongest proof recent enough for the role's expectations?
 
 ### 4) Role Readability (15%)
 
@@ -363,11 +388,11 @@ Why you vs an obvious generic candidate from the target domain?
 
 What would make a HM hesitate (gaps, adjacency, credibility holes)?
 
-**Scoring note:** **High / Medium / Low** here describes **relative material risk** among rubric cells—not permission for maximal negative prose. A **High** score means “meaningful hiring risk on evidence,” not “write the bleakest possible paragraph.” Keep the cell’s language **proportional** to the tier and **paired** with any countervailing evidence visible in resume/portfolio when relevant.
+**Scoring note:** **High / Medium / Low** here describes **relative material risk** among rubric cells — not permission for maximal negative prose. A **High** score means "meaningful hiring risk on evidence," not "write the bleakest possible paragraph." Keep the cell's language **proportional** to the tier.
 
 ### 7) Narrative Coherence (5%)
 
-Do **primary resume + portfolio** tell one coherent application story for this JD? (You may note journal-vs-public gaps in PART 3 / Actionable output—this cell scores the **submittable** story.)
+Do **primary resume + portfolio** read as one internally consistent application — headings, section ordering, claim/proof alignment, no contradictions between summary and work history? (This scores the **local consistency** of the submittable story. The PART 5 headline `Narrative coherence (for this JD)` scores the broader question of whether the whole package reads as one candidate for **this specific JD**. The two can diverge: a well-ordered resume can still be the wrong resume for a particular posting.)
 
 ### 8) ATS / recruiter hygiene (pass/fail)
 
@@ -378,17 +403,17 @@ Pass/fail only: headings, scanability, keyword sanity (not stuffing), parse risk
 After scoring, explicitly answer:
 
 - **What problem is this job hiring for?**
-- **Where does resume + portfolio show you solving that problem** (employer-visible proof)?
+- **Where does resume + portfolio show you solving that problem?**
 - **Does the primary resume make that obvious in the first 20 seconds?**
 - **What would make someone hesitate** based only on resume + portfolio?
-- **What already mitigates those hesitations** based only on resume + portfolio? (Parallel to the line above—e.g. anchor projects, scope match, receipts that answer part of the doubt. If mitigation is thin, say so briefly.)
-- **Does the submittable story hang together?** (If journals add nuance, put under tuning/actions, not as a second “true” score.)
+- **What already mitigates those hesitations?** (See "Risk acknowledgment vs risk overweighting" — mitigation pairing is conditional on visible evidence. If nothing in the submittable materials addresses a hesitation, say so; do not invent a softener.)
+- **Does the submittable story hang together?**
 
 ## Re-run workflow (when this template changes)
 
 1. Bump `template_version` + add a changelog entry at the top of this file.
 2. Re-run evaluations by starting a fresh chat (or fork) and pasting the **Runner prompt** below.
-3. Always restate `template_version` in the output header metadata.
+3. Always restate `template_version` and `model_used` in the output header metadata.
 4. Re-runs should create a **new** report file using the collision rules under **Output artifact (required)** (do not silently overwrite prior reports).
 
 ---
@@ -408,18 +433,7 @@ Job description input:
 - (paste JD text here) OR (@path/to/job description file)
 
 Task:
-Write the full report to `job-evaluation-reports/` using the Output artifact rules in JOB_EVALUATION_TEMPLATE.md (naming + collisions), and ensure the report uses the exact PART 1–6 headings defined in JOB_EVALUATION_TEMPLATE.md.
+Write the full report to `job-evaluation-reports/` using the rules defined in JOB_EVALUATION_TEMPLATE.md (Header metadata first, then PART 1–6 with the exact headings and subheadings, then the `#### Rubric` block, then Weighted synthesis and Actionable output). Follow the Output artifact naming + collision rules. Honor "Operating mode (tone + ethics)" and "Risk acknowledgment vs risk overweighting"; complete the PART 5 ↔ PART 6 self-check before finalizing.
 
-Constraints:
-- Print header metadata first (inside the written report file), including template_version copied from JOB_EVALUATION_TEMPLATE.md, plus `output_report_path`, `resume_versions_evaluated`, and **`primary_resume_for_verdict`**.
-- Populate `portfolio_pages_required`, `portfolio_pages_reviewed`, and ensure `evidence_sources_used` accounts for **all** canonical portfolio URLs in `JOB_EVALUATION_REFERENCES.md` (or marks fetch failures explicitly).
-- Be **direct and realistic**. No flattery. Follow **Risk acknowledgment vs risk overweighting** in JOB_EVALUATION_TEMPLATE.md: do not catastrophize or repeat the same downside across every PART; pair concerns with **mitigations** visible in resume/portfolio where fair; for **game/AAA JDs**, flag assumptions about must-haves vs wishlist language.
-- Use both resume variants in PART 2 (connect md + games md); then select **`primary_resume_for_verdict`** per PART 2 rules.
-- PART 5 headline verdict lines (**five** bullets: include **Narrative coherence (for this JD)**, **Signal strength: Recruiter**, **Signal strength: HM**) must be grounded in **primary resume + portfolio only**; they score **fit-signal strength** (comparative diagnostics), **not** predictive odds. PART 3 journals inform tuning, not tier inflation. See PART 5 definitions. Use the PART 5 subheads **`#### 3 main screening concerns or gaps`** (not a personal attack framing) with **balanced specificity** vs advance bullets.
-- In PART 4, follow **Required diligence** + **PART 4 written output (synthesis only)** in JOB_EVALUATION_TEMPLATE.md (integrated narrative; no per-URL subsections; no cherry-picking which pages you reviewed).
-- In PART 3, include at least 2 short quotes total from summaries/dumps (with file paths); keep PART 3 in the “tuning / honesty” lane per template.
-- If sources conflict, call it out.
-- In **PART 6 `#### Weighted synthesis`**, include both **what would make someone hesitate** and **what already mitigates those hesitations** (submittable materials only).
-- End with the two short paragraphs: why hire / why not hire.
-- Prefer readable internal formatting: short paragraphs, bullets where natural, and subheads inside dense sections.
+Confirm the written file path in chat; do not paste the full report unless asked.
 ```

@@ -59,20 +59,24 @@ def _build_prompt(repo: Path, jd_rel: str) -> str:
     return f"""Automated job-evaluation batch step (single JD).
 
 You MUST read and follow these workspace files before writing:
-- JOB_EVALUATION_TEMPLATE.md
+- JOB_EVALUATION_TEMPLATE.md (v1.14.0+)
 - JOB_EVALUATION_REFERENCES.md
 - JOB_EVAL_CHAT_COMMAND.md
 
 The job description for this run is:
 - {jd_rel}
 
+Calibration reminder (in addition to the template's Operating mode rules):
+- Direct realism also means refusing High when proof is adjacent, dated, or inferred. A generous default is as much a failure as a harsh default.
+- Complete the PART 5 ↔ PART 6 self-check defined in the template before finalizing the report.
+
 Requirements (summarized from JOB_EVAL_CHAT_COMMAND.md):
 - Write the FULL report under job-evaluation-reports/ using the template naming + collision rules.
-- Use the exact PART 1 through PART 6 headings from JOB_EVALUATION_TEMPLATE.md (v1.9.0+).
-- Follow v1.9.0+ **balanced risk tone** and **signal strength** PART 5 lines (Signal strength: Recruiter / HM = fit-signal diagnostics, not predictions) in JOB_EVALUATION_TEMPLATE.md: direct realism without catastrophizing; pair screening concerns with mitigations visible in resume/portfolio where fair; game/AAA JD assumption-flagging as in template.
-- PART 2: evaluate both resume variants; select primary_resume_for_verdict per template. PART 5’s five headline verdict lines (including narrative coherence) must be grounded in primary resume + portfolio only; PART 3 journals inform resume/portfolio tuning, not tier inflation.
-- Review every portfolio URL listed in JOB_EVALUATION_REFERENCES.md; include header metadata (including primary_resume_for_verdict) and evidence accounting per template.
-- Include at least 2 short quotes total from summaries or monthly dumps in PART 3, each with repo-relative file paths (use the folders listed under JOB_EVALUATION_REFERENCES.md).
+- Use the exact PART 1 through PART 6 headings from JOB_EVALUATION_TEMPLATE.md.
+- Honor "Operating mode (tone + ethics)" and "Risk acknowledgment vs risk overweighting" in the template. Mitigation pairing is conditional on visible evidence; leave concerns bare when the submittable package offers no mitigation.
+- PART 2: evaluate both resume variants; select primary_resume_for_verdict per template. The five PART 5 headline tiers (including narrative coherence) must be grounded in primary resume + portfolio only; PART 3 journals inform tuning, not tier inflation.
+- Review every portfolio URL listed in JOB_EVALUATION_REFERENCES.md; include header metadata (model_used, primary_resume_for_verdict, etc.) and evidence accounting per template.
+- Include at least 2 short quotes total from summaries or monthly dumps in PART 3, each with repo-relative file paths.
 
 After the report file is written, end your reply with a single line exactly in this form (fill in the real path):
 OUTPUT_PATH: job-evaluation-reports/<filename>.md

@@ -50,7 +50,7 @@ def test_verdict_line_to_table_cell_strips_labels() -> None:
         cj.verdict_line_to_table_cell(
             "- **Actual capability (inferred)**: Medium-High", "Capability"
         )
-        == "Medium–High"
+        == "Medium-High"
     )
     assert (
         cj.verdict_line_to_table_cell(
@@ -68,25 +68,26 @@ def test_verdict_line_to_table_cell_strips_labels() -> None:
 
 def test_rating_only_for_summary_drops_tail_prose() -> None:
     assert cj.rating_only_for_summary("High") == "High"
-    assert cj.rating_only_for_summary("Medium–High (notes here)") == "Medium–High"
+    assert cj.rating_only_for_summary("Medium-High (notes here)") == "Medium-High"
     assert cj.rating_only_for_summary("High for senior game UX work") == "High"
-    assert cj.rating_only_for_summary("Medium-High. More text.") == "Medium–High"
+    assert cj.rating_only_for_summary("Medium-High. More text.") == "Medium-High"
 
 
-def test_rating_only_for_summary_picks_highest_of_multiple() -> None:
+def test_rating_only_for_summary_takes_first_tier_not_max() -> None:
     s = (
-        "Medium–High for game UX leadership; Medium for mobile CoD-specific execution."
+        "Medium-High for game UX leadership; Medium for mobile CoD-specific execution."
     )
-    assert cj.rating_only_for_summary(s) == "Medium–High"
-    assert cj.rating_only_for_summary("Medium for A; High for B") == "High"
-    assert cj.rating_only_for_summary("Unknown (x); Medium (y)") == "Medium"
+    assert cj.rating_only_for_summary(s) == "Medium-High"
+    assert cj.rating_only_for_summary("Medium for A; High for B") == "Medium"
+    assert cj.rating_only_for_summary("Medium — although craft on the site is High") == "Medium"
+    assert cj.rating_only_for_summary("Unknown (x); Medium (y)") == "Unknown"
 
 
 def test_verdict_line_long_bullet_is_rating_only() -> None:
     line = (
-        "- **Fit on paper:** **Medium–High** (strong years + portfolio; weaker on mobile)."
+        "- **Fit on paper:** **Medium-High** (strong years + portfolio; weaker on mobile)."
     )
-    assert cj.verdict_line_to_table_cell(line, "Fit on Paper") == "Medium–High"
+    assert cj.verdict_line_to_table_cell(line, "Fit on Paper") == "Medium-High"
 
 
 def test_verdict_line_narrative_coherence_column() -> None:
@@ -127,7 +128,7 @@ def test_extract_verdict_lines_bold_paragraphs_without_list_markers() -> None:
 
 **Fit on paper:** **High** (notes)
 
-**Actual capability (inferred):** **Medium–High** (notes)
+**Actual capability (inferred):** **Medium-High** (notes)
 
 **Narrative coherence (for this JD):** **Medium**
 
@@ -186,21 +187,46 @@ def test_allocate_overview_path_singular_record(tmp_path: Path) -> None:
 
 def test_tier_cell_to_numeric() -> None:
     assert cj.tier_cell_to_numeric("High") == 99.0
-    assert cj.tier_cell_to_numeric("Medium–High") == 98.0
+    assert cj.tier_cell_to_numeric("Medium-High") == 98.0
     assert cj.tier_cell_to_numeric("Medium") == 97.0
-    assert cj.tier_cell_to_numeric("Unknown") == 95.0
-    assert cj.tier_cell_to_numeric("TBD") == 93.0
+    assert cj.tier_cell_to_numeric("Medium-Low") == 96.0
+    assert cj.tier_cell_to_numeric("Very Low") == 94.0
+    assert cj.tier_cell_to_numeric("Unknown") == 93.0
+    assert cj.tier_cell_to_numeric("TBD") == 91.0
     assert cj.tier_cell_to_numeric("") is None
     assert cj.tier_cell_to_numeric("Good") is None
 
 
-def test_tier_cell_to_chart_numeric_spread() -> None:
+def test_tier_cell_to_chart_numeric_uniform_spacing() -> None:
+    vals = [
+        cj.tier_cell_to_chart_numeric(label) for label in cj.SEVEN_STEP_ORDINALS
+    ]
+    assert None not in vals
+    assert vals == sorted(vals)
+    deltas = [round(vals[i + 1] - vals[i], 6) for i in range(len(vals) - 1)]
+    assert all(abs(d - deltas[0]) < 1e-6 for d in deltas), f"deltas not uniform: {deltas}"
     assert cj.tier_cell_to_chart_numeric("Very High") == 92.0
-    assert cj.tier_cell_to_chart_numeric("High") == 80.0
-    assert cj.tier_cell_to_chart_numeric("Medium–High") == 62.0
-    assert cj.tier_cell_to_chart_numeric("Medium") == 40.0
-    assert cj.tier_cell_to_chart_numeric("Low") == 15.0
-    assert cj.tier_cell_to_chart_numeric("Unknown") == 28.0
+    assert cj.tier_cell_to_chart_numeric("Very Low") == 8.0
+    assert cj.tier_cell_to_chart_numeric("Unknown") is not None
+    assert cj.tier_cell_to_chart_numeric("Unknown") < cj.tier_cell_to_chart_numeric("Very Low")
+
+
+def test_normalize_seven_point_tiers() -> None:
+    assert cj.rating_only_for_summary("medium low (x)") == "Medium-Low"
+    assert cj.rating_only_for_summary("Very Low") == "Very Low"
+    assert cj.rating_only_for_summary("Medium–High (legacy en dash)") == "Medium-High"
+
+
+def test_seven_step_ordinals_constant() -> None:
+    assert cj.SEVEN_STEP_ORDINALS == (
+        "Very Low",
+        "Low",
+        "Medium-Low",
+        "Medium",
+        "Medium-High",
+        "High",
+        "Very High",
+    )
 
 
 def test_build_collated_rows_one_report(tmp_path: Path) -> None:
@@ -256,4 +282,116 @@ def test_write_overview_chart_html_smoke(tmp_path: Path) -> None:
     text = out.read_text(encoding="utf-8")
     assert "plotly" in text.lower()
     assert "Dot matrix" in text
-    assert "batch rank" in text.lower()
+    assert "Radar" in text
+
+
+def test_combined_chart_columns_order() -> None:
+    assert len(cj.COMBINED_CHART_COLUMNS) == len(cj.VERDICT_TABLE_COLUMNS) + len(cj.RUBRIC_TABLE_COLUMNS)
+    assert cj.COMBINED_CHART_COLUMNS[: len(cj.VERDICT_TABLE_COLUMNS)] == cj.VERDICT_TABLE_COLUMNS
+
+
+def test_chart_score_columns_omits_ats_and_risk_factors() -> None:
+    assert "ATS / recruiter hygiene" not in cj.CHART_SCORE_COLUMNS
+    assert "Risk Factors" not in cj.CHART_SCORE_COLUMNS
+    assert len(cj.CHART_SCORE_COLUMNS) == len(cj.COMBINED_CHART_COLUMNS) - 2
+
+
+def test_tier_cell_pass_fail_chart_numeric() -> None:
+    assert cj.tier_cell_to_chart_numeric("Pass") == 92.0
+    assert cj.tier_cell_to_chart_numeric("Fail") == 8.0
+
+
+def test_extract_model_used_header() -> None:
+    text = """# Header metadata
+- `template_version`: v1.14.0
+- `model_used`: `GPT-5.4 Mini`
+- `job`: Role
+"""
+    assert cj.extract_model_used(text) == "GPT-5.4 Mini"
+
+
+def test_extract_model_used_missing() -> None:
+    assert cj.extract_model_used("# no metadata\nbody") == ""
+
+
+def test_is_mini_family_model_heuristic() -> None:
+    assert cj._is_mini_family_model("GPT-5.4 Mini") is True
+    assert cj._is_mini_family_model("Cursor / GPT-5.4 Mini") is True
+    assert cj._is_mini_family_model("gpt-5.4-medium") is False
+    assert cj._is_mini_family_model("Cursor GPT-5.4") is False
+    assert cj._is_mini_family_model("") is False
+
+
+def test_build_collated_rows_captures_model_used(tmp_path: Path) -> None:
+    jd = "Role With Model"
+    (tmp_path / f"{jd}.eval.md").write_text(
+        """# Header metadata
+- `model_used`: `GPT-5.4 Mini`
+
+### PART 5 — Combined verdict
+
+- **Fit on paper:** **High**
+- **Actual capability (inferred):** **Medium**
+- **Narrative coherence (for this JD):** **Medium**
+- **Signal strength: Recruiter:** **Medium**
+- **Signal strength: HM:** **Medium**
+
+### PART 6 — x
+""",
+        encoding="utf-8",
+    )
+    rows = cj.build_collated_rows(tmp_path, tmp_path)
+    assert rows[0].model_used == "GPT-5.4 Mini"
+
+
+def test_extract_rubric_subsection_and_lines() -> None:
+    part6 = """
+#### Rubric
+
+- **Problem Match (25%):** High
+- **Relevant Proof (20%):** Medium
+- **Recency (15%):** Low
+- **Role Readability (15%):** Medium
+- **Differentiation (10%):** High
+- **Risk Factors (10%):** Medium
+- **Narrative Coherence (5%):** High
+- **ATS / recruiter hygiene:** Pass
+
+#### Weighted synthesis
+
+- **Q:** A
+"""
+    block = cj.extract_rubric_subsection(part6)
+    assert "Weighted synthesis" not in block
+    rubric = cj.extract_rubric_lines(block)
+    assert rubric["Problem Match"].startswith("- **Problem Match")
+    assert cj.rubric_line_to_table_cell(rubric["ATS / recruiter hygiene"], "ATS / recruiter hygiene") == "Pass"
+    assert cj.rubric_line_to_table_cell(rubric["Narrative Coherence (rubric)"], "Narrative Coherence (rubric)") == "High"
+
+
+def test_build_collated_rows_parses_part6_rubric(tmp_path: Path) -> None:
+    jd = "Rubric Co"
+    (tmp_path / f"{jd}.eval.md").write_text(
+        """### PART 5 — Combined verdict
+- **Fit on paper:** **High**
+- **Actual capability (inferred):** **Medium**
+- **Narrative coherence (for this JD):** **Medium**
+- **Signal strength: Recruiter:** **Medium**
+- **Signal strength: HM:** **Medium**
+
+### PART 6 — Rubric scoring
+
+#### Rubric
+
+- **Problem Match (25%):** Low
+- **ATS / recruiter hygiene:** Fail
+
+#### Weighted synthesis
+x
+""",
+        encoding="utf-8",
+    )
+    rows = cj.build_collated_rows(tmp_path, tmp_path)
+    assert len(rows) == 1
+    assert rows[0].rubric.get("Problem Match", "").startswith("- **Problem Match")
+    assert cj.rubric_line_to_table_cell(rows[0].rubric["ATS / recruiter hygiene"], "ATS / recruiter hygiene") == "Fail"
