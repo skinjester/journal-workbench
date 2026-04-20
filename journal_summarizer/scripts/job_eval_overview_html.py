@@ -56,15 +56,16 @@ ACCENT = "#77e6ff"
 ACCENT_2 = "#9b7cff"
 SERIES = ["#77e6ff", "#9b7cff", "#55d6be", "#ff8a65", "#ffd166", "#ff6fae", "#64b5f6", "#c3f73a"]
 
-# Grouped bar chart: fill color by nearest ordinal (weakest → strongest), aligned with ``SEVEN_STEP_ORDINALS``.
+# Grouped bar chart: fill by nearest ordinal (weakest → strongest). Single-hue blue ramp (darker →
+# lighter) aligned with ``HEATMAP_MONO_COLORSCALE`` so it matches the dot matrix without extra hues.
 ORDINAL_BAR_COLORS: Tuple[str, ...] = (
-    "#141c2a",
-    "#1c2a3d",
-    "#24364d",
-    "#2d4662",
-    "#3a5c7a",
-    "#4f7394",
-    "#6d92b0",
+    "#0f1826",
+    "#131f33",
+    "#1a2944",
+    "#223456",
+    "#2c426a",
+    "#3a5680",
+    "#5c7a9e",
 )
 
 # Single-hue blues; stops spaced for roughly equal perceived lightness steps (reads cleanly in grayscale).
@@ -90,12 +91,12 @@ def _heatmap_left_margin_px(jobs: Sequence[str]) -> int:
     return min(340, max(160, int(longest * 5.2) + 8))
 
 
-# Dot-matrix column headers: horizontal ticks + <br> wraps; generous px/category limits tick overlap.
+# Dot-matrix column headers: tilted ticks keep columns compact while labels stay readable (no overlap).
 HEATMAP_DIM_LABEL_FONT_PX = 9
-HEATMAP_X_TICK_ANGLE = 0
-# Inner plot width scales ~linearly with categories; keep total figure width from over-padding empty space between dots.
-HEATMAP_WIDTH_PX_PER_CATEGORY = 78
-HEATMAP_WIDTH_EXTRA_PX = 300
+HEATMAP_X_TICK_ANGLE = -40
+# With angled ticks, columns can be narrower than horizontal multi-line headers required.
+HEATMAP_WIDTH_PX_PER_CATEGORY = 54
+HEATMAP_WIDTH_EXTRA_PX = 260
 # Vertical pixels per job row (grid cell); larger = more space between dots and grid lines.
 HEATMAP_ROW_HEIGHT_PX = 46
 
@@ -108,9 +109,13 @@ def _heatmap_figure_width_px(n_dims: int) -> int:
 _VERDICT_COLS = frozenset(VERDICT_TABLE_COLUMNS)
 
 
-def _wrap_dim_label(label: str, max_first_line: int = 8) -> str:
+def _wrap_dim_label(label: str, max_first_line: int = 8, *, heatmap_ticks: bool = False) -> str:
     """Split a dimension label for multi-line heatmap column headers (HTML <br>)."""
-    # Narrow second line: keeps paired "Signal Strength" columns readable when columns are tight.
+    # Dot matrix: stack "Signal / Strength / (…)" so two adjacent Signal columns do not collide.
+    if heatmap_ticks and label.startswith("Signal Strength ("):
+        rest = label[len("Signal Strength ") :].lstrip()
+        return f"Signal<br>Strength<br>{rest}"
+    # Other charts (e.g. dot-plot subplot titles): two lines are enough.
     if label.startswith("Signal Strength ("):
         rest = label[len("Signal Strength ") :].lstrip()
         return f"Signal Strength<br>{rest}"
@@ -349,7 +354,7 @@ def _chart_score_to_nearest_tier_index(score: float) -> int:
 def _bar_color_for_chart_score(score: Optional[float]) -> str:
     """Solid fill for grouped horizontal bars from chart numeric (same map as dot matrix)."""
     if score is None:
-        return "#252f3d"
+        return "#2a3344"
     return ORDINAL_BAR_COLORS[_chart_score_to_nearest_tier_index(float(score))]
 
 
@@ -425,8 +430,12 @@ def _fig_heatmap(jobs: List[str], dims: List[str], z: List[List[Optional[float]]
     """
     COLOR_LO, COLOR_HI = 0.0, 100.0
 
-    # Tighter first-line budget than default so long rubric headers wrap before they collide.
-    wrapped_dims = [_wrap_dim_label(d, max_first_line=7) for d in dims]
+    # Angled ticks: use lighter wrapping (tall multi-line + rotation eats top margin). Horizontal (angle≈0):
+    # use heatmap_ticks=True so adjacent "Signal Strength" columns stack narrower.
+    if abs(HEATMAP_X_TICK_ANGLE) < 1.0:
+        wrapped_dims = [_wrap_dim_label(d, max_first_line=6, heatmap_ticks=True) for d in dims]
+    else:
+        wrapped_dims = [_wrap_dim_label(d, max_first_line=11, heatmap_ticks=False) for d in dims]
 
     xs: List[str] = []
     ys: List[str] = []
@@ -584,7 +593,7 @@ def _fig_dot_plots(
         rows=1,
         cols=n_dims,
         subplot_titles=wrapped_titles,
-        horizontal_spacing=0.04,
+        horizontal_spacing=0.022,
         shared_yaxes=True,
     )
     for j in range(n_dims):
@@ -670,16 +679,19 @@ def _fig_job_grouped_bars(
                 orientation="h",
                 marker=dict(
                     color=colors,
-                    line=dict(width=1, color="rgba(255,255,255,0.14)"),
+                    opacity=0.94,
+                    line=dict(width=1.25, color="rgba(255,255,255,0.28)"),
                 ),
                 customdata=custom,
                 hovertemplate="%{y}<br>" + html_module.escape(dim) + "<br>%{customdata}<br>score %{x:.0f}<extra></extra>",
             )
         )
+    # bargroupgap: lower → thicker stripes per dimension inside each job row (many dims = needs small gap).
+    # bargap: higher → more vertical space between job rows.
     fig.update_layout(
         barmode="group",
-        bargap=0.18,
-        bargroupgap=0.14,
+        bargap=0.28,
+        bargroupgap=0.035,
         xaxis=dict(
             title=dict(text="Chart score (ordinal → 0–100)", font=dict(size=11, color=MUTED)),
             range=[0.0, 100.0],
@@ -692,22 +704,25 @@ def _fig_job_grouped_bars(
             title=None,
             autorange="reversed",
             tickfont=dict(size=10, color=MUTED),
+            ticklabelposition="outside left",
             showgrid=True,
             gridcolor="rgba(151,173,210,0.08)",
             zeroline=False,
+            automargin=True,
         ),
         legend=dict(
             orientation="h",
             yanchor="top",
-            y=-0.14,
+            y=-0.12,
             x=0,
             xanchor="left",
-            font=dict(size=9, color=MUTED),
+            font=dict(size=10, color=MUTED),
             traceorder="normal",
             itemclick="toggle",
             itemdoubleclick="toggleothers",
+            valign="top",
         ),
-        margin=dict(l=12, r=20, t=28, b=120),
+        margin=dict(l=8, r=20, t=32, b=132),
     )
     return fig
 
@@ -746,7 +761,7 @@ def write_overview_chart_html(
     figures: List[Tuple[str, str, go.Figure]] = [
         (
             "Dot matrix",
-            "Each cell is a circle: color follows the 0–100 chart score; marker size uses discrete steps by nearest ordinal tier so adjacent tiers are easy to tell apart. Columns are PART 5 verdicts plus rubric tiers (ATS / recruiter hygiene and Risk Factors omitted). Hover for the tier label."
+            "Each cell is a circle: color follows the 0–100 chart score; marker size uses discrete steps by nearest ordinal tier so adjacent tiers are easy to tell apart. Column headers are tilted so the grid stays compact without crowding. Columns are PART 5 verdicts plus rubric tiers (ATS / recruiter hygiene and Risk Factors omitted). Hover for the tier label."
             + mini_caveat,
             _fig_heatmap(display_jobs, dims, z, z_text),
         ),
@@ -758,7 +773,7 @@ def write_overview_chart_html(
         ),
         (
             "Grouped bars",
-            "One horizontal row per job (sorted like dot plots by weighted mean chart score). Each dimension is a bar in the group; bar length is the 0–100 chart score and fill color maps to the nearest ordinal tier (Very Low → Very High). Legend identifies dimensions; click legend entries to hide/show a dimension across all jobs. Missing or empty cells use the unknown-tier score."
+            "One horizontal row per job (sorted by weighted mean chart score). Each dimension is a bar in the group: length = 0–100 chart score; fill color = nearest ordinal on a monochrome blue ramp (darker = weaker, lighter = stronger). Rows are tall enough that eleven dimensions read as separate stripes, not a barcode. Legend lists dimensions—click to hide/show. Missing cells use the unknown-tier score."
             + mini_caveat,
             _fig_job_grouped_bars(display_jobs, dims, z, z_text),
         ),
@@ -781,7 +796,7 @@ def write_overview_chart_html(
             fig.update_layout(
                 width=hw,
                 autosize=False,
-                margin=dict(l=lm, r=28, t=188, b=64),
+                margin=dict(l=lm, r=28, t=168, b=64),
                 xaxis=dict(
                     tickangle=HEATMAP_X_TICK_ANGLE,
                     tickfont=dict(size=HEATMAP_DIM_LABEL_FONT_PX, color=MUTED),
@@ -804,15 +819,17 @@ def write_overview_chart_html(
             )
         elif title == "Grouped bars":
             lm = _heatmap_left_margin_px(jobs)
+            # Tall rows so ~11 grouped traces are stripes thick enough to read; scales with dimension count.
+            row_px = max(92, min(124, int(6.9 * n_dim + 26)))
             fig.update_layout(
-                width=max(1040, min(2000, 880 + n_dim * 14)),
-                height=max(520, min(3600, 28 * len(jobs) + 200)),
+                width=max(1080, min(2200, 900 + n_dim * 18)),
+                height=max(640, min(5600, row_px * len(jobs) + 280)),
                 autosize=False,
-                margin=dict(l=lm, r=24, t=40, b=140),
+                margin=dict(l=lm, r=24, t=44, b=168),
             )
         elif title == "Dot plots":
             fig.update_layout(
-                width=max(1200, min(6200, 118 * n_dim + 240)),
+                width=max(1000, min(6200, 96 * n_dim + 200)),
                 autosize=False,
             )
         responsive = not heatmap_wide

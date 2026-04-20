@@ -1,7 +1,8 @@
 ## Header metadata
-- `template_version`: `v1.13.0`
-- `model_used`: `GPT-5.4 Mini`
-- `job`: `Amazon Web Services (AWS Applied AI Solutions) | Sr UX Designer`
+
+- `template_version`: v1.14.0
+- `model_used`: GPT-5.4
+- `job`: Amazon - Senior UX Designer, AWS Applied AI Solutions
 - `jd_source`: `@job descriptions/Sr UX Designer, AWS Applied AI Solutions`
 - `output_report_path`: `job-evaluation-reports/Sr UX Designer, AWS Applied AI Solutions.eval.md`
 - `resume_versions_evaluated`:
@@ -21,24 +22,25 @@
   - `https://www.garyb.design/research/deepdream-gdc`
   - `https://www.garyb.design/research/quest-tracker`
 - `portfolio_pages_reviewed`:
-  - Reviewed: `https://www.garyb.design/` - systems-first positioning with testimonials and broad product/research proof.
-  - Reviewed: `https://www.garyb.design/products/elderscrollsonline` - strongest end-to-end systems, trust, and console UX proof.
-  - Reviewed: `https://www.garyb.design/products/madden` - shared design-system standardization across studios.
-  - Reviewed: `https://www.garyb.design/products/sims3` - onboarding and scalable interaction template proof.
-  - Reviewed: `https://www.garyb.design/products/starwars` - in-engine UI, platform constraints, and implementation-aware design.
-  - Reviewed: `https://www.garyb.design/products/xoholo` - Unreal, blueprints, and spatial composition across screens.
-  - Reviewed: `https://www.garyb.design/products/deepdream` - interactive installation, responsiveness, and production logistics.
-  - Reviewed: `https://www.garyb.design/research/circular-buffer` - continuous playback logic and failure-mode recovery.
-  - Reviewed: `https://www.garyb.design/research/deepdream-gdc` - public interactive-ML framing and demo legibility.
-  - Reviewed: `https://www.garyb.design/research/quest-tracker` - ambiguous preproduction UX and Unreal prototype work.
+  - **Reviewed** - `https://www.garyb.design/` - Strong positioning, but still broad.
+  - **Reviewed** - `https://www.garyb.design/products/elderscrollsonline` - Strong systems, scale, cross-functional proof.
+  - **Reviewed** - `https://www.garyb.design/products/madden` - Strong design-system and cross-studio standardization proof.
+  - **Reviewed** - `https://www.garyb.design/products/sims3` - Good end-to-end systems simplification proof.
+  - **Reviewed** - `https://www.garyb.design/products/starwars` - Good prototyping and implementation proof.
+  - **Reviewed** - `https://www.garyb.design/products/xoholo` - Technical experimentation, not product UX proof.
+  - **Reviewed** - `https://www.garyb.design/products/deepdream` - Direct AI-adjacent experimentation and prototyping.
+  - **Reviewed** - `https://www.garyb.design/research/circular-buffer` - Strong builder signal; limited business-product relevance.
+  - **Reviewed** - `https://www.garyb.design/research/deepdream-gdc` - Best direct trust/behavior framing around AI.
+  - **Reviewed** - `https://www.garyb.design/research/quest-tracker` - Strong ambiguity, systems, narrative framing proof.
 - `evidence_sources_used`:
   - `job descriptions/Sr UX Designer, AWS Applied AI Solutions`
   - `resumes/gboodhoo-resume-connect.md`
   - `resumes/gboodhoo-resume-games.md`
-  - `summaries 2026-04/2016-06.md`
-  - `summaries 2026-04/2017-01.md`
-  - `summaries 2026-04/2019-06.md`
-  - `summaries 2026-04/2024-07.md`
+  - `summaries 2026-04/2013-10.md`
+  - `summaries 2026-04/2014-03.md`
+  - `summaries 2026-04/2016-10.md`
+  - `journal_summarizer/monthly_dumps/2016-06.md`
+  - `journal_summarizer/monthly_dumps/2017-06.md`
   - `https://www.garyb.design/`
   - `https://www.garyb.design/products/elderscrollsonline`
   - `https://www.garyb.design/products/madden`
@@ -50,253 +52,320 @@
   - `https://www.garyb.design/research/deepdream-gdc`
   - `https://www.garyb.design/research/quest-tracker`
 
-## PART 1 — What the role is really asking for
+### PART 1 — What the role is really asking for
 
 #### The explicit asks
-- Own end-to-end UX strategy for complex product areas and multi-service journeys.
-- Design AI-native experiences that move beyond assistive UI toward proactive, context-aware, trustworthy AI teammates.
-- Bring system-level thinking, reusable patterns, and quality standards to a new or evolving surface area.
-- Use AI-accelerated workflows, rapid prototyping, and tangible artifacts to influence product direction quickly.
-- Partner closely with product, engineering, and applied science to shape roadmap and customer value.
-- Validate decisions through research, experimentation, and data, while also mentoring other designers.
+
+This is not a feature-production UX role. AWS is asking for a senior designer who can define product direction in ambiguous territory, shape AI-native interaction models, and carry work from concept through tangible prototypes that influence roadmap decisions.
+
+The clearest hard asks are:
+
+- end-to-end strategy across multi-service journeys
+- system-level thinking and reusable patterns
+- direct partnership with product, engineering, and applied science
+- strong prototyping velocity, explicitly including AI-accelerated workflows and vibe coding
+- trust, transparency, and human-AI collaboration design
+- customer validation, experimentation, and stakeholder influence
+- mentoring and raising team quality
 
 #### The implied asks
-- This is not just a screen-design role; it is a product-shaping role where the designer has to define what the experience should be.
-- The team likely wants someone who can turn ambiguous AI product space into a clear, opinionated direction without waiting for perfect requirements.
-- Tangible artifacts matter here. The role reads as evidence-driven and iterative, not purely conceptual.
-- The posting also implies a strong trust-and-adoption problem: business users need to feel the AI is understandable, controllable, and worth using.
-- I am treating the AI-accelerated workflow language as substantive, not decorative. The posting explicitly rewards artifact-driven speed.
+
+The team likely wants someone who can make AI feel useful and governable in enterprise contexts, not just visually polished. "AI teammates," "trust models," and "business applications" imply workflow design, delegation boundaries, explainability, and failure-state thinking for users who need reliability more than novelty.
+
+They also appear to want a designer who can produce enough tangible artifacts on their own that strategy conversations do not stay abstract. The mention of rapid prototyping and vibe coding is unusually explicit, so they are probably screening for someone who already works this way rather than someone merely open to it.
 
 #### What "great" looks like for this role
-- A senior designer who can work at both system and product levels without losing the customer problem.
-- Someone who can translate fuzzy AI opportunity into legible interaction models, trust cues, and cross-service journeys.
-- A designer whose work makes senior stakeholders feel, quickly, that the direction is coherent and shippable.
-- A collaborator who can speak product, engineering, and science without flattening the complexity of the problem.
+
+Great here looks like a designer who can do all of the following in one package:
+
+- frame ambiguous product problems crisply
+- turn those frames into interaction models and prototypes
+- speak credibly with science and engineering peers
+- show judgment about trust and human-AI boundaries
+- influence senior stakeholders with customer-backed reasoning
+- mentor others without reading as a pure people manager
 
 #### What a hiring team is optimizing for in screening
-- Immediate evidence of senior product UX judgment, not just visual polish.
-- Fast confirmation that the candidate can handle ambiguous AI product space and still land on opinionated interactions.
-- Proof of prototyping fluency, including rapid exploration and concrete artifacts.
-- A credible story about trust, clarity, and adoption in a business application context.
+
+On paper, they are probably optimizing for three things first:
+
+- obvious relevance to AI-powered product work, not just generic systems UX
+- evidence of leading complex, cross-surface experiences with reusable patterns
+- a readable senior-product-designer narrative outside games or entertainment
+
+Secondary optimization is likely around whether the candidate looks like a builder. The JD is unusually direct that prototypes and AI-assisted making should be part of the job, not optional garnish.
 
 #### Likely doubts unless proven otherwise
-- There is no direct public case study for an AI teammate or agentic business application.
-- The strongest public portfolio proof is systems-heavy, but much of it comes from games and creative-tech work, which is adjacent rather than direct.
-- A screener may wonder whether the candidate has recent enterprise-AI shipping proof, not just strong adjacent design craft.
-- The resume needs to make the AI/prototyping angle obvious fast, otherwise the screen may bucket the candidate as a general systems designer.
 
-## PART 2 — Resume evaluation only (two-pass)
+- Has he designed AI-native business software, or mainly games and experimental installations?
+- Can he show enterprise-style customer journeys and workflow outcomes, not just interaction craft and systems thinking?
+- Is the "AI" proof current enough and product-relevant enough, or is it mostly earlier creative ML experimentation?
+- Does he read as a senior product designer for business apps quickly enough, or as a strong but mispositioned game/systems designer?
+- Can he show science-partner credibility from the application package itself, rather than by inference?
+
+### PART 2 — Resume evaluation only (two-pass)
 
 #### `resumes/gboodhoo-resume-connect.md`
-**Interview likelihood from this resume alone:** Medium-high.
 
-This version is the better match for this JD because it reads as a platform-and-systems product designer with ambiguous-space comfort, trust-moment framing, and explicit technical fluency. It does not scream "AI-native product designer" on first read, but it survives because the story is portable, senior, and technically credible.
+**Interview likelihood from this resume alone:** Medium-low. This version is closer to the JD because it foregrounds systems, trust moments, ambiguity, cross-functional work, and product-like surfaces. The problem is that the AI-native business-app signal is still mostly adjacent, and the strongest visible proof still comes from game/platform work rather than enterprise software.
 
 **Strongest signals:**
-- Clear platform/systems framing: account lifecycle, identity flows, cross-surface UX, and high-trust moments.
-- Strong ambiguity language that fits the JD's need for an opinionated senior designer.
-- Technical fluency is visible in `Cursor`, `Python`, `React`, `HTML/CSS`, and `Lua`.
-- Cross-functional collaboration with product, engineering, research, and QA is explicit.
+
+- Better framing for high-trust flows, service UX, and cross-surface journeys.
+- Explicit ambiguity handling and partnership with product, engineering, research, and QA.
+- Some builder/tool signal through Cursor, Python, React, and prototyping language.
+- Iveda Pinpoint gives at least one non-game product anchor.
 
 **Weakest / missing signals:**
-- It does not front-load AI-native product design, agentic interaction, or business-app experience.
-- The most specific examples are still rooted in games and platform work, so an AWS screener has to generalize them.
-- The top summary is credible but slightly generic compared with the detail below it.
+
+- No direct AI-product bullet.
+- No applied-science or data-science partnership proof.
+- No clear enterprise business-application outcomes.
+- Mentoring is present, but not strongly enough to stand out as a bar-raising senior signal.
 
 **Vague / passive / dated language:**
-- "My work focuses on reducing friction..." is accurate but broad.
-- "I work well in ambiguous spaces..." is true, but it is still a soft self-description rather than evidence.
-- "durable multi-platform business" reads a bit like marketing copy.
 
-**Archetype read:**
-- Senior systems/product strategist with strong implementation fluency.
+- "I work well in ambiguous spaces" is credible but generic.
+- "Relevant client work includes" weakens ownership slightly because scope and outcomes vary by engagement.
+- Some bullets describe helpful activities without sharp product/result framing.
 
-**Can a recruiter bucket you quickly?**
-- Yes. Bucket: senior UX / platform systems / product design with technical prototyping fluency.
+**Archetype read:** Senior IC focused on systems, trust-sensitive flows, and cross-surface UX; adjacent to lead behavior, but not framed as a pure strategy lead.
+
+**Can a recruiter bucket you quickly:** Yes, but only partially. Likely bucket: senior systems/platform UX designer with game-platform and service-flow experience.
 
 #### `resumes/gboodhoo-resume-games.md`
-**Interview likelihood from this resume alone:** Medium.
 
-This version is stronger for game-specific leadership, prototyping, and systems depth, but it is less aligned to AWS Applied AI Solutions because the domain signal is game-first. It is a better proof-of-capability resume than a better application-facing resume for this JD.
+**Interview likelihood from this resume alone:** Low. It is stronger on shipped systems, design systems, prototyping, and leadership inside game production, but it points the recruiter toward AAA game UX rather than AI-native business applications.
 
 **Strongest signals:**
-- Clear senior game UX leadership with shipped AAA credits and live-service systems.
-- Strong systems language around design systems, implementation, and cross-functional collaboration.
-- Prototyping and code-driven demo work are visible and credible.
-- The technical stack is broad enough to suggest real build fluency.
+
+- Strongest direct evidence of leading complex systems and reusable frameworks.
+- Better documentation of design-system ownership and production alignment.
+- Clearer seniority in shipped product environments.
+- Better explicit prototyping language, including Unreal and code-driven demos.
 
 **Weakest / missing signals:**
-- The resume is too game-specific for this business-app role.
-- AI-native, agentic, or customer-ops framing is not front-loaded.
-- The strongest proof is older, so a screener may need help translating it into current AWS relevance.
+
+- Heavily game-coded from the first line.
+- No business-app or enterprise-readability signal.
+- AI appears nowhere in the resume body.
+- Cross-functional influence is real but framed inside game development, not product strategy for business software.
 
 **Vague / passive / dated language:**
-- "Browser-based game UX and interface design" is too thin to carry a senior-screen read.
-- "Visual development and front-end prototyping" is accurate, but underspecified.
-- Some bullets are concise to the point of hiding the depth they imply.
 
-**Archetype read:**
-- Lead game UX designer / systems lead.
+- "Lead game UX designer" is clear, but overcommits the application story to one domain.
+- Several bullets are good but still lean on internal production phrasing rather than customer/business framing.
 
-**Can a recruiter bucket you quickly?**
-- Yes, but into game UX. That is not the target bucket for this posting.
+**Archetype read:** Lead/Principal-leaning game UX systems designer with prototyping depth.
 
-#### Comparative
-- `resumes/gboodhoo-resume-connect.md` is closer to this JD because it reads as a senior systems/product designer first, not a game specialist.
-- I would apply with one primary resume plus the portfolio, not a third variant.
-- If you wanted to improve match clarity later, a targeted edit to the connect resume would be more useful than building a new persona from scratch.
+**Can a recruiter bucket you quickly:** Yes. Bucket: senior/lead AAA game UX designer. For this JD, that is the wrong fast bucket.
+
+#### Comparative read
+
+`resumes/gboodhoo-resume-connect.md` is closer to this JD because it at least tries to frame trust-sensitive systems, cross-surface journeys, and product-facing ambiguity in a broader way. The games resume has stronger systems proof, but it would make the wrong recruiter impression too early.
+
+You should apply with one primary resume plus portfolio, not a third variant by default. The stronger move is to tighten the connect resume around AI-native systems and builder proof rather than splitting into yet another story. That said, this JD is close enough to the edge of the current positioning that targeted edits would help materially.
 
 #### Primary resume for PART 5–6 (authoritative)
-- `primary_resume_for_verdict`: `resumes/gboodhoo-resume-connect.md`
 
-I selected this because step 1 decided it: it is closer to the JD. This is the application-facing resume for headline scoring in PART 5–6; the games resume stays in PART 2 for comparison only.
+`primary_resume_for_verdict`: `resumes/gboodhoo-resume-connect.md`
 
-## PART 3 — Monthly summaries + raw journals (supporting evidence)
+Selected by rule step 1: it is closer to this JD.
+
+This is the application-facing resume for headline scoring in PART 5-6; the games resume remains in PART 2 for comparison only.
+
+### PART 3 — Monthly summaries + raw journals (supporting evidence)
+
+PART 3 improves the behavioral read and shows what is under-visible, but it does not rescue headline scoring where the application package stays adjacent.
 
 #### Behavioral patterns
-- The journal trail shows a repeatable pattern: turn ambiguous work into reviewable artifacts, then tighten scope around what the team can actually ship.
-- Collaboration is a constant theme, not an afterthought. The work logs repeatedly show coordination with product, engineering, leadership, and implementation partners.
-- The logs also show a preference for tangible proof over hand-wavy direction, which fits this role's emphasis on rapid prototyping and influence through artifacts.
+
+The journals support a consistent pattern of working through ambiguity by externalizing structure, then using that structure to align teams. That shows up in both game and platform contexts: matrices, styleguides, Q&A decks, use-case inventories, and prototype handoffs recur as methods.
+
+Two short signals:
+
+- "You shipped item tooltip styleguide v5 to a wide list and fixed frame gaps from first in-game screenshots, built stats and game menu Axure prototypes with interactive switches and add-ons lists, and handed Confluence notes to Andy for implementation and Marc for visual pass." - `summaries 2026-04/2013-10.md`
+- "The outcome they are really looking for is a prioritized list of things to do... these stories serve 2 purposes: functional requirements... basis for wireframes... identify larger patterns... recognize ownership and scope." - `journal_summarizer/monthly_dumps/2016-06.md`
 
 #### Leadership and influence evidence
-- `summaries 2026-04/2016-06.md`: "Treat signed-in state and consistent top nav as cross-cutting product requirements, not page-level polish."
-- `summaries 2026-04/2017-01.md`: "working sessions on newsletter signup success/failure states, sign-in prototype, and CSS parity"
-- Those lines point to practical leadership: framing the real problem, aligning implementation, and keeping UX coherent across surfaces.
+
+The strongest journal pattern is not people-management leadership but design leadership through framing, documentation, prototype artifacts, and stakeholder communication. The 2014 ESO presentation work and 2016 platform research/presentation work both reinforce that he can align different functions around a point of view.
+
+Another useful signal:
+
+- "Framed the stakeholder session as Q&A rather than a defensive 'proposal,' and structured talking points around analytical/expressive/dominant lenses." - `summaries 2026-04/2014-03.md`
+
+That is good evidence of influence style and communication design, even though it is not visible enough on the resume.
 
 #### Direct ambiguity-navigation evidence
-- `summaries 2026-04/2019-06.md`: "Publish Kestrel AR/UI Unreal visualizations to HTML5 on AWS S3 for browser walkthroughs."
-- `summaries 2026-04/2017-01.md`: "Shipped Axure prototype links and refreshed Confluence hub docs; iterated sizing far longer than estimated but reached export-ready mockups."
-- This is the right kind of signal for an AI-native UX role: build something concrete, make it reviewable, and use it to reduce uncertainty.
+
+There is strong evidence of taking unclear spaces and making them operable. The 2016 web/platform notes show user-story matrices, stakeholder interviews, prioritization, metric framing, and recommendation planning. That maps well to the JD's demand for translating ambiguity into opinionated direction.
+
+The caveat is visibility. This is mostly in journals, not in the application package. It supports honesty about actual practice, but it cannot justify higher PART 5 tiers by itself.
 
 #### Evidence that strengthens the resume
-- `summaries 2026-04/2024-07.md`: "Weird prompts are allowed if they produce specific service promises, not jokes on the homepage."
-- That line shows discipline about public-facing messaging: creativity is useful, but only if it sharpens the promise to the audience.
-- `summaries 2026-04/2019-06.md` also matters because it shows a browser-walkthrough mindset on AWS S3, which is a useful technical-adjacent clue for this posting even though it is not enterprise AI product proof.
+
+- Repeated prototype-making for evaluation, not just presentation polish.
+- Repeated systems documentation and pattern thinking.
+- Repeated cross-functional alignment with engineering, production, QA, and leadership.
+- Some older but real AI/ML exploration with interactive behavior design, especially around DeepDream.
+
+From the ML side:
+
+- "Using the DeepDream convolutional neural network algorithm and real-time video feedback, the system turns your image into a vision of its own thought processes--a magic mirror." - `journal_summarizer/monthly_dumps/2017-06.md`
+
+That does not equal enterprise AI product design, but it does strengthen the claim that the AI interest is not superficial.
 
 #### Evidence that weakens or complicates the resume story
-- The journals reinforce the same strengths already visible in the resume and portfolio; they do not reveal a hidden, dramatically different AI product lane.
-- The strongest evidence is still adjacent to the AWS role rather than a direct business-app AI shipment.
-- That means the journals are valuable for honesty and interview prep, but they should not inflate the headline fit.
+
+The journals do not add recent business-AI product proof. They mainly show older game/platform systems work plus creative ML experimentation. That means the underlying capability may be broader than the resume shows, but the most relevant missing signal remains missing: current enterprise AI-native product work.
+
+They also reinforce that much of the best influence/process evidence is buried in private notes rather than surfaced publicly.
 
 #### Net read from journals
-- The work logs describe a designer who is prototype-first, systems-minded, and comfortable making complex ideas legible.
-- They support the connect resume's framing, but they do not turn this into a pure AI-business-app specialist story.
 
-## PART 4 — Portfolio evaluation (hiring manager lens)
+The journals make the candid case stronger that you are more strategic, structured, and prototype-driven than the resume alone suggests. They do not materially change the core screening concern for this JD: the submittable package still does not prove recent AI-native business application work with applied-science partnership.
+
+### PART 4 — Portfolio evaluation (hiring manager lens)
 
 #### What the portfolio proves for this JD
-The portfolio proves that the candidate can work at the intersection of systems, trust, implementation, and tangible prototypes. The homepage sets the tone immediately: "Reliable systems. Creative execution." More importantly, the case studies show that the candidate is comfortable shaping opinionated experiences in ambiguous spaces, not just polishing interfaces.
 
-`https://www.garyb.design/products/elderscrollsonline` is the clearest proof of end-to-end systems thinking: large-scale interaction redesign, cross-surface consistency, and controller-first UX under real constraints. `https://www.garyb.design/products/madden` shows that the candidate can standardize patterns across teams and studios. `https://www.garyb.design/research/quest-tracker` adds preproduction ambiguity, player archetypes, and prototype-led feature invention. `https://www.garyb.design/products/deepdream` and `https://www.garyb.design/research/deepdream-gdc` together show public-facing interactive-ML work where legibility and trust matter just as much as novelty. `https://www.garyb.design/products/xoholo` strengthens the story on spatial composition and technical prototyping.
+The portfolio proves real systems thinking, reusable-pattern design, and comfort operating from concept through artifact. `https://www.garyb.design/products/elderscrollsonline`, `https://www.garyb.design/products/madden`, and `https://www.garyb.design/products/sims3` show strong ability to simplify large, interdependent systems into coherent navigation models, templates, and shared standards. `https://www.garyb.design/research/quest-tracker` is especially relevant to the JD's ambiguity language because it shows problem-framing before the underlying product world was fully defined.
+
+It also proves builder behavior more than the resume does. `https://www.garyb.design/products/starwars`, `https://www.garyb.design/research/circular-buffer`, and the DeepDream pages show code-adjacent prototyping and technical experimentation used to validate interactions, not just static design presentation.
+
+For the AI-specific part of the JD, the strongest evidence comes from `https://www.garyb.design/products/deepdream` and `https://www.garyb.design/research/deepdream-gdc`. Those pages show hands-on machine-learning experimentation, interaction design around system behavior, and some early thinking about trust, legibility, and audience interpretation. The GDC writeup is especially relevant because it frames reliability and immediate comprehension as the UX problem for an intelligent system.
 
 #### What the portfolio does not prove (or only weakly supports) for this JD
-The portfolio does not directly prove AI-teammate or agentic business-app design. It also does not show recent AWS-scale product shipping in an enterprise context. Much of the public proof is game or creative-tech adjacent, which is useful for systems and experimentation but not a perfect one-to-one match for Applied AI Solutions.
+
+It does not prove enterprise business-application design. Most case studies are games, creative technology, or installations. Even where the underlying methods are transferable, the target domain AWS is hiring for is different enough that a skeptical hiring manager could still treat the match as adjacent.
+
+It also does not strongly prove collaboration with applied scientists on product direction. The AI work appears self-directed and exploratory rather than embedded in a product organization with science, product, and engineering jointly shaping production systems.
+
+The portfolio weakly supports trust and human-AI collaboration in the AWS sense. It shows behavioral thinking around machine perception and audience interpretation, but not durable workflow patterns for AI teammates in business contexts.
 
 #### Hiring risks the portfolio reduces vs leaves open
-- Reduces the risk that the candidate is only a visual designer.
-- Reduces the risk that the candidate cannot prototype or reason about implementation.
-- Reduces the risk that the candidate lacks trust/legibility instincts for ambiguous interaction design.
-- Leaves open whether the candidate has a direct, recent enterprise AI product case study.
-- Leaves open whether an AWS screener will instantly translate the game-heavy portfolio into business-app relevance.
+
+- Reduces: doubt that he can think systemically across large surfaces.
+- Reduces: doubt that he can prototype and work close to implementation.
+- Reduces: doubt that he can create reusable frameworks and design language.
+- Leaves open: whether he has shipped AI-native business software.
+- Leaves open: whether he has influenced product strategy in a modern enterprise SaaS environment.
+- Leaves open: whether his AI trust thinking extends from artistic/experimental systems to business-critical operational tools.
 
 #### Credibility and receipts
-The site is credible because the case studies are specific about tools, workflow, and tradeoffs. The result statements are somewhat promotional, so the process detail matters more than the headline claims. The public AI work is real and relevant, but it reads as experimental interaction design more than productized enterprise AI.
 
-## PART 5 — Combined verdict
+The portfolio is meaningfully better than a marketing-only site because many case studies explain constraints, mechanics, and design logic rather than merely showing polished screens. Still, some results claims are broad and domain-transfer is sometimes asserted more than demonstrated. The AI pages show authentic experimentation and builder credibility, but the jump from that work to AWS Applied AI Solutions remains partly interpretive.
 
-Primary resume selected: `resumes/gboodhoo-resume-connect.md`. The five verdict lines below are grounded only in that resume plus the reviewed portfolio pages; the journal depth in PART 3 is for honesty and tuning, not hidden tier inflation.
+#### Portfolio coverage (audit)
 
-- **Fit on paper**: Medium-high
-- **Actual capability (inferred)**: Medium-high
-- **Narrative coherence (for this JD)**: Medium-high
-- **Signal strength: Recruiter**: High
-- **Signal strength: HM**: Medium-high
+| URL | Status | Note |
+| --- | --- | --- |
+| `https://www.garyb.design/` | Reviewed | Broad positioning and testimonials |
+| `https://www.garyb.design/products/elderscrollsonline` | Reviewed | Strong systems and scale proof |
+| `https://www.garyb.design/products/madden` | Reviewed | Strong cross-studio standards proof |
+| `https://www.garyb.design/products/sims3` | Reviewed | Good workflow simplification proof |
+| `https://www.garyb.design/products/starwars` | Reviewed | Good code-linked prototyping proof |
+| `https://www.garyb.design/products/xoholo` | Reviewed | Technical, weak business relevance |
+| `https://www.garyb.design/products/deepdream` | Reviewed | Best direct AI experimentation proof |
+| `https://www.garyb.design/research/circular-buffer` | Reviewed | Builder proof, limited JD match |
+| `https://www.garyb.design/research/deepdream-gdc` | Reviewed | Best AI legibility/trust framing |
+| `https://www.garyb.design/research/quest-tracker` | Reviewed | Strong ambiguity and systems proof |
+
+### PART 5 — Combined verdict
+
+Primary resume for headline scoring: `resumes/gboodhoo-resume-connect.md`. The five headline tiers below are grounded only in that resume plus the portfolio. The journals add useful depth in PART 3 and tuning in PART 6, but they do not function as a second score track.
+
+- **Fit on paper**: medium-low
+- **Actual capability (inferred)**: medium
+- **Narrative coherence (for this JD)**: medium-low
+- **Signal strength: Recruiter**: medium-low
+- **Signal strength: HM**: medium
 
 #### 3 strongest reasons to advance
-- The application package already shows senior systems/product UX, not junior UI craft. That matters because the role wants someone who can define direction, not just execute screens.
-- The portfolio proves the candidate can turn ambiguity into tangible artifacts and use those artifacts to influence decisions.
-- The public AI/ML and technical-prototyping work gives the AWS role a credible adjacent signal instead of forcing the screener to imagine the fit from scratch.
+
+- Strong systems thinker with real evidence of simplifying complex, interdependent surfaces into reusable interaction patterns and frameworks.
+- Better-than-average builder signal for a designer, including prototyping, code-adjacent experimentation, and tangible artifacts used to influence implementation.
+- Credible track record of operating in ambiguity and aligning cross-functional teams through audits, design systems, prototypes, and presentations.
 
 #### 3 main screening concerns or gaps
-- There is no direct public case study for an AI teammate or agentic business application, so a skeptical screener may still want a more explicit example. The DeepDream work partially mitigates this by showing interactive ML, legibility, and trust concerns.
-- The public portfolio is still game and creative-tech heavy, which can make the AWS fit feel adjacent rather than exact. The connect resume helps, but it does not fully erase that mismatch.
-- Recent enterprise-product shipping proof is thinner than the older systems and prototype work. The site and journals show continuity, but not a current AWS-like shipping record.
+
+- The package does not directly prove AI-native business-application design; the strongest AI proof is older, experimental, and not enterprise-product based.
+- Applied-science partnership is named by the JD but not clearly evidenced in the resume or portfolio.
+- The application story is still split between game systems, trust/platform work, and creative AI exploration; that is interesting, but not yet a clean AWS business-app narrative.
 
 #### Misleveling / mispositioning read
-- This does not read as underleveled.
-- The main risk is mispositioning: the candidate can be read as a broad systems/product designer with strong technical fluency, rather than as a directly proven AI-native business-app designer.
-- The best framing for this JD is senior systems/product UX with prototyping depth and AI-adjacent interaction work, not a pure AI specialist pitch.
 
-## PART 6 — Rubric scoring + weighted synthesis
+This does not read as underqualified. It reads as somewhat mispositioned. The likely failure mode is not "too junior" but "strong senior systems designer whose best visible proof points come from the wrong domain cluster." If positioned carefully, he could still be interesting to a hiring manager who values transferable systems thinking. If screened quickly by a recruiter against literal enterprise-AI comparables, he is easy to pass on.
+
+### PART 6 — Rubric scoring + weighted synthesis
 
 #### Rubric
-- **Problem Match (25%):** Medium-high
-- **Relevant Proof (20%):** Medium-high
-- **Recency (15%):** Medium
-- **Role Readability (15%):** Medium-high
-- **Differentiation (10%):** Medium-high
-- **Risk Factors (10%):** Medium
-- **Narrative Coherence (5%):** Medium-high
+
+- **Problem Match (25%)**: Medium
+- **Relevant Proof (20%)**: Medium
+- **Recency (15%)**: Medium-low
+- **Role Readability (15%)**: Medium
+- **Differentiation (10%)**: Medium-high
+- **Risk Factors (10%)**: High
+- **Narrative Coherence (5%)**: Medium
 - **ATS / recruiter hygiene:** Pass
 
 #### Weighted synthesis
 
-**What problem is this job hiring for?**  
-A senior UX designer who can turn ambiguous AI-enabled business-app space into trustworthy, opinionated, end-to-end experiences and work closely with product, engineering, and applied science.
-
-**Where does resume + portfolio show you solving that problem?**  
-The connect resume shows account lifecycle, trust moments, ambiguity comfort, and technical fluency. The portfolio shows systems thinking, implementation-aware design, and prototype-led exploration across large surfaces. The AI-adjacent public work shows that the candidate has already been thinking about interactive machine intelligence, legibility, and user trust.
-
-**Does the primary resume make that obvious in the first 20 seconds?**  
-Mostly, but not perfectly. It is obvious that this is a senior systems/product designer with technical fluency; it is less obvious that the candidate is specifically an AI-native business-app designer.
-
-**What would make someone hesitate based only on resume + portfolio?**  
-They may hesitate because the most vivid public proof is game and creative-tech adjacent, not a direct enterprise AI product case study. They may also wonder how current the AWS-like shipping context is.
-
-**What already mitigates those hesitations based only on resume + portfolio?**  
-The public portfolio shows strong systems, trust, and prototyping instincts, and the AI/ML interaction work is credible rather than decorative. The connect resume also helps by framing the candidate in product and platform language rather than game language.
-
-**Does the submittable story hang together?**  
-Yes, as a systems-first, prototype-driven designer with real adjacent AI interaction proof. It is coherent, but it is not a perfect one-to-one enterprise AI match.
+- **What problem is this job hiring for?** A senior designer who can define AI-native business-product direction in ambiguous spaces, make trust-sensitive interaction models concrete, and influence product decisions through systems thinking plus fast prototyping.
+- **Where does resume + portfolio show you solving that problem?** Mostly in adjacent form: ESO, Madden, Sims 3, and Quest Tracker show systems framing, reusable patterns, and ambiguity handling; DeepDream and the GDC writeup show real AI experimentation and builder behavior.
+- **Does the primary resume make that obvious in the first 20 seconds?** Not enough. It gets closer than the games resume, but the AI-native business-app story still requires interpretation.
+- **What would make someone hesitate based only on resume + portfolio?** Domain adjacency, limited recent AI-product proof, no strong applied-science partnership evidence, and a story that still reads broader than this specific hiring lane.
+- **What already mitigates those hesitations?** The portfolio does visibly mitigate doubts about systems depth, prototyping ability, and ambiguity handling. It does not visibly mitigate the missing enterprise AI-product proof, so that concern stays bare.
+- **Does the submittable story hang together?** Partially. It is coherent as "senior systems designer with builder instincts and some AI experimentation," but only partially coherent as "senior designer for AI-native business applications."
 
 #### Actionable output
 
-**Themes to emphasize**
-- Trust, clarity, and adoption in complex systems.
-- Cross-surface journey design and systems thinking.
-- Rapid prototyping that turns ambiguity into something reviewable.
-- Technical fluency that supports AI-accelerated workflows.
-- Customer-backed decision making and stakeholder alignment.
+#### Themes to emphasize
 
-**Themes to de-emphasize**
-- Game-specific language that does not help this application.
-- Creative-tech flourish unless it supports trust, interaction logic, or rapid prototyping.
-- Old credit lists that slow the reader down more than they help.
+- Systems thinking across complex journeys
+- Trust-sensitive UX and legibility under complexity
+- Prototype-driven decision making
+- Reusable frameworks, standards, and quality-bar work
+- Human interpretation of intelligent-system behavior
 
-**5 bullets to rewrite**
-- Reframe the headline summary so it reads as senior product/systems UX for AI-enabled business applications, not just general platforms and systems.
-- Move `Cursor`, `Python`, `React`, and `HTML/CSS` earlier in the resume story if this role is the target.
-- Rewrite one selected work bullet to make the customer problem, scope, and outcome more explicit.
-- Add one public-facing sentence that makes AI interaction or AI-augmented prototyping unmistakable.
-- Trim any game-forward phrasing that competes with the AWS story instead of supporting it.
+#### Themes to de-emphasize
 
-**3 missing signals to make explicit**
-- A direct AI teammate or agentic interaction example.
-- A recent business-app or enterprise-scale project that is closer to AWS's center of gravity.
-- A public example of research/experiment/data informing the design direction.
+- Purely game-specific framing in top-level positioning
+- Art-installation language that sounds far from product work
+- Broad creative-technologist branding when the target role wants business-application clarity
 
-**5 interview stories to prepare**
-- A trust-heavy journey story, such as sign-in, recovery, or account management across surfaces.
-- A prototype-driven ambiguity story where a tangible artifact changed the conversation.
-- A systems/design-standards story where you made multiple teams easier to ship with.
-- A public AI/ML interaction story from DeepDream or circular-buffer, focused on legibility and user trust.
-- A cross-functional influence story showing how you shaped direction with product, engineering, or science partners.
+#### Up to 5 bullets to rewrite
 
-**Direct recommendation**
-- Apply after targeted resume edits.
+- Rewrite the summary so AI-native systems and prototyping are explicit, not implied.
+- Rewrite the Iveda Pinpoint bullet to stress business workflow complexity, customer value, and decision impact.
+- Rewrite one ESO/platform bullet to foreground end-to-end service journey strategy rather than only flow improvement.
+- Rewrite the tools line so AI-assisted making is visible through actual workflow language, not just a list including Cursor.
+- Rewrite one leadership bullet to show how critique, standards, or mentoring changed team output quality.
+
+#### Up to 3 missing signals to make explicit
+
+- Any direct work with AI-assisted workflows, agent behavior, or LLM-based prototyping in current practice.
+- Any partnership pattern with data science, research science, or ML-adjacent technical stakeholders.
+- Any measurable business or customer outcomes from non-game product work.
+
+#### Up to 5 interview stories to prepare
+
+- A story about turning an ambiguous system into a concrete interaction model and roadmap direction.
+- A story about creating reusable patterns or standards that improved execution quality across teams.
+- A story about influencing skeptical stakeholders with prototypes or structured artifacts.
+- A story about AI experimentation that changed how you think about trust, transparency, or user understanding.
+- A story that translates game/platform experience into business-application problem solving without sounding defensive.
+
+#### Direct recommendation
+
+apply after targeted resume edits
 
 **Why they might hire you**
-They have a credible senior designer who can think in systems, prototype quickly, and make complicated journeys more legible. The package suggests real technical fluency and a thoughtful approach to trust, which are both useful for AI-native product work.
+
+They might hire you if a human reviewer sees the transferable core quickly: strong systems design, real ambiguity handling, credible prototyping instincts, and an unusually tangible mix of design craft plus technical experimentation. There is enough substance here for a hiring manager to imagine you contributing to complex AI-product definition work.
 
 **Why they might not**
-The portfolio and journals are adjacent to the role more than directly inside it. A screener looking for a current enterprise AI product specialist may want a more explicit business-app case study and less game/creative-tech framing.
+
+They might not because this specific JD asks for proof that is more literal than your current package provides. The missing center of gravity is recent AI-native business-product work with applied-science adjacency. Without that, the story can read as impressive but adjacent.
