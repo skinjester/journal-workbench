@@ -1,10 +1,11 @@
 # Job evaluation template (canonical)
 
-`template_version`: **v1.14.0**  
-`last_updated`: **2026-04-20**
+`template_version`: **v1.14.1**  
+`last_updated`: **2026-04-21**
 
 ## Changelog
 
+- **v1.14.1 (2026-04-21)**: **Resume list from references.** PART 2 evaluates every repo-relative resume path under `JOB_EVALUATION_REFERENCES.md` → **Resume(s)** (not a fixed pair). `primary_resume_for_verdict` must be **one of those paths**. Optional tailored resumes (e.g. studio-specific) live in the same section.
 - **v1.14.0 (2026-04-20)**: **Imperative cleanup.** Removed redundant restatements of core rules (journals do not inflate PART 5 tiers; submittable package = primary resume + portfolio; signal strength is not interview odds; balanced specificity; mitigation pairing; Risk Factors is not permission for bleak prose) — each rule now has one canonical location. Added **symmetric scoring notes** on Problem Match, Relevant Proof, and Narrative Coherence so High requires direct evidence (previously only Risk Factors had a tier-moderation note). Made **mitigation pairing conditional** on visible evidence. Added a **PART 5 ↔ PART 6 self-check**. Added a neutral **"hold"** option to the direct recommendation list. Updated sample rubric to demonstrate the seven-step scale. Compressed changelog and shrank the runner prompt.
 - **v1.13.0 (2026-04-20)**: Canonical seven-step ordinals with ASCII hyphens. See PART 5 ordinal tiers note.
 - **v1.12.0 (2026-04-20)**: Header metadata adds `model_used`.
@@ -156,8 +157,8 @@ Chat output policy:
 - `job`: (company + title if known)
 - `jd_source`: (pasted text vs `@path/to/file`)
 - `output_report_path`: (repo-relative path of the markdown file you wrote)
-- `resume_versions_evaluated`: (list both `resumes/gboodhoo-resume-connect.md` and `resumes/gboodhoo-resume-games.md` when evaluated in PART 2)
-- `primary_resume_for_verdict`: (single repo-relative path—the resume selected in PART 2 as authoritative for PART 5–6 headline scoring; must be one of the two resume paths above)
+- `resume_versions_evaluated`: (list every resume path under **Resume(s)** in `JOB_EVALUATION_REFERENCES.md` that you evaluated in PART 2)
+- `primary_resume_for_verdict`: (single repo-relative path—the resume selected in PART 2 as authoritative for PART 5–6 headline scoring; must be one of the paths in `resume_versions_evaluated`)
 - `portfolio_evaluated`: yes/no (default yes, using references doc URLs)
 - `portfolio_pages_required`: (copy the full deduped portfolio URL list from `JOB_EVALUATION_REFERENCES.md`)
 - `portfolio_pages_reviewed`: (checklist of the same URLs, each marked **Reviewed** or **Failed to fetch** with a one-line note)
@@ -181,12 +182,9 @@ Preferred internal structure for readability:
 - `#### What a hiring team is optimizing for in screening`
 - `#### Likely doubts unless proven otherwise`
 
-### PART 2 — Resume evaluation only (two-pass)
+### PART 2 — Resume evaluation only (multi-pass)
 
-Evaluate **each** resume variant independently:
-
-- [`resumes/gboodhoo-resume-connect.md`](resumes/gboodhoo-resume-connect.md)
-- [`resumes/gboodhoo-resume-games.md`](resumes/gboodhoo-resume-games.md)
+Evaluate **each** resume variant independently (every repo-relative `.md` path listed under **Resume(s)** in [`JOB_EVALUATION_REFERENCES.md`](JOB_EVALUATION_REFERENCES.md); reproduce that list as linked bullets here):
 
 For each resume, include:
 
@@ -199,17 +197,17 @@ For each resume, include:
 
 Then add a **comparative** subsection:
 
-- which resume is closer to *this JD*
-- whether you should apply with one primary resume + portfolio, or actually need a third variant
+- which listed resume is closest to *this JD* (short rationale)
+- whether any other listed resume is redundant for this application or still worth keeping in rotation
 
 Then add **`#### Primary resume for PART 5–6 (authoritative)`** (required):
 
-- Set **`primary_resume_for_verdict`** to exactly one path: `resumes/gboodhoo-resume-connect.md` **or** `resumes/gboodhoo-resume-games.md`.
+- Set **`primary_resume_for_verdict`** to exactly one path from the **Resume(s)** list in `JOB_EVALUATION_REFERENCES.md` (the same set you evaluated above).
 - **Selection rules** (apply in order; state which step decided it):
   1. Prefer the resume **closer to this JD** (from the comparative subsection above).
   2. If still tied, prefer the higher **Interview likelihood from this resume alone** (High beats Medium beats Low).
   3. If still tied, state the tie-break in one explicit sentence (no silent pick).
-- One short line: this choice is the **application-facing** resume for headline scoring in PART 5–6; the other resume remains in PART 2 for comparison only.
+- One short line: this choice is the **application-facing** resume for headline scoring in PART 5–6; non-primary resume(s) remain in PART 2 for comparison only.
 
 Formatting preference:
 
@@ -364,7 +362,7 @@ Sample shape (values illustrative — mix of three-step and seven-step tiers dem
 
 Does the background solve the JD's real pains (not the buzzwords)?
 
-**Scoring note:** **High** means the JD's core asks are named directly on primary resume or portfolio in current, submittable form. If the match is **adjacent** (related domain, related scale, related tools) or **inferred** (supported by journal detail but not visible on the page), cap this cell at **Medium**. If a JD-named required ask is absent from both resume and portfolio, cap at **Medium-Low**.
+**Scoring note:** **High** means the JD's core asks are named directly on primary resume or portfolio in current, submittable form. If the match is **adjacent** (related domain, related scale, related tools) or **inferred** (supported by journal detail but not visible on the page), cap this cell at **Medium**. If a JD-named required ask is absent from the evaluated resume set and portfolio, cap at **Medium-Low**.
 
 ### 2) Relevant Proof (20%)
 
