@@ -1,10 +1,11 @@
 # Job evaluation template (canonical)
 
-`template_version`: **v1.14.1**  
-`last_updated`: **2026-04-21**
+`template_version`: **v1.14.2**  
+`last_updated`: **2026-04-22**
 
 ## Changelog
 
+- **v1.14.2 (2026-04-22)**: **References: Riot-tuned resume.** `JOB_EVALUATION_REFERENCES.md` now lists `resumes/gboodhoo-resume-riot.md` alongside other variants; PART 2 / `primary_resume_for_verdict` behavior is unchanged.
 - **v1.14.1 (2026-04-21)**: **Resume list from references.** PART 2 evaluates every repo-relative resume path under `JOB_EVALUATION_REFERENCES.md` → **Resume(s)** (not a fixed pair). `primary_resume_for_verdict` must be **one of those paths**. Optional tailored resumes (e.g. studio-specific) live in the same section.
 - **v1.14.0 (2026-04-20)**: **Imperative cleanup.** Removed redundant restatements of core rules (journals do not inflate PART 5 tiers; submittable package = primary resume + portfolio; signal strength is not interview odds; balanced specificity; mitigation pairing; Risk Factors is not permission for bleak prose) — each rule now has one canonical location. Added **symmetric scoring notes** on Problem Match, Relevant Proof, and Narrative Coherence so High requires direct evidence (previously only Risk Factors had a tier-moderation note). Made **mitigation pairing conditional** on visible evidence. Added a **PART 5 ↔ PART 6 self-check**. Added a neutral **"hold"** option to the direct recommendation list. Updated sample rubric to demonstrate the seven-step scale. Compressed changelog and shrank the runner prompt.
 - **v1.13.0 (2026-04-20)**: Canonical seven-step ordinals with ASCII hyphens. See PART 5 ordinal tiers note.

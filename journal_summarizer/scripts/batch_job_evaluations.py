@@ -59,7 +59,7 @@ def _build_prompt(repo: Path, jd_rel: str) -> str:
     return f"""Automated job-evaluation batch step (single JD).
 
 You MUST read and follow these workspace files before writing:
-- JOB_EVALUATION_TEMPLATE.md (v1.14.1+)
+- JOB_EVALUATION_TEMPLATE.md (v1.14.2+)
 - JOB_EVALUATION_REFERENCES.md
 - JOB_EVAL_CHAT_COMMAND.md
 

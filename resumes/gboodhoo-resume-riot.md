@@ -2,10 +2,10 @@ GARY BOODHOO
 garyb.design | San Francisco, CA | gboodhoo@gmail.com | 415-802-4076
 
 SENIOR UX DESIGNER
-Senior game UX designer experienced in onboarding, commerce, and interdependent player-facing systems, taking features from concept through implementation across console and PC.
+Senior game UX designer who defines onboarding, commerce, and complex player-facing systems, taking features from concept through implementation across console and PC. I use prototypes and reusable patterns to turn ambiguous feature areas into clear player experiences and buildable team decisions.
 
 SELECTED WORK
-Led the design and implementation of The Elder Scrolls Online UX/UI for PlayStation and Xbox. That work established pillars for content design and behavior the live service still relies on today.
+Led the replatforming of The Elder Scrolls Online UX from PC to PlayStation and Xbox, establishing controller-first patterns and reusable UI structures that remain foundational to the live service.
 
 Designed the onboarding experience for The Sims 3. This flow helped new players start quickly and supported deeper configuration for returning players. JavaScript prototypes helped the team see how content moved through the system before it was built.
 
@@ -17,9 +17,9 @@ Figma · Framer · Adobe Creative Cloud · Unreal Engine · TouchDesigner · Pyt
 EXPERIENCE
 Skinjester Studio — Founder & Principal Product Designer
 2016–2025 • San Francisco, CA
-- Defined Kestrel's AR UI design language — a framework for how interface elements anchor to the player and the world, developed during preproduction.
-- Designed live-service UX for elderscrollsonline.com, the game’s web platform. My competitive analysis and research connected account and commerce journeys across game and web. 
-- Designed UX for Iveda Pinpoint, a hospital indoor positioning system, building spatial prototypes to guide engineering spend.
+- Led game UX consulting for live services and product incubation, helping teams define UX direction and turn open problem spaces into buildable features.
+- Designed live-service UX for elderscrollsonline.com, connecting account and commerce journeys across game and web through competitive analysis and research.
+- Designed UX for Iveda Pinpoint, an indoor positioning system for hospital inventory loss management, partnering with WRLD3D and building spatial prototypes and user journeys to guide engineering spend.
 
 ZeniMax Online Studios — User Experience Lead, The Elder Scrolls Online (ESO)
 2013–2016 • Cockeysville, MD

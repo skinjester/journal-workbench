@@ -14,6 +14,8 @@ Every file listed here is read for **PART 2** (compare). For **PART 5 headline v
   - Alternate positioning (more game-forward). Use when evaluating game roles, or when you want the evaluator to sanity-check framing mismatch.
 - [`resumes/gboodhoo-resume-31st-union.md`](resumes/gboodhoo-resume-31st-union.md)
   - Role-tuned variant for **Sr UX Designer, 31st Union** (and similar postings); compare explicitly against connect/games in PART 2 when this file is in the list.
+- [`resumes/gboodhoo-resume-riot.md`](resumes/gboodhoo-resume-riot.md)
+  - Role-tuned variant for **Riot-style** senior game UX / player-experience–forward roles; compare explicitly against connect/games (and other tailored variants) in PART 2 when this file is in the list.
 
 ## Portfolio (public)
 
