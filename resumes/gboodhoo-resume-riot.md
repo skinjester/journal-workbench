@@ -24,7 +24,7 @@ Skinjester Studio — Founder & Principal Product Designer
 ZeniMax Online Studios — User Experience Lead, The Elder Scrolls Online (ESO)
 2013–2016 • Cockeysville, MD
 - Led UX/UI for ESO’s console launch and ongoing live-service development, owning onboarding, progression and commerce from concept through implementation.
-- Built UI workflows in Adobe Fireworks for ESO, documenting patterns, component states, and token definitions to support engineering and QA during implementation and issue resolution.
+- Built UI workflows in Adobe Fireworks for ESO, documenting patterns, component states, and token definitions to support engineering and QA during implementation and for issue resolution.
 - Ran focus tests for player trading and the Crown Store that surfaced real interaction failures and drove design revision before launch.
 
 RealU — User Experience Consultant, Otherland
