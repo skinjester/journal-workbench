@@ -7,9 +7,9 @@ Senior game UX designer with shipped AAA credits on console and PC, working with
 SELECTED WORK
 Led the design and implementation of The Elder Scrolls Online UX/UI for PlayStation and Xbox. That work established pillars for content design and behavior the live service still relies on today.
 
-Designed the Game Entry onboarding experience for The Sims 3. The flow helped new players start quickly and supported deeper configuration for returning players. JavaScript prototypes helped the team see how content moved through the system before it was built.
+Designed the onboarding experience for The Sims 3. This flow helped new players start quickly and supported deeper configuration for returning players. JavaScript prototypes helped the team see how content moved through the system before it was built.
 
-On Project Kestrel, an unreleased online co-op action RPG with ZeniMax Online Studios and Sprung Studios, my prototypes informed feature direction during preproduction. I built diegetic UI and 3D layouts in Unreal with game assets and custom blueprints, then published them as HTML5 builds on AWS S3 for weekly review.
+On Project Kestrel, an unreleased online co-op action RPG with ZeniMax Online Studios and Sprung Studios, my prototypes informed feature direction during preproduction. I built diegetic UI and 3D layouts in Unreal with game assets and custom blueprints, then published them as HTML5 builds to AWS S3 for weekly review.
 
 TOOLS
 Figma · Framer · Adobe Creative Cloud · Unreal Engine · TouchDesigner · Python · Lua · React · HTML/CSS
@@ -19,13 +19,13 @@ Skinjester Studio — Founder & Principal Product Designer
 2016–2025 • San Francisco, CA
 - Contributed preproduction UX on Project Kestrel with ZeniMax Online Studios and Sprung Studios.
 - Designed live-service UX for elderscrollsonline.com, the game’s web platform. My competitive analysis and research connected account and commerce journeys across game and web. 
-- Designed UX for Iveda Pinpoint, an indoor positioning system for hospital loss management, during its product incubation. I brought in WRLD3D as a technical partner and built spatial prototypes and user journeys to inform engineering spend.
+- Designed UX for Iveda Pinpoint, an indoor positioning system for hospital inventory loss management, partnering with WRLD3D and building spatial prototypes and user journeys to guide engineering spend.
 
 ZeniMax Online Studios — User Experience Lead, The Elder Scrolls Online (ESO)
 2013–2016 • Cockeysville, MD
 - Led UX/UI for ESO’s console launch and ongoing live-service development, owning onboarding, progression and commerce from concept through implementation.
 - Created a UX design system that engineering and QA built against. Cross-functional reviews moved faster because design intent was already captured.
-- Ran usability testing on core systems including a player-trading session with eight volunteers. The findings revised the flow for invite acceptance and currency focus states before launch.
+- Wrote test plans for item trading and the in-game storefront, partnering with QA to run usability sessions that surfaced interaction issues early and refined critical player-facing flows before launch.
 
 RealU — User Experience Consultant, Otherland
 2012–2013 • Singapore
@@ -49,13 +49,13 @@ Nihilistic Software — Senior User Interface Designer, Zombie Apocalypse
 
 Electronic Arts — User Experience Consultant, The Sims 3
 2008 • Redwood Shores, CA
-- Designed the Game Entry onboarding experience for The Sims 3, creating reusable content templates and interaction patterns that improved player understanding and streamlined content production.
+- Designed the onboarding experience for The Sims 3, creating reusable content templates and interaction patterns that improved player understanding and streamlined content production.
 
 LucasArts — Senior UX/UI Designer, Star Wars: The Force Unleashed
 2006–2008 • San Francisco
 - Designed UI for Star Wars: The Force Unleashed from concept through launch on PlayStation 3 and Xbox 360, which became LucasArts’ fastest-selling game.
 - Designed the interface and authored it in-engine, from visual design to Lua behaviors.
-- Worked with engineering and QA to harden the authoring pipeline for console certification.
+- Worked with engineering and QA to harden the content pipeline for console certification.
 
 Rainbow Studios — Senior User Interface Designer, MX vs ATV Untamed
 2005–2006 • Phoenix, AZ
