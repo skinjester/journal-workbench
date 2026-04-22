@@ -2,7 +2,7 @@ GARY BOODHOO
 garyb.design | San Francisco, CA | gboodhoo@gmail.com | 415-802-4076
 
 SENIOR UX DESIGNER
-Senior game UX designer with shipped AAA credits on console and PC, working from concept to in-engine implementation. Most recent game work was in-engine UX prototyping with ZeniMax Online Studios on an unreleased online co-op action RPG. I currently build creative MIDI tools for live performance and interactive media. I work early at concept stage and mentor teams through launch and support.
+Senior game UX designer with shipped AAA credits on console and PC, working with cross-functional teams from concept to in-engine implementation.
 
 SELECTED WORK
 Led the design and implementation of The Elder Scrolls Online UX/UI for PlayStation and Xbox. That work established pillars for content design and behavior the live service still relies on today.
