@@ -1,5 +1,5 @@
 GARY BOODHOO
-garyb.design | San Francisco, CA | gboodhoo@gmail.com | 415-802-4076
+Portfolio: https://www.garyb.design | San Francisco, CA | gboodhoo@gmail.com | 415-802-4076
 
 SENIOR UX DESIGNER
 Senior game UX designer who defines onboarding, commerce, and complex player-facing systems, taking features from concept through implementation across console and PC. I use prototypes and reusable patterns to turn ambiguous feature areas into clear player experiences and buildable team decisions.
