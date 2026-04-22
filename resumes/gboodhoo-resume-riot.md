@@ -5,7 +5,7 @@ SENIOR UX DESIGNER
 Senior game UX designer who defines onboarding, commerce, and complex player-facing systems, taking features from concept through implementation across console and PC. I use prototypes and reusable patterns to turn ambiguous feature areas into clear player experiences and buildable team decisions.
 
 SELECTED WORK
-Led the replatforming of The Elder Scrolls Online UX from PC to PlayStation and Xbox, establishing controller-first patterns and reusable UI structures that remain foundational to the live service.
+Led the replatforming of The Elder Scrolls Online UX from PC to PlayStation and Xbox, establishing controller-first patterns and reusable UI structures still foundational to the live MMO. ZeniMax has publicly cited $2B in ongoing lifetime revenue for this game (GDC 2024).
 
 Designed the onboarding experience for The Sims 3. This flow helped new players start quickly and supported deeper configuration for returning players. JavaScript prototypes helped the team see how content moved through the system before it was built.
 
