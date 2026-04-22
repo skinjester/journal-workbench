@@ -29,7 +29,7 @@ ZeniMax Online Studios — User Experience Lead, The Elder Scrolls Online (ESO)
 
 RealU — User Experience Consultant, Otherland
 2012–2013 • Singapore
-- Consulted on UX/UI for Otherland, helping a stalled MMORPG regain momentum through design direction and structured review. The work supported continued investor funding.
+- Consulted on UX/UI for Otherland, helping a stalled MMORPG regain momentum through design direction, prototyping, and structured review, supporting continued investor funding.
 
 Rumble Games — User Experience Designer, KingsRoad
 2011–2012 • Redwood City, CA
@@ -37,7 +37,7 @@ Browser-based game UX and interface design.
 
 Osterhout Design Group — Product Designer
 2010–2011 • San Francisco
-- Designed AR interaction demos for early wearable hardware. I translated optical and sensor constraints into discoverable spatial behaviors for military-contractor scenarios.
+- Designed demos for early wearable AR hardware, translating optical and sensor constraints into discoverable spatial behaviors through scenarios co-developed with military subject matter experts.
 
 Serious Business — User Experience Designer
 2009–2010 • San Francisco
@@ -45,7 +45,7 @@ UX and feature design for early social games.
 
 Nihilistic Software — Senior User Interface Designer, Zombie Apocalypse
 2008–2009 • Novato, CA
-- Designed the HUD and front-end UX for Zombie Apocalypse, a 4-player local co-op shooter using Scaleform, keeping the interface legible on a shared screen.
+- Advanced the HUD and front-end UX for Zombie Apocalypse mid-development, refining the interface for 4-player local co-op and shared-screen clarity.
 
 Electronic Arts — User Experience Consultant, The Sims 3
 2008 • Redwood Shores, CA
@@ -54,7 +54,7 @@ Electronic Arts — User Experience Consultant, The Sims 3
 LucasArts — Senior UX/UI Designer, Star Wars: The Force Unleashed
 2006–2008 • San Francisco
 - Designed UI for Star Wars: The Force Unleashed from concept through launch on PlayStation 3 and Xbox 360, which became LucasArts’ fastest-selling game.
-- Designed the interface and authored it in-engine, from visual design to Lua behaviors.
+- Designed and authored the user interface in-engine, from visual design to Lua behaviors.
 - Worked with engineering and QA to harden the content pipeline for console certification.
 
 Rainbow Studios — Senior User Interface Designer, MX vs ATV Untamed
@@ -63,8 +63,8 @@ Visual development and front-end interface prototyping.
 
 Electronic Arts Tiburon — Senior User Interface Designer, Madden NFL
 2001–2005 • Maitland, FL
-- Owned interface work from early design through shipping implementation across four annual Madden NFL releases. Hundreds of screens passed first-party certification each cycle.
 - Co-developed and supported EA Sports’ shared UI design system that four studios used to ship seven annual titles.
+- Progressed from contributor to lead interface designer on Madden NFL, owning interface work from early design through first-party certification across annual releases.
 
 EDUCATION
 Full Sail University (A.S., Video Production) · Massachusetts College of Art and Design (Studio for Interrelated Media) · CooperU Interaction Design Practicum
