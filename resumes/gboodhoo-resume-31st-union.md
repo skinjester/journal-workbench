@@ -25,7 +25,7 @@ ZeniMax Online Studios — User Experience Lead, The Elder Scrolls Online (ESO)
 2013–2016 • Cockeysville, MD
 - Led UX/UI for ESO’s console launch and ongoing live-service development, owning onboarding, progression and commerce from concept through implementation.
 - Created a UX design system that engineering and QA built against. Cross-functional reviews moved faster because design intent was already captured.
-- Wrote test plans for item trading and the in-game storefront, partnering with QA to run usability sessions that surfaced interaction issues early and refined critical player-facing flows before launch.
+- Wrote test plans for item trading and the in-game storefront, partnering with QA to run playtests that surfaced interaction issues early and refined critical player-facing flows before launch.
 
 RealU — User Experience Consultant, Otherland
 2012–2013 • Singapore
