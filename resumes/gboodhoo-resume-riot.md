@@ -2,7 +2,7 @@ GARY BOODHOO
 Portfolio: https://www.garyb.design | San Francisco, CA | gboodhoo@gmail.com | 415-802-4076
 
 SENIOR UX DESIGNER
-Senior game UX designer who defines onboarding, commerce, and complex player-facing systems, taking features from concept through implementation across console and PC. I use prototypes and reusable patterns to turn ambiguous feature areas into clear player experiences and buildable team decisions.
+Senior game UX designer working on interrelated player-facing systems across console, PC, and connected devices. I take features from concept through implementation, using prototypes and reusable patterns to turn ambiguity into actionable decisions for teams.
 
 SELECTED WORK
 Led the replatforming of The Elder Scrolls Online UX from PC to PlayStation and Xbox, establishing controller-first patterns and reusable UI structures still foundational to the live MMO. ZeniMax has publicly cited $2B in ongoing lifetime revenue for this game (GDC 2024).
