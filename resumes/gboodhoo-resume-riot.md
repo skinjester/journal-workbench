@@ -2,10 +2,10 @@ GARY BOODHOO
 Portfolio: https://www.garyb.design | San Francisco, CA | gboodhoo@gmail.com | 415-802-4076
 
 SENIOR UX DESIGNER
-Senior game UX designer working on interrelated player-facing systems across console, PC, and connected devices. I take features from concept through implementation, using prototypes and reusable patterns to turn ambiguity into actionable decisions for teams.
+Senior game UX designer focused on interrelated player-facing systems, taking features from concept through implementation across console, PC, and connected devices. I help teams work through ambiguity together, using prototypes and visual models to turn open questions into concrete decisions.
 
 SELECTED WORK
-Led the replatforming of The Elder Scrolls Online UX from PC to PlayStation and Xbox, establishing controller-first patterns and reusable UI structures still foundational to the live MMO. ZeniMax has publicly cited $2B in ongoing lifetime revenue for this game (GDC 2024).
+Led the replatforming of The Elder Scrolls Online UX from PC to PlayStation and Xbox, establishing interaction design pillars that remain foundational to the live service behind a game ZeniMax has publicly cited at over $2B in lifetime revenue.
 
 Designed the onboarding experience for The Sims 3. This flow helped new players start quickly and supported deeper configuration for returning players. JavaScript prototypes helped the team see how content moved through the system before it was built.
 
@@ -23,7 +23,7 @@ Skinjester Studio — Founder & Principal Product Designer
 
 ZeniMax Online Studios — User Experience Lead, The Elder Scrolls Online (ESO)
 2013–2016 • Cockeysville, MD
-- Led UX/UI for ESO’s console launch and live service, adapting a PC-native MMORPG into a controller-first experience across core game and platform touchpoints.
+- Led UX/UI for ESO’s console launch and live service, helping redesign a dense PC MMORPG for growth in new marketplaces, on a game that later reached 26M users.
 - Built UI workflows in Adobe Fireworks for ESO, documenting patterns, component states, and token definitions to support engineering and QA during implementation and for issue resolution.
 - Wrote test plans for item trading and the in-game storefront, partnering with QA to run playtests that surfaced interaction issues early and refined player-facing flows before launch.
 
