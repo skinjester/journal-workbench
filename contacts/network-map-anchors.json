@@ -1,0 +1,115 @@
+{
+  "description": "LinkedIn member ids (connectionOf) for mutual-connection search. URL pattern: https://www.linkedin.com/search/results/people/?origin=SHARED_CONNECTIONS_CANNED_SEARCH&network=%5B%22F%22%5D&connectionOf=%5B%22<ID>%22%5D",
+  "captured": "2026-04-23",
+  "anchors": {
+    "Ed Knapp": {
+      "connectionOf": "ACoAAAD242oBMHy6aShHYnbzB8vfoLIdDgu0Uwo",
+      "search_hint": "1st + keywords Ed Knapp",
+      "mutual_pages": 9
+    },
+    "Quin Richards": {
+      "connectionOf": "ACoAABMv2AMB3iF0ebsjL4BuQv6N-w3PMNczBHI",
+      "search_hint": "1st + keywords Quin Richards",
+      "mutual_pages": 1
+    },
+    "Jim Rivers": {
+      "connectionOf": "ACoAAAA-gmYB9wlhSLfDHhTX1L7kWWCLkLJ1mEI",
+      "search_hint": "1st + keywords Jim Rivers recruiter",
+      "mutual_pages": 10
+    },
+    "Mags Ng": {
+      "connectionOf": "ACoAAAAGmQIB9y0vxe2pmRUX4VSwd6flb6Bga24",
+      "search_hint": "1st + Mags Ng production",
+      "mutual_pages": 5
+    },
+    "Ryan Ward": {
+      "connectionOf": "ACoAAAAANfYB06XykGHOYY1IUSAwq9BPGV9vfcY",
+      "search_hint": "1st + Ryan Ward Jagex",
+      "mutual_pages": 10
+    },
+    "Nathaniel Nordfelt": {
+      "connectionOf": "ACoAAAAjT3wBLO8iFLdQTD4dCNKblWw71klz1WI",
+      "search_hint": "1st + Nathaniel Nordfelt Riot",
+      "mutual_pages": 3
+    },
+    "Allen Warner": {
+      "connectionOf": "ACoAAAEjWgYByq6SLqMQxwUwUTKxEQWvbIb9eFs",
+      "search_hint": "1st + Allen Warner Narrative Baltimore",
+      "mutual_pages": 10
+    },
+    "Jason Smith": {
+      "connectionOf": "ACoAAAApcvYBvI35wuUSBWBzEJ0HJf28B9MVxSs",
+      "search_hint": "1st + Jason Smith Game Caviar",
+      "mutual_pages": 10
+    },
+    "Victor Keenan": {
+      "connectionOf": "ACoAAAFJv3MBNRbkNw4vmxctxFtCD4J_vtPlGPM",
+      "search_hint": "1st + Victor Keenan Riot Mill Valley",
+      "mutual_pages": 5
+    },
+    "Nicholas Konkle": {
+      "connectionOf": "ACoAAAD2cycBJLUt8gJ7AEWHsZLjkAAc-4Fr85M",
+      "search_hint": "1st + Nicholas Konkle Riot",
+      "mutual_pages": 7
+    },
+    "Greg Faillace": {
+      "connectionOf": "ACoAAAARBzABxC5UjAV9mpmzqzYG1tCuMlKt8oc",
+      "search_hint": "1st + Greg Faillace Riot",
+      "mutual_pages": 6
+    },
+    "Seth Hall": {
+      "connectionOf": "ACoAAABAg64BIVXcfD9VjtOdngD9upy5VvQzMqk",
+      "search_hint": "1st + Seth Hall Riot VFX",
+      "mutual_pages": 10
+    },
+    "Teck Lee Tan": {
+      "connectionOf": "ACoAAABb7oQBOqPF-cqVXT-KmsegpQgcbkCVTT0",
+      "search_hint": "1st + Teck Lee Tan Riot Singapore",
+      "mutual_pages": 3
+    },
+    "Geoffrey Marsi": {
+      "connectionOf": "ACoAAAe0JY4B7kvLm-VHeZO897OGwwQTYcxM0bg",
+      "search_hint": "1st + Geoffrey Marsi Riot Technical Game Design",
+      "mutual_pages": 4
+    },
+    "Gina Jaio": {
+      "connectionOf": "ACoAAABL5f0Bpn5HxNLxAGuJvPEwVyW2N3rupwM",
+      "search_hint": "1st + Gina Jaio Riot",
+      "mutual_pages": 13
+    },
+    "Seren Mason": {
+      "connectionOf": "ACoAAAEzVA8B3BK5nNzfCE0IYIgmicuylxkkp8w",
+      "search_hint": "1st + Seren Mason Riot Game Design",
+      "mutual_pages": 2
+    },
+    "Derek Van Oss": {
+      "connectionOf": "ACoAAAAHaN4BtuS66tu0GuFcGzjcsLpTf15e3xg",
+      "search_hint": "1st + Derek Van Oss Riot UX workwithdvo",
+      "mutual_pages": 2
+    },
+    "Dan Kline": {
+      "connectionOf": "ACoAAABxyAkBGX2YYP-b-0sohvDYIaBEckIRt4g",
+      "search_hint": "1st + Dan Kline Riot",
+      "mutual_pages": 8
+    },
+    "Steven Chiang": {
+      "connectionOf": "ACoAAAACyjYBw1PlT7dZ7yFpGNlwxMvq0-lRrTQ",
+      "search_hint": "1st + Steven Chiang Fortis",
+      "mutual_pages": 10
+    }
+  },
+  "pending_anchors": [
+    "Patrick Bostwick",
+    "Gregory Molnár",
+    "Karen LeBlanc",
+    "Greg Wessman",
+    "Alexei Ryan",
+    "David Kaye",
+    "Johnny Waterman",
+    "Lucas Martín Alvarez",
+    "Sepideh Asgharian Shahri",
+    "Fernando Forero Pinilla",
+    "Paxton Galvanek",
+    "Darren Bell Jr."
+  ]
+}

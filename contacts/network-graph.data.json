@@ -1,0 +1,6113 @@
+{
+  "meta": {
+    "generatedAt": "2026-04-23",
+    "sourceMd": "contacts/network-map.md",
+    "anchorsJson": "contacts/network-map-anchors.json",
+    "tagsJson": "contacts/network-map.tags.json",
+    "anchorCount": 19,
+    "secondDegreeCount": 69,
+    "nodeCount": 211,
+    "edgeCount": 270,
+    "disclaimer": "1st-layer data reflects LinkedIn mutual samples in contacts/network-map.md. The graph uses anchor → mutual (and you → anchor) only; it does not draw edges between mutuals who merely appear on the same list line. Node size = superWeight (sum of incident edge weights). 2nd-degree Riot/UX rows use contacts/riot-2nd-degree-ux-2026.json (bridge edges to matched 1st).",
+    "secondBridgeEdgeCount": 48,
+    "riot2ndSource": "contacts/riot-2nd-degree-ux-2026.json"
+  },
+  "roles": {
+    "recruiter": {
+      "label": "Recruiter / TA",
+      "shape": "triangle"
+    },
+    "design": {
+      "label": "Design / UX",
+      "shape": "dot"
+    },
+    "engineering": {
+      "label": "Engineering",
+      "shape": "square"
+    },
+    "art": {
+      "label": "Art / Technical Art",
+      "shape": "diamond"
+    },
+    "production": {
+      "label": "Production / Leadership",
+      "shape": "hexagon"
+    }
+  },
+  "tiers": {
+    "hot": {
+      "label": "Hot — message this week",
+      "opacity": 1.0,
+      "rank": 3
+    },
+    "warm": {
+      "label": "Warm — queue for soon",
+      "opacity": 1.0,
+      "rank": 2
+    },
+    "cold": {
+      "label": "Cold — context only",
+      "opacity": 0.35,
+      "rank": 1
+    }
+  },
+  "defaultTierOpacity": 0.35,
+  "nodes": [
+    {
+      "id": "__you__",
+      "name": "You",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": true,
+      "isRD": false,
+      "mutualDegree": 0,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 19.0
+    },
+    {
+      "id": "aaron-lemay",
+      "name": "Aaron LeMay",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": "(gaming exec)",
+      "role": "production",
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "aaron-yonas",
+      "name": "Aaron Yonas",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "adam-arrigo",
+      "name": "Adam Arrigo",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 2,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 2.0
+    },
+    {
+      "id": "adam-murguia",
+      "name": "Adam Murguia",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 2,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 4.0
+    },
+    {
+      "id": "adam-piper",
+      "name": "Adam Piper",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 4,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": "(engineering)",
+      "role": "engineering",
+      "tier": null,
+      "superWeight": 4.0
+    },
+    {
+      "id": "albert-holaso",
+      "name": "Albert Holaso",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "alex-chatfield",
+      "name": "Alex Chatfield",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 3,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 3.0
+    },
+    {
+      "id": "alex-churchill",
+      "name": "Alex Churchill",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "alex-rozgo",
+      "name": "Alex Rozgo",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "allen-warner",
+      "name": "Allen Warner",
+      "isAnchor": true,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "mutualPages": 10,
+      "connectionOf": "ACoAAAEjWgYByq6SLqMQxwUwUTKxEQWvbIb9eFs",
+      "searchHint": "1st + Allen Warner Narrative Baltimore",
+      "company": "(narrative)",
+      "role": "design",
+      "tier": "warm",
+      "superWeight": 12.0
+    },
+    {
+      "id": "altair-martinez",
+      "name": "Altair Martinez",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "ammon-haggerty",
+      "name": "Ammon Haggerty",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "amy-li",
+      "name": "Amy Li",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "andrea-marchiotto",
+      "name": "Andrea Marchiotto",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "andrew-snell",
+      "name": "Andrew Snell",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "ben-jones",
+      "name": "Ben Jones",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "brian-nestor",
+      "name": "Brian Nestor",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "brian-schneider",
+      "name": "Brian Schneider",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 4,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 5.0
+    },
+    {
+      "id": "bruce-harlick",
+      "name": "Bruce Harlick",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 2.0
+    },
+    {
+      "id": "casto-edward-vocal-jr",
+      "name": "Casto Edward Vocal Jr",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "cedrick-collomb",
+      "name": "Cedrick Collomb",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": "(exec)",
+      "role": "engineering",
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "celia-hodent",
+      "name": "Celia Hodent",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 7.0
+    },
+    {
+      "id": "charlene-zvolanek",
+      "name": "Charlene Zvolanek",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "charles-durairaj",
+      "name": "Charles Durairaj",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "chris-balser",
+      "name": "Chris Balser",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 3,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": "(systems)",
+      "role": "design",
+      "tier": null,
+      "superWeight": 3.0
+    },
+    {
+      "id": "chris-dillman",
+      "name": "Chris Dillman",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": "(engineering)",
+      "role": "engineering",
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "chris-huybregts",
+      "name": "Chris Huybregts",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "chris-marvin",
+      "name": "Chris Marvin",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "chris-ocampo",
+      "name": "Chris Ocampo",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 2,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 2.0
+    },
+    {
+      "id": "christine-brownell",
+      "name": "Christine Brownell",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "christofer-strasz",
+      "name": "Christofer Strasz",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "christopher-jimison",
+      "name": "Christopher Jimison",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "claudiu-dumitru",
+      "name": "Claudiu Dumitru",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": "(security)",
+      "role": "engineering",
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "cole-nelson",
+      "name": "Cole Nelson",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 2.0
+    },
+    {
+      "id": "colin-mcginley",
+      "name": "Colin McGinley",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 2,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": "(engineering)",
+      "role": "engineering",
+      "tier": null,
+      "superWeight": 2.0
+    },
+    {
+      "id": "dale-cieslak",
+      "name": "Dale Cieslak",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 2,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": "(engineering)",
+      "role": "engineering",
+      "tier": null,
+      "superWeight": 2.0
+    },
+    {
+      "id": "dale-russell",
+      "name": "Dale Russell",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "dan-kline",
+      "name": "Dan Kline",
+      "isAnchor": true,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": 8,
+      "connectionOf": "ACoAAABxyAkBGX2YYP-b-0sohvDYIaBEckIRt4g",
+      "searchHint": "1st + Dan Kline Riot",
+      "company": "Riot",
+      "role": "design",
+      "tier": "warm",
+      "superWeight": 22.0
+    },
+    {
+      "id": "dan-wellman",
+      "name": "Dan Wellman",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "dave-cross",
+      "name": "Dave Cross",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 2,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 2.0
+    },
+    {
+      "id": "david-kirscheneder",
+      "name": "David Kirscheneder",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": "Ubisoft Singapore",
+      "role": "engineering",
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "david-reed-monroe",
+      "name": "David Reed Monroe",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "david-sheldon-hicks",
+      "name": "David Sheldon-Hicks",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "david-swanson-ux",
+      "name": "David Swanson (UX",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "derek-brinkmann",
+      "name": "Derek Brinkmann",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 2,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 2.0
+    },
+    {
+      "id": "derek-van-oss",
+      "name": "Derek Van Oss",
+      "isAnchor": true,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": 2,
+      "connectionOf": "ACoAAAAHaN4BtuS66tu0GuFcGzjcsLpTf15e3xg",
+      "searchHint": "1st + Derek Van Oss Riot UX workwithdvo",
+      "company": "Riot",
+      "role": "design",
+      "tier": "warm",
+      "superWeight": 15.0
+    },
+    {
+      "id": "dmitry-andreev",
+      "name": "Dmitry Andreev",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 2,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": "(engineering)",
+      "role": "engineering",
+      "tier": null,
+      "superWeight": 2.0
+    },
+    {
+      "id": "ea-nhl",
+      "name": "EA NHL)",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "ed-knapp",
+      "name": "Ed Knapp",
+      "isAnchor": true,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 6,
+      "mutualPages": 9,
+      "connectionOf": "ACoAAAD242oBMHy6aShHYnbzB8vfoLIdDgu0Uwo",
+      "searchHint": "1st + keywords Ed Knapp",
+      "company": "Lightspeed",
+      "role": "production",
+      "tier": "cold",
+      "superWeight": 22.0
+    },
+    {
+      "id": "edmund-shen",
+      "name": "Edmund Shen",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "elijah-freeman",
+      "name": "Elijah Freeman",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 2,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 3.0
+    },
+    {
+      "id": "fran-court",
+      "name": "Fran Court",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "gabrielle-snowden",
+      "name": "Gabrielle Snowden",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 2,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 2.0
+    },
+    {
+      "id": "geoffrey-marsi",
+      "name": "Geoffrey Marsi",
+      "isAnchor": true,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": true,
+      "mutualDegree": 0,
+      "mutualPages": 4,
+      "connectionOf": "ACoAAAe0JY4B7kvLm-VHeZO897OGwwQTYcxM0bg",
+      "searchHint": "1st + Geoffrey Marsi Riot Technical Game Design",
+      "company": "Riot",
+      "role": "design",
+      "tier": "hot",
+      "superWeight": 11.0
+    },
+    {
+      "id": "gina-jaio",
+      "name": "Gina Jaio",
+      "isAnchor": true,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "mutualPages": 13,
+      "connectionOf": "ACoAAABL5f0Bpn5HxNLxAGuJvPEwVyW2N3rupwM",
+      "searchHint": "1st + Gina Jaio Riot",
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 21.0
+    },
+    {
+      "id": "glenn-entis",
+      "name": "Glenn Entis",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 3,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 3.0
+    },
+    {
+      "id": "greg-faillace",
+      "name": "Greg Faillace",
+      "isAnchor": true,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": true,
+      "mutualDegree": 1,
+      "mutualPages": 6,
+      "connectionOf": "ACoAAAARBzABxC5UjAV9mpmzqzYG1tCuMlKt8oc",
+      "searchHint": "1st + Greg Faillace Riot",
+      "company": "Riot",
+      "role": "art",
+      "tier": "hot",
+      "superWeight": 9.0
+    },
+    {
+      "id": "greg-knight",
+      "name": "Greg Knight",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "hafiz-zainal-abidin",
+      "name": "Hafiz Zainal Abidin",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "isa-anne-stamos",
+      "name": "Isa Anne Stamos",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "james-owen-lowe",
+      "name": "James Owen Lowe",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 4,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": "Archetype / ex ZOS",
+      "role": "design",
+      "tier": "warm",
+      "superWeight": 4.0
+    },
+    {
+      "id": "jano-vesina",
+      "name": "Jano Vesina",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "jasmine-sarmiento",
+      "name": "Jasmine Sarmiento",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 2,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 2.0
+    },
+    {
+      "id": "jason-smith",
+      "name": "Jason Smith",
+      "isAnchor": true,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "mutualPages": 10,
+      "connectionOf": "ACoAAAApcvYBvI35wuUSBWBzEJ0HJf28B9MVxSs",
+      "searchHint": "1st + Jason Smith Game Caviar",
+      "company": "Game Caviar",
+      "role": "production",
+      "tier": "cold",
+      "superWeight": 14.0
+    },
+    {
+      "id": "jason-williford",
+      "name": "Jason Williford",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 2,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 2.0
+    },
+    {
+      "id": "jeff-pearce",
+      "name": "Jeff Pearce",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "jeff-poole",
+      "name": "Jeff Poole",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "jeff-seamster",
+      "name": "Jeff Seamster",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 4,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 4.0
+    },
+    {
+      "id": "jeremy-sera",
+      "name": "Jeremy Sera",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 4,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": "ex ZOS",
+      "role": "design",
+      "tier": "warm",
+      "superWeight": 4.0
+    },
+    {
+      "id": "jim-rivers",
+      "name": "Jim Rivers",
+      "isAnchor": true,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "mutualPages": 10,
+      "connectionOf": "ACoAAAA-gmYB9wlhSLfDHhTX1L7kWWCLkLJ1mEI",
+      "searchHint": "1st + keywords Jim Rivers recruiter",
+      "company": "(recruiter)",
+      "role": "recruiter",
+      "tier": "cold",
+      "superWeight": 20.0
+    },
+    {
+      "id": "joel-anderson",
+      "name": "Joel Anderson",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 2.0
+    },
+    {
+      "id": "john-chaffee",
+      "name": "John Chaffee",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "john-stafford",
+      "name": "John Stafford",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 2,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 2.0
+    },
+    {
+      "id": "john-yoo",
+      "name": "John Yoo",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 3,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 3.0
+    },
+    {
+      "id": "johnny-white",
+      "name": "Johnny White",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "jonathan-tilden",
+      "name": "Jonathan Tilden",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "joseph-kubiak",
+      "name": "Joseph Kubiak",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "josh-santangelo",
+      "name": "Josh Santangelo",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "judy-wolf",
+      "name": "Judy Wolf",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "justin-mcleod",
+      "name": "Justin McLeod",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 2,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 2.0
+    },
+    {
+      "id": "kento-kojima",
+      "name": "Kento Kojima",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 4,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 4.0
+    },
+    {
+      "id": "kim-herbst",
+      "name": "Kim Herbst",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 2,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": "(art)",
+      "role": "art",
+      "tier": null,
+      "superWeight": 2.0
+    },
+    {
+      "id": "kristen-diane-mcdonald-brown",
+      "name": "Kristen Diane McDonald-Brown",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "kursad-can",
+      "name": "Kursad Can",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "lea-jacqueline-evans",
+      "name": "Lea Jacqueline Evans",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": "(art)",
+      "role": "art",
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "lisa-martin",
+      "name": "Lisa Martin",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 3,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 3.0
+    },
+    {
+      "id": "mags-ng",
+      "name": "Mags Ng",
+      "isAnchor": true,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "mutualPages": 5,
+      "connectionOf": "ACoAAAAGmQIB9y0vxe2pmRUX4VSwd6flb6Bga24",
+      "searchHint": "1st + Mags Ng production",
+      "company": "ex Riot",
+      "role": "production",
+      "tier": "warm",
+      "superWeight": 15.0
+    },
+    {
+      "id": "marc-hudgins",
+      "name": "Marc Hudgins",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 2,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": "Zenimax Online",
+      "role": "art",
+      "tier": null,
+      "superWeight": 2.0
+    },
+    {
+      "id": "marc-hudgins-project-art-director",
+      "name": "Marc Hudgins (Project Art Director",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "mark-lee",
+      "name": "Mark Lee",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 2,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 2.0
+    },
+    {
+      "id": "mark-mongie",
+      "name": "Mark Mongie",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "matt-mcenerney",
+      "name": "Matt McEnerney",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "matt-thazhmon",
+      "name": "Matt Thazhmon",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 2,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 2.0
+    },
+    {
+      "id": "michael-arnold",
+      "name": "Michael Arnold",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "miguel-molinari",
+      "name": "Miguel Molinari",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "mike-bates",
+      "name": "Mike Bates",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "mila-pavlin",
+      "name": "Mila Pavlin",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 2,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 3.0
+    },
+    {
+      "id": "murtaza-nemat-ali",
+      "name": "Murtaza Nemat Ali",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "nat-dart",
+      "name": "Nat Dart",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": "Skydance",
+      "role": "design",
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "nathaniel-nordfelt",
+      "name": "Nathaniel Nordfelt",
+      "isAnchor": true,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "mutualPages": 3,
+      "connectionOf": "ACoAAAAjT3wBLO8iFLdQTD4dCNKblWw71klz1WI",
+      "searchHint": "1st + Nathaniel Nordfelt Riot",
+      "company": "Riot",
+      "role": "engineering",
+      "tier": "warm",
+      "superWeight": 11.0
+    },
+    {
+      "id": "nicholas-konkle",
+      "name": "Nicholas Konkle",
+      "isAnchor": true,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": 7,
+      "connectionOf": "ACoAAAD2cycBJLUt8gJ7AEWHsZLjkAAc-4Fr85M",
+      "searchHint": "1st + Nicholas Konkle Riot",
+      "company": "Riot",
+      "role": "design",
+      "tier": "hot",
+      "superWeight": 9.0
+    },
+    {
+      "id": "nikita-puranik",
+      "name": "Nikita Puranik",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "noah-watkins",
+      "name": "Noah Watkins",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "oge-young",
+      "name": "Oge Young",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "ole-goethe",
+      "name": "Ole Goethe",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "paul-rand-pierce",
+      "name": "Paul Rand Pierce",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "paul-robinson",
+      "name": "Paul Robinson",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "paul-sage",
+      "name": "Paul Sage",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 2,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": "The Holdouts",
+      "role": "design",
+      "tier": null,
+      "superWeight": 2.0
+    },
+    {
+      "id": "paul-teall",
+      "name": "Paul Teall",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "peter-grassi",
+      "name": "Peter Grassi",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 3,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 3.0
+    },
+    {
+      "id": "peter-santoki",
+      "name": "Peter Santoki",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "quin-richards",
+      "name": "Quin Richards",
+      "isAnchor": true,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": 1,
+      "connectionOf": "ACoAABMv2AMB3iF0ebsjL4BuQv6N-w3PMNczBHI",
+      "searchHint": "1st + keywords Quin Richards",
+      "company": "(design)",
+      "role": "design",
+      "tier": "cold",
+      "superWeight": 7.0
+    },
+    {
+      "id": "rachael-masako-ing",
+      "name": "Rachael Masako Ing",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "ray-mazza",
+      "name": "Ray Mazza",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 4,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 4.0
+    },
+    {
+      "id": "reid-kimball",
+      "name": "Reid Kimball",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "rodrigo-aguilar",
+      "name": "Rodrigo Aguilar",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 3,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 3.0
+    },
+    {
+      "id": "ron-kee",
+      "name": "Ron Kee",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 2,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 2.0
+    },
+    {
+      "id": "ryan-ward",
+      "name": "Ryan Ward",
+      "isAnchor": true,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "mutualPages": 10,
+      "connectionOf": "ACoAAAAANfYB06XykGHOYY1IUSAwq9BPGV9vfcY",
+      "searchHint": "1st + Ryan Ward Jagex",
+      "company": "(studio head)",
+      "role": "production",
+      "tier": "cold",
+      "superWeight": 5.0
+    },
+    {
+      "id": "sam-hofer",
+      "name": "Sam Hofer",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "sammi-kim",
+      "name": "Sammi Kim",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 5,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 5.0
+    },
+    {
+      "id": "scot-brew",
+      "name": "Scot Brew",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "scott-nagy",
+      "name": "Scott Nagy",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "seren-mason",
+      "name": "Seren Mason",
+      "isAnchor": true,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "mutualPages": 2,
+      "connectionOf": "ACoAAAEzVA8B3BK5nNzfCE0IYIgmicuylxkkp8w",
+      "searchHint": "1st + Seren Mason Riot Game Design",
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 15.0
+    },
+    {
+      "id": "seth-hall",
+      "name": "Seth Hall",
+      "isAnchor": true,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 3,
+      "mutualPages": 10,
+      "connectionOf": "ACoAAABAg64BIVXcfD9VjtOdngD9upy5VvQzMqk",
+      "searchHint": "1st + Seth Hall Riot VFX",
+      "company": "Riot",
+      "role": "art",
+      "tier": "hot",
+      "superWeight": 14.0
+    },
+    {
+      "id": "shawn-pitman",
+      "name": "Shawn Pitman",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": "(design)",
+      "role": "design",
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "shawna-tanskanen",
+      "name": "Shawna Tanskanen",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": "(design)",
+      "role": "design",
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "sheetal-bandi",
+      "name": "Sheetal Bandi",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "simon-kandah",
+      "name": "Simon Kandah",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 2.0
+    },
+    {
+      "id": "stella-balmoria",
+      "name": "Stella Balmoria",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "stephan-dube",
+      "name": "Stephan Dube",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 2,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 2.0
+    },
+    {
+      "id": "stephen-busfield",
+      "name": "Stephen Busfield",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 2,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 2.0
+    },
+    {
+      "id": "steve-nelson-ii",
+      "name": "Steve Nelson II",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 2,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 2.0
+    },
+    {
+      "id": "steven-chiang",
+      "name": "Steven Chiang",
+      "isAnchor": true,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "mutualPages": 10,
+      "connectionOf": "ACoAAAACyjYBw1PlT7dZ7yFpGNlwxMvq0-lRrTQ",
+      "searchHint": "1st + Steven Chiang Fortis",
+      "company": "Fortis Games",
+      "role": "production",
+      "tier": "warm",
+      "superWeight": 21.0
+    },
+    {
+      "id": "taylor-wright",
+      "name": "Taylor Wright",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 3,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 5.0
+    },
+    {
+      "id": "teck-lee-tan",
+      "name": "Teck Lee Tan",
+      "isAnchor": true,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "mutualPages": 3,
+      "connectionOf": "ACoAAABb7oQBOqPF-cqVXT-KmsegpQgcbkCVTT0",
+      "searchHint": "1st + Teck Lee Tan Riot Singapore",
+      "company": "Riot",
+      "role": "art",
+      "tier": "warm",
+      "superWeight": 12.0
+    },
+    {
+      "id": "terri-lou-tiongson",
+      "name": "Terri Lou Tiongson",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "timothy-nice",
+      "name": "Timothy Nice",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 2,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 2.0
+    },
+    {
+      "id": "tommy-cinquegrano",
+      "name": "Tommy Cinquegrano",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "valeria-magal-sanchez",
+      "name": "Valeria Magalí Sanchez",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "victor-keenan",
+      "name": "Victor Keenan",
+      "isAnchor": true,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": 5,
+      "connectionOf": "ACoAAAFJv3MBNRbkNw4vmxctxFtCD4J_vtPlGPM",
+      "searchHint": "1st + Victor Keenan Riot Mill Valley",
+      "company": "Riot",
+      "role": "engineering",
+      "tier": "warm",
+      "superWeight": 13.0
+    },
+    {
+      "id": "vivek-sangubhotla",
+      "name": "Vivek Sangubhotla",
+      "isAnchor": false,
+      "isSecond": false,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "company": null,
+      "role": null,
+      "tier": null,
+      "superWeight": 1.0
+    },
+    {
+      "id": "2nd:gage-johnson",
+      "name": "Gage Johnson",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "UX Designer II @ Riot Games",
+      "profileUrl": "https://www.linkedin.com/in/gage-t-johnson/",
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Celia Hodent, Andrew Rice, +4",
+      "firstConnParsed": [
+        "Celia Hodent",
+        "Andrew Rice"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "celia-hodent",
+          "name": "Celia Hodent",
+          "inMapAsAnchor": false
+        }
+      ],
+      "firstConnNotInMap": [
+        "Andrew Rice"
+      ],
+      "superWeight": 1.0
+    },
+    {
+      "id": "2nd:sweta-m",
+      "name": "Sweta M.",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "UX Designer at Riot Games",
+      "profileUrl": "https://www.linkedin.com/in/sweta-mohapatra/",
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Andy Grignon, Celia Hodent, +4",
+      "firstConnParsed": [
+        "Andy Grignon",
+        "Celia Hodent"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "celia-hodent",
+          "name": "Celia Hodent",
+          "inMapAsAnchor": false
+        }
+      ],
+      "firstConnNotInMap": [
+        "Andy Grignon"
+      ],
+      "superWeight": 1.0
+    },
+    {
+      "id": "2nd:brian-ralphs",
+      "name": "Brian Ralphs",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 0,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Principal UX Designer at Riot Games",
+      "profileUrl": "https://www.linkedin.com/in/brian-ralphs/",
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Nick Slough",
+      "firstConnParsed": [
+        "Nick Slough"
+      ],
+      "firstConnInMap": [],
+      "firstConnNotInMap": [
+        "Nick Slough"
+      ],
+      "superWeight": 0.0
+    },
+    {
+      "id": "2nd:caprice-hong",
+      "name": "Caprice Hong",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Lead UX Designer at Riot Games",
+      "profileUrl": "https://www.linkedin.com/in/capricehong/",
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Jason Smith, Nick Slough, +2",
+      "firstConnParsed": [
+        "Jason Smith",
+        "Nick Slough"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "jason-smith",
+          "name": "Jason Smith",
+          "inMapAsAnchor": true
+        }
+      ],
+      "firstConnNotInMap": [
+        "Nick Slough"
+      ],
+      "superWeight": 1.0
+    },
+    {
+      "id": "2nd:kevin-hustler",
+      "name": "Kevin Hustler",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Principal UX Designer @ Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Isaac Epp, Taylor Wright, +12",
+      "firstConnParsed": [
+        "Isaac Epp",
+        "Taylor Wright"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "taylor-wright",
+          "name": "Taylor Wright",
+          "inMapAsAnchor": false
+        }
+      ],
+      "firstConnNotInMap": [
+        "Isaac Epp"
+      ],
+      "superWeight": 1.0
+    },
+    {
+      "id": "2nd:jami-lukins",
+      "name": "Jami Lukins",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 0,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Principal UX Design Lead",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Vic DeLeon, Dave Inscore, +27",
+      "firstConnParsed": [
+        "Vic DeLeon",
+        "Dave Inscore"
+      ],
+      "firstConnInMap": [],
+      "firstConnNotInMap": [
+        "Vic DeLeon",
+        "Dave Inscore"
+      ],
+      "superWeight": 0.0
+    },
+    {
+      "id": "2nd:zane-lyon",
+      "name": "Zane Lyon",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Principal UX Designer",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Ryan Ward, Tim Train, +10",
+      "firstConnParsed": [
+        "Ryan Ward",
+        "Tim Train"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "ryan-ward",
+          "name": "Ryan Ward",
+          "inMapAsAnchor": true
+        }
+      ],
+      "firstConnNotInMap": [
+        "Tim Train"
+      ],
+      "superWeight": 1.0
+    },
+    {
+      "id": "2nd:kai-smith",
+      "name": "Kai Smith",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 0,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Riot Games UX Researcher",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Spiderman in Training",
+      "firstConnParsed": [
+        "Spiderman in Training"
+      ],
+      "firstConnInMap": [],
+      "firstConnNotInMap": [
+        "Spiderman in Training"
+      ],
+      "superWeight": 0.0
+    },
+    {
+      "id": "2nd:bridget-schiffler",
+      "name": "Bridget Schiffler",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 2,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Senior UX Design Lead at Riot Games R&D",
+      "profileUrl": "https://www.linkedin.com/in/bridgetschiffler/",
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Nicholas Konkle, Ed Knapp",
+      "firstConnParsed": [
+        "Nicholas Konkle",
+        "Ed Knapp"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "ed-knapp",
+          "name": "Ed Knapp",
+          "inMapAsAnchor": true
+        },
+        {
+          "id": "nicholas-konkle",
+          "name": "Nicholas Konkle",
+          "inMapAsAnchor": true
+        }
+      ],
+      "firstConnNotInMap": [],
+      "superWeight": 2.0
+    },
+    {
+      "id": "2nd:ruby-chien",
+      "name": "Ruby Chien",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 0,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "UX Design @ Riot Games",
+      "profileUrl": "https://www.linkedin.com/in/rubyyujuchien/",
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Rhonda Cox, MBA, PMP",
+      "firstConnParsed": [
+        "Rhonda Cox"
+      ],
+      "firstConnInMap": [],
+      "firstConnNotInMap": [
+        "Rhonda Cox"
+      ],
+      "superWeight": 0.0
+    },
+    {
+      "id": "2nd:jiaqi-wu",
+      "name": "Jiaqi Wu",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 0,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "UX Designer at Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Michael A. Agustin, David Musgrove, +8",
+      "firstConnParsed": [
+        "Michael A. Agustin",
+        "David Musgrove"
+      ],
+      "firstConnInMap": [],
+      "firstConnNotInMap": [
+        "Michael A. Agustin",
+        "David Musgrove"
+      ],
+      "superWeight": 0.0
+    },
+    {
+      "id": "2nd:jason-cohen",
+      "name": "Jason Cohen",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Sr UX Manager at Riot Games",
+      "profileUrl": "https://www.linkedin.com/in/jason-cohen-9332273/",
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Ryan Ward, Aaron Rutledge, +9",
+      "firstConnParsed": [
+        "Ryan Ward",
+        "Aaron Rutledge"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "ryan-ward",
+          "name": "Ryan Ward",
+          "inMapAsAnchor": true
+        }
+      ],
+      "firstConnNotInMap": [
+        "Aaron Rutledge"
+      ],
+      "superWeight": 1.0
+    },
+    {
+      "id": "2nd:helen-ho",
+      "name": "Helen Ho",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 0,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "UX Designer @ Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Fernando Forero Pinilla",
+      "firstConnParsed": [
+        "Fernando Forero Pinilla"
+      ],
+      "firstConnInMap": [],
+      "firstConnNotInMap": [
+        "Fernando Forero Pinilla"
+      ],
+      "superWeight": 0.0
+    },
+    {
+      "id": "2nd:morgan-romero",
+      "name": "Morgan Romero",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 2,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Senior UX Designer at Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Ed Knapp, Celia Hodent, +1",
+      "firstConnParsed": [
+        "Ed Knapp",
+        "Celia Hodent"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "celia-hodent",
+          "name": "Celia Hodent",
+          "inMapAsAnchor": false
+        },
+        {
+          "id": "ed-knapp",
+          "name": "Ed Knapp",
+          "inMapAsAnchor": true
+        }
+      ],
+      "firstConnNotInMap": [],
+      "superWeight": 2.0
+    },
+    {
+      "id": "2nd:vidhi-shah",
+      "name": "Vidhi Shah",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Senior UX Designer at Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Aaron Rutledge, Celia Hodent, +6",
+      "firstConnParsed": [
+        "Aaron Rutledge",
+        "Celia Hodent"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "celia-hodent",
+          "name": "Celia Hodent",
+          "inMapAsAnchor": false
+        }
+      ],
+      "firstConnNotInMap": [
+        "Aaron Rutledge"
+      ],
+      "superWeight": 1.0
+    },
+    {
+      "id": "2nd:anya-li",
+      "name": "Anya Li",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 0,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Senior UX Designer — Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Teamfight Tactics",
+      "firstConnParsed": [
+        "Teamfight Tactics"
+      ],
+      "firstConnInMap": [],
+      "firstConnNotInMap": [
+        "Teamfight Tactics"
+      ],
+      "superWeight": 0.0
+    },
+    {
+      "id": "2nd:jordan-checkman",
+      "name": "Jordan Checkman",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Senior User Experience Design Manager at Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Aaron Rutledge, Nicholas Konkle, +3",
+      "firstConnParsed": [
+        "Aaron Rutledge",
+        "Nicholas Konkle"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "nicholas-konkle",
+          "name": "Nicholas Konkle",
+          "inMapAsAnchor": true
+        }
+      ],
+      "firstConnNotInMap": [
+        "Aaron Rutledge"
+      ],
+      "superWeight": 1.0
+    },
+    {
+      "id": "2nd:christopher-misenas",
+      "name": "Christopher Misenas",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Senior Game Designer at Riot Games (open to work)",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Bruce Harlick, Jonathan Curiel, +3",
+      "firstConnParsed": [
+        "Bruce Harlick",
+        "Jonathan Curiel"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "bruce-harlick",
+          "name": "Bruce Harlick",
+          "inMapAsAnchor": false
+        }
+      ],
+      "firstConnNotInMap": [
+        "Jonathan Curiel"
+      ],
+      "superWeight": 1.0
+    },
+    {
+      "id": "2nd:h",
+      "name": "° H.",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 0,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Art Outsourcing Manager III at Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "David Musgrove, Joshua Lindsay, +14",
+      "firstConnParsed": [
+        "David Musgrove",
+        "Joshua Lindsay"
+      ],
+      "firstConnInMap": [],
+      "firstConnNotInMap": [
+        "David Musgrove",
+        "Joshua Lindsay"
+      ],
+      "superWeight": 0.0
+    },
+    {
+      "id": "2nd:roxanna-yu",
+      "name": "Roxanna Yu",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 0,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Contract UX Designer @ Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "—",
+      "firstConnParsed": [],
+      "firstConnInMap": [],
+      "firstConnNotInMap": [],
+      "superWeight": 0.0
+    },
+    {
+      "id": "2nd:alex-wheeler",
+      "name": "Alex Wheeler",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Senior Manager — UX @ Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Ryan Ward, Aaron Rutledge, +15",
+      "firstConnParsed": [
+        "Ryan Ward",
+        "Aaron Rutledge"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "ryan-ward",
+          "name": "Ryan Ward",
+          "inMapAsAnchor": true
+        }
+      ],
+      "firstConnNotInMap": [
+        "Aaron Rutledge"
+      ],
+      "superWeight": 1.0
+    },
+    {
+      "id": "2nd:ki-s",
+      "name": "Ki S.",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 0,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "UX Design Lead, R&D Game",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Tim Train, Aaron Rutledge, +2",
+      "firstConnParsed": [
+        "Tim Train",
+        "Aaron Rutledge"
+      ],
+      "firstConnInMap": [],
+      "firstConnNotInMap": [
+        "Tim Train",
+        "Aaron Rutledge"
+      ],
+      "superWeight": 0.0
+    },
+    {
+      "id": "2nd:ray-ocampo",
+      "name": "Ray Ocampo",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Senior UX Designer / Design Leader @ Riot Games",
+      "profileUrl": "https://www.linkedin.com/in/rvocampo/",
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Justin Stark, Jim Rivers, +21",
+      "firstConnParsed": [
+        "Justin Stark",
+        "Jim Rivers"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "jim-rivers",
+          "name": "Jim Rivers",
+          "inMapAsAnchor": true
+        }
+      ],
+      "firstConnNotInMap": [
+        "Justin Stark"
+      ],
+      "superWeight": 1.0
+    },
+    {
+      "id": "2nd:aiden-thurston",
+      "name": "Aiden Thurston",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 0,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "UX Researcher — Product Experiences & AAA Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Danielle Corporon, Victor Dima",
+      "firstConnParsed": [
+        "Danielle Corporon",
+        "Victor Dima"
+      ],
+      "firstConnInMap": [],
+      "firstConnNotInMap": [
+        "Danielle Corporon",
+        "Victor Dima"
+      ],
+      "superWeight": 0.0
+    },
+    {
+      "id": "2nd:jeff-kao",
+      "name": "jeff kao",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Principal UX Designer at Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Derek Van Oss, David Musgrove, +14",
+      "firstConnParsed": [
+        "Derek Van Oss",
+        "David Musgrove"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "derek-van-oss",
+          "name": "Derek Van Oss",
+          "inMapAsAnchor": true
+        }
+      ],
+      "firstConnNotInMap": [
+        "David Musgrove"
+      ],
+      "superWeight": 1.0
+    },
+    {
+      "id": "2nd:alex-park",
+      "name": "Alex Park",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "UX Design Manager @ Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Cole Nelson",
+      "firstConnParsed": [
+        "Cole Nelson"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "cole-nelson",
+          "name": "Cole Nelson",
+          "inMapAsAnchor": false
+        }
+      ],
+      "firstConnNotInMap": [],
+      "superWeight": 1.0
+    },
+    {
+      "id": "2nd:janet-he",
+      "name": "Janet He",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 0,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Visual Designer II @ Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "VALORANT",
+      "firstConnParsed": [],
+      "firstConnInMap": [],
+      "firstConnNotInMap": [],
+      "superWeight": 0.0
+    },
+    {
+      "id": "2nd:rachel-chan",
+      "name": "Rachel Chan",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 0,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Senior UX Designer at Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Nick Slough",
+      "firstConnParsed": [
+        "Nick Slough"
+      ],
+      "firstConnInMap": [],
+      "firstConnNotInMap": [
+        "Nick Slough"
+      ],
+      "superWeight": 0.0
+    },
+    {
+      "id": "2nd:alicia-loring",
+      "name": "Alicia Loring",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 0,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Principal UX Designer at Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Aaron Rutledge",
+      "firstConnParsed": [
+        "Aaron Rutledge"
+      ],
+      "firstConnInMap": [],
+      "firstConnNotInMap": [
+        "Aaron Rutledge"
+      ],
+      "superWeight": 0.0
+    },
+    {
+      "id": "2nd:meagan-taylor",
+      "name": "Meagan Taylor",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "UX Designer II",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Mags Ng",
+      "firstConnParsed": [
+        "Mags Ng"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "mags-ng",
+          "name": "Mags Ng",
+          "inMapAsAnchor": true
+        }
+      ],
+      "firstConnNotInMap": [],
+      "superWeight": 1.0
+    },
+    {
+      "id": "2nd:krysten-reis",
+      "name": "Krysten Reis",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 2,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Senior Visual Designer at Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Jason Smith, Adam Murguia, +12",
+      "firstConnParsed": [
+        "Jason Smith",
+        "Adam Murguia"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "adam-murguia",
+          "name": "Adam Murguia",
+          "inMapAsAnchor": false
+        },
+        {
+          "id": "jason-smith",
+          "name": "Jason Smith",
+          "inMapAsAnchor": true
+        }
+      ],
+      "firstConnNotInMap": [],
+      "superWeight": 2.0
+    },
+    {
+      "id": "2nd:ettore-manetti",
+      "name": "Ettore Manetti",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 2,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Principal User Experience Designer at Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Teck Lee Tan, Celia Hodent, +7",
+      "firstConnParsed": [
+        "Teck Lee Tan",
+        "Celia Hodent"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "celia-hodent",
+          "name": "Celia Hodent",
+          "inMapAsAnchor": false
+        },
+        {
+          "id": "teck-lee-tan",
+          "name": "Teck Lee Tan",
+          "inMapAsAnchor": true
+        }
+      ],
+      "firstConnNotInMap": [],
+      "superWeight": 2.0
+    },
+    {
+      "id": "2nd:nabil-k",
+      "name": "Nabil K.",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Design Director",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Aaron Rutledge, Adam Murguia, +6",
+      "firstConnParsed": [
+        "Aaron Rutledge",
+        "Adam Murguia"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "adam-murguia",
+          "name": "Adam Murguia",
+          "inMapAsAnchor": false
+        }
+      ],
+      "firstConnNotInMap": [
+        "Aaron Rutledge"
+      ],
+      "superWeight": 1.0
+    },
+    {
+      "id": "2nd:alisa-maltseva",
+      "name": "Alisa Maltseva",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 0,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Visual Design Artist @ Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "450 followers (no mutuals line)",
+      "firstConnParsed": [
+        "450 followers"
+      ],
+      "firstConnInMap": [],
+      "firstConnNotInMap": [
+        "450 followers"
+      ],
+      "superWeight": 0.0
+    },
+    {
+      "id": "2nd:joy-an",
+      "name": "Joy An",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 0,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Principal Visual Designer @ Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Isaac Epp, Siddhartha Deb, +19",
+      "firstConnParsed": [
+        "Isaac Epp",
+        "Siddhartha Deb"
+      ],
+      "firstConnInMap": [],
+      "firstConnNotInMap": [
+        "Isaac Epp",
+        "Siddhartha Deb"
+      ],
+      "superWeight": 0.0
+    },
+    {
+      "id": "2nd:ji-hwan-kim",
+      "name": "Ji Hwan Kim",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Visual / Motion Designer",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Ed Knapp, Fernando Forero Pinilla, +3",
+      "firstConnParsed": [
+        "Ed Knapp",
+        "Fernando Forero Pinilla"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "ed-knapp",
+          "name": "Ed Knapp",
+          "inMapAsAnchor": true
+        }
+      ],
+      "firstConnNotInMap": [
+        "Fernando Forero Pinilla"
+      ],
+      "superWeight": 1.0
+    },
+    {
+      "id": "2nd:noelle-stransky",
+      "name": "Noelle Stransky",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 0,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Design Leader @ Riot Games — CP / UX strategy; services / Follow",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "(card: services)",
+      "firstConnParsed": [],
+      "firstConnInMap": [],
+      "firstConnNotInMap": [],
+      "superWeight": 0.0
+    },
+    {
+      "id": "2nd:ukasz-wieczorek",
+      "name": "Łukasz Wieczorek",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 0,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Senior Visual Designer at Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "David Musgrove, Cody Bye, +4",
+      "firstConnParsed": [
+        "David Musgrove",
+        "Cody Bye"
+      ],
+      "firstConnInMap": [],
+      "firstConnNotInMap": [
+        "David Musgrove",
+        "Cody Bye"
+      ],
+      "superWeight": 0.0
+    },
+    {
+      "id": "2nd:chris-nguyen",
+      "name": "Chris Nguyen",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 0,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Visual Designer @ Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Rhonda Cox, MBA, PMP, Fernando Forero Pinilla",
+      "firstConnParsed": [
+        "Rhonda Cox",
+        "Fernando Forero Pinilla"
+      ],
+      "firstConnInMap": [],
+      "firstConnNotInMap": [
+        "Rhonda Cox",
+        "Fernando Forero Pinilla"
+      ],
+      "superWeight": 0.0
+    },
+    {
+      "id": "2nd:suri-eunsul-lee",
+      "name": "Suri Eunsul Lee",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 0,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Lead UI Designer at Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Nick Slough",
+      "firstConnParsed": [
+        "Nick Slough"
+      ],
+      "firstConnInMap": [],
+      "firstConnNotInMap": [
+        "Nick Slough"
+      ],
+      "superWeight": 0.0
+    },
+    {
+      "id": "2nd:oliver-zumstein",
+      "name": "Oliver Zumstein",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Art Direction / Visual Design / UI, UX",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Elijah Freeman, Alex Mack, +14",
+      "firstConnParsed": [
+        "Elijah Freeman",
+        "Alex Mack"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "elijah-freeman",
+          "name": "Elijah Freeman",
+          "inMapAsAnchor": false
+        }
+      ],
+      "firstConnNotInMap": [
+        "Alex Mack"
+      ],
+      "superWeight": 1.0
+    },
+    {
+      "id": "2nd:evan-squire",
+      "name": "Evan Squire",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 0,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Art Director",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Creative \\",
+      "firstConnParsed": [
+        "Creative \\"
+      ],
+      "firstConnInMap": [],
+      "firstConnNotInMap": [
+        "Creative \\"
+      ],
+      "superWeight": 0.0
+    },
+    {
+      "id": "2nd:ambur-luton",
+      "name": "Ambur Luton",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 0,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "UX Manager at Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Aaron Rutledge",
+      "firstConnParsed": [
+        "Aaron Rutledge"
+      ],
+      "firstConnInMap": [],
+      "firstConnNotInMap": [
+        "Aaron Rutledge"
+      ],
+      "superWeight": 0.0
+    },
+    {
+      "id": "2nd:kacey-geary",
+      "name": "Kacey Geary",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 2,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Senior Visual Designer on the TFT Gameplay team",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Jim Rivers, Mila Pavlin, +6",
+      "firstConnParsed": [
+        "Jim Rivers",
+        "Mila Pavlin"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "jim-rivers",
+          "name": "Jim Rivers",
+          "inMapAsAnchor": true
+        },
+        {
+          "id": "mila-pavlin",
+          "name": "Mila Pavlin",
+          "inMapAsAnchor": false
+        }
+      ],
+      "firstConnNotInMap": [],
+      "superWeight": 2.0
+    },
+    {
+      "id": "2nd:christopher-martin",
+      "name": "Christopher Martin",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 0,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "UI/UX Designer",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Patrick Bostwick",
+      "firstConnParsed": [
+        "Patrick Bostwick"
+      ],
+      "firstConnInMap": [],
+      "firstConnNotInMap": [
+        "Patrick Bostwick"
+      ],
+      "superWeight": 0.0
+    },
+    {
+      "id": "2nd:tori-ero",
+      "name": "Tori Ero",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 0,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Gameplay Art Director, Teamfight Tactics @ Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Johnny Waterman, Fernando Forero Pinilla, +1",
+      "firstConnParsed": [
+        "Johnny Waterman",
+        "Fernando Forero Pinilla"
+      ],
+      "firstConnInMap": [],
+      "firstConnNotInMap": [
+        "Johnny Waterman",
+        "Fernando Forero Pinilla"
+      ],
+      "superWeight": 0.0
+    },
+    {
+      "id": "2nd:julia-marsh",
+      "name": "Julia Marsh",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 0,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Director of User Experience — VALORANT, Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Nick Slough",
+      "firstConnParsed": [
+        "Nick Slough"
+      ],
+      "firstConnInMap": [],
+      "firstConnNotInMap": [
+        "Nick Slough"
+      ],
+      "superWeight": 0.0
+    },
+    {
+      "id": "2nd:jeff-brown",
+      "name": "Jeff Brown",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 0,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "I make games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Vic DeLeon, David Musgrove, +20",
+      "firstConnParsed": [
+        "Vic DeLeon",
+        "David Musgrove"
+      ],
+      "firstConnInMap": [],
+      "firstConnNotInMap": [
+        "Vic DeLeon",
+        "David Musgrove"
+      ],
+      "superWeight": 0.0
+    },
+    {
+      "id": "2nd:sy-harris",
+      "name": "Sy Harris",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Principal User Experience Designer at Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Nida Zada, Derek Van Oss, +5",
+      "firstConnParsed": [
+        "Nida Zada",
+        "Derek Van Oss"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "derek-van-oss",
+          "name": "Derek Van Oss",
+          "inMapAsAnchor": true
+        }
+      ],
+      "firstConnNotInMap": [
+        "Nida Zada"
+      ],
+      "superWeight": 1.0
+    },
+    {
+      "id": "2nd:junho-kim",
+      "name": "Junho Kim",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Director, Visual Design Art at Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Taylor Wright, Mark Soderwall, +18",
+      "firstConnParsed": [
+        "Taylor Wright",
+        "Mark Soderwall"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "taylor-wright",
+          "name": "Taylor Wright",
+          "inMapAsAnchor": false
+        }
+      ],
+      "firstConnNotInMap": [
+        "Mark Soderwall"
+      ],
+      "superWeight": 1.0
+    },
+    {
+      "id": "2nd:pablo-morales-phd",
+      "name": "Pablo Morales, PhD",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Researcher @ Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Celia Hodent, Amanda (Mandi) Hall, PhD, +5",
+      "firstConnParsed": [
+        "Celia Hodent",
+        "Amanda Hall"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "celia-hodent",
+          "name": "Celia Hodent",
+          "inMapAsAnchor": false
+        }
+      ],
+      "firstConnNotInMap": [
+        "Amanda Hall"
+      ],
+      "superWeight": 1.0
+    },
+    {
+      "id": "2nd:dave-guskin",
+      "name": "Dave Guskin",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 2,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Game Director, Riftbound (League TCG), Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Mags Ng, Brian Schneider, +3",
+      "firstConnParsed": [
+        "Mags Ng",
+        "Brian Schneider"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "brian-schneider",
+          "name": "Brian Schneider",
+          "inMapAsAnchor": false
+        },
+        {
+          "id": "mags-ng",
+          "name": "Mags Ng",
+          "inMapAsAnchor": true
+        }
+      ],
+      "firstConnNotInMap": [],
+      "superWeight": 2.0
+    },
+    {
+      "id": "2nd:danny-medina",
+      "name": "Danny Medina",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Senior UX Designer at Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Mark Soderwall, Jim Rivers, +10",
+      "firstConnParsed": [
+        "Mark Soderwall",
+        "Jim Rivers"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "jim-rivers",
+          "name": "Jim Rivers",
+          "inMapAsAnchor": true
+        }
+      ],
+      "firstConnNotInMap": [
+        "Mark Soderwall"
+      ],
+      "superWeight": 1.0
+    },
+    {
+      "id": "2nd:randi-m-cohn",
+      "name": "Randi M. Cohn",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 2,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "17+ yrs; production/ops; high-level strategy (long headline)",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Ryan Ward, Jim Rivers, +8",
+      "firstConnParsed": [
+        "Ryan Ward",
+        "Jim Rivers"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "jim-rivers",
+          "name": "Jim Rivers",
+          "inMapAsAnchor": true
+        },
+        {
+          "id": "ryan-ward",
+          "name": "Ryan Ward",
+          "inMapAsAnchor": true
+        }
+      ],
+      "firstConnNotInMap": [],
+      "superWeight": 2.0
+    },
+    {
+      "id": "2nd:michelle-mauk",
+      "name": "Michelle Mauk",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 0,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Senior Manager, Creative Development: CPX at Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Ivan Duch, Darren Bell Jr., +4",
+      "firstConnParsed": [
+        "Ivan Duch",
+        "Darren Bell Jr."
+      ],
+      "firstConnInMap": [],
+      "firstConnNotInMap": [
+        "Ivan Duch",
+        "Darren Bell Jr."
+      ],
+      "superWeight": 0.0
+    },
+    {
+      "id": "2nd:marcus-meurling",
+      "name": "Marcus Meurling",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 2,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Senior UX Designer at Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Jason Smith, Jim Rivers, +2",
+      "firstConnParsed": [
+        "Jason Smith",
+        "Jim Rivers"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "jason-smith",
+          "name": "Jason Smith",
+          "inMapAsAnchor": true
+        },
+        {
+          "id": "jim-rivers",
+          "name": "Jim Rivers",
+          "inMapAsAnchor": true
+        }
+      ],
+      "firstConnNotInMap": [],
+      "superWeight": 2.0
+    },
+    {
+      "id": "2nd:antonella-spagnoli",
+      "name": "Antonella Spagnoli",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Monetisation UX for League; AI UX (long headline)",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Joel Anderson, Finnbar Burke, +3",
+      "firstConnParsed": [
+        "Joel Anderson",
+        "Finnbar Burke"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "joel-anderson",
+          "name": "Joel Anderson",
+          "inMapAsAnchor": false
+        }
+      ],
+      "firstConnNotInMap": [
+        "Finnbar Burke"
+      ],
+      "superWeight": 1.0
+    },
+    {
+      "id": "2nd:devin-murphy",
+      "name": "Devin Murphy",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 0,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "UX Designer II @ Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "—",
+      "firstConnParsed": [],
+      "firstConnInMap": [],
+      "firstConnNotInMap": [],
+      "superWeight": 0.0
+    },
+    {
+      "id": "2nd:anouk-ben-tchavtchavadze",
+      "name": "anouk ben-tchavtchavadze",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Principal User Experience Designer at Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Mags Ng, David Musgrove, +21",
+      "firstConnParsed": [
+        "Mags Ng",
+        "David Musgrove"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "mags-ng",
+          "name": "Mags Ng",
+          "inMapAsAnchor": true
+        }
+      ],
+      "firstConnNotInMap": [
+        "David Musgrove"
+      ],
+      "superWeight": 1.0
+    },
+    {
+      "id": "2nd:cindy-n",
+      "name": "Cindy N.",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Senior Manager, Art Direction — Visual Design @ Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "David Musgrove, Jim Rivers, +6",
+      "firstConnParsed": [
+        "David Musgrove",
+        "Jim Rivers"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "jim-rivers",
+          "name": "Jim Rivers",
+          "inMapAsAnchor": true
+        }
+      ],
+      "firstConnNotInMap": [
+        "David Musgrove"
+      ],
+      "superWeight": 1.0
+    },
+    {
+      "id": "2nd:evan-huang",
+      "name": "Evan Huang",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 2,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Senior Visual Designer @ Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Simon Kandah, Jim Rivers, +5",
+      "firstConnParsed": [
+        "Simon Kandah",
+        "Jim Rivers"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "jim-rivers",
+          "name": "Jim Rivers",
+          "inMapAsAnchor": true
+        },
+        {
+          "id": "simon-kandah",
+          "name": "Simon Kandah",
+          "inMapAsAnchor": false
+        }
+      ],
+      "firstConnNotInMap": [],
+      "superWeight": 2.0
+    },
+    {
+      "id": "2nd:alex-vejnoska",
+      "name": "Alex Vejnoska",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "UX, software, product design leadership",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Jim Rivers, Nick Slough, +3",
+      "firstConnParsed": [
+        "Jim Rivers",
+        "Nick Slough"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "jim-rivers",
+          "name": "Jim Rivers",
+          "inMapAsAnchor": true
+        }
+      ],
+      "firstConnNotInMap": [
+        "Nick Slough"
+      ],
+      "superWeight": 1.0
+    },
+    {
+      "id": "2nd:tiffany-lam",
+      "name": "Tiffany Lam",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 0,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Principal Creative Director",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Riot Games",
+      "firstConnParsed": [
+        "Riot Games"
+      ],
+      "firstConnInMap": [],
+      "firstConnNotInMap": [
+        "Riot Games"
+      ],
+      "superWeight": 0.0
+    },
+    {
+      "id": "2nd:kirby-cofino",
+      "name": "Kirby Cofino",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Software Engineer at Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Victor Keenan",
+      "firstConnParsed": [
+        "Victor Keenan"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "victor-keenan",
+          "name": "Victor Keenan",
+          "inMapAsAnchor": true
+        }
+      ],
+      "firstConnNotInMap": [],
+      "superWeight": 1.0
+    },
+    {
+      "id": "2nd:jacob-lee",
+      "name": "Jacob Lee",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Visual Design at Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Ed Knapp, Shuangfei (Faye) Jiang, +1",
+      "firstConnParsed": [
+        "Ed Knapp",
+        "Shuangfei Jiang"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "ed-knapp",
+          "name": "Ed Knapp",
+          "inMapAsAnchor": true
+        }
+      ],
+      "firstConnNotInMap": [
+        "Shuangfei Jiang"
+      ],
+      "superWeight": 1.0
+    },
+    {
+      "id": "2nd:mo-grey",
+      "name": "Mo Grey",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Principal Game Producer at Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Mags Ng, Joshua Lindsay, +7",
+      "firstConnParsed": [
+        "Mags Ng",
+        "Joshua Lindsay"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "mags-ng",
+          "name": "Mags Ng",
+          "inMapAsAnchor": true
+        }
+      ],
+      "firstConnNotInMap": [
+        "Joshua Lindsay"
+      ],
+      "superWeight": 1.0
+    },
+    {
+      "id": "2nd:irene-zhu",
+      "name": "Irene Zhu",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Principal User Experience Designer at Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Jim Rivers, Nick Slough, +3",
+      "firstConnParsed": [
+        "Jim Rivers",
+        "Nick Slough"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "jim-rivers",
+          "name": "Jim Rivers",
+          "inMapAsAnchor": true
+        }
+      ],
+      "firstConnNotInMap": [
+        "Nick Slough"
+      ],
+      "superWeight": 1.0
+    },
+    {
+      "id": "2nd:corey-wise",
+      "name": "Corey Wise",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 0,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Principal User Experience Designer @ Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Marcello Sarmento, Karen LeBlanc",
+      "firstConnParsed": [
+        "Marcello Sarmento",
+        "Karen LeBlanc"
+      ],
+      "firstConnInMap": [],
+      "firstConnNotInMap": [
+        "Marcello Sarmento",
+        "Karen LeBlanc"
+      ],
+      "superWeight": 0.0
+    },
+    {
+      "id": "2nd:kristy-lee",
+      "name": "Kristy Lee",
+      "isAnchor": false,
+      "isSecond": true,
+      "isYou": false,
+      "isRD": false,
+      "mutualDegree": 0,
+      "bridgeCount": 1,
+      "mutualPages": null,
+      "connectionOf": null,
+      "searchHint": null,
+      "headline": "Senior UX Designer at Riot Games",
+      "profileUrl": null,
+      "company": null,
+      "role": "design",
+      "tier": null,
+      "cardMutuals": "Ed Knapp, Ting Xu",
+      "firstConnParsed": [
+        "Ed Knapp",
+        "Ting Xu"
+      ],
+      "firstConnInMap": [
+        {
+          "id": "ed-knapp",
+          "name": "Ed Knapp",
+          "inMapAsAnchor": true
+        }
+      ],
+      "firstConnNotInMap": [
+        "Ting Xu"
+      ],
+      "superWeight": 1.0
+    }
+  ],
+  "edges": [
+    {
+      "source": "__you__",
+      "target": "allen-warner",
+      "type": "you-anchor",
+      "weight": 1.0
+    },
+    {
+      "source": "__you__",
+      "target": "dan-kline",
+      "type": "you-anchor",
+      "weight": 1.0
+    },
+    {
+      "source": "__you__",
+      "target": "derek-van-oss",
+      "type": "you-anchor",
+      "weight": 1.0
+    },
+    {
+      "source": "__you__",
+      "target": "ed-knapp",
+      "type": "you-anchor",
+      "weight": 1.0
+    },
+    {
+      "source": "__you__",
+      "target": "geoffrey-marsi",
+      "type": "you-anchor",
+      "weight": 1.0
+    },
+    {
+      "source": "__you__",
+      "target": "gina-jaio",
+      "type": "you-anchor",
+      "weight": 1.0
+    },
+    {
+      "source": "__you__",
+      "target": "greg-faillace",
+      "type": "you-anchor",
+      "weight": 1.0
+    },
+    {
+      "source": "__you__",
+      "target": "jason-smith",
+      "type": "you-anchor",
+      "weight": 1.0
+    },
+    {
+      "source": "__you__",
+      "target": "jim-rivers",
+      "type": "you-anchor",
+      "weight": 1.0
+    },
+    {
+      "source": "__you__",
+      "target": "mags-ng",
+      "type": "you-anchor",
+      "weight": 1.0
+    },
+    {
+      "source": "__you__",
+      "target": "nathaniel-nordfelt",
+      "type": "you-anchor",
+      "weight": 1.0
+    },
+    {
+      "source": "__you__",
+      "target": "nicholas-konkle",
+      "type": "you-anchor",
+      "weight": 1.0
+    },
+    {
+      "source": "__you__",
+      "target": "quin-richards",
+      "type": "you-anchor",
+      "weight": 1.0
+    },
+    {
+      "source": "__you__",
+      "target": "ryan-ward",
+      "type": "you-anchor",
+      "weight": 1.0
+    },
+    {
+      "source": "__you__",
+      "target": "seren-mason",
+      "type": "you-anchor",
+      "weight": 1.0
+    },
+    {
+      "source": "__you__",
+      "target": "seth-hall",
+      "type": "you-anchor",
+      "weight": 1.0
+    },
+    {
+      "source": "__you__",
+      "target": "steven-chiang",
+      "type": "you-anchor",
+      "weight": 1.0
+    },
+    {
+      "source": "__you__",
+      "target": "teck-lee-tan",
+      "type": "you-anchor",
+      "weight": 1.0
+    },
+    {
+      "source": "__you__",
+      "target": "victor-keenan",
+      "type": "you-anchor",
+      "weight": 1.0
+    },
+    {
+      "source": "ed-knapp",
+      "target": "chris-balser",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "ed-knapp",
+      "target": "jeremy-sera",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "ed-knapp",
+      "target": "james-owen-lowe",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "ed-knapp",
+      "target": "colin-mcginley",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "ed-knapp",
+      "target": "paul-sage",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "ed-knapp",
+      "target": "steve-nelson-ii",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "ed-knapp",
+      "target": "dan-wellman",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "ed-knapp",
+      "target": "jason-williford",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "ed-knapp",
+      "target": "ben-jones",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "ed-knapp",
+      "target": "marc-hudgins-project-art-director",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "quin-richards",
+      "target": "johnny-white",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "quin-richards",
+      "target": "derek-van-oss",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "quin-richards",
+      "target": "bruce-harlick",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "quin-richards",
+      "target": "celia-hodent",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "quin-richards",
+      "target": "stephan-dube",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "jim-rivers",
+      "target": "jeff-seamster",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "jim-rivers",
+      "target": "chris-balser",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "jim-rivers",
+      "target": "rachael-masako-ing",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "jim-rivers",
+      "target": "sammi-kim",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "jim-rivers",
+      "target": "kim-herbst",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "jim-rivers",
+      "target": "taylor-wright",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "jim-rivers",
+      "target": "ed-knapp",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "jim-rivers",
+      "target": "gabrielle-snowden",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "jim-rivers",
+      "target": "adam-piper",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "jim-rivers",
+      "target": "mila-pavlin",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "mags-ng",
+      "target": "rodrigo-aguilar",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "mags-ng",
+      "target": "sammi-kim",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "mags-ng",
+      "target": "glenn-entis",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "mags-ng",
+      "target": "ed-knapp",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "mags-ng",
+      "target": "brian-schneider",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "mags-ng",
+      "target": "ray-mazza",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "mags-ng",
+      "target": "lisa-martin",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "mags-ng",
+      "target": "peter-grassi",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "mags-ng",
+      "target": "alex-chatfield",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "mags-ng",
+      "target": "justin-mcleod",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "nathaniel-nordfelt",
+      "target": "murtaza-nemat-ali",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "nathaniel-nordfelt",
+      "target": "alex-chatfield",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "nathaniel-nordfelt",
+      "target": "matt-thazhmon",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "nathaniel-nordfelt",
+      "target": "derek-brinkmann",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "nathaniel-nordfelt",
+      "target": "miguel-molinari",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "nathaniel-nordfelt",
+      "target": "dale-russell",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "nathaniel-nordfelt",
+      "target": "paul-teall",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "nathaniel-nordfelt",
+      "target": "scott-nagy",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "nathaniel-nordfelt",
+      "target": "peter-santoki",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "nathaniel-nordfelt",
+      "target": "oge-young",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "allen-warner",
+      "target": "jeff-seamster",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "allen-warner",
+      "target": "david-swanson-ux",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "allen-warner",
+      "target": "ea-nhl",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "allen-warner",
+      "target": "kim-herbst",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "allen-warner",
+      "target": "ed-knapp",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "allen-warner",
+      "target": "gabrielle-snowden",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "allen-warner",
+      "target": "mila-pavlin",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "allen-warner",
+      "target": "brian-schneider",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "allen-warner",
+      "target": "jeremy-sera",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "allen-warner",
+      "target": "james-owen-lowe",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "allen-warner",
+      "target": "john-chaffee",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "jason-smith",
+      "target": "jeff-seamster",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "jason-smith",
+      "target": "sammi-kim",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "jason-smith",
+      "target": "glenn-entis",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "jason-smith",
+      "target": "christopher-jimison",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "jason-smith",
+      "target": "ron-kee",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "jason-smith",
+      "target": "adam-piper",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "jason-smith",
+      "target": "ray-mazza",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "jason-smith",
+      "target": "mark-lee",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "jason-smith",
+      "target": "kento-kojima",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "jason-smith",
+      "target": "dmitry-andreev",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "victor-keenan",
+      "target": "ron-kee",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "victor-keenan",
+      "target": "mark-lee",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "victor-keenan",
+      "target": "stella-balmoria",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "victor-keenan",
+      "target": "jasmine-sarmiento",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "victor-keenan",
+      "target": "mike-bates",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "victor-keenan",
+      "target": "peter-grassi",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "victor-keenan",
+      "target": "chris-ocampo",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "victor-keenan",
+      "target": "dave-cross",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "victor-keenan",
+      "target": "john-yoo",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "victor-keenan",
+      "target": "adam-murguia",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "nicholas-konkle",
+      "target": "ed-knapp",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "nicholas-konkle",
+      "target": "jeremy-sera",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "nicholas-konkle",
+      "target": "james-owen-lowe",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "nicholas-konkle",
+      "target": "marc-hudgins",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "nicholas-konkle",
+      "target": "seth-hall",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "greg-faillace",
+      "target": "rodrigo-aguilar",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "greg-faillace",
+      "target": "jeff-seamster",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "greg-faillace",
+      "target": "brian-schneider",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "greg-faillace",
+      "target": "ray-mazza",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "greg-faillace",
+      "target": "lisa-martin",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "greg-faillace",
+      "target": "chris-ocampo",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "greg-faillace",
+      "target": "seth-hall",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "seth-hall",
+      "target": "taylor-wright",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "seth-hall",
+      "target": "casto-edward-vocal-jr",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "seth-hall",
+      "target": "adam-piper",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "seth-hall",
+      "target": "dale-cieslak",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "seth-hall",
+      "target": "kento-kojima",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "seth-hall",
+      "target": "dmitry-andreev",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "seth-hall",
+      "target": "nat-dart",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "seth-hall",
+      "target": "timothy-nice",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "seth-hall",
+      "target": "brian-nestor",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "seth-hall",
+      "target": "cedrick-collomb",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "teck-lee-tan",
+      "target": "altair-martinez",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "teck-lee-tan",
+      "target": "shawna-tanskanen",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "teck-lee-tan",
+      "target": "shawn-pitman",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "teck-lee-tan",
+      "target": "charles-durairaj",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "teck-lee-tan",
+      "target": "hafiz-zainal-abidin",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "teck-lee-tan",
+      "target": "jano-vesina",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "teck-lee-tan",
+      "target": "edmund-shen",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "teck-lee-tan",
+      "target": "david-kirscheneder",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "teck-lee-tan",
+      "target": "aaron-lemay",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "teck-lee-tan",
+      "target": "claudiu-dumitru",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "geoffrey-marsi",
+      "target": "chris-balser",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "geoffrey-marsi",
+      "target": "ed-knapp",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "geoffrey-marsi",
+      "target": "jeremy-sera",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "geoffrey-marsi",
+      "target": "james-owen-lowe",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "geoffrey-marsi",
+      "target": "colin-mcginley",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "geoffrey-marsi",
+      "target": "paul-sage",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "geoffrey-marsi",
+      "target": "lea-jacqueline-evans",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "geoffrey-marsi",
+      "target": "dan-kline",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "geoffrey-marsi",
+      "target": "christofer-strasz",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "geoffrey-marsi",
+      "target": "chris-dillman",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "gina-jaio",
+      "target": "rodrigo-aguilar",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "gina-jaio",
+      "target": "ed-knapp",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "gina-jaio",
+      "target": "fran-court",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "gina-jaio",
+      "target": "david-reed-monroe",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "gina-jaio",
+      "target": "jasmine-sarmiento",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "gina-jaio",
+      "target": "steve-nelson-ii",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "gina-jaio",
+      "target": "terri-lou-tiongson",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "gina-jaio",
+      "target": "lisa-martin",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "gina-jaio",
+      "target": "jason-williford",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "gina-jaio",
+      "target": "stephen-busfield",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "gina-jaio",
+      "target": "vivek-sangubhotla",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "gina-jaio",
+      "target": "marc-hudgins",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "gina-jaio",
+      "target": "adam-arrigo",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "gina-jaio",
+      "target": "john-stafford",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "gina-jaio",
+      "target": "noah-watkins",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "gina-jaio",
+      "target": "nikita-puranik",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "gina-jaio",
+      "target": "dave-cross",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "gina-jaio",
+      "target": "elijah-freeman",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "gina-jaio",
+      "target": "john-yoo",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "gina-jaio",
+      "target": "kursad-can",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "seren-mason",
+      "target": "sammi-kim",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "seren-mason",
+      "target": "taylor-wright",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "seren-mason",
+      "target": "ammon-haggerty",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "seren-mason",
+      "target": "adam-arrigo",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "seren-mason",
+      "target": "john-yoo",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "seren-mason",
+      "target": "adam-murguia",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "seren-mason",
+      "target": "greg-faillace",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "seren-mason",
+      "target": "christine-brownell",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "seren-mason",
+      "target": "ole-goethe",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "seren-mason",
+      "target": "joel-anderson",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "seren-mason",
+      "target": "josh-santangelo",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "seren-mason",
+      "target": "nicholas-konkle",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "seren-mason",
+      "target": "victor-keenan",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "seren-mason",
+      "target": "alex-churchill",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "derek-van-oss",
+      "target": "quin-richards",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "derek-van-oss",
+      "target": "kristen-diane-mcdonald-brown",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "derek-van-oss",
+      "target": "cole-nelson",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "derek-van-oss",
+      "target": "stephan-dube",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "derek-van-oss",
+      "target": "charlene-zvolanek",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "derek-van-oss",
+      "target": "amy-li",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "derek-van-oss",
+      "target": "david-sheldon-hicks",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "derek-van-oss",
+      "target": "andrew-snell",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "derek-van-oss",
+      "target": "jeff-pearce",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "derek-van-oss",
+      "target": "valeria-magal-sanchez",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "derek-van-oss",
+      "target": "andrea-marchiotto",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "dan-kline",
+      "target": "adam-piper",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "dan-kline",
+      "target": "dale-cieslak",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "dan-kline",
+      "target": "ray-mazza",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "dan-kline",
+      "target": "kento-kojima",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "dan-kline",
+      "target": "scot-brew",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "dan-kline",
+      "target": "chris-huybregts",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "dan-kline",
+      "target": "timothy-nice",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "dan-kline",
+      "target": "aaron-yonas",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "dan-kline",
+      "target": "michael-arnold",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "dan-kline",
+      "target": "reid-kimball",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "dan-kline",
+      "target": "stephen-busfield",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "dan-kline",
+      "target": "chris-marvin",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "dan-kline",
+      "target": "alex-rozgo",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "dan-kline",
+      "target": "john-stafford",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "dan-kline",
+      "target": "seth-hall",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "dan-kline",
+      "target": "paul-rand-pierce",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "dan-kline",
+      "target": "greg-knight",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "dan-kline",
+      "target": "jonathan-tilden",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "dan-kline",
+      "target": "joseph-kubiak",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "dan-kline",
+      "target": "isa-anne-stamos",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "steven-chiang",
+      "target": "sammi-kim",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "steven-chiang",
+      "target": "tommy-cinquegrano",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "steven-chiang",
+      "target": "glenn-entis",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "steven-chiang",
+      "target": "judy-wolf",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "steven-chiang",
+      "target": "mark-mongie",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "steven-chiang",
+      "target": "brian-schneider",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "steven-chiang",
+      "target": "sam-hofer",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "steven-chiang",
+      "target": "kento-kojima",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "steven-chiang",
+      "target": "jeff-poole",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "steven-chiang",
+      "target": "peter-grassi",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "steven-chiang",
+      "target": "matt-mcenerney",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "steven-chiang",
+      "target": "sheetal-bandi",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "steven-chiang",
+      "target": "albert-holaso",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "steven-chiang",
+      "target": "alex-chatfield",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "steven-chiang",
+      "target": "justin-mcleod",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "steven-chiang",
+      "target": "elijah-freeman",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "steven-chiang",
+      "target": "matt-thazhmon",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "steven-chiang",
+      "target": "paul-robinson",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "steven-chiang",
+      "target": "simon-kandah",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "steven-chiang",
+      "target": "derek-brinkmann",
+      "type": "lists",
+      "weight": 1
+    },
+    {
+      "source": "2nd:gage-johnson",
+      "target": "celia-hodent",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:sweta-m",
+      "target": "celia-hodent",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:caprice-hong",
+      "target": "jason-smith",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:kevin-hustler",
+      "target": "taylor-wright",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:zane-lyon",
+      "target": "ryan-ward",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:bridget-schiffler",
+      "target": "ed-knapp",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:bridget-schiffler",
+      "target": "nicholas-konkle",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:jason-cohen",
+      "target": "ryan-ward",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:morgan-romero",
+      "target": "celia-hodent",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:morgan-romero",
+      "target": "ed-knapp",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:vidhi-shah",
+      "target": "celia-hodent",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:jordan-checkman",
+      "target": "nicholas-konkle",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:christopher-misenas",
+      "target": "bruce-harlick",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:alex-wheeler",
+      "target": "ryan-ward",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:ray-ocampo",
+      "target": "jim-rivers",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:jeff-kao",
+      "target": "derek-van-oss",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:alex-park",
+      "target": "cole-nelson",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:meagan-taylor",
+      "target": "mags-ng",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:krysten-reis",
+      "target": "adam-murguia",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:krysten-reis",
+      "target": "jason-smith",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:ettore-manetti",
+      "target": "celia-hodent",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:ettore-manetti",
+      "target": "teck-lee-tan",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:nabil-k",
+      "target": "adam-murguia",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:ji-hwan-kim",
+      "target": "ed-knapp",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:oliver-zumstein",
+      "target": "elijah-freeman",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:kacey-geary",
+      "target": "jim-rivers",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:kacey-geary",
+      "target": "mila-pavlin",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:sy-harris",
+      "target": "derek-van-oss",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:junho-kim",
+      "target": "taylor-wright",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:pablo-morales-phd",
+      "target": "celia-hodent",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:dave-guskin",
+      "target": "brian-schneider",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:dave-guskin",
+      "target": "mags-ng",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:danny-medina",
+      "target": "jim-rivers",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:randi-m-cohn",
+      "target": "jim-rivers",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:randi-m-cohn",
+      "target": "ryan-ward",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:marcus-meurling",
+      "target": "jason-smith",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:marcus-meurling",
+      "target": "jim-rivers",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:antonella-spagnoli",
+      "target": "joel-anderson",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:anouk-ben-tchavtchavadze",
+      "target": "mags-ng",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:cindy-n",
+      "target": "jim-rivers",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:evan-huang",
+      "target": "jim-rivers",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:evan-huang",
+      "target": "simon-kandah",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:alex-vejnoska",
+      "target": "jim-rivers",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:kirby-cofino",
+      "target": "victor-keenan",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:jacob-lee",
+      "target": "ed-knapp",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:mo-grey",
+      "target": "mags-ng",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:irene-zhu",
+      "target": "jim-rivers",
+      "type": "bridge",
+      "weight": 1
+    },
+    {
+      "source": "2nd:kristy-lee",
+      "target": "ed-knapp",
+      "type": "bridge",
+      "weight": 1
+    }
+  ]
+}

@@ -1,0 +1,443 @@
+{
+  "description": "2nd/3rd+ Riot UX–adjacent people — outreach targets. Not network-map anchors.",
+  "captured": "2026-04-24",
+  "source": "User LinkedIn search paste; see riot-2nd-degree-ux-2026.md",
+  "rowCount": 71,
+  "people": [
+    {
+      "name": "Gage Johnson",
+      "networkDistance": "2nd",
+      "title": "UX Designer II @ Riot Games",
+      "bridgeMutuals": "Celia Hodent, Andrew Rice, +4",
+      "profileUrl": "https://www.linkedin.com/in/gage-t-johnson/"
+    },
+    {
+      "name": "Sweta M.",
+      "networkDistance": "2nd",
+      "title": "UX Designer at Riot Games",
+      "bridgeMutuals": "Andy Grignon, Celia Hodent, +4",
+      "profileUrl": "https://www.linkedin.com/in/sweta-mohapatra/"
+    },
+    {
+      "name": "Brian Ralphs",
+      "networkDistance": "2nd",
+      "title": "Principal UX Designer at Riot Games",
+      "bridgeMutuals": "Nick Slough",
+      "profileUrl": "https://www.linkedin.com/in/brian-ralphs/"
+    },
+    {
+      "name": "Caprice Hong",
+      "networkDistance": "2nd",
+      "title": "Lead UX Designer at Riot Games",
+      "bridgeMutuals": "Jason Smith, Nick Slough, +2",
+      "profileUrl": "https://www.linkedin.com/in/capricehong/"
+    },
+    {
+      "name": "Kevin Hustler",
+      "networkDistance": "2nd",
+      "title": "Principal UX Designer @ Riot Games",
+      "bridgeMutuals": "Isaac Epp, Taylor Wright, +12"
+    },
+    {
+      "name": "Jami Lukins",
+      "networkDistance": "2nd",
+      "title": "Principal UX Design Lead",
+      "bridgeMutuals": "Vic DeLeon, Dave Inscore, +27"
+    },
+    {
+      "name": "Zane Lyon",
+      "networkDistance": "2nd",
+      "title": "Principal UX Designer",
+      "bridgeMutuals": "Ryan Ward, Tim Train, +10"
+    },
+    {
+      "name": "Kai Smith",
+      "networkDistance": "2nd",
+      "title": "Riot Games UX Researcher \\",
+      "bridgeMutuals": "Spiderman in Training"
+    },
+    {
+      "name": "Bridget Schiffler",
+      "networkDistance": "2nd",
+      "title": "Senior UX Design Lead at Riot Games R&D",
+      "bridgeMutuals": "Nicholas Konkle, Ed Knapp",
+      "profileUrl": "https://www.linkedin.com/in/bridgetschiffler/"
+    },
+    {
+      "name": "Ruby Chien",
+      "networkDistance": "2nd",
+      "title": "UX Design @ Riot Games",
+      "bridgeMutuals": "Rhonda Cox, MBA, PMP",
+      "profileUrl": "https://www.linkedin.com/in/rubyyujuchien/"
+    },
+    {
+      "name": "Jiaqi Wu",
+      "networkDistance": "2nd",
+      "title": "UX Designer at Riot Games",
+      "bridgeMutuals": "Michael A. Agustin, David Musgrove, +8"
+    },
+    {
+      "name": "Jason Cohen",
+      "networkDistance": "2nd",
+      "title": "Sr UX Manager at Riot Games",
+      "bridgeMutuals": "Ryan Ward, Aaron Rutledge, +9",
+      "profileUrl": "https://www.linkedin.com/in/jason-cohen-9332273/"
+    },
+    {
+      "name": "Helen Ho",
+      "networkDistance": "2nd",
+      "title": "UX Designer @ Riot Games",
+      "bridgeMutuals": "Fernando Forero Pinilla"
+    },
+    {
+      "name": "Morgan Romero",
+      "networkDistance": "2nd",
+      "title": "Senior UX Designer at Riot Games",
+      "bridgeMutuals": "Ed Knapp, Celia Hodent, +1"
+    },
+    {
+      "name": "Vidhi Shah",
+      "networkDistance": "2nd",
+      "title": "Senior UX Designer at Riot Games",
+      "bridgeMutuals": "Aaron Rutledge, Celia Hodent, +6"
+    },
+    {
+      "name": "Anya Li",
+      "networkDistance": "2nd",
+      "title": "Senior UX Designer — Riot Games \\",
+      "bridgeMutuals": "Teamfight Tactics"
+    },
+    {
+      "name": "Jordan Checkman",
+      "networkDistance": "2nd",
+      "title": "Senior User Experience Design Manager at Riot Games",
+      "bridgeMutuals": "Aaron Rutledge, Nicholas Konkle, +3"
+    },
+    {
+      "name": "Christopher Misenas",
+      "networkDistance": "2nd",
+      "title": "Senior Game Designer at Riot Games (open to work)",
+      "bridgeMutuals": "Bruce Harlick, Jonathan Curiel, +3"
+    },
+    {
+      "name": "° H.",
+      "networkDistance": "2nd",
+      "title": "Art Outsourcing Manager III at Riot Games",
+      "bridgeMutuals": "David Musgrove, Joshua Lindsay, +14"
+    },
+    {
+      "name": "Roxanna Yu",
+      "networkDistance": "2nd",
+      "title": "Contract UX Designer @ Riot Games",
+      "bridgeMutuals": "—"
+    },
+    {
+      "name": "Alex Wheeler",
+      "networkDistance": "2nd",
+      "title": "Senior Manager — UX @ Riot Games",
+      "bridgeMutuals": "Ryan Ward, Aaron Rutledge, +15"
+    },
+    {
+      "name": "Ki S.",
+      "networkDistance": "2nd",
+      "title": "UX Design Lead, R&D Game",
+      "bridgeMutuals": "Tim Train, Aaron Rutledge, +2"
+    },
+    {
+      "name": "Ray Ocampo",
+      "networkDistance": "2nd",
+      "title": "Senior UX Designer / Design Leader @ Riot Games",
+      "bridgeMutuals": "Justin Stark, Jim Rivers, +21",
+      "profileUrl": "https://www.linkedin.com/in/rvocampo/"
+    },
+    {
+      "name": "Aiden Thurston",
+      "networkDistance": "2nd",
+      "title": "UX Researcher — Product Experiences & AAA Games",
+      "bridgeMutuals": "Danielle Corporon, Victor Dima"
+    },
+    {
+      "name": "jeff kao",
+      "networkDistance": "2nd",
+      "title": "Principal UX Designer at Riot Games",
+      "bridgeMutuals": "Derek Van Oss, David Musgrove, +14"
+    },
+    {
+      "name": "Alex Park",
+      "networkDistance": "2nd",
+      "title": "UX Design Manager @ Riot Games",
+      "bridgeMutuals": "Cole Nelson"
+    },
+    {
+      "name": "Janet He",
+      "networkDistance": "2nd",
+      "title": "Visual Designer II @ Riot Games \\",
+      "bridgeMutuals": "VALORANT"
+    },
+    {
+      "name": "Rachel Chan",
+      "networkDistance": "2nd",
+      "title": "Senior UX Designer at Riot Games",
+      "bridgeMutuals": "Nick Slough"
+    },
+    {
+      "name": "Alicia Loring",
+      "networkDistance": "2nd",
+      "title": "Principal UX Designer at Riot Games",
+      "bridgeMutuals": "Aaron Rutledge"
+    },
+    {
+      "name": "Meagan Taylor",
+      "networkDistance": "2nd",
+      "title": "UX Designer II",
+      "bridgeMutuals": "Mags Ng"
+    },
+    {
+      "name": "Krysten Reis",
+      "networkDistance": "2nd",
+      "title": "Senior Visual Designer at Riot Games",
+      "bridgeMutuals": "Jason Smith, Adam Murguia, +12"
+    },
+    {
+      "name": "Ettore Manetti",
+      "networkDistance": "2nd",
+      "title": "Principal User Experience Designer at Riot Games",
+      "bridgeMutuals": "Teck Lee Tan, Celia Hodent, +7"
+    },
+    {
+      "name": "Nabil K.",
+      "networkDistance": "2nd",
+      "title": "Design Director",
+      "bridgeMutuals": "Aaron Rutledge, Adam Murguia, +6"
+    },
+    {
+      "name": "Alisa Maltseva",
+      "networkDistance": "2nd",
+      "title": "Visual Design Artist @ Riot Games",
+      "bridgeMutuals": "450 followers (no mutuals line)"
+    },
+    {
+      "name": "Joy An",
+      "networkDistance": "2nd",
+      "title": "Principal Visual Designer @ Riot Games",
+      "bridgeMutuals": "Isaac Epp, Siddhartha Deb, +19"
+    },
+    {
+      "name": "Ji Hwan Kim",
+      "networkDistance": "2nd",
+      "title": "Visual / Motion Designer",
+      "bridgeMutuals": "Ed Knapp, Fernando Forero Pinilla, +3"
+    },
+    {
+      "name": "Noelle Stransky",
+      "networkDistance": "2nd",
+      "title": "Design Leader @ Riot Games — CP / UX strategy; services / Follow",
+      "bridgeMutuals": "(card: services)"
+    },
+    {
+      "name": "Łukasz Wieczorek",
+      "networkDistance": "2nd",
+      "title": "Senior Visual Designer at Riot Games",
+      "bridgeMutuals": "David Musgrove, Cody Bye, +4"
+    },
+    {
+      "name": "Chris Nguyen",
+      "networkDistance": "2nd",
+      "title": "Visual Designer @ Riot Games",
+      "bridgeMutuals": "Rhonda Cox, MBA, PMP, Fernando Forero Pinilla"
+    },
+    {
+      "name": "Suri Eunsul Lee",
+      "networkDistance": "2nd",
+      "title": "Lead UI Designer at Riot Games",
+      "bridgeMutuals": "Nick Slough"
+    },
+    {
+      "name": "Oliver Zumstein",
+      "networkDistance": "2nd",
+      "title": "Art Direction / Visual Design / UI, UX",
+      "bridgeMutuals": "Elijah Freeman, Alex Mack, +14"
+    },
+    {
+      "name": "Evan Squire",
+      "networkDistance": "2nd",
+      "title": "Art Director \\",
+      "bridgeMutuals": "Creative \\"
+    },
+    {
+      "name": "Ambur Luton",
+      "networkDistance": "2nd",
+      "title": "UX Manager at Riot Games",
+      "bridgeMutuals": "Aaron Rutledge"
+    },
+    {
+      "name": "Kacey Geary",
+      "networkDistance": "2nd",
+      "title": "Senior Visual Designer on the TFT Gameplay team",
+      "bridgeMutuals": "Jim Rivers, Mila Pavlin, +6"
+    },
+    {
+      "name": "Christopher Martin",
+      "networkDistance": "2nd",
+      "title": "UI/UX Designer",
+      "bridgeMutuals": "Patrick Bostwick"
+    },
+    {
+      "name": "Tori Ero",
+      "networkDistance": "2nd",
+      "title": "Gameplay Art Director, Teamfight Tactics @ Riot Games",
+      "bridgeMutuals": "Johnny Waterman, Fernando Forero Pinilla, +1"
+    },
+    {
+      "name": "Julia Marsh",
+      "networkDistance": "2nd",
+      "title": "Director of User Experience — VALORANT, Riot Games",
+      "bridgeMutuals": "Nick Slough"
+    },
+    {
+      "name": "Jeff Brown",
+      "networkDistance": "2nd",
+      "title": "I make games",
+      "bridgeMutuals": "Vic DeLeon, David Musgrove, +20"
+    },
+    {
+      "name": "Sy Harris",
+      "networkDistance": "2nd",
+      "title": "Principal User Experience Designer at Riot Games",
+      "bridgeMutuals": "Nida Zada, Derek Van Oss, +5"
+    },
+    {
+      "name": "Scott H. W. Snyder",
+      "networkDistance": "3rd+",
+      "title": "Sr. Manager of UX Design on VALORANT",
+      "bridgeMutuals": "3rd+; Message only on paste"
+    },
+    {
+      "name": "Junho Kim",
+      "networkDistance": "2nd",
+      "title": "Director, Visual Design Art at Riot Games",
+      "bridgeMutuals": "Taylor Wright, Mark Soderwall, +18"
+    },
+    {
+      "name": "Pablo Morales, PhD",
+      "networkDistance": "2nd",
+      "title": "Researcher @ Riot Games",
+      "bridgeMutuals": "Celia Hodent, Amanda (Mandi) Hall, PhD, +5"
+    },
+    {
+      "name": "Dave Guskin",
+      "networkDistance": "2nd",
+      "title": "Game Director, Riftbound (League TCG), Riot Games",
+      "bridgeMutuals": "Mags Ng, Brian Schneider, +3"
+    },
+    {
+      "name": "Danny Medina",
+      "networkDistance": "2nd",
+      "title": "Senior UX Designer at Riot Games",
+      "bridgeMutuals": "Mark Soderwall, Jim Rivers, +10"
+    },
+    {
+      "name": "Randi M. Cohn",
+      "networkDistance": "2nd",
+      "title": "17+ yrs; production/ops; high-level strategy (long headline)",
+      "bridgeMutuals": "Ryan Ward, Jim Rivers, +8"
+    },
+    {
+      "name": "Sally (Hyunji) Kim",
+      "networkDistance": "3rd+",
+      "title": "UX Designer @ Riot Games",
+      "bridgeMutuals": "3rd+; Message on paste"
+    },
+    {
+      "name": "Michelle Mauk",
+      "networkDistance": "2nd",
+      "title": "Senior Manager, Creative Development: CPX at Riot Games",
+      "bridgeMutuals": "Ivan Duch, Darren Bell Jr., +4"
+    },
+    {
+      "name": "Marcus Meurling",
+      "networkDistance": "2nd",
+      "title": "Senior UX Designer at Riot Games",
+      "bridgeMutuals": "Jason Smith, Jim Rivers, +2"
+    },
+    {
+      "name": "Antonella Spagnoli",
+      "networkDistance": "2nd",
+      "title": "Monetisation UX for League; AI UX (long headline)",
+      "bridgeMutuals": "Joel Anderson, Finnbar Burke, +3"
+    },
+    {
+      "name": "Devin Murphy",
+      "networkDistance": "2nd",
+      "title": "UX Designer II @ Riot Games",
+      "bridgeMutuals": "—"
+    },
+    {
+      "name": "anouk ben-tchavtchavadze",
+      "networkDistance": "2nd",
+      "title": "Principal User Experience Designer at Riot Games",
+      "bridgeMutuals": "Mags Ng, David Musgrove, +21"
+    },
+    {
+      "name": "Cindy N.",
+      "networkDistance": "2nd",
+      "title": "Senior Manager, Art Direction — Visual Design @ Riot Games",
+      "bridgeMutuals": "David Musgrove, Jim Rivers, +6"
+    },
+    {
+      "name": "Evan Huang",
+      "networkDistance": "2nd",
+      "title": "Senior Visual Designer @ Riot Games",
+      "bridgeMutuals": "Simon Kandah, Jim Rivers, +5"
+    },
+    {
+      "name": "Alex Vejnoska",
+      "networkDistance": "2nd",
+      "title": "UX, software, product design leadership",
+      "bridgeMutuals": "Jim Rivers, Nick Slough, +3"
+    },
+    {
+      "name": "Tiffany Lam",
+      "networkDistance": "2nd",
+      "title": "Principal Creative Director \\",
+      "bridgeMutuals": "Riot Games"
+    },
+    {
+      "name": "Kirby Cofino",
+      "networkDistance": "2nd",
+      "title": "Software Engineer at Riot Games",
+      "bridgeMutuals": "Victor Keenan"
+    },
+    {
+      "name": "Jacob Lee",
+      "networkDistance": "2nd",
+      "title": "Visual Design at Riot Games",
+      "bridgeMutuals": "Ed Knapp, Shuangfei (Faye) Jiang, +1"
+    },
+    {
+      "name": "Mo Grey",
+      "networkDistance": "2nd",
+      "title": "Principal Game Producer at Riot Games",
+      "bridgeMutuals": "Mags Ng, Joshua Lindsay, +7"
+    },
+    {
+      "name": "Irene Zhu",
+      "networkDistance": "2nd",
+      "title": "Principal User Experience Designer at Riot Games",
+      "bridgeMutuals": "Jim Rivers, Nick Slough, +3"
+    },
+    {
+      "name": "Corey Wise",
+      "networkDistance": "2nd",
+      "title": "Principal User Experience Designer @ Riot Games",
+      "bridgeMutuals": "Marcello Sarmento, Karen LeBlanc"
+    },
+    {
+      "name": "Kristy Lee",
+      "networkDistance": "2nd",
+      "title": "Senior UX Designer at Riot Games",
+      "bridgeMutuals": "Ed Knapp, Ting Xu"
+    }
+  ],
+  "profileUrlsNote": "2026-04-24: eight Riot UX rows linked to public /in/ URLs. Graph anchors still require 1st degree + network-map mutual capture."
+}

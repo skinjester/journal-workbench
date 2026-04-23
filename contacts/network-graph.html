@@ -1,0 +1,651 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Connection map — network graph</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
+    <script defer src="./network-graph.data.js"></script>
+    <style>
+      :root {
+        --bg: #0f1115;
+        --panel: #1a1d24;
+        --text: #e9ecf1;
+        --muted: #9aa3b2;
+        --accent: #6fa8ff;
+        --accent-strong: #2e7dff;
+        --mutual: #6fa8ff;
+        --you: #f5f7fb;
+        --edge: rgba(130, 145, 170, 0.42);
+        --second: #a78bfa;
+        --border: #2a2f3a;
+      }
+      html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+      #app { display: grid; grid-template-columns: 320px 1fr; height: 100vh; }
+      #sidebar { background: var(--panel); border-right: 1px solid var(--border); padding: 16px 18px; overflow-y: auto; font-size: 13px; line-height: 1.5; }
+      #sidebar h1 { font-size: 15px; margin: 0 0 6px; }
+      #sidebar h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 18px 0 8px; }
+      #sidebar p { color: var(--muted); margin: 4px 0 10px; }
+      #graph { position: relative; }
+      #net { position: absolute; inset: 0; }
+      label.ctrl { display: flex; align-items: center; gap: 8px; padding: 4px 0; cursor: pointer; }
+      label.ctrl input { accent-color: var(--accent-strong); }
+      .legend { display: flex; flex-direction: column; gap: 6px; }
+      .legend .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+      .legend .line { display: inline-block; width: 22px; height: 2px; margin-right: 8px; vertical-align: middle; }
+      .legend .line.thick { height: 4px; }
+      .legend .line.dashed { background: none !important; border-top: 2px dashed rgba(245, 247, 251, 0.45); }
+      .legend .row { display: flex; align-items: center; }
+      .meta { color: var(--muted); font-size: 12px; }
+      .stat { display: flex; justify-content: space-between; }
+      .panel-section { border-top: 1px solid var(--border); padding-top: 12px; margin-top: 12px; }
+      #selection { font-size: 13px; }
+      #selection .name { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+      #selection a { color: var(--accent); }
+      #selection .kv { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; margin-top: 6px; }
+      #selection .kv span:nth-child(odd) { color: var(--muted); }
+      .range { width: 100%; }
+      .empty { color: var(--muted); font-style: italic; }
+      code { background: #232733; padding: 1px 4px; border-radius: 3px; font-size: 12px; }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <aside id="sidebar">
+        <h1>Connection map</h1>
+        <p class="meta" id="metaLine">Loading&hellip;</p>
+        <p class="meta" id="encodingSummary" style="line-height:1.45"><strong>You</strong> = soft 5-point star. <strong>1st-layer</strong> and <strong>2nd</strong> differ by color (blue vs purple) only. <strong>Size</strong> = <strong>superWeight</strong> (see <em>Scale</em>). R&amp;D: gold border. Tier filters don&rsquo;t hide you.</p>
+
+        <h2>View</h2>
+        <label class="ctrl"><input type="checkbox" id="toggleMutualOnly" checked /> Show mutual (1st-layer) nodes</label>
+        <label class="ctrl" style="font-size:12px;color:var(--muted)">With mutuals off, 1st anchors + 2nd stay visible &mdash; mutuals hide.</label>
+        <label class="ctrl"><input type="checkbox" id="toggleRD" /> Highlight R&amp;D only</label>
+
+        <h2>Tier</h2>
+        <label class="ctrl"><input type="checkbox" id="toggleHideCold" /> Hide cold &amp; untiered</label>
+        <div id="tierFilter" class="legend"></div>
+
+        <h2>Legend &mdash; color (layer only)</h2>
+        <div class="legend">
+          <div class="row"><span class="swatch" style="background:var(--you);clip-path:polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)"></span> <strong>You</strong> &mdash; soft star; one link per <code>##</code> anchor in the build.</div>
+          <div class="row"><span class="swatch" style="background:var(--mutual)"></span>Blue &mdash; <strong>1st-layer</strong> (everyone on the map except you and 2nd-degree rows). Same fill whether or not they have their own <code>##</code> section.</div>
+          <div class="row"><span class="swatch" style="background:var(--second)"></span>Purple &mdash; <strong>2nd</strong> (Riot/UX outreach list in the data)</div>
+        </div>
+        <p class="meta" style="margin:6px 0 0">R&amp;D: <span class="swatch" style="width:12px;height:12px;box-shadow:0 0 0 2px #e8c84a inset;background:var(--mutual)"></span> <strong>Gold border</strong> on 1st-layer (blue) nodes (not a new fill color).</p>
+
+        <h2>Legend &mdash; size (superconnectors)</h2>
+        <div class="legend">
+          <div class="row"><span class="swatch" style="background:var(--mutual); width:6px; height:6px"></span><span class="swatch" style="background:var(--mutual); width:20px; height:20px; margin-left:6px"></span> <strong>Radius &asymp;7px &rarr; &asymp;52px</strong> from <code>superWeight</code> (sum of incident link weights in the data). Edges are drawn the same; size is the hub signal. <em>Not</em> your LinkedIn degree &mdash; only this graph.</div>
+        </div>
+
+        <h2>Legend &mdash; edges</h2>
+        <div class="legend">
+          <div class="row"><span class="line" style="background:var(--edge)"></span> <strong>One line style</strong> &mdash; <strong>you &rarr; anchor</strong>, <strong>anchor &rarr; mutual</strong> (that person is on that anchor&rsquo;s list in the file), and <strong>2nd &rarr; 1st</strong> bridges. <em>No</em> edges between two mutuals just because they were on the same list line. Hover an edge for the type.</div>
+        </div>
+
+        <h2>Legend &mdash; tier (filter only)</h2>
+        <p class="meta">Outreach <strong>hot / warm / cold</strong> does <strong>not</strong> change size or color here. When no tier: shown as <em>untiered</em>. Checkboxes hide groups; <strong>Hide cold &amp; untiered</strong> is a view filter, not a visual scale.</p>
+
+        <h2>Selection</h2>
+        <p class="meta" id="nhoodHint" style="display:none; margin:0 0 8px; line-height:1.4"><strong>Neighborhood mode:</strong> only this person and their direct links stay visible. <strong>Click the same node again</strong> or the background to show the full graph again.</p>
+        <div id="selection"><div class="empty">Click a node for details. Click again (or the background) to show or hide everyone who isn&rsquo;t directly connected.</div></div>
+
+        <div class="panel-section">
+          <h2>About this data</h2>
+          <p class="meta" id="disclaimerLine"></p>
+          <p class="meta">Regenerate: <code>python3 scripts/build_network_graph.py</code>. Tiers / companies live in <code>contacts/network-map.tags.json</code>.</p>
+        </div>
+      </aside>
+      <main id="graph">
+        <div id="net"></div>
+      </main>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+
+        function boot() {
+          if (typeof vis === "undefined") {
+            setTimeout(boot, 50);
+            return;
+          }
+          if (window.NETWORK_DATA) {
+            render(window.NETWORK_DATA);
+            return;
+          }
+          fetch("./network-graph.data.json")
+            .then(function (r) { return r.json(); })
+            .then(render)
+            .catch(function (err) {
+              document.getElementById("metaLine").textContent =
+                "Could not load network-graph.data.js. Run scripts/build_network_graph.py, or serve this folder over HTTP.";
+              console.error(err);
+            });
+        }
+
+        function tierLabel(tiers, tierKey) {
+          if (!tierKey) return "Untiered";
+          var entry = tiers && tiers[tierKey];
+          return (entry && entry.label) || tierKey;
+        }
+
+        function nodeOpacity() {
+          return 1;
+        }
+
+        // Pixel radius: linear in superWeight^0.85 so hubs read clearly above the mid pack
+        // (log() was too compressive; most nodes looked the same size).
+        var SIZE_MIN = 7;
+        var SIZE_MAX = 52;
+
+        function sizeFromSuperWeight(n, maxW) {
+          var w = typeof n.superWeight === "number" ? n.superWeight : 0;
+          if (w < 0) w = 0;
+          if (maxW < 0.5) maxW = 0.5;
+          var t = w / maxW;
+          t = Math.max(0, Math.min(1, t));
+          // Slight curve: more separation between 20 and 60 than between 0 and 5
+          t = Math.pow(t, 0.85);
+          return SIZE_MIN + t * (SIZE_MAX - SIZE_MIN);
+        }
+
+        /** Vis custom node: 5-point star, fill only (no stroke). Inner/outer ~0.82 = shallow, restrained points. */
+        function youStarCtxRenderer(p) {
+          var ctx = p.ctx;
+          var x = p.x;
+          var y = p.y;
+          var st = p.state;
+          var style = p.style;
+          var outer = typeof style.size === "number" && style.size > 0 ? style.size : 15;
+          var inner = outer * 0.82;
+          var fill;
+          if (st.selected) {
+            fill = "#f0f2f6";
+          } else if (st.hover) {
+            fill = "#e0e5ed";
+          } else {
+            fill = "#b9c2cf";
+          }
+          var w = 2 * outer;
+          var h = 2 * outer;
+          return {
+            drawNode: function () {
+              ctx.beginPath();
+              var i;
+              for (i = 0; i < 10; i += 1) {
+                var r = (i % 2 === 0) ? outer : inner;
+                var a = (Math.PI * 2 * i) / 10 - Math.PI / 2;
+                var px = x + r * Math.cos(a);
+                var py = y + r * Math.sin(a);
+                if (i === 0) {
+                  ctx.moveTo(px, py);
+                } else {
+                  ctx.lineTo(px, py);
+                }
+              }
+              ctx.closePath();
+              ctx.fillStyle = fill;
+              ctx.fill();
+            },
+            nodeDimensions: { width: w, height: h },
+          };
+        }
+
+        function buildVisNodes(data) {
+          var maxW = 1;
+          data.nodes.forEach(function (n) {
+            if (n.isYou) {
+              return;
+            }
+            var sw = typeof n.superWeight === "number" ? n.superWeight : 0;
+            if (sw > maxW) maxW = sw;
+          });
+
+          return data.nodes.map(function (n) {
+            if (n.isYou) {
+              return {
+                id: n.id,
+                label: n.name,
+                title: buildTooltip(n, data.tiers || {}),
+                shape: "custom",
+                size: 15,
+                borderWidth: 0,
+                borderWidthSelected: 0,
+                color: {
+                  background: "#b9c2cf",
+                  border: "#b9c2cf",
+                  highlight: { background: "#e0e5ed", border: "#e0e5ed" },
+                },
+                ctxRenderer: youStarCtxRenderer,
+                font: {
+                  color: "#e9ecf1",
+                  size: 12,
+                  face: "-apple-system, Segoe UI, Roboto, sans-serif",
+                  strokeWidth: 2,
+                  strokeColor: "#0f1115",
+                  vadjust: 4,
+                },
+                _meta: n,
+              };
+            }
+            if (n.isSecond) {
+              return {
+                id: n.id,
+                label: n.name,
+                title: buildTooltip(n, data.tiers || {}),
+                shape: "dot",
+                size: sizeFromSuperWeight(n, maxW),
+                color: {
+                  background: "#a78bfa",
+                  border: "#5b21b6",
+                  highlight: { background: "#c4b5fd", border: "#6d28d9" },
+                },
+                opacity: nodeOpacity(),
+                borderWidth: 2,
+                font: {
+                  color: "#e9ecf1",
+                  size: 14,
+                  face: "-apple-system, Segoe UI, Roboto, sans-serif",
+                  strokeWidth: 3,
+                  strokeColor: "#0f1115",
+                  vadjust: -2,
+                },
+                _meta: n,
+              };
+            }
+
+            var size = sizeFromSuperWeight(n, maxW);
+            var rdB = n.isRD ? 3 : 1;
+            var mb = n.isRD ? "#e8c84a" : "#1e4a7a";
+            var mhi = n.isRD ? { background: "#6fa8ff", border: "#f0d45c" } : { background: "#8cbcff", border: "#1e4a7a" };
+            var color = { background: "#5b8fd8", border: mb, highlight: mhi };
+
+            return {
+              id: n.id,
+              label: n.name,
+              title: buildTooltip(n, data.tiers || {}),
+              shape: "dot",
+              size: size,
+              color: color,
+              opacity: nodeOpacity(),
+              borderWidth: rdB,
+              font: {
+                color: "#e9ecf1",
+                size: 14,
+                face: "-apple-system, Segoe UI, Roboto, sans-serif",
+                strokeWidth: 3,
+                strokeColor: "#0f1115",
+                vadjust: -2,
+              },
+              _meta: n,
+            };
+          });
+        }
+
+        function buildVisEdgeTitle(e) {
+          var t = e.type;
+          if (t === "coanchor") {
+            return "Co-list (pair); weight " + (e.weight != null ? e.weight : 1);
+          }
+          if (t === "bridge") {
+            return "2nd \u2192 1st (bridge in this map)";
+          }
+          if (t === "lists") {
+            return "Anchor list membership";
+          }
+          if (t === "you-anchor") {
+            return "You \u2192 1st anchor (your captured \u201c##\u201d sample in this map)";
+          }
+          return t || "Link";
+        }
+
+        function buildVisEdges(data) {
+          var edges = data.edges;
+          var lineColor = { color: "rgba(130, 145, 170, 0.42)", highlight: "rgba(160, 180, 210, 0.7)", hover: "rgba(160, 180, 210, 0.6)" };
+          return edges.map(function (e, idx) {
+            return {
+              id: "e" + idx,
+              from: e.source,
+              to: e.target,
+              width: 1.05,
+              color: lineColor,
+              smooth: { type: "continuous", roundness: 0.12 },
+              title: buildVisEdgeTitle(e),
+            };
+          });
+        }
+
+        function buildTooltip(n, tiers) {
+          var div = document.createElement("div");
+          div.style.maxWidth = "260px";
+          div.style.fontFamily = "-apple-system, Segoe UI, Roboto, sans-serif";
+          if (n.isYou) {
+            div.innerHTML =
+              '<div style="font-weight:600;margin-bottom:2px">You</div>' +
+              '<div style="color:#9aa3b2;font-size:12px;line-height:1.4">One link to each 1st anchor in this build (the people with a <code>##</code> section in your network-map). Same line style as everything else.</div>';
+            return div;
+          }
+          var kind = n.isSecond ? "2nd (outreach)" : "1st layer";
+          var company = n.company || "";
+          var subLine = [kind];
+          if (n.tier) subLine.push(tierLabel(tiers, n.tier));
+          if (n.isRD) subLine.push("R&amp;D");
+          div.innerHTML =
+            '<div style="font-weight:600;margin-bottom:2px">' + escapeHTML(n.name) + '</div>' +
+            '<div style="color:#9aa3b2;font-size:12px">' + subLine.join(' &middot; ') + '</div>' +
+            (n.headline ? '<div style="color:#9aa3b2;font-size:12px">' + escapeHTML(n.headline) + '</div>' : '') +
+            (company ? '<div style="color:#9aa3b2;font-size:12px">' + escapeHTML(company) + '</div>' : '') +
+            '<div style="font-size:12px;margin-top:4px">' +
+              (n.isAnchor && n.mutualPages ? 'Pages: ' + n.mutualPages + '<br/>' : '') +
+              (n.isSecond && n.cardMutuals
+              ? '<div style="color:#b4a3e8;font-size:11px;margin-top:4px;max-width:240px">Shared 1st (card): ' +
+                escapeHTML(n.cardMutuals) + "</div>"
+              : "") +
+            (typeof n.superWeight === "number"
+              ? "<strong>superWeight</strong> (drives size): " + n.superWeight.toFixed(1) + "<br/>"
+              : "") +
+            (!n.isSecond
+              ? "Also: listed on " + (n.mutualDegree || 0) + " anchor sample" + ((n.mutualDegree || 0) === 1 ? "" : "s") + "<br/>"
+              : "") +
+            (n.isSecond && typeof n.bridgeCount === "number" && n.bridgeCount > 0
+              ? "Bridges in map: " + n.bridgeCount + "<br/>"
+              : "") +
+            '</div>';
+          return div;
+        }
+
+        function escapeHTML(s) {
+          return String(s).replace(/[&<>"']/g, function (c) {
+            return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+          });
+        }
+
+        function mutualSearchUrl(connectionOf) {
+          if (!connectionOf) return null;
+          return (
+            "https://www.linkedin.com/search/results/people/" +
+            "?origin=SHARED_CONNECTIONS_CANNED_SEARCH&network=%5B%22F%22%5D" +
+            "&connectionOf=%5B%22" + encodeURIComponent(connectionOf) + "%22%5D"
+          );
+        }
+
+        function buildTierFilter(data) {
+          var container = document.getElementById("tierFilter");
+          var tiers = data.tiers || {};
+          var present = { "hot": 0, "warm": 0, "cold": 0, "__untiered__": 0, "__2nd__": 0 };
+          data.nodes.forEach(function (n) {
+            if (n.isYou) {
+              return;
+            }
+            if (n.isSecond) {
+              present["__2nd__"] += 1;
+              return;
+            }
+            var key = n.tier || "__untiered__";
+            present[key] = (present[key] || 0) + 1;
+          });
+          container.innerHTML = "";
+          var order = ["hot", "warm", "cold"];
+          order.forEach(function (key) {
+            if (!present[key]) return;
+            var spec = tiers[key] || { label: key, opacity: 1 };
+            var row = document.createElement("label");
+            row.className = "ctrl";
+            var dotOpacity = typeof spec.opacity === "number" ? spec.opacity : 1;
+            row.innerHTML =
+              '<input type="checkbox" data-tier="' + key + '" id="tier-' + key + '" checked /> ' +
+              '<span class="swatch" style="background:var(--mutual); opacity:' + dotOpacity + '"></span>' +
+              escapeHTML(spec.label) + ' <span class="meta">(' + present[key] + ')</span>';
+            container.appendChild(row);
+          });
+          if (present["__2nd__"]) {
+            var r2 = document.createElement("label");
+            r2.className = "ctrl";
+            r2.innerHTML =
+              '<input type="checkbox" data-tier="__2nd__" id="tier-2nd" checked /> ' +
+              '<span class="swatch" style="background:var(--second)"></span>' +
+              '2nd-degree outreach <span class="meta">(' + present["__2nd__"] + ")</span>";
+            container.appendChild(r2);
+          }
+          if (present["__untiered__"]) {
+            var row = document.createElement("label");
+            row.className = "ctrl";
+            row.innerHTML =
+              '<input type="checkbox" data-tier="__untiered__" id="tier-untiered" checked /> ' +
+              '<span class="swatch" style="background:var(--mutual)"></span>' +
+              'Untiered <span class="meta">(' + present["__untiered__"] + ')</span>';
+            container.appendChild(row);
+          }
+        }
+
+        function render(data) {
+          var meta = data.meta || {};
+          var s2c = meta.secondDegreeCount;
+          var metaParts = [meta.anchorCount + " 1st anchors"];
+          if (typeof s2c === "number" && s2c > 0) metaParts.push(s2c + " 2nd");
+          document.getElementById("metaLine").textContent =
+            metaParts.join(", ") + ", " + meta.nodeCount + " nodes, " + meta.edgeCount + " edges (gen. " + (meta.generatedAt || "") + ")";
+          document.getElementById("disclaimerLine").textContent = meta.disclaimer || "";
+
+          buildTierFilter(data);
+
+          var visNodes = buildVisNodes(data);
+          var visEdges = buildVisEdges(data);
+
+          var nodesDataset = new vis.DataSet(visNodes);
+          var edgesDataset = new vis.DataSet(visEdges);
+
+          /** 1-hop neighbors (all data edges) for "hide unconnected" on click. */
+          var neighborMap = {};
+          function addNeighbor(a, b) {
+            if (neighborMap[a] == null) neighborMap[a] = {};
+            if (neighborMap[b] == null) neighborMap[b] = {};
+            neighborMap[a][b] = true;
+            neighborMap[b][a] = true;
+          }
+          data.edges.forEach(function (e) {
+            addNeighbor(e.source, e.target);
+          });
+          var isolateId = null;
+
+          var container = document.getElementById("net");
+          var network = new vis.Network(container, { nodes: nodesDataset, edges: edgesDataset }, {
+            physics: {
+              enabled: true,
+              solver: "forceAtlas2Based",
+              forceAtlas2Based: {
+                // Slightly more negative repulsion + longer springs + less center pull = clearer cluster separation
+                gravitationalConstant: -86,
+                centralGravity: 0.0085,
+                springLength: 155,
+                springConstant: 0.07,
+                damping: 0.6,
+                avoidOverlap: 0.55,
+              },
+              stabilization: { iterations: 800, fit: true },
+            },
+            interaction: { hover: true, tooltipDelay: 120, navigationButtons: false, zoomView: true },
+            nodes: { shape: "dot" },
+            edges: { selectionWidth: 1.35 },
+          });
+
+          function freezeLayout() {
+            network.setOptions({ physics: { enabled: false } });
+          }
+          network.on("stabilizationIterationsDone", function () {
+            freezeLayout();
+          });
+          setTimeout(freezeLayout, 15000);
+
+          applyFilters();
+
+          var controls = ["toggleMutualOnly", "toggleRD", "toggleHideCold"];
+          controls.forEach(function (id) {
+            document.getElementById(id).addEventListener("input", applyFilters);
+          });
+          document.getElementById("tierFilter").addEventListener("change", applyFilters);
+
+          network.on("selectNode", function (params) {
+            var nodeId = params.nodes[0];
+            var raw = (nodesDataset.get(nodeId) || {})._meta;
+            if (raw) showSelection(raw);
+          });
+          // Toggle neighborhood hide: click same node again to show full graph; click another to switch; empty click clears.
+          network.on("click", function (params) {
+            if (params.nodes.length === 0) {
+              if (isolateId != null) {
+                isolateId = null;
+                applyFilters();
+              }
+              return;
+            }
+            var nid = params.nodes[0];
+            if (isolateId === nid) {
+              isolateId = null;
+            } else {
+              isolateId = nid;
+            }
+            applyFilters();
+          });
+          network.on("deselectNode", function () {
+            setTimeout(function () {
+              if (network.getSelectedNodes().length === 0) {
+                isolateId = null;
+                applyFilters();
+                document.getElementById("selection").innerHTML =
+                  '<div class="empty">Click a node for details. Click again (or the background) to show or hide everyone who isn&rsquo;t directly connected.</div>';
+              }
+            }, 0);
+          });
+
+          function selectedTiers() {
+            var boxes = document.querySelectorAll('#tierFilter input[type="checkbox"]');
+            var set = {};
+            boxes.forEach(function (b) { if (b.checked) set[b.getAttribute("data-tier")] = true; });
+            return set;
+          }
+
+          function inIsolateNeighborhood(nid) {
+            if (isolateId == null) return true;
+            if (nid === isolateId) return true;
+            var m = neighborMap[isolateId];
+            return m != null && m[nid] === true;
+          }
+
+          function applyFilters() {
+            var hint = document.getElementById("nhoodHint");
+            if (hint) hint.style.display = isolateId != null ? "block" : "none";
+
+            var showMutualOnly = document.getElementById("toggleMutualOnly").checked;
+            var rdOnly = document.getElementById("toggleRD").checked;
+            var hideCold = document.getElementById("toggleHideCold").checked;
+            var tiersSel = selectedTiers();
+
+            var nodeHidden = {};
+            visNodes.forEach(function (n) {
+              var meta = n._meta;
+              if (meta.isYou) {
+                var youHidden = isolateId != null && !inIsolateNeighborhood(n.id);
+                nodeHidden[n.id] = youHidden;
+                return;
+              }
+              var hidden = false;
+              if (!showMutualOnly && !meta.isAnchor && !meta.isSecond) hidden = true;
+              if (rdOnly && !meta.isRD) hidden = true;
+              var tierKey = meta.isSecond ? "__2nd__" : (meta.tier || "__untiered__");
+              if (!tiersSel[tierKey]) hidden = true;
+              if (hideCold && (tierKey === "cold" || (tierKey === "__untiered__" && !meta.isSecond))) hidden = true;
+              if (isolateId != null && !inIsolateNeighborhood(n.id)) hidden = true;
+              nodeHidden[n.id] = hidden;
+            });
+            var nodeUpdates = visNodes.map(function (n) {
+              return { id: n.id, hidden: nodeHidden[n.id] };
+            });
+            nodesDataset.update(nodeUpdates);
+
+            var edgeUpdates = visEdges.map(function (e) {
+              return { id: e.id, hidden: !!(nodeHidden[e.from] || nodeHidden[e.to]) };
+            });
+            edgesDataset.update(edgeUpdates);
+          }
+
+          function showSelection(n) {
+            if (n.isYou) {
+              document.getElementById("selection").innerHTML =
+                '<div class="name">You</div>' +
+                '<p class="meta" style="margin:6px 0 0;line-height:1.45">The star is you. Each line goes to a <strong>1st anchor</strong> you have a <code>##</code> section for in <code>network-map</code> &mdash; the lists you already captured, not a full LinkedIn graph.</p>';
+              return;
+            }
+            var url = mutualSearchUrl(n.connectionOf);
+            var parts = [];
+            parts.push('<div class="name">' + escapeHTML(n.name) + "</div>");
+            var kind = n.isSecond ? "2nd (Riot/UX list)" : "1st layer";
+            var sub = [kind];
+            if (n.tier) sub.push(tierLabel(data.tiers || {}, n.tier));
+            if (n.isRD) sub.push("R&amp;D flagged");
+            parts.push('<div class="meta">' + sub.join(" &middot; ") + "</div>");
+            parts.push('<div class="kv">');
+            if (typeof n.superWeight === "number") {
+              parts.push("<span>superWeight</span><span>" + n.superWeight.toFixed(1) + " (drives circle size)</span>");
+            }
+            if (n.headline) parts.push("<span>Title</span><span>" + escapeHTML(n.headline) + "</span>");
+            if (n.company) parts.push("<span>Company</span><span>" + escapeHTML(n.company) + "</span>");
+            if (n.tier) parts.push("<span>Tier</span><span>" + escapeHTML(n.tier) + "</span>");
+            if (n.isSecond && typeof n.bridgeCount === "number") {
+              parts.push("<span>Bridge edges</span><span>" + n.bridgeCount + "</span>");
+            }
+            if (n.isAnchor && n.mutualPages) parts.push("<span>Pages</span><span>" + n.mutualPages + "</span>");
+            if (!n.isSecond) {
+              parts.push("<span>Anchor lists (sample)</span><span>" + n.mutualDegree + "</span>");
+            }
+            if (n.searchHint) parts.push("<span>Search hint</span><span>" + escapeHTML(n.searchHint) + "</span>");
+            parts.push("</div>");
+            if (n.isSecond && n.cardMutuals) {
+              parts.push(
+                '<p style="margin:10px 0 0;color:#b4a3e8;font-size:12px;line-height:1.4"><strong>Your shared 1st (LinkedIn card):</strong><br/>' +
+                  escapeHTML(n.cardMutuals) +
+                  "</p>"
+              );
+            }
+            if (n.isSecond && Array.isArray(n.firstConnInMap) && n.firstConnInMap.length) {
+              var lines = n.firstConnInMap.map(function (b) {
+                var tag = b.inMapAsAnchor ? "1st anchor in map" : "in map as mutual (not a captured 1st anchor)";
+                return escapeHTML(b.name) + " — " + tag;
+              });
+              parts.push(
+                '<p style="margin:8px 0 0;font-size:12px;line-height:1.45"><strong>In this map:</strong><br/>' +
+                  lines.join("<br/>") +
+                  "</p>"
+              );
+            }
+            if (n.isSecond && Array.isArray(n.firstConnNotInMap) && n.firstConnNotInMap.length) {
+              parts.push(
+                '<p style="margin:6px 0 0;font-size:12px;color:var(--muted)"><strong>Parsed, not in map yet:</strong> ' +
+                  escapeHTML(n.firstConnNotInMap.join(", ")) +
+                  "</p>"
+              );
+            }
+            if (n.isSecond) {
+              parts.push(
+                '<p style="margin-top:8px;font-size:12px;color:var(--muted)">Full list: <code>contacts/riot-2nd-shared-1st-connections.md</code> (re-run build to refresh)</p>'
+              );
+            }
+            if (n.isSecond && n.profileUrl) {
+              parts.push(
+                '<p style="margin-top:10px"><a href="' +
+                  escapeHTML(n.profileUrl) +
+                  '" target="_blank" rel="noopener">Open LinkedIn profile &rarr;</a></p>'
+              );
+            } else if (url) {
+              parts.push('<p style="margin-top:10px"><a href="' + url + '" target="_blank" rel="noopener">Open mutuals on LinkedIn &rarr;</a></p>');
+            }
+            document.getElementById("selection").innerHTML = parts.join("");
+          }
+        }
+
+        boot();
+      })();
+    </script>
+  </body>
+</html>
