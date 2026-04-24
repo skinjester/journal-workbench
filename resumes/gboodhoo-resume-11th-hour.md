@@ -19,12 +19,12 @@ Skinjester Studio — Founder & Principal Product Designer
 2016–2025 • San Francisco, CA
 - Consulted on UX for live services and product incubation, helping teams turn open problem spaces into clear, buildable next steps, including preproduction UX for Project Kestrel with ZeniMax Online Studios and Sprung Studios.
 - Designed live-service UX for elderscrollsonline.com, the game’s web platform, connecting account and commerce journeys across game and web through competitive analysis and research.
-- Designed UX for Iveda Pinpoint, an indoor positioning system for hospital loss management, creating a mobile app concept and partnering with WRLD3D on spatial prototypes to guide engineering spend.
+- Designed UX for Iveda Pinpoint, an indoor positioning system for hospital loss management, creating mobile app concepts and partnering with WRLD3D on spatial prototypes to guide engineering spend.
 
 ZeniMax Online Studios — User Experience Lead, The Elder Scrolls Online (ESO)
 2013–2016 • Cockeysville, MD
 - Led UX/UI for ESO’s console launch and live service, helping redesign a dense PC MMORPG for growth in new marketplaces, on a game that later reached 26M users.
-- Built UI workflows in Adobe Fireworks for ESO, documenting patterns, component states, and token definitions to support engineering and QA during implementation and for issue resolution.
+- Built UI workflows for ESO, documenting patterns, component states, and token definitions to support engineering and QA during implementation and for issue resolution.
 - Wrote test plans for item trading and the in-game storefront, partnering with QA to run playtests that surfaced interaction issues early and refined player-facing flows before launch.
 
 RealU — User Experience Consultant, Otherland
