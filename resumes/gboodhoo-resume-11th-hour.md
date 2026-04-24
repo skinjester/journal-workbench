@@ -2,7 +2,7 @@ GARY BOODHOO
 Portfolio: https://www.garyb.design | San Francisco, CA | gboodhoo@gmail.com | 415-802-4076
 
 SENIOR UX DESIGNER
-Senior game UX designer focused on interrelated player-facing systems, taking features from concept through implementation across console, PC, and connected devices. I help teams work through ambiguity together, using prototypes and visual models to turn open questions into concrete decisions.
+Senior game UX designer focused on interrelated player-facing systems, taking features from concept through implementation across console, PC, and connected devices. I help teams work through ambiguity using prototypes and visual models to turn open questions into concrete decisions. Currently designing LFOGRID, a creative MIDI tool, using Figma to model reusable UI primitives, component variants, and state-based interaction patterns.
 
 SELECTED WORK
 Led the replatforming of The Elder Scrolls Online UX from PC to PlayStation and Xbox, establishing interaction design pillars that remain foundational to the live service behind a game ZeniMax has publicly cited at over $2B in lifetime revenue.
@@ -12,7 +12,7 @@ Designed the onboarding experience for The Sims 3. This flow helped new players 
 On Project Kestrel, an unreleased online co-op action RPG with ZeniMax Online Studios and Sprung Studios, my prototypes informed feature direction during preproduction. I built diegetic UI and 3D layouts in Unreal with game assets and custom blueprints, then published them as HTML5 builds to AWS S3 for weekly review.
 
 TOOLS
-Figma · Framer · Adobe Creative Cloud · Unreal Engine · TouchDesigner · Python · Lua · React · HTML/CSS
+Figma (components, variants, prototyping, token-based design systems) · Framer · Adobe Creative Cloud · Unreal Engine · TouchDesigner · Python · Lua · React · HTML/CSS
 
 EXPERIENCE
 Skinjester Studio — Founder & Principal Product Designer
