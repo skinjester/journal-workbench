@@ -17,15 +17,15 @@ Figma (components, variants, prototyping, token-based design systems) · Framer 
 EXPERIENCE
 Skinjester Studio — Founder & Principal Product Designer
 2016–2025 • San Francisco, CA
-- Led game UX consulting for live services and product incubation, helping teams define interaction direction and turn open problem spaces into buildable player flows—including preproduction UX on Project Kestrel with ZeniMax Online Studios and Sprung Studios.
+- Consulted on UX for live services and product incubation, helping teams turn open problem spaces into clear, buildable next steps, including preproduction UX for Project Kestrel with ZeniMax Online Studios and Sprung Studios.
 - Designed live-service UX for elderscrollsonline.com, the game’s web platform, connecting account and commerce journeys across game and web through competitive analysis and research.
-- Designed UX for Iveda Pinpoint, an indoor positioning system for hospital inventory loss management, partnering with WRLD3D and building spatial prototypes and user journeys to guide engineering spend.
+- Designed UX for Iveda Pinpoint, an indoor positioning system for hospital loss management, creating a mobile app concept and partnering with WRLD3D on spatial prototypes to guide engineering spend.
 
 ZeniMax Online Studios — User Experience Lead, The Elder Scrolls Online (ESO)
 2013–2016 • Cockeysville, MD
-- Led UX/UI for ESO’s console launch and ongoing live-service development, owning onboarding, progression, and commerce from concept through implementation. Helped redesign a dense PC MMORPG for growth in new marketplaces; the title later reached 26M users.
+- Led UX/UI for ESO’s console launch and live service, helping redesign a dense PC MMORPG for growth in new marketplaces, on a game that later reached 26M users.
 - Built UI workflows in Adobe Fireworks for ESO, documenting patterns, component states, and token definitions to support engineering and QA during implementation and for issue resolution.
-- Wrote test plans for item trading and the in-game storefront, partnering with QA to run playtests that surfaced interaction issues early and refined critical player-facing flows before launch.
+- Wrote test plans for item trading and the in-game storefront, partnering with QA to run playtests that surfaced interaction issues early and refined player-facing flows before launch.
 
 RealU — User Experience Consultant, Otherland
 2012–2013 • Singapore
@@ -63,8 +63,8 @@ Visual development and front-end interface prototyping.
 
 Electronic Arts Tiburon — Senior User Interface Designer, Madden NFL
 2001–2005 • Maitland, FL
-- Co-developed and supported EA Sports’ shared UI design system that four studios used to ship seven annual titles.
-- Progressed from contributor to lead interface designer on Madden NFL, owning interface work from early design through first-party certification across annual releases. Hundreds of screens passed certification each cycle.
+- Co-developed and supported EA Sports’ shared UI design system, used by four studios to ship seven annual titles, including FIFA and Madden NFL.
+- Progressed from contributor to lead interface designer on Madden NFL, owning interface work from early design through first-party certification across annual releases.
 
 EDUCATION
-Full Sail University (A.S., Video Production) · Massachusetts College of Art and Design (Studio for Interrelated Media) · CooperU Interaction Design Practicum
+Full Sail University (A.S., Video Production) · Massachusetts College of Art and Design (Studio for Interrelated Media)
