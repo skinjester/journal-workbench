@@ -45,7 +45,7 @@ UX and feature design for early social games.
 
 Nihilistic Software — Senior User Interface Designer, Zombie Apocalypse
 2008–2009 • Novato, CA
-- Designed the HUD and front-end UX for Zombie Apocalypse, a 4-player local co-op shooter using Scaleform, keeping the interface legible on a shared screen.
+- Advanced the HUD and front-end for Zombie Apocalypse mid-development, refining the interface for 4-player local co-op and shared-screen clarity.
 
 Electronic Arts — User Experience Consultant, The Sims 3
 2008 • Redwood Shores, CA
