@@ -10,9 +10,13 @@ Outputs:
   contacts/riot-2nd-shared-1st-connections.md  2nd targets × shared 1st (from
                                      card) + in-map match (if riot json merged).
 
+Optional input:
+  contacts/network-map.peer-edges.md Table or bullet list of manual mutual–mutual
+                                     edges (type "peer" in the JSON, gold in HTML).
+
 Re-run whenever contacts/network-map.md, contacts/network-map-anchors.json,
-contacts/riot-2nd-degree-ux-2026.json, or the R&D profile flags table
-in contacts/riot-games.md changes:
+contacts/network-map.peer-edges.md (optional), contacts/riot-2nd-degree-ux-2026.json,
+or the R&D profile flags table in contacts/riot-games.md changes:
 
     python3 scripts/build_network_graph.py
 """
@@ -28,6 +32,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 MAP_MD = ROOT / "contacts" / "network-map.md"
+PEER_EDGES_MD = ROOT / "contacts" / "network-map.peer-edges.md"
 ANCHORS_JSON = ROOT / "contacts" / "network-map-anchors.json"
 RIOT_MD = ROOT / "contacts" / "riot-games.md"
 TAGS_JSON = ROOT / "contacts" / "network-map.tags.json"
@@ -81,6 +86,92 @@ def clean_person_token(raw: str) -> str | None:
     if lowered.startswith(("and others", "e.g.", "many rows", "as ")):
         return None
     return t
+
+
+def _resolve_peer_display_name(raw: str) -> str | None:
+    """Table/bullet name cell to display; allows two-token names the list parser also accepts."""
+    t = raw.strip()
+    t = t.replace("**", "").replace("*", "").replace("`", "")
+    t = re.sub(r"\s+", " ", t).strip()
+    if not t or t.lower().startswith(("http://", "https://")):
+        return None
+    c = clean_person_token(t)
+    if c:
+        return c
+    if " " in t and len(t) < 200:
+        return t
+    return None
+
+
+def parse_peer_edges(text: str) -> list[tuple[str, str, str | None]]:
+    """Parse network-map.peer-edges.md: markdown table data rows and `- A, B` (optional `; note`)."""
+    rows: list[tuple[str, str, str | None]] = []
+    seen: set[tuple[str, str]] = set()
+
+    def _add(c1: str, c2: str, note: str | None) -> None:
+        if c1.lower() == "you" or c2.lower() == "you":
+            return
+        a, b = slugify(c1), slugify(c2)
+        if a == b:
+            return
+        k = (min(a, b), max(a, b))
+        if k in seen:
+            return
+        seen.add(k)
+        rows.append((c1, c2, note))
+
+    for line in text.splitlines():
+        s = line.strip()
+        if not s or s.startswith("#"):
+            continue
+        if "|" in s and s[0] == "|":
+            if re.match(r"^\|\s*[-:]+[-|\s:]*$", s):
+                continue
+            parts = [p.strip() for p in s.strip().strip("|").split("|")]
+            if len(parts) < 2:
+                continue
+            a_raw, b_raw = parts[0], parts[1]
+            if re.match(r"^[-:|\s]+$", a_raw) or a_raw.lower() in (
+                "person a",
+                "a",
+            ):
+                continue
+            if a_raw.lower() == "person a" and b_raw.lower() == "person b":
+                continue
+            c1, c2 = _resolve_peer_display_name(a_raw), _resolve_peer_display_name(
+                b_raw
+            )
+            if not c1 or not c2:
+                continue
+            note: str | None = None
+            if len(parts) > 2 and (parts[2] or "").strip():
+                n = (parts[2] or "").replace("**", "").strip()
+                if n and n.lower() not in (
+                    "note (optional)",
+                    "note",
+                ) and not n.lower().startswith("note (optional"):
+                    note = n or None
+            _add(c1, c2, note)
+            continue
+        m = re.match(r"^[-*]\s+(.+)$", s)
+        if not m:
+            continue
+        rest = m.group(1).strip()
+        if not rest or rest.startswith("`"):
+            continue
+        if ";" in rest:
+            main, ntail = rest.split(";", 1)
+            note2 = ntail.strip() or None
+        else:
+            main, note2 = rest, None
+        m2 = main.split(",", 1)
+        if len(m2) < 2:
+            continue
+        c1 = _resolve_peer_display_name(m2[0])
+        c2 = _resolve_peer_display_name(m2[1].strip())
+        if c1 and c2:
+            _add(c1, c2, note2)
+    return rows
 
 
 def parse_bridge_names(bridge: str) -> list[str]:
@@ -249,10 +340,22 @@ def write_riot_2nd_shared_1st_md(
     out_path.write_text("\n".join(lines), encoding="utf-8")
 
 
-def parse_network_map(md_text: str) -> dict[str, list[str]]:
-    """Return anchor_display_name -> [mutual display name, ...] (order preserved, dedup'd per anchor)."""
+# Co-list graph: max names on one `-` bullet to generate all-pairs edges (avoids huge cliques).
+COLIST_MAX_NAMES_ON_LINE = 18
+
+
+def parse_network_map(
+    md_text: str,
+) -> tuple[dict[str, list[str]], list[tuple[str, str, str]]]:
+    """Return (anchor -> mutuals, co_list_triples).
+
+    co_list_triples: (name_a, name_b, anchor_display) for every unordered pair that
+    appears on the *same* comma-separated mutual bullet line (not "they know each
+    other" — only "co-listed in your capture under that anchor").
+    """
     lines = md_text.splitlines()
     anchors: dict[str, list[str]] = {}
+    co_list_triples: list[tuple[str, str, str]] = []
 
     i = 0
     n = len(lines)
@@ -296,17 +399,32 @@ def parse_network_map(md_text: str) -> dict[str, list[str]]:
                     if body.startswith("*"):
                         k += 1
                         continue
+                    line_names: list[str] = []
+                    line_seen: set[str] = set()
                     for token in body.split(","):
                         name = clean_person_token(token)
-                        if name and name not in seen:
+                        if name and name not in line_seen:
+                            line_seen.add(name)
+                            line_names.append(name)
+                    for name in line_names:
+                        if name not in seen:
                             seen.add(name)
                             mutuals.append(name)
+                    if (
+                        len(line_names) >= 2
+                        and len(line_names) <= COLIST_MAX_NAMES_ON_LINE
+                    ):
+                        for ii in range(len(line_names)):
+                            for jj in range(ii + 1, len(line_names)):
+                                co_list_triples.append(
+                                    (line_names[ii], line_names[jj], anchor_name)
+                                )
                 k += 1
 
         anchors[anchor_name] = mutuals
         # Jump to the next "##" to continue scanning.
         i = j
-    return anchors
+    return anchors, co_list_triples
 
 
 def parse_rd_flags(riot_md_text: str) -> set[str]:
@@ -339,6 +457,8 @@ def build_graph(
     anchors_json: dict,
     rd_flags: set[str],
     tags_overlay: dict,
+    peer_edge_rows: list[tuple[str, str, str | None]] | None = None,
+    colist_triples: list[tuple[str, str, str]] | None = None,
 ) -> dict:
     tags = (tags_overlay or {}).get("tags", {}) or {}
     roles_map = (tags_overlay or {}).get("roles", {}) or {}
@@ -373,6 +493,10 @@ def build_graph(
             mid_list.append(mid)
         anchor_lists_by_id.append((aid, mid_list))
 
+    for a, b, _ in peer_edge_rows or []:
+        for nm in (a, b):
+            display_by_id.setdefault(slugify(nm), nm)
+
     # Anchor -> mutual edges (weight 1 per membership).
     list_edges: list[dict] = []
     for aid, mids in anchor_lists_by_id:
@@ -382,6 +506,26 @@ def build_graph(
             list_edges.append(
                 {"source": aid, "target": mid, "type": "lists", "weight": 1}
             )
+
+    # Same-line co-list (unordered pairs on one mutual bullet: comma-separated).
+    # Weight < 1 so "real" list + peer edges drive size more than inferred mesh.
+    colist_seen: set[tuple[str, str]] = set()
+    colist_edges: list[dict] = []
+    for a, b, anchor in colist_triples or []:
+        sa, sb = slugify(a), slugify(b)
+        k2 = (min(sa, sb), max(sa, sb))
+        if k2 in colist_seen:
+            continue
+        colist_seen.add(k2)
+        colist_edges.append(
+            {
+                "source": k2[0],
+                "target": k2[1],
+                "type": "colist",
+                "weight": 0.35,
+                "anchor": anchor,
+            }
+        )
 
     # Degree (# anchors listing this person), as a mutual.
     mutual_degree: dict[str, int] = defaultdict(int)
@@ -440,26 +584,43 @@ def build_graph(
         }
         for aid in sorted(anchor_ids)
     ]
-    # No "coanchor" / peer–peer co-list edges: we only model anchor → mutual (and you → anchor,
-    # 2nd → bridge). Co-appearing on the same comma-separated line is not an edge.
-    edges = you_to_anchor_edges + list_edges
+    # Manual mutual–mutual: contacts/network-map.peer-edges.md (undirected in data as one edge)
+    peer_edges: list[dict] = []
+    for a, b, note in peer_edge_rows or []:
+        sa, sb = slugify(a), slugify(b)
+        e: dict = {
+            "source": min(sa, sb),
+            "target": max(sa, sb),
+            "type": "peer",
+            "weight": 1.0,
+        }
+        if note:
+            e["note"] = note
+        peer_edges.append(e)
+    # Order: you→anchor, anchor lists, co-list (inferred), manual peer, then 2nd bridges in main().
+    edges = you_to_anchor_edges + list_edges + colist_edges + peer_edges
 
     return {
         "meta": {
             "generatedAt": date.today().isoformat(),
             "sourceMd": str(MAP_MD.relative_to(ROOT)),
+            "peerEdgesMd": str(PEER_EDGES_MD.relative_to(ROOT))
+            if PEER_EDGES_MD.exists()
+            else None,
             "anchorsJson": str(ANCHORS_JSON.relative_to(ROOT)),
             "tagsJson": str(TAGS_JSON.relative_to(ROOT)) if TAGS_JSON.exists() else None,
             "anchorCount": len(anchor_ids),
+            "coListEdgeCount": len(colist_edges),
+            "peerEdgeCount": len(peer_edges),
             "secondDegreeCount": 0,
             "nodeCount": len(nodes),
             "edgeCount": len(edges),
             "disclaimer": (
                 "1st-layer data reflects LinkedIn mutual samples in contacts/network-map.md. "
-                "The graph uses anchor → mutual (and you → anchor) only; it does not draw "
-                "edges between mutuals who merely appear on the same list line. "
-                "Node size = superWeight (sum of incident edge weights). 2nd-degree Riot/UX "
-                "rows use contacts/riot-2nd-degree-ux-2026.json (bridge edges to matched 1st)."
+                "Co-list (dim) links join names on the *same comma-separated mutual bullet* "
+                "— co-captured, not proof they know each other. You→anchor, anchor→mutual, and "
+                "2nd→1st bridges are primary. Optional manual links: contacts/network-map.peer-edges.md. "
+                "Node size = superWeight (sum of edge weights; co-list uses a lower weight)."
             ),
         },
         "roles": roles_map,
@@ -490,7 +651,7 @@ def main() -> int:
         print(f"missing {ANCHORS_JSON}", file=sys.stderr)
         return 1
 
-    anchors_md = parse_network_map(MAP_MD.read_text(encoding="utf-8"))
+    anchors_md, colist_triples = parse_network_map(MAP_MD.read_text(encoding="utf-8"))
     anchors_json = json.loads(ANCHORS_JSON.read_text(encoding="utf-8"))
     rd_flags = (
         parse_rd_flags(RIOT_MD.read_text(encoding="utf-8")) if RIOT_MD.exists() else set()
@@ -499,7 +660,17 @@ def main() -> int:
         json.loads(TAGS_JSON.read_text(encoding="utf-8")) if TAGS_JSON.exists() else {}
     )
 
-    graph = build_graph(anchors_md, anchors_json, rd_flags, tags_overlay)
+    peer_edge_rows: list[tuple[str, str, str | None]] = []
+    if PEER_EDGES_MD.exists():
+        peer_edge_rows = parse_peer_edges(PEER_EDGES_MD.read_text(encoding="utf-8"))
+    graph = build_graph(
+        anchors_md,
+        anchors_json,
+        rd_flags,
+        tags_overlay,
+        peer_edge_rows,
+        colist_triples,
+    )
 
     s2 = merge_second_degree_riot(graph, RIOT_2ND_JSON)
     if s2:
@@ -537,8 +708,10 @@ def main() -> int:
     out_bits = f"{OUT_JSON.relative_to(ROOT)} and {OUT_JS.relative_to(ROOT)}"
     if s2c:
         out_bits += f" and {RIOT_2ND_1ST_MD.relative_to(ROOT)}"
+    pe = meta.get("peerEdgeCount", 0) or 0
+    cl = meta.get("coListEdgeCount", 0) or 0
     print(
-        f"wrote {out_bits} — {meta['anchorCount']} anchors, {s2c} 2nd-degree, "
+        f"wrote {out_bits} — {meta['anchorCount']} anchors, {cl} co-list, {pe} peer, {s2c} 2nd-degree, "
         f"{meta['nodeCount']} nodes, {meta['edgeCount']} edges"
     )
     return 0

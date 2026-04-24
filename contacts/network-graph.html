@@ -7,31 +7,42 @@
     <script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"></script>
     <script defer src="./network-graph.data.js"></script>
     <style>
+      /* Tron: Legacy–inspired: black void, electric cyan grid, orange “disc” heat, light-line edges */
       :root {
-        --bg: #0f1115;
-        --panel: #1a1d24;
-        --text: #e9ecf1;
-        --muted: #9aa3b2;
-        --accent: #6fa8ff;
-        --accent-strong: #2e7dff;
-        --mutual: #6fa8ff;
-        --you: #f5f7fb;
-        --edge: rgba(130, 145, 170, 0.42);
-        --second: #a78bfa;
-        --border: #2a2f3a;
+        --bg: #000000;
+        --panel: #030810;
+        --text: #b8f8ff;
+        --muted: #4a6d78;
+        --accent: #00e5ff;
+        --accent-strong: #5cf4ff;
+        --mutual: #00b8d4;
+        --you: #e0ffff;
+        --tier-hot: #ff5722;
+        --tier-warm: #ffab00;
+        --tier-cold: #006978;
+        --tier-none: #00b8d4;
+        --edge: rgba(0, 229, 255, 0.38);
+        --second: #d500f9;
+        --border: #0d3d4a;
+        --font-ui: "SF Mono", ui-monospace, "Cascadia Code", "Segoe UI", Roboto, sans-serif;
       }
-      html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+      html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-ui); }
       #app { display: grid; grid-template-columns: 320px 1fr; height: 100vh; }
-      #sidebar { background: var(--panel); border-right: 1px solid var(--border); padding: 16px 18px; overflow-y: auto; font-size: 13px; line-height: 1.5; }
-      #sidebar h1 { font-size: 15px; margin: 0 0 6px; }
-      #sidebar h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: 18px 0 8px; }
+      #sidebar {
+        background: linear-gradient(180deg, #050a12 0%, #020508 100%);
+        border-right: 1px solid var(--border);
+        box-shadow: inset -1px 0 20px rgba(0, 229, 255, 0.06);
+        padding: 16px 18px; overflow-y: auto; font-size: 13px; line-height: 1.5;
+      }
+      #sidebar h1 { font-size: 15px; margin: 0 0 6px; color: var(--accent); font-weight: 600; letter-spacing: 0.04em; text-shadow: 0 0 12px rgba(0, 245, 255, 0.45); }
+      #sidebar h2 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #3d8b9a; margin: 18px 0 8px; }
       #sidebar p { color: var(--muted); margin: 4px 0 10px; }
-      #graph { position: relative; }
-      #net { position: absolute; inset: 0; }
+      #graph { position: relative; background: #000; }
+      #net { position: absolute; inset: 0; background: #000; }
       label.ctrl { display: flex; align-items: center; gap: 8px; padding: 4px 0; cursor: pointer; }
-      label.ctrl input { accent-color: var(--accent-strong); }
+      label.ctrl input { accent-color: #00e5ff; }
       .legend { display: flex; flex-direction: column; gap: 6px; }
-      .legend .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+      .legend .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: middle; box-shadow: 0 0 8px currentColor; }
       .legend .line { display: inline-block; width: 22px; height: 2px; margin-right: 8px; vertical-align: middle; }
       .legend .line.thick { height: 4px; }
       .legend .line.dashed { background: none !important; border-top: 2px dashed rgba(245, 247, 251, 0.45); }
@@ -40,13 +51,14 @@
       .stat { display: flex; justify-content: space-between; }
       .panel-section { border-top: 1px solid var(--border); padding-top: 12px; margin-top: 12px; }
       #selection { font-size: 13px; }
-      #selection .name { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
-      #selection a { color: var(--accent); }
+      #selection .name { font-size: 15px; font-weight: 600; margin-bottom: 4px; color: var(--accent); }
+      #selection a { color: #5cf4ff; }
+      #selection a:hover { color: #ffab00; }
       #selection .kv { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; margin-top: 6px; }
-      #selection .kv span:nth-child(odd) { color: var(--muted); }
+      #selection .kv span:nth-child(odd) { color: #5a7d86; }
       .range { width: 100%; }
       .empty { color: var(--muted); font-style: italic; }
-      code { background: #232733; padding: 1px 4px; border-radius: 3px; font-size: 12px; }
+      code { background: #061018; color: #7df9ff; padding: 1px 4px; border-radius: 2px; font-size: 12px; border: 1px solid #0a3444; }
     </style>
   </head>
   <body>
@@ -54,37 +66,41 @@
       <aside id="sidebar">
         <h1>Connection map</h1>
         <p class="meta" id="metaLine">Loading&hellip;</p>
-        <p class="meta" id="encodingSummary" style="line-height:1.45"><strong>You</strong> = soft 5-point star. <strong>1st-layer</strong> and <strong>2nd</strong> differ by color (blue vs purple) only. <strong>Size</strong> = <strong>superWeight</strong> (see <em>Scale</em>). R&amp;D: gold border. Tier filters don&rsquo;t hide you.</p>
+        <p class="meta" id="encodingSummary" style="line-height:1.45">Theme: <em>Tron: Legacy</em> &mdash; black grid, cyan lines, <strong>heat</strong> = orange &rarr; amber &rarr; dim teal &rarr; electric cyan. <strong>2nd</strong> = fuchsia. <strong>Size</strong> = <code>superWeight</code>. Tier filters don&rsquo;t hide you.</p>
 
         <h2>View</h2>
         <label class="ctrl"><input type="checkbox" id="toggleMutualOnly" checked /> Show mutual (1st-layer) nodes</label>
         <label class="ctrl" style="font-size:12px;color:var(--muted)">With mutuals off, 1st anchors + 2nd stay visible &mdash; mutuals hide.</label>
-        <label class="ctrl"><input type="checkbox" id="toggleRD" /> Highlight R&amp;D only</label>
+        <label class="ctrl"><input type="checkbox" id="toggleColist" checked /> Show <strong>co-list</strong> (same bullet line) links</label>
+        <label class="ctrl" style="font-size:12px;color:var(--muted)">Auto from comma-separated names on one <code>-</code> line in <code>network-map.md</code> &mdash; not proof of a relationship, only co-capture. Uncheck to reduce clutter.</label>
 
         <h2>Tier</h2>
         <label class="ctrl"><input type="checkbox" id="toggleHideCold" /> Hide cold &amp; untiered</label>
         <div id="tierFilter" class="legend"></div>
 
-        <h2>Legend &mdash; color (layer only)</h2>
+        <h2>Legend &mdash; color (1st layer = tier &ldquo;heat&rdquo;)</h2>
         <div class="legend">
-          <div class="row"><span class="swatch" style="background:var(--you);clip-path:polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)"></span> <strong>You</strong> &mdash; soft star; one link per <code>##</code> anchor in the build.</div>
-          <div class="row"><span class="swatch" style="background:var(--mutual)"></span>Blue &mdash; <strong>1st-layer</strong> (everyone on the map except you and 2nd-degree rows). Same fill whether or not they have their own <code>##</code> section.</div>
-          <div class="row"><span class="swatch" style="background:var(--second)"></span>Purple &mdash; <strong>2nd</strong> (Riot/UX outreach list in the data)</div>
+          <div class="row"><span class="swatch" style="background:var(--you);clip-path:polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)"></span> <strong>You</strong> &mdash; star; not tier-colored.</div>
+          <div class="row"><span class="swatch" style="background:var(--tier-hot)"></span> <strong>Hot</strong> (outreach tier)</div>
+          <div class="row"><span class="swatch" style="background:var(--tier-warm)"></span> <strong>Warm</strong></div>
+          <div class="row"><span class="swatch" style="background:var(--tier-cold)"></span> <strong>Cold</strong></div>
+          <div class="row"><span class="swatch" style="background:var(--tier-none)"></span> <strong>Untiered</strong> (no <code>tier</code> in tags)</div>
+          <div class="row"><span class="swatch" style="background:var(--second)"></span> <strong>2nd-degree</strong> (fuchsia; grid &ldquo;program&rdquo; set)</div>
         </div>
-        <p class="meta" style="margin:6px 0 0">R&amp;D: <span class="swatch" style="width:12px;height:12px;box-shadow:0 0 0 2px #e8c84a inset;background:var(--mutual)"></span> <strong>Gold border</strong> on 1st-layer (blue) nodes (not a new fill color).</p>
+        <p class="meta" style="margin:6px 0 0">R&amp;D: <span class="swatch" style="width:12px;height:12px;box-shadow:0 0 0 2px #ffea00 inset;background:var(--tier-warm)"></span> <strong>Yellow ring</strong> (identity) on top of tier fill.</p>
 
         <h2>Legend &mdash; size (superconnectors)</h2>
         <div class="legend">
-          <div class="row"><span class="swatch" style="background:var(--mutual); width:6px; height:6px"></span><span class="swatch" style="background:var(--mutual); width:20px; height:20px; margin-left:6px"></span> <strong>Radius &asymp;7px &rarr; &asymp;52px</strong> from <code>superWeight</code> (sum of incident link weights in the data). Edges are drawn the same; size is the hub signal. <em>Not</em> your LinkedIn degree &mdash; only this graph.</div>
+          <div class="row"><span class="swatch" style="background:var(--tier-hot); width:6px; height:6px"></span><span class="swatch" style="background:var(--tier-warm); width:20px; height:20px; margin-left:6px"></span> <strong>Radius &asymp;7px &rarr; &asymp;52px</strong> from <code>superWeight</code> (sum of incident link weights in the data). Edges are drawn the same; size is the hub signal. <em>Not</em> your LinkedIn degree &mdash; only this graph.</div>
         </div>
 
         <h2>Legend &mdash; edges</h2>
         <div class="legend">
-          <div class="row"><span class="line" style="background:var(--edge)"></span> <strong>One line style</strong> &mdash; <strong>you &rarr; anchor</strong>, <strong>anchor &rarr; mutual</strong> (that person is on that anchor&rsquo;s list in the file), and <strong>2nd &rarr; 1st</strong> bridges. <em>No</em> edges between two mutuals just because they were on the same list line. Hover an edge for the type.</div>
+          <div class="row"><span class="line" style="background:var(--edge)"></span> <strong>Cyan</strong> &mdash; <strong>you &rarr; anchor</strong>, <strong>anchor &rarr; mutual</strong>, <strong>2nd &rarr; 1st</strong>. <span style="color:rgba(150,200,255,0.5)">Dim indigo</span> &mdash; <strong>co-list</strong> (same comma-separated line in a mutual block). <span style="color:rgba(255,200,120,0.85)">Gold</span> &mdash; optional manual <code>peer-edges.md</code>. Hover for type / anchor.</div>
         </div>
 
-        <h2>Legend &mdash; tier (filter only)</h2>
-        <p class="meta">Outreach <strong>hot / warm / cold</strong> does <strong>not</strong> change size or color here. When no tier: shown as <em>untiered</em>. Checkboxes hide groups; <strong>Hide cold &amp; untiered</strong> is a view filter, not a visual scale.</p>
+        <h2>Legend &mdash; tier (checkboxes = hide groups)</h2>
+        <p class="meta">Same tiers as fill above. Checkboxes <strong>hide</strong> nodes in that group (e.g. hide all cold). <strong>Hide cold &amp; untiered</strong> is a view filter. Does not change tier colors.</p>
 
         <h2>Selection</h2>
         <p class="meta" id="nhoodHint" style="display:none; margin:0 0 8px; line-height:1.4"><strong>Neighborhood mode:</strong> only this person and their direct links stay visible. <strong>Click the same node again</strong> or the background to show the full graph again.</p>
@@ -130,6 +146,36 @@
           return (entry && entry.label) || tierKey;
         }
 
+        var TRON_LABEL = {
+          color: "#a8f0ff",
+          face: "SF Mono, ui-monospace, Segoe UI, Roboto, sans-serif",
+          strokeWidth: 2,
+          strokeColor: "#000408",
+        };
+
+        /** 1st-layer fill: Tron heat (orange / amber / dim cyan / user cyan). R&D = yellow identity ring. */
+        function visColorFromTier(tierKey, isRD) {
+          var hot = { bg: "#ff5722", b: "#6d1a00", hi: "#ff8a65" };
+          var warm = { bg: "#ffab00", b: "#5c3d00", hi: "#ffe082" };
+          var cold = { bg: "#006978", b: "#002a30", hi: "#26c6da" };
+          var none = { bg: "#00b8d4", b: "#005c69", hi: "#62efff" };
+          var t;
+          if (tierKey === "hot") t = hot;
+          else if (tierKey === "warm") t = warm;
+          else if (tierKey === "cold") t = cold;
+          else t = none;
+          var rdB = "#ffea00";
+          var rdH = "#fff9c4";
+          return {
+            background: t.bg,
+            border: isRD ? rdB : t.b,
+            highlight: {
+              background: t.hi,
+              border: isRD ? rdH : "#e0f7ff",
+            },
+          };
+        }
+
         function nodeOpacity() {
           return 1;
         }
@@ -161,11 +207,11 @@
           var inner = outer * 0.82;
           var fill;
           if (st.selected) {
-            fill = "#f0f2f6";
+            fill = "#ffffff";
           } else if (st.hover) {
-            fill = "#e0e5ed";
+            fill = "#80deea";
           } else {
-            fill = "#b9c2cf";
+            fill = "#00e5ff";
           }
           var w = 2 * outer;
           var h = 2 * outer;
@@ -213,19 +259,12 @@
                 borderWidth: 0,
                 borderWidthSelected: 0,
                 color: {
-                  background: "#b9c2cf",
-                  border: "#b9c2cf",
-                  highlight: { background: "#e0e5ed", border: "#e0e5ed" },
+                  background: "#00e5ff",
+                  border: "#00e5ff",
+                  highlight: { background: "#ffffff", border: "#b2ffff" },
                 },
                 ctxRenderer: youStarCtxRenderer,
-                font: {
-                  color: "#e9ecf1",
-                  size: 12,
-                  face: "-apple-system, Segoe UI, Roboto, sans-serif",
-                  strokeWidth: 2,
-                  strokeColor: "#0f1115",
-                  vadjust: 4,
-                },
+                font: Object.assign({ size: 12, vadjust: 4 }, TRON_LABEL),
                 _meta: n,
               };
             }
@@ -237,29 +276,20 @@
                 shape: "dot",
                 size: sizeFromSuperWeight(n, maxW),
                 color: {
-                  background: "#a78bfa",
-                  border: "#5b21b6",
-                  highlight: { background: "#c4b5fd", border: "#6d28d9" },
+                  background: "#d500f9",
+                  border: "#4a0072",
+                  highlight: { background: "#ea80fc", border: "#f0f0f0" },
                 },
                 opacity: nodeOpacity(),
                 borderWidth: 2,
-                font: {
-                  color: "#e9ecf1",
-                  size: 14,
-                  face: "-apple-system, Segoe UI, Roboto, sans-serif",
-                  strokeWidth: 3,
-                  strokeColor: "#0f1115",
-                  vadjust: -2,
-                },
+                font: Object.assign({ size: 14, vadjust: -2 }, TRON_LABEL),
                 _meta: n,
               };
             }
 
             var size = sizeFromSuperWeight(n, maxW);
             var rdB = n.isRD ? 3 : 1;
-            var mb = n.isRD ? "#e8c84a" : "#1e4a7a";
-            var mhi = n.isRD ? { background: "#6fa8ff", border: "#f0d45c" } : { background: "#8cbcff", border: "#1e4a7a" };
-            var color = { background: "#5b8fd8", border: mb, highlight: mhi };
+            var color = visColorFromTier(n.tier, n.isRD);
 
             return {
               id: n.id,
@@ -270,14 +300,7 @@
               color: color,
               opacity: nodeOpacity(),
               borderWidth: rdB,
-              font: {
-                color: "#e9ecf1",
-                size: 14,
-                face: "-apple-system, Segoe UI, Roboto, sans-serif",
-                strokeWidth: 3,
-                strokeColor: "#0f1115",
-                vadjust: -2,
-              },
+              font: Object.assign({ size: 14, vadjust: -2 }, TRON_LABEL),
               _meta: n,
             };
           });
@@ -297,18 +320,49 @@
           if (t === "you-anchor") {
             return "You \u2192 1st anchor (your captured \u201c##\u201d sample in this map)";
           }
+          if (t === "peer") {
+            return (
+              "Manual peer (mutual \u2013 mutual)" +
+              (e.note ? " \u2014 " + e.note : "")
+            );
+          }
+          if (t === "colist") {
+            return (
+              "Co-list (same mutual bullet line; co-capture, not a claim they know each other)" +
+              (e.anchor ? " \u2014 under " + e.anchor : "")
+            );
+          }
           return t || "Link";
         }
 
         function buildVisEdges(data) {
           var edges = data.edges;
-          var lineColor = { color: "rgba(130, 145, 170, 0.42)", highlight: "rgba(160, 180, 210, 0.7)", hover: "rgba(160, 180, 210, 0.6)" };
+          var lineColorCyan = {
+            color: "rgba(0, 229, 255, 0.35)",
+            highlight: "rgba(120, 255, 255, 0.85)",
+            hover: "rgba(0, 255, 255, 0.65)",
+          };
+          var lineColorPeer = {
+            color: "rgba(255, 200, 120, 0.45)",
+            highlight: "rgba(255, 230, 180, 0.9)",
+            hover: "rgba(255, 210, 140, 0.8)",
+          };
+          var lineColorColist = {
+            color: "rgba(130, 160, 255, 0.28)",
+            highlight: "rgba(180, 200, 255, 0.7)",
+            hover: "rgba(150, 190, 255, 0.5)",
+          };
           return edges.map(function (e, idx) {
+            var et = e.type;
+            var lineColor = lineColorCyan;
+            if (et === "peer") lineColor = lineColorPeer;
+            else if (et === "colist") lineColor = lineColorColist;
             return {
               id: "e" + idx,
               from: e.source,
               to: e.target,
-              width: 1.05,
+              _edgeType: et,
+              width: et === "peer" ? 1.15 : et === "colist" ? 0.55 : 0.95,
               color: lineColor,
               smooth: { type: "continuous", roundness: 0.12 },
               title: buildVisEdgeTitle(e),
@@ -480,9 +534,10 @@
 
           applyFilters();
 
-          var controls = ["toggleMutualOnly", "toggleRD", "toggleHideCold"];
+          var controls = ["toggleMutualOnly", "toggleHideCold", "toggleColist"];
           controls.forEach(function (id) {
-            document.getElementById(id).addEventListener("input", applyFilters);
+            var el = document.getElementById(id);
+            if (el) el.addEventListener("input", applyFilters);
           });
           document.getElementById("tierFilter").addEventListener("change", applyFilters);
 
@@ -538,8 +593,9 @@
             if (hint) hint.style.display = isolateId != null ? "block" : "none";
 
             var showMutualOnly = document.getElementById("toggleMutualOnly").checked;
-            var rdOnly = document.getElementById("toggleRD").checked;
             var hideCold = document.getElementById("toggleHideCold").checked;
+            var showColist = document.getElementById("toggleColist");
+            var showColistOn = !showColist || showColist.checked;
             var tiersSel = selectedTiers();
 
             var nodeHidden = {};
@@ -552,7 +608,6 @@
               }
               var hidden = false;
               if (!showMutualOnly && !meta.isAnchor && !meta.isSecond) hidden = true;
-              if (rdOnly && !meta.isRD) hidden = true;
               var tierKey = meta.isSecond ? "__2nd__" : (meta.tier || "__untiered__");
               if (!tiersSel[tierKey]) hidden = true;
               if (hideCold && (tierKey === "cold" || (tierKey === "__untiered__" && !meta.isSecond))) hidden = true;
@@ -565,7 +620,9 @@
             nodesDataset.update(nodeUpdates);
 
             var edgeUpdates = visEdges.map(function (e) {
-              return { id: e.id, hidden: !!(nodeHidden[e.from] || nodeHidden[e.to]) };
+              var hideNode = !!(nodeHidden[e.from] || nodeHidden[e.to]);
+              var hideCol = e._edgeType === "colist" && !showColistOn;
+              return { id: e.id, hidden: hideNode || hideCol };
             });
             edgesDataset.update(edgeUpdates);
           }

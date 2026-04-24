@@ -1,0 +1,5 @@
+# Playwright session for LinkedIn mutuals dump (cookies; do not commit)
+.playwright/
+
+# Text dumps from scripts/linkedin_mutuals_dump.py (optional; remove line to track)
+contacts/linkedin-mutual-dumps/

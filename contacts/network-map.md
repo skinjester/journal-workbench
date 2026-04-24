@@ -2,7 +2,7 @@
 
 *Goal: for each “anchor” contact (from your Riot / recruiter **overlap** list, plus any **Riot 1st-degree** names you explicitly add), record who is in the **intersection** of: **your 1st-degree network** and **the anchor’s** network. On LinkedIn this is the **“mutual connections”** search: `origin=SHARED_CONNECTIONS_CANNED_SEARCH` + `connectionOf=[member id]`. This file builds a map: **anchor → { mutuals }**.*
 
-**Interactive graph:** [network-graph.html](network-graph.html) — anchor vs mutual colors, R&D accent. Edges are **you → anchor**, **anchor → each mutual on that list**, and 2nd→1st bridges only (no edges between mutuals who only co-appeared on the same line). Data reflects the **samples** in this file; regenerate with `python3 scripts/build_network_graph.py` after edits. Open the HTML directly in a browser, or serve this folder with `python3 -m http.server` and visit `/contacts/network-graph.html`.
+**Interactive graph:** [network-graph.html](network-graph.html) — anchor vs mutual colors, R&D accent. The builder adds **co-list** links (dim) between every pair of names on the *same comma-separated* mutual bullet in this file (same line of your capture, not a claim they know each other; hide them in the graph with the sidebar toggle if it is too busy). Also: **you → anchor**, **anchor → mutual**, optional **extra** pairings in [network-map.peer-edges.md](network-map.peer-edges.md) when you want to mark a relationship the map does not encode, and 2nd→1st bridges. Regenerate with `python3 scripts/build_network_graph.py` after edits.
 
 **2nd-degree Riot UX (outreach list, separate from anchors):** [riot-2nd-degree-ux-2026.md](riot-2nd-degree-ux-2026.md).
 

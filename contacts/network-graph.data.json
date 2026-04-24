@@ -2,13 +2,16 @@
   "meta": {
     "generatedAt": "2026-04-23",
     "sourceMd": "contacts/network-map.md",
+    "peerEdgesMd": "contacts/network-map.peer-edges.md",
     "anchorsJson": "contacts/network-map-anchors.json",
     "tagsJson": "contacts/network-map.tags.json",
     "anchorCount": 19,
+    "coListEdgeCount": 408,
+    "peerEdgeCount": 1,
     "secondDegreeCount": 69,
     "nodeCount": 211,
-    "edgeCount": 270,
-    "disclaimer": "1st-layer data reflects LinkedIn mutual samples in contacts/network-map.md. The graph uses anchor → mutual (and you → anchor) only; it does not draw edges between mutuals who merely appear on the same list line. Node size = superWeight (sum of incident edge weights). 2nd-degree Riot/UX rows use contacts/riot-2nd-degree-ux-2026.json (bridge edges to matched 1st).",
+    "edgeCount": 679,
+    "disclaimer": "1st-layer data reflects LinkedIn mutual samples in contacts/network-map.md. Co-list (dim) links join names on the *same comma-separated mutual bullet* — co-captured, not proof they know each other. You→anchor, anchor→mutual, and 2nd→1st bridges are primary. Optional manual links: contacts/network-map.peer-edges.md. Node size = superWeight (sum of edge weights; co-list uses a lower weight).",
     "secondBridgeEdgeCount": 48,
     "riot2ndSource": "contacts/riot-2nd-degree-ux-2026.json"
   },
@@ -83,7 +86,7 @@
       "company": "(gaming exec)",
       "role": "production",
       "tier": null,
-      "superWeight": 1.0
+      "superWeight": 4.15
     },
     {
       "id": "aaron-yonas",
@@ -131,7 +134,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 4.0
+      "superWeight": 7.1499999999999995
     },
     {
       "id": "adam-piper",
@@ -147,7 +150,7 @@
       "company": "(engineering)",
       "role": "engineering",
       "tier": null,
-      "superWeight": 4.0
+      "superWeight": 11.699999999999992
     },
     {
       "id": "albert-holaso",
@@ -179,7 +182,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 3.0
+      "superWeight": 9.299999999999995
     },
     {
       "id": "alex-churchill",
@@ -243,7 +246,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 1.0
+      "superWeight": 4.15
     },
     {
       "id": "ammon-haggerty",
@@ -339,7 +342,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 1.0
+      "superWeight": 4.15
     },
     {
       "id": "brian-schneider",
@@ -355,7 +358,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 5.0
+      "superWeight": 11.999999999999993
     },
     {
       "id": "bruce-harlick",
@@ -387,7 +390,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 1.0
+      "superWeight": 4.15
     },
     {
       "id": "cedrick-collomb",
@@ -403,7 +406,7 @@
       "company": "(exec)",
       "role": "engineering",
       "tier": null,
-      "superWeight": 1.0
+      "superWeight": 4.15
     },
     {
       "id": "celia-hodent",
@@ -451,7 +454,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 1.0
+      "superWeight": 4.15
     },
     {
       "id": "chris-balser",
@@ -467,7 +470,7 @@
       "company": "(systems)",
       "role": "design",
       "tier": null,
-      "superWeight": 3.0
+      "superWeight": 9.949999999999996
     },
     {
       "id": "chris-dillman",
@@ -483,7 +486,7 @@
       "company": "(engineering)",
       "role": "engineering",
       "tier": null,
-      "superWeight": 1.0
+      "superWeight": 4.15
     },
     {
       "id": "chris-huybregts",
@@ -531,7 +534,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 2.0
+      "superWeight": 7.249999999999997
     },
     {
       "id": "christine-brownell",
@@ -563,7 +566,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 1.0
+      "superWeight": 4.15
     },
     {
       "id": "christopher-jimison",
@@ -579,7 +582,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 1.0
+      "superWeight": 4.15
     },
     {
       "id": "claudiu-dumitru",
@@ -595,7 +598,7 @@
       "company": "(security)",
       "role": "engineering",
       "tier": null,
-      "superWeight": 1.0
+      "superWeight": 4.15
     },
     {
       "id": "cole-nelson",
@@ -627,7 +630,7 @@
       "company": "(engineering)",
       "role": "engineering",
       "tier": null,
-      "superWeight": 2.0
+      "superWeight": 5.1499999999999995
     },
     {
       "id": "dale-cieslak",
@@ -643,7 +646,7 @@
       "company": "(engineering)",
       "role": "engineering",
       "tier": null,
-      "superWeight": 2.0
+      "superWeight": 5.1499999999999995
     },
     {
       "id": "dale-russell",
@@ -659,7 +662,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 1.0
+      "superWeight": 4.15
     },
     {
       "id": "dan-kline",
@@ -675,7 +678,7 @@
       "company": "Riot",
       "role": "design",
       "tier": "warm",
-      "superWeight": 22.0
+      "superWeight": 25.150000000000013
     },
     {
       "id": "dan-wellman",
@@ -707,7 +710,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 2.0
+      "superWeight": 5.1499999999999995
     },
     {
       "id": "david-kirscheneder",
@@ -723,7 +726,7 @@
       "company": "Ubisoft Singapore",
       "role": "engineering",
       "tier": null,
-      "superWeight": 1.0
+      "superWeight": 4.15
     },
     {
       "id": "david-reed-monroe",
@@ -771,7 +774,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 1.0
+      "superWeight": 4.5
     },
     {
       "id": "derek-brinkmann",
@@ -787,7 +790,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 2.0
+      "superWeight": 5.1499999999999995
     },
     {
       "id": "derek-van-oss",
@@ -819,7 +822,7 @@
       "company": "(engineering)",
       "role": "engineering",
       "tier": null,
-      "superWeight": 2.0
+      "superWeight": 7.599999999999997
     },
     {
       "id": "ea-nhl",
@@ -835,7 +838,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 1.0
+      "superWeight": 4.5
     },
     {
       "id": "ed-knapp",
@@ -851,7 +854,7 @@
       "company": "Lightspeed",
       "role": "production",
       "tier": "cold",
-      "superWeight": 22.0
+      "superWeight": 32.50000000000004
     },
     {
       "id": "edmund-shen",
@@ -867,7 +870,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 1.0
+      "superWeight": 4.15
     },
     {
       "id": "elijah-freeman",
@@ -915,7 +918,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 2.0
+      "superWeight": 7.249999999999997
     },
     {
       "id": "geoffrey-marsi",
@@ -963,7 +966,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 3.0
+      "superWeight": 8.599999999999996
     },
     {
       "id": "greg-faillace",
@@ -1011,7 +1014,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 1.0
+      "superWeight": 4.15
     },
     {
       "id": "isa-anne-stamos",
@@ -1043,7 +1046,7 @@
       "company": "Archetype / ex ZOS",
       "role": "design",
       "tier": "warm",
-      "superWeight": 4.0
+      "superWeight": 10.649999999999993
     },
     {
       "id": "jano-vesina",
@@ -1059,7 +1062,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 1.0
+      "superWeight": 4.15
     },
     {
       "id": "jasmine-sarmiento",
@@ -1075,7 +1078,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 2.0
+      "superWeight": 5.1499999999999995
     },
     {
       "id": "jason-smith",
@@ -1155,7 +1158,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 4.0
+      "superWeight": 13.09999999999999
     },
     {
       "id": "jeremy-sera",
@@ -1171,7 +1174,7 @@
       "company": "ex ZOS",
       "role": "design",
       "tier": "warm",
-      "superWeight": 4.0
+      "superWeight": 11.649999999999993
     },
     {
       "id": "jim-rivers",
@@ -1219,7 +1222,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 1.0
+      "superWeight": 4.5
     },
     {
       "id": "john-stafford",
@@ -1251,7 +1254,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 3.0
+      "superWeight": 6.149999999999998
     },
     {
       "id": "johnny-white",
@@ -1347,7 +1350,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 2.0
+      "superWeight": 5.1499999999999995
     },
     {
       "id": "kento-kojima",
@@ -1363,7 +1366,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 4.0
+      "superWeight": 9.599999999999994
     },
     {
       "id": "kim-herbst",
@@ -1379,7 +1382,7 @@
       "company": "(art)",
       "role": "art",
       "tier": null,
-      "superWeight": 2.0
+      "superWeight": 7.249999999999997
     },
     {
       "id": "kristen-diane-mcdonald-brown",
@@ -1427,7 +1430,7 @@
       "company": "(art)",
       "role": "art",
       "tier": null,
-      "superWeight": 1.0
+      "superWeight": 4.15
     },
     {
       "id": "lisa-martin",
@@ -1443,7 +1446,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 3.0
+      "superWeight": 7.199999999999997
     },
     {
       "id": "mags-ng",
@@ -1475,7 +1478,7 @@
       "company": "Zenimax Online",
       "role": "art",
       "tier": null,
-      "superWeight": 2.0
+      "superWeight": 3.4000000000000004
     },
     {
       "id": "marc-hudgins-project-art-director",
@@ -1507,7 +1510,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 2.0
+      "superWeight": 7.949999999999997
     },
     {
       "id": "mark-mongie",
@@ -1555,7 +1558,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 2.0
+      "superWeight": 5.1499999999999995
     },
     {
       "id": "michael-arnold",
@@ -1587,7 +1590,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 1.0
+      "superWeight": 4.15
     },
     {
       "id": "mike-bates",
@@ -1603,7 +1606,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 1.0
+      "superWeight": 4.15
     },
     {
       "id": "mila-pavlin",
@@ -1619,7 +1622,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 3.0
+      "superWeight": 8.249999999999996
     },
     {
       "id": "murtaza-nemat-ali",
@@ -1635,7 +1638,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 1.0
+      "superWeight": 4.15
     },
     {
       "id": "nat-dart",
@@ -1651,7 +1654,7 @@
       "company": "Skydance",
       "role": "design",
       "tier": null,
-      "superWeight": 1.0
+      "superWeight": 4.15
     },
     {
       "id": "nathaniel-nordfelt",
@@ -1731,7 +1734,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 1.0
+      "superWeight": 4.15
     },
     {
       "id": "ole-goethe",
@@ -1795,7 +1798,7 @@
       "company": "The Holdouts",
       "role": "design",
       "tier": null,
-      "superWeight": 2.0
+      "superWeight": 5.1499999999999995
     },
     {
       "id": "paul-teall",
@@ -1811,7 +1814,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 1.0
+      "superWeight": 4.15
     },
     {
       "id": "peter-grassi",
@@ -1827,7 +1830,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 3.0
+      "superWeight": 9.299999999999995
     },
     {
       "id": "peter-santoki",
@@ -1843,7 +1846,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 1.0
+      "superWeight": 4.15
     },
     {
       "id": "quin-richards",
@@ -1875,7 +1878,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 1.0
+      "superWeight": 4.15
     },
     {
       "id": "ray-mazza",
@@ -1891,7 +1894,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 4.0
+      "superWeight": 10.299999999999994
     },
     {
       "id": "reid-kimball",
@@ -1923,7 +1926,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 3.0
+      "superWeight": 7.199999999999997
     },
     {
       "id": "ron-kee",
@@ -1939,7 +1942,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 2.0
+      "superWeight": 7.949999999999997
     },
     {
       "id": "ryan-ward",
@@ -1987,7 +1990,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 5.0
+      "superWeight": 12.699999999999992
     },
     {
       "id": "scot-brew",
@@ -2019,7 +2022,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 1.0
+      "superWeight": 4.15
     },
     {
       "id": "seren-mason",
@@ -2051,7 +2054,7 @@
       "company": "Riot",
       "role": "art",
       "tier": "hot",
-      "superWeight": 14.0
+      "superWeight": 17.500000000000004
     },
     {
       "id": "shawn-pitman",
@@ -2067,7 +2070,7 @@
       "company": "(design)",
       "role": "design",
       "tier": null,
-      "superWeight": 1.0
+      "superWeight": 4.15
     },
     {
       "id": "shawna-tanskanen",
@@ -2083,7 +2086,7 @@
       "company": "(design)",
       "role": "design",
       "tier": null,
-      "superWeight": 1.0
+      "superWeight": 4.15
     },
     {
       "id": "sheetal-bandi",
@@ -2131,7 +2134,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 1.0
+      "superWeight": 4.15
     },
     {
       "id": "stephan-dube",
@@ -2211,7 +2214,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 5.0
+      "superWeight": 10.949999999999996
     },
     {
       "id": "teck-lee-tan",
@@ -2259,7 +2262,7 @@
       "company": null,
       "role": null,
       "tier": null,
-      "superWeight": 2.0
+      "superWeight": 5.1499999999999995
     },
     {
       "id": "tommy-cinquegrano",
@@ -5820,6 +5823,2869 @@
       "target": "derek-brinkmann",
       "type": "lists",
       "weight": 1
+    },
+    {
+      "source": "chris-balser",
+      "target": "jeff-seamster",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "jeff-seamster",
+      "target": "rachael-masako-ing",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "jeff-seamster",
+      "target": "sammi-kim",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "jeff-seamster",
+      "target": "kim-herbst",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "jeff-seamster",
+      "target": "taylor-wright",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "ed-knapp",
+      "target": "jeff-seamster",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "gabrielle-snowden",
+      "target": "jeff-seamster",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "adam-piper",
+      "target": "jeff-seamster",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "jeff-seamster",
+      "target": "mila-pavlin",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "chris-balser",
+      "target": "rachael-masako-ing",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "chris-balser",
+      "target": "sammi-kim",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "chris-balser",
+      "target": "kim-herbst",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "chris-balser",
+      "target": "taylor-wright",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "chris-balser",
+      "target": "ed-knapp",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "chris-balser",
+      "target": "gabrielle-snowden",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "adam-piper",
+      "target": "chris-balser",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "chris-balser",
+      "target": "mila-pavlin",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "rachael-masako-ing",
+      "target": "sammi-kim",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "kim-herbst",
+      "target": "rachael-masako-ing",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "rachael-masako-ing",
+      "target": "taylor-wright",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "ed-knapp",
+      "target": "rachael-masako-ing",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "gabrielle-snowden",
+      "target": "rachael-masako-ing",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "adam-piper",
+      "target": "rachael-masako-ing",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "mila-pavlin",
+      "target": "rachael-masako-ing",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "kim-herbst",
+      "target": "sammi-kim",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "sammi-kim",
+      "target": "taylor-wright",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "ed-knapp",
+      "target": "sammi-kim",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "gabrielle-snowden",
+      "target": "sammi-kim",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "adam-piper",
+      "target": "sammi-kim",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "mila-pavlin",
+      "target": "sammi-kim",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "kim-herbst",
+      "target": "taylor-wright",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "ed-knapp",
+      "target": "kim-herbst",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "gabrielle-snowden",
+      "target": "kim-herbst",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "adam-piper",
+      "target": "kim-herbst",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "kim-herbst",
+      "target": "mila-pavlin",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "ed-knapp",
+      "target": "taylor-wright",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "gabrielle-snowden",
+      "target": "taylor-wright",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "adam-piper",
+      "target": "taylor-wright",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "mila-pavlin",
+      "target": "taylor-wright",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "ed-knapp",
+      "target": "gabrielle-snowden",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "adam-piper",
+      "target": "ed-knapp",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "ed-knapp",
+      "target": "mila-pavlin",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "adam-piper",
+      "target": "gabrielle-snowden",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "gabrielle-snowden",
+      "target": "mila-pavlin",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "adam-piper",
+      "target": "mila-pavlin",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jim Rivers"
+    },
+    {
+      "source": "rodrigo-aguilar",
+      "target": "sammi-kim",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "glenn-entis",
+      "target": "rodrigo-aguilar",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "ed-knapp",
+      "target": "rodrigo-aguilar",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "brian-schneider",
+      "target": "rodrigo-aguilar",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "ray-mazza",
+      "target": "rodrigo-aguilar",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "lisa-martin",
+      "target": "rodrigo-aguilar",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "peter-grassi",
+      "target": "rodrigo-aguilar",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "alex-chatfield",
+      "target": "rodrigo-aguilar",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "justin-mcleod",
+      "target": "rodrigo-aguilar",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "glenn-entis",
+      "target": "sammi-kim",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "brian-schneider",
+      "target": "sammi-kim",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "ray-mazza",
+      "target": "sammi-kim",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "lisa-martin",
+      "target": "sammi-kim",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "peter-grassi",
+      "target": "sammi-kim",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "alex-chatfield",
+      "target": "sammi-kim",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "justin-mcleod",
+      "target": "sammi-kim",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "ed-knapp",
+      "target": "glenn-entis",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "brian-schneider",
+      "target": "glenn-entis",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "glenn-entis",
+      "target": "ray-mazza",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "glenn-entis",
+      "target": "lisa-martin",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "glenn-entis",
+      "target": "peter-grassi",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "alex-chatfield",
+      "target": "glenn-entis",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "glenn-entis",
+      "target": "justin-mcleod",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "brian-schneider",
+      "target": "ed-knapp",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "ed-knapp",
+      "target": "ray-mazza",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "ed-knapp",
+      "target": "lisa-martin",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "ed-knapp",
+      "target": "peter-grassi",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "alex-chatfield",
+      "target": "ed-knapp",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "ed-knapp",
+      "target": "justin-mcleod",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "brian-schneider",
+      "target": "ray-mazza",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "brian-schneider",
+      "target": "lisa-martin",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "brian-schneider",
+      "target": "peter-grassi",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "alex-chatfield",
+      "target": "brian-schneider",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "brian-schneider",
+      "target": "justin-mcleod",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "lisa-martin",
+      "target": "ray-mazza",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "peter-grassi",
+      "target": "ray-mazza",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "alex-chatfield",
+      "target": "ray-mazza",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "justin-mcleod",
+      "target": "ray-mazza",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "lisa-martin",
+      "target": "peter-grassi",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "alex-chatfield",
+      "target": "lisa-martin",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "justin-mcleod",
+      "target": "lisa-martin",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "alex-chatfield",
+      "target": "peter-grassi",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "justin-mcleod",
+      "target": "peter-grassi",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "alex-chatfield",
+      "target": "justin-mcleod",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Mags Ng"
+    },
+    {
+      "source": "alex-chatfield",
+      "target": "murtaza-nemat-ali",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "matt-thazhmon",
+      "target": "murtaza-nemat-ali",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "derek-brinkmann",
+      "target": "murtaza-nemat-ali",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "miguel-molinari",
+      "target": "murtaza-nemat-ali",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "dale-russell",
+      "target": "murtaza-nemat-ali",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "murtaza-nemat-ali",
+      "target": "paul-teall",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "murtaza-nemat-ali",
+      "target": "scott-nagy",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "murtaza-nemat-ali",
+      "target": "peter-santoki",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "murtaza-nemat-ali",
+      "target": "oge-young",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "alex-chatfield",
+      "target": "matt-thazhmon",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "alex-chatfield",
+      "target": "derek-brinkmann",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "alex-chatfield",
+      "target": "miguel-molinari",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "alex-chatfield",
+      "target": "dale-russell",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "alex-chatfield",
+      "target": "paul-teall",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "alex-chatfield",
+      "target": "scott-nagy",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "alex-chatfield",
+      "target": "peter-santoki",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "alex-chatfield",
+      "target": "oge-young",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "derek-brinkmann",
+      "target": "matt-thazhmon",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "matt-thazhmon",
+      "target": "miguel-molinari",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "dale-russell",
+      "target": "matt-thazhmon",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "matt-thazhmon",
+      "target": "paul-teall",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "matt-thazhmon",
+      "target": "scott-nagy",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "matt-thazhmon",
+      "target": "peter-santoki",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "matt-thazhmon",
+      "target": "oge-young",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "derek-brinkmann",
+      "target": "miguel-molinari",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "dale-russell",
+      "target": "derek-brinkmann",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "derek-brinkmann",
+      "target": "paul-teall",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "derek-brinkmann",
+      "target": "scott-nagy",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "derek-brinkmann",
+      "target": "peter-santoki",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "derek-brinkmann",
+      "target": "oge-young",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "dale-russell",
+      "target": "miguel-molinari",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "miguel-molinari",
+      "target": "paul-teall",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "miguel-molinari",
+      "target": "scott-nagy",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "miguel-molinari",
+      "target": "peter-santoki",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "miguel-molinari",
+      "target": "oge-young",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "dale-russell",
+      "target": "paul-teall",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "dale-russell",
+      "target": "scott-nagy",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "dale-russell",
+      "target": "peter-santoki",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "dale-russell",
+      "target": "oge-young",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "paul-teall",
+      "target": "scott-nagy",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "paul-teall",
+      "target": "peter-santoki",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "oge-young",
+      "target": "paul-teall",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "peter-santoki",
+      "target": "scott-nagy",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "oge-young",
+      "target": "scott-nagy",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "oge-young",
+      "target": "peter-santoki",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nathaniel Nordfelt"
+    },
+    {
+      "source": "david-swanson-ux",
+      "target": "jeff-seamster",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "ea-nhl",
+      "target": "jeff-seamster",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "brian-schneider",
+      "target": "jeff-seamster",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "jeff-seamster",
+      "target": "jeremy-sera",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "james-owen-lowe",
+      "target": "jeff-seamster",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "jeff-seamster",
+      "target": "john-chaffee",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "david-swanson-ux",
+      "target": "ea-nhl",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "david-swanson-ux",
+      "target": "kim-herbst",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "david-swanson-ux",
+      "target": "ed-knapp",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "david-swanson-ux",
+      "target": "gabrielle-snowden",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "david-swanson-ux",
+      "target": "mila-pavlin",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "brian-schneider",
+      "target": "david-swanson-ux",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "david-swanson-ux",
+      "target": "jeremy-sera",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "david-swanson-ux",
+      "target": "james-owen-lowe",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "david-swanson-ux",
+      "target": "john-chaffee",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "ea-nhl",
+      "target": "kim-herbst",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "ea-nhl",
+      "target": "ed-knapp",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "ea-nhl",
+      "target": "gabrielle-snowden",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "ea-nhl",
+      "target": "mila-pavlin",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "brian-schneider",
+      "target": "ea-nhl",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "ea-nhl",
+      "target": "jeremy-sera",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "ea-nhl",
+      "target": "james-owen-lowe",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "ea-nhl",
+      "target": "john-chaffee",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "brian-schneider",
+      "target": "kim-herbst",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "jeremy-sera",
+      "target": "kim-herbst",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "james-owen-lowe",
+      "target": "kim-herbst",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "john-chaffee",
+      "target": "kim-herbst",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "ed-knapp",
+      "target": "jeremy-sera",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "ed-knapp",
+      "target": "james-owen-lowe",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "ed-knapp",
+      "target": "john-chaffee",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "brian-schneider",
+      "target": "gabrielle-snowden",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "gabrielle-snowden",
+      "target": "jeremy-sera",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "gabrielle-snowden",
+      "target": "james-owen-lowe",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "gabrielle-snowden",
+      "target": "john-chaffee",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "brian-schneider",
+      "target": "mila-pavlin",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "jeremy-sera",
+      "target": "mila-pavlin",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "james-owen-lowe",
+      "target": "mila-pavlin",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "john-chaffee",
+      "target": "mila-pavlin",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "brian-schneider",
+      "target": "jeremy-sera",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "brian-schneider",
+      "target": "james-owen-lowe",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "brian-schneider",
+      "target": "john-chaffee",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "james-owen-lowe",
+      "target": "jeremy-sera",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "jeremy-sera",
+      "target": "john-chaffee",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "james-owen-lowe",
+      "target": "john-chaffee",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Allen Warner"
+    },
+    {
+      "source": "glenn-entis",
+      "target": "jeff-seamster",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "christopher-jimison",
+      "target": "jeff-seamster",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "jeff-seamster",
+      "target": "ron-kee",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "jeff-seamster",
+      "target": "ray-mazza",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "jeff-seamster",
+      "target": "mark-lee",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "jeff-seamster",
+      "target": "kento-kojima",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "dmitry-andreev",
+      "target": "jeff-seamster",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "christopher-jimison",
+      "target": "sammi-kim",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "ron-kee",
+      "target": "sammi-kim",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "mark-lee",
+      "target": "sammi-kim",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "kento-kojima",
+      "target": "sammi-kim",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "dmitry-andreev",
+      "target": "sammi-kim",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "christopher-jimison",
+      "target": "glenn-entis",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "glenn-entis",
+      "target": "ron-kee",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "adam-piper",
+      "target": "glenn-entis",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "glenn-entis",
+      "target": "mark-lee",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "glenn-entis",
+      "target": "kento-kojima",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "dmitry-andreev",
+      "target": "glenn-entis",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "christopher-jimison",
+      "target": "ron-kee",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "adam-piper",
+      "target": "christopher-jimison",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "christopher-jimison",
+      "target": "ray-mazza",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "christopher-jimison",
+      "target": "mark-lee",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "christopher-jimison",
+      "target": "kento-kojima",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "christopher-jimison",
+      "target": "dmitry-andreev",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "adam-piper",
+      "target": "ron-kee",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "ray-mazza",
+      "target": "ron-kee",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "mark-lee",
+      "target": "ron-kee",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "kento-kojima",
+      "target": "ron-kee",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "dmitry-andreev",
+      "target": "ron-kee",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "adam-piper",
+      "target": "ray-mazza",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "adam-piper",
+      "target": "mark-lee",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "adam-piper",
+      "target": "kento-kojima",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "adam-piper",
+      "target": "dmitry-andreev",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "mark-lee",
+      "target": "ray-mazza",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "kento-kojima",
+      "target": "ray-mazza",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "dmitry-andreev",
+      "target": "ray-mazza",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "kento-kojima",
+      "target": "mark-lee",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "dmitry-andreev",
+      "target": "mark-lee",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "dmitry-andreev",
+      "target": "kento-kojima",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Jason Smith"
+    },
+    {
+      "source": "ron-kee",
+      "target": "stella-balmoria",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "jasmine-sarmiento",
+      "target": "ron-kee",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "mike-bates",
+      "target": "ron-kee",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "peter-grassi",
+      "target": "ron-kee",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "chris-ocampo",
+      "target": "ron-kee",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "dave-cross",
+      "target": "ron-kee",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "john-yoo",
+      "target": "ron-kee",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "adam-murguia",
+      "target": "ron-kee",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "mark-lee",
+      "target": "stella-balmoria",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "jasmine-sarmiento",
+      "target": "mark-lee",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "mark-lee",
+      "target": "mike-bates",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "mark-lee",
+      "target": "peter-grassi",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "chris-ocampo",
+      "target": "mark-lee",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "dave-cross",
+      "target": "mark-lee",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "john-yoo",
+      "target": "mark-lee",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "adam-murguia",
+      "target": "mark-lee",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "jasmine-sarmiento",
+      "target": "stella-balmoria",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "mike-bates",
+      "target": "stella-balmoria",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "peter-grassi",
+      "target": "stella-balmoria",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "chris-ocampo",
+      "target": "stella-balmoria",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "dave-cross",
+      "target": "stella-balmoria",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "john-yoo",
+      "target": "stella-balmoria",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "adam-murguia",
+      "target": "stella-balmoria",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "jasmine-sarmiento",
+      "target": "mike-bates",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "jasmine-sarmiento",
+      "target": "peter-grassi",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "chris-ocampo",
+      "target": "jasmine-sarmiento",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "dave-cross",
+      "target": "jasmine-sarmiento",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "jasmine-sarmiento",
+      "target": "john-yoo",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "adam-murguia",
+      "target": "jasmine-sarmiento",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "mike-bates",
+      "target": "peter-grassi",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "chris-ocampo",
+      "target": "mike-bates",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "dave-cross",
+      "target": "mike-bates",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "john-yoo",
+      "target": "mike-bates",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "adam-murguia",
+      "target": "mike-bates",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "chris-ocampo",
+      "target": "peter-grassi",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "dave-cross",
+      "target": "peter-grassi",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "john-yoo",
+      "target": "peter-grassi",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "adam-murguia",
+      "target": "peter-grassi",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "chris-ocampo",
+      "target": "dave-cross",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "chris-ocampo",
+      "target": "john-yoo",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "adam-murguia",
+      "target": "chris-ocampo",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "dave-cross",
+      "target": "john-yoo",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "adam-murguia",
+      "target": "dave-cross",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "adam-murguia",
+      "target": "john-yoo",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Victor Keenan"
+    },
+    {
+      "source": "ed-knapp",
+      "target": "marc-hudgins",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nicholas Konkle"
+    },
+    {
+      "source": "ed-knapp",
+      "target": "seth-hall",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nicholas Konkle"
+    },
+    {
+      "source": "jeremy-sera",
+      "target": "marc-hudgins",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nicholas Konkle"
+    },
+    {
+      "source": "jeremy-sera",
+      "target": "seth-hall",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nicholas Konkle"
+    },
+    {
+      "source": "james-owen-lowe",
+      "target": "marc-hudgins",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nicholas Konkle"
+    },
+    {
+      "source": "james-owen-lowe",
+      "target": "seth-hall",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nicholas Konkle"
+    },
+    {
+      "source": "marc-hudgins",
+      "target": "seth-hall",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Nicholas Konkle"
+    },
+    {
+      "source": "jeff-seamster",
+      "target": "rodrigo-aguilar",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Greg Faillace"
+    },
+    {
+      "source": "chris-ocampo",
+      "target": "rodrigo-aguilar",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Greg Faillace"
+    },
+    {
+      "source": "rodrigo-aguilar",
+      "target": "seth-hall",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Greg Faillace"
+    },
+    {
+      "source": "jeff-seamster",
+      "target": "lisa-martin",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Greg Faillace"
+    },
+    {
+      "source": "chris-ocampo",
+      "target": "jeff-seamster",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Greg Faillace"
+    },
+    {
+      "source": "jeff-seamster",
+      "target": "seth-hall",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Greg Faillace"
+    },
+    {
+      "source": "brian-schneider",
+      "target": "chris-ocampo",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Greg Faillace"
+    },
+    {
+      "source": "brian-schneider",
+      "target": "seth-hall",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Greg Faillace"
+    },
+    {
+      "source": "chris-ocampo",
+      "target": "ray-mazza",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Greg Faillace"
+    },
+    {
+      "source": "ray-mazza",
+      "target": "seth-hall",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Greg Faillace"
+    },
+    {
+      "source": "chris-ocampo",
+      "target": "lisa-martin",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Greg Faillace"
+    },
+    {
+      "source": "lisa-martin",
+      "target": "seth-hall",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Greg Faillace"
+    },
+    {
+      "source": "chris-ocampo",
+      "target": "seth-hall",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Greg Faillace"
+    },
+    {
+      "source": "casto-edward-vocal-jr",
+      "target": "taylor-wright",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "dale-cieslak",
+      "target": "taylor-wright",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "kento-kojima",
+      "target": "taylor-wright",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "dmitry-andreev",
+      "target": "taylor-wright",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "nat-dart",
+      "target": "taylor-wright",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "taylor-wright",
+      "target": "timothy-nice",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "brian-nestor",
+      "target": "taylor-wright",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "cedrick-collomb",
+      "target": "taylor-wright",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "adam-piper",
+      "target": "casto-edward-vocal-jr",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "casto-edward-vocal-jr",
+      "target": "dale-cieslak",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "casto-edward-vocal-jr",
+      "target": "kento-kojima",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "casto-edward-vocal-jr",
+      "target": "dmitry-andreev",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "casto-edward-vocal-jr",
+      "target": "nat-dart",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "casto-edward-vocal-jr",
+      "target": "timothy-nice",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "brian-nestor",
+      "target": "casto-edward-vocal-jr",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "casto-edward-vocal-jr",
+      "target": "cedrick-collomb",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "adam-piper",
+      "target": "dale-cieslak",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "adam-piper",
+      "target": "nat-dart",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "adam-piper",
+      "target": "timothy-nice",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "adam-piper",
+      "target": "brian-nestor",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "adam-piper",
+      "target": "cedrick-collomb",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "dale-cieslak",
+      "target": "kento-kojima",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "dale-cieslak",
+      "target": "dmitry-andreev",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "dale-cieslak",
+      "target": "nat-dart",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "dale-cieslak",
+      "target": "timothy-nice",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "brian-nestor",
+      "target": "dale-cieslak",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "cedrick-collomb",
+      "target": "dale-cieslak",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "kento-kojima",
+      "target": "nat-dart",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "kento-kojima",
+      "target": "timothy-nice",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "brian-nestor",
+      "target": "kento-kojima",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "cedrick-collomb",
+      "target": "kento-kojima",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "dmitry-andreev",
+      "target": "nat-dart",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "dmitry-andreev",
+      "target": "timothy-nice",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "brian-nestor",
+      "target": "dmitry-andreev",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "cedrick-collomb",
+      "target": "dmitry-andreev",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "nat-dart",
+      "target": "timothy-nice",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "brian-nestor",
+      "target": "nat-dart",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "cedrick-collomb",
+      "target": "nat-dart",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "brian-nestor",
+      "target": "timothy-nice",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "cedrick-collomb",
+      "target": "timothy-nice",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "brian-nestor",
+      "target": "cedrick-collomb",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Seth Hall"
+    },
+    {
+      "source": "altair-martinez",
+      "target": "shawna-tanskanen",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "altair-martinez",
+      "target": "shawn-pitman",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "altair-martinez",
+      "target": "charles-durairaj",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "altair-martinez",
+      "target": "hafiz-zainal-abidin",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "altair-martinez",
+      "target": "jano-vesina",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "altair-martinez",
+      "target": "edmund-shen",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "altair-martinez",
+      "target": "david-kirscheneder",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "aaron-lemay",
+      "target": "altair-martinez",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "altair-martinez",
+      "target": "claudiu-dumitru",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "shawn-pitman",
+      "target": "shawna-tanskanen",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "charles-durairaj",
+      "target": "shawna-tanskanen",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "hafiz-zainal-abidin",
+      "target": "shawna-tanskanen",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "jano-vesina",
+      "target": "shawna-tanskanen",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "edmund-shen",
+      "target": "shawna-tanskanen",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "david-kirscheneder",
+      "target": "shawna-tanskanen",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "aaron-lemay",
+      "target": "shawna-tanskanen",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "claudiu-dumitru",
+      "target": "shawna-tanskanen",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "charles-durairaj",
+      "target": "shawn-pitman",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "hafiz-zainal-abidin",
+      "target": "shawn-pitman",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "jano-vesina",
+      "target": "shawn-pitman",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "edmund-shen",
+      "target": "shawn-pitman",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "david-kirscheneder",
+      "target": "shawn-pitman",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "aaron-lemay",
+      "target": "shawn-pitman",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "claudiu-dumitru",
+      "target": "shawn-pitman",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "charles-durairaj",
+      "target": "hafiz-zainal-abidin",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "charles-durairaj",
+      "target": "jano-vesina",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "charles-durairaj",
+      "target": "edmund-shen",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "charles-durairaj",
+      "target": "david-kirscheneder",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "aaron-lemay",
+      "target": "charles-durairaj",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "charles-durairaj",
+      "target": "claudiu-dumitru",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "hafiz-zainal-abidin",
+      "target": "jano-vesina",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "edmund-shen",
+      "target": "hafiz-zainal-abidin",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "david-kirscheneder",
+      "target": "hafiz-zainal-abidin",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "aaron-lemay",
+      "target": "hafiz-zainal-abidin",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "claudiu-dumitru",
+      "target": "hafiz-zainal-abidin",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "edmund-shen",
+      "target": "jano-vesina",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "david-kirscheneder",
+      "target": "jano-vesina",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "aaron-lemay",
+      "target": "jano-vesina",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "claudiu-dumitru",
+      "target": "jano-vesina",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "david-kirscheneder",
+      "target": "edmund-shen",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "aaron-lemay",
+      "target": "edmund-shen",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "claudiu-dumitru",
+      "target": "edmund-shen",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "aaron-lemay",
+      "target": "david-kirscheneder",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "claudiu-dumitru",
+      "target": "david-kirscheneder",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "aaron-lemay",
+      "target": "claudiu-dumitru",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Teck Lee Tan"
+    },
+    {
+      "source": "chris-balser",
+      "target": "jeremy-sera",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "chris-balser",
+      "target": "james-owen-lowe",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "chris-balser",
+      "target": "colin-mcginley",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "chris-balser",
+      "target": "paul-sage",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "chris-balser",
+      "target": "lea-jacqueline-evans",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "chris-balser",
+      "target": "dan-kline",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "chris-balser",
+      "target": "christofer-strasz",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "chris-balser",
+      "target": "chris-dillman",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "colin-mcginley",
+      "target": "ed-knapp",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "ed-knapp",
+      "target": "paul-sage",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "ed-knapp",
+      "target": "lea-jacqueline-evans",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "dan-kline",
+      "target": "ed-knapp",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "christofer-strasz",
+      "target": "ed-knapp",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "chris-dillman",
+      "target": "ed-knapp",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "colin-mcginley",
+      "target": "jeremy-sera",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "jeremy-sera",
+      "target": "paul-sage",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "jeremy-sera",
+      "target": "lea-jacqueline-evans",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "dan-kline",
+      "target": "jeremy-sera",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "christofer-strasz",
+      "target": "jeremy-sera",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "chris-dillman",
+      "target": "jeremy-sera",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "colin-mcginley",
+      "target": "james-owen-lowe",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "james-owen-lowe",
+      "target": "paul-sage",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "james-owen-lowe",
+      "target": "lea-jacqueline-evans",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "dan-kline",
+      "target": "james-owen-lowe",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "christofer-strasz",
+      "target": "james-owen-lowe",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "chris-dillman",
+      "target": "james-owen-lowe",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "colin-mcginley",
+      "target": "paul-sage",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "colin-mcginley",
+      "target": "lea-jacqueline-evans",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "colin-mcginley",
+      "target": "dan-kline",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "christofer-strasz",
+      "target": "colin-mcginley",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "chris-dillman",
+      "target": "colin-mcginley",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "lea-jacqueline-evans",
+      "target": "paul-sage",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "dan-kline",
+      "target": "paul-sage",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "christofer-strasz",
+      "target": "paul-sage",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "chris-dillman",
+      "target": "paul-sage",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "dan-kline",
+      "target": "lea-jacqueline-evans",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "christofer-strasz",
+      "target": "lea-jacqueline-evans",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "chris-dillman",
+      "target": "lea-jacqueline-evans",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "christofer-strasz",
+      "target": "dan-kline",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "chris-dillman",
+      "target": "dan-kline",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "chris-dillman",
+      "target": "christofer-strasz",
+      "type": "colist",
+      "weight": 0.35,
+      "anchor": "Geoffrey Marsi"
+    },
+    {
+      "source": "chris-balser",
+      "target": "jeremy-sera",
+      "type": "peer",
+      "weight": 1.0,
+      "note": "Template — replace with links you know, or delete this row"
     },
     {
       "source": "2nd:gage-johnson",
