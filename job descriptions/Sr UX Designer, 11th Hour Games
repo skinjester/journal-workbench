@@ -50,3 +50,24 @@ KRAFTON Americas provides equal employment opportunities to all employees and ap
 Due to recent scams, our recruiters will only reach out to you via @eleventhhour.games, @sds.com, @krafton.com, @unknownworlds.com or @pubg.com. If you received an email and are unsure you can always email recruiting_ka@krafton.com.
 
 
+1. The Elder Scrolls Online console UX/UI
+https://www.garyb.design/products/elderscrollsonline
+This best represents my shipped UX ownership for complex RPG systems. I led the replatforming of ESO from PC to PlayStation and Xbox, defining controller-first navigation, interaction patterns, menu structures, tooltips, and reusable UX standards that engineering, QA, UI art, and design could implement against. The work included flows, wireframes, interaction models, documentation, and iteration through production constraints and console certification.
+
+2. Quest Tracker / RPG systems prototyping
+https://www.garyb.design/research/quest-tracker
+This best represents my systems-thinking and prototyping process. It is a good example of how I use visual models to iterate and communicate with a team.
+
+All of the above. I see Figma as part of a broader continuum of tools I’ve used to structure UX/UI work and make it visible enough for people to discuss, critique, and build from. I use it as a shared workspace for early exploration and for implementation guidance during production and beyond. It helps teams align on the shape of a problem early, then gives stakeholders a clear reference for what gets built.
+
+I’m also exploring AI-assisted design workflows around Figma through my independent work on generative development, using design systems as inputs for building personal software.
+
+On The Elder Scrolls Online, I worked on the item tooltip system.
+
+This was not just a stat display. Players needed to understand what an item did, how valuable or rare it was, and how it affected their survivability.
+
+The production challenge was drift. The team was moving quickly, so feature designers and engineers often solved item presentation locally. Over time, similar items appeared differently across the game. QA feedback became noisy instead of systematic.
+
+I defined declarative layout rules for a Lua-based tooltip component. The rules grouped, prioritized, and displayed item data consistently across different contexts. The system also supported custom content blocks for narrative and gameplay needs.
+
+Nearly 10 years later, the system remains in use. It gave the team a shared structure for item data, reduced production drift, and made the game easier to extend.
