@@ -8,14 +8,14 @@ CORE COMPETENCIES
 Product design · Game UX/UI · Prototyping · Design systems · AI-assisted workflows · Cross-platform experiences
 
 TECHNICAL SKILLS
-Figma (components, variants, prototyping, token-based design systems) · Framer · Photoshop · Illustrator · After Effects · Unreal Engine · TouchDesigner · Python · Lua · React · HTML/CSS
+Figma · Framer · Photoshop · Illustrator · After Effects · Unreal Engine · TouchDesigner · Python · Lua · React · HTML/CSS
 
 EXPERIENCE
 Skinjester Studio — Founder & Principal Product Designer
 2016–2025 • San Francisco, CA
-- UX consulting for live services and product incubation, including Project Kestrel, an unreleased online co-op action RPG with ZeniMax Online Studios. Built spatial UI prototypes using Unreal Engine, then published HTML5 builds to AWS S3 for weekly review.
+- Consulted on preproduction UX for Project Kestrel, an unreleased online co-op action RPG with ZeniMax Online Studios, building spatial UI prototypes in Unreal Engine and publishing HTML5 builds to AWS S3 to help the team evaluate feature direction.
 - Designed CMS and platform UX for The Elder Scrolls Online across web and game-client surfaces, improving the player journey from account setup through purchase and support.
-- Designed UX frameworks and spatial prototypes for Iveda Pinpoint, a hospital inventory tool. Brought in WRLD3D for indoor mapping expertise and partnered with their team to validate product direction before engineering spend.
+- Designed UX for Iveda Pinpoint, an indoor positioning system for hospital inventory loss management. Brought in WRLD3D as a design partner for indoor mapping, using spatial prototypes and user journeys to guide engineering spend.
 
 ZeniMax Online Studios — User Experience Lead, The Elder Scrolls Online (ESO)
 2013–2016 • Cockeysville, MD
