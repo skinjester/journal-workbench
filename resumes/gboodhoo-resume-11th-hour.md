@@ -2,7 +2,7 @@ GARY BOODHOO
 Portfolio: https://www.garyb.design | San Francisco, CA | gboodhoo@gmail.com | 415-802-4076
 
 SENIOR UX DESIGNER
-Senior game UX designer focused on helping players engage with complex systems. I replatformed The Elder Scrolls Online from PC to PlayStation and Xbox, establishing interaction design pillars for a live service ZeniMax has publicly cited at over $2B in lifetime revenue. Currently building LFOGRID, a creative tool for device automation across MIDI networks, using Figma to model reusable components and interaction patterns.
+Senior game UX designer focused on helping players engage with complex systems. At ZeniMax Online Studios, I replatformed The Elder Scrolls Online from PC to PlayStation and Xbox, establishing interaction design pillars for a live service ZeniMax has publicly cited at over $2B in lifetime revenue. Currently building LFOGRID, a creative tool for device automation across MIDI networks, using Figma to model reusable components and interaction patterns.
 
 TOOLS
 Figma (components, variables, auto layout, prototyping) · Framer · Adobe Creative Cloud · Unreal Engine · TouchDesigner · Python · Lua · React · HTML/CSS
@@ -10,14 +10,14 @@ Figma (components, variables, auto layout, prototyping) · Framer · Adobe Creat
 EXPERIENCE
 Skinjester Studio — Founder & Principal Product Designer
 2016–2025 • San Francisco, CA
-- Partnered with ZeniMax Online Studios on preproduction UX for Project Kestrel, an unreleased online co-op action RPG, using Unreal prototypes to help the team evaluate pathfinding, HUD behavior, and front-end interface concepts.
+- Partnered with ZeniMax Online Studios on preproduction UX for Project Kestrel, an unreleased online co-op action RPG, using Unreal prototypes to help the team evaluate pathfinding, HUD behavior, and front-end interaction concepts.
 - Designed live-service platform UX for The Elder Scrolls Online across web and game-client surfaces, drawing on site analytics and years of forum feedback to clarify account, purchase, and support flows.
 - Led early-stage evaluation of Iveda Pinpoint, an indoor positioning concept for inventory loss management, delivering mobile web designs and partnering with WRLD3D on interior mapping to clarify product direction and engineering requirements.
 
 ZeniMax Online Studios — User Experience Lead, The Elder Scrolls Online (ESO)
 2013–2016 • Cockeysville, MD
 - Led UX/UI for ESO’s console launch, translating a dense PC MMORPG into controller-first PlayStation and Xbox experiences across customization, progression, itemization, and commerce. ESO remains an active live service that has since reached 26M players.
-- Built UI workflows for ESO, documenting interaction patterns, component states, and token definitions to support engineering and QA during implementation and issue resolution.
+- Built UI workflows for ESO, documenting interaction patterns, component states, and token definitions to support engineering and QA through implementation and issue resolution.
 - Wrote test plans for item trading and the in-game storefront, partnering with QA to run playtests that surfaced interaction issues early and refined player-facing flows before launch.
 
 RealU — User Experience Consultant, Otherland
@@ -29,11 +29,11 @@ Rumble Games — User Experience Designer, KingsRoad
 Browser-based game UX and interface design.
 
 Osterhout Design Group — Product Designer
-2010–2011 • San Francisco
+2010–2011 • San Francisco, CA
 - Designed demos for early wearable AR hardware, translating optical and sensor constraints into discoverable spatial behaviors through scenarios co-developed with military subject matter experts.
 
 Serious Business — User Experience Designer
-2009–2010 • San Francisco
+2009–2010 • San Francisco, CA
 UX and feature design for early social games.
 
 Nihilistic Software — Senior User Interface Designer, Zombie Apocalypse
@@ -45,10 +45,10 @@ Electronic Arts — User Experience Consultant, The Sims 3
 - Designed the onboarding experience for The Sims 3, creating reusable content templates and interaction patterns that improved player understanding and streamlined content production.
 
 LucasArts — Senior UX/UI Designer, Star Wars: The Force Unleashed
-2006–2008 • San Francisco
+2006–2008 • San Francisco, CA
 - Designed UI for Star Wars: The Force Unleashed from concept through launch on PlayStation 3 and Xbox 360, which became LucasArts’ fastest-selling game.
-- Designed and authored the user interface in-engine, from visual design to Lua behaviors.
-- Worked with engineering and QA to harden the content pipeline for console certification.
+- Authored the user interface in-engine, translating visual design into Lua behaviors.
+- Collaborated with engineering and QA to harden the content pipeline for console certification.
 
 Rainbow Studios — Senior User Interface Designer, MX vs ATV Untamed
 2005–2006 • Phoenix, AZ
