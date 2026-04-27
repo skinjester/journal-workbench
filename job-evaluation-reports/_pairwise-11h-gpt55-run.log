@@ -1,0 +1,13 @@
+=== Stage 1: batch job evaluations ===
+
+=== Job 1/1: job descriptions/Sr UX Designer, 11th Hour Games ===
+    model: gpt-5.5-medium
+    progress: heartbeat every 30s (agent may print nothing until done)
+  ... still running (Sr UX Designer, 11th Hour Games): 30s elapsed
+  ... still running (Sr UX Designer, 11th Hour Games): 60s elapsed
+  ... still running (Sr UX Designer, 11th Hour Games): 90s elapsed
+  ... still running (Sr UX Designer, 11th Hour Games): 120s elapsed
+OUTPUT_PATH: job-evaluation-reports/Sr UX Designer, 11th Hour Games.eval.md
+=== finished: Sr UX Designer, 11th Hour Games (127.0s, exit 0) ===
+=== Stage 2: collate overview ===
+Wrote job-evaluation-reports/_OVERVIEW-20260426-154935(14).md (14 jobs)

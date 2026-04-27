@@ -2,24 +2,17 @@ GARY BOODHOO
 Portfolio: https://www.garyb.design | San Francisco, CA | gboodhoo@gmail.com | 415-802-4076
 
 SENIOR UX DESIGNER
-Senior game UX designer focused on interrelated player-facing systems, taking features from concept through implementation across console, PC, and connected devices. I help teams work through ambiguity using prototypes and visual models to turn open questions into concrete decisions. Currently designing LFOGRID, a creative MIDI tool, using Figma to model reusable UI primitives, component variants, and state-based interaction patterns.
-
-SELECTED WORK
-Led the replatforming of The Elder Scrolls Online UX from PC to PlayStation and Xbox, establishing interaction design pillars that remain foundational to the live service behind a game ZeniMax has publicly cited at over $2B in lifetime revenue.
-
-Designed the onboarding experience for The Sims 3. This flow helped new players start quickly and supported deeper configuration for returning players. JavaScript prototypes helped the team see how content moved through the system before it was built.
-
-On Project Kestrel, an unreleased online co-op action RPG with ZeniMax Online Studios and Sprung Studios, my prototypes informed feature direction during preproduction. I built diegetic UI and 3D layouts in Unreal with game assets and custom blueprints, then published them as HTML5 builds to AWS S3 for weekly review.
+Senior game UX designer focused on helping players engage with complex systems. I replatformed The Elder Scrolls Online from PC to PlayStation and Xbox, establishing interaction design pillars for a live service ZeniMax has publicly cited at over $2B in lifetime revenue. Currently building LFOGRID, a creative tool for device automation across MIDI networks, using Figma to model reusable components and interaction patterns.
 
 TOOLS
-Figma (components, variants, prototyping, token-based design systems) · Framer · Adobe Creative Cloud · Unreal Engine · TouchDesigner · Python · Lua · React · HTML/CSS
+Figma · Framer · Adobe Creative Cloud · Unreal Engine · TouchDesigner · Python · Lua · React · HTML/CSS
 
 EXPERIENCE
 Skinjester Studio — Founder & Principal Product Designer
 2016–2025 • San Francisco, CA
-- Consulted on UX for live services and product incubation, helping teams turn open problem spaces into clear, buildable next steps, including preproduction UX for Project Kestrel with ZeniMax Online Studios and Sprung Studios.
-- Designed live-service UX for elderscrollsonline.com, the game’s web platform, connecting account and commerce journeys across game and web through competitive analysis and research.
-- Designed UX for Iveda Pinpoint, an indoor positioning system for hospital loss management, creating mobile app concepts and partnering with WRLD3D on spatial prototypes to guide engineering spend.
+- Partnered with ZeniMax Online Studios on preproduction UX for Project Kestrel, an unreleased online co-op action RPG, using Unreal prototypes to help the team evaluate pathfinding, HUD behavior, and front-end interface concepts.
+- Designed live-service platform UX for The Elder Scrolls Online across web and game-client surfaces, drawing on site analytics and years of forum feedback to clarify account, purchase, and support flows.
+- Led early-stage evaluation of Iveda Pinpoint, an indoor positioning concept for inventory loss management, delivering mobile web designs and partnering with WRLD3D on interior mapping to clarify product direction and engineering requirements.
 
 ZeniMax Online Studios — User Experience Lead, The Elder Scrolls Online (ESO)
 2013–2016 • Cockeysville, MD

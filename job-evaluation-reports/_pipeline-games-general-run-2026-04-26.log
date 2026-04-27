@@ -1,0 +1,20 @@
+=== Stage 1: batch job evaluations ===
+
+=== Job 1/15: job descriptions/Lead UX, Activision-Blizzard ===
+    model: (CLI default)
+    progress: heartbeat every 30s (agent may print nothing until done)
+  ... still running (Lead UX, Activision-Blizzard): 30s elapsed
+  ... still running (Lead UX, Activision-Blizzard): 60s elapsed
+  ... still running (Lead UX, Activision-Blizzard): 90s elapsed
+  ... still running (Lead UX, Activision-Blizzard): 120s elapsed
+  ... still running (Lead UX, Activision-Blizzard): 150s elapsed
+  ... still running (Lead UX, Activision-Blizzard): 180s elapsed
+  ... still running (Lead UX, Activision-Blizzard): 210s elapsed
+Wrote the full report to disk and followed the required template, resume comparison, portfolio review set, and PART 5/6 consistency check.
+
+OUTPUT_PATH: job-evaluation-reports/Lead UX, Activision-Blizzard.eval.md
+=== finished: Lead UX, Activision-Blizzard (239.2s, exit 0) ===
+
+=== Job 2/15: job descriptions/Lead UX, CD Projekt Red ===
+    model: (CLI default)
+    progress: heartbeat every 30s (agent may print nothing until done)

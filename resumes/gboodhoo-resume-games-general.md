@@ -16,6 +16,7 @@ Skinjester Studio — Founder & Principal Product Designer
 - Preproduction UX for Project Kestrel, an unreleased online co-op action RPG with ZeniMax Online Studios, building spatial UI prototypes in Unreal Engine and publishing HTML5 builds to AWS S3 to help the team evaluate feature direction.
 - Designed CMS and platform UX for The Elder Scrolls Online across web and game-client surfaces, improving the player journey from account setup through purchase and support.
 - Designed UX for Iveda Pinpoint, an indoor positioning system for hospital inventory loss management. Brought in WRLD3D as a design partner for indoor mapping, using spatial prototypes and user journeys to guide engineering spend.
+- Led early-stage evaluation of Iveda Pinpoint, an indoor positioning concept for inventory loss management, delivering mobile web designs and partnering with WRLD3D on interior mapping to clarify product direction and engineering requirements.
 
 ZeniMax Online Studios — User Experience Lead, The Elder Scrolls Online (ESO)
 2013–2016 • Cockeysville, MD

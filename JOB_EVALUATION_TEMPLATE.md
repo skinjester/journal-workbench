@@ -1,10 +1,11 @@
 # Job evaluation template (canonical)
 
-`template_version`: **v1.14.3**  
-`last_updated`: **2026-04-23**
+`template_version`: **v1.14.4**  
+`last_updated`: **2026-04-26**
 
 ## Changelog
 
+- **v1.14.4 (2026-04-26)**: **References: games-general resume.** `JOB_EVALUATION_REFERENCES.md` now lists `resumes/gboodhoo-resume-games-general.md`; PART 2 / `primary_resume_for_verdict` behavior is unchanged.
 - **v1.14.3 (2026-04-23)**: **References: 11th Hour–tuned resume.** `JOB_EVALUATION_REFERENCES.md` now lists `resumes/gboodhoo-resume-11th-hour.md`; PART 2 / `primary_resume_for_verdict` behavior is unchanged.
 - **v1.14.2 (2026-04-22)**: **References: Riot-tuned resume.** `JOB_EVALUATION_REFERENCES.md` now lists `resumes/gboodhoo-resume-riot.md` alongside other variants; PART 2 / `primary_resume_for_verdict` behavior is unchanged.
 - **v1.14.1 (2026-04-21)**: **Resume list from references.** PART 2 evaluates every repo-relative resume path under `JOB_EVALUATION_REFERENCES.md` → **Resume(s)** (not a fixed pair). `primary_resume_for_verdict` must be **one of those paths**. Optional tailored resumes (e.g. studio-specific) live in the same section.

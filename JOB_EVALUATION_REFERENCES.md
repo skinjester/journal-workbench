@@ -12,6 +12,8 @@ Every file listed here is read for **PART 2** (compare). For **PART 5 headline v
   - Primary “platform / systems / trust moments” positioning.
 - [`resumes/gboodhoo-resume-games.md`](resumes/gboodhoo-resume-games.md)
   - Alternate positioning (more game-forward). Use when evaluating game roles, or when you want the evaluator to sanity-check framing mismatch.
+- [`resumes/gboodhoo-resume-games-general.md`](resumes/gboodhoo-resume-games-general.md)
+  - **General** game-UX / cross-title positioning (broad game roles, not studio-tuned). Compare in PART 2 against `games` and any role-specific variants.
 - [`resumes/gboodhoo-resume-31st-union.md`](resumes/gboodhoo-resume-31st-union.md)
   - Role-tuned variant for **Sr UX Designer, 31st Union** (and similar postings); compare explicitly against connect/games in PART 2 when this file is in the list.
 - [`resumes/gboodhoo-resume-riot.md`](resumes/gboodhoo-resume-riot.md)
