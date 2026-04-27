@@ -5,7 +5,7 @@ SENIOR UX DESIGNER
 Senior game UX designer focused on helping players engage with complex systems. I replatformed The Elder Scrolls Online from PC to PlayStation and Xbox, establishing interaction design pillars for a live service ZeniMax has publicly cited at over $2B in lifetime revenue. Currently building LFOGRID, a creative tool for device automation across MIDI networks, using Figma to model reusable components and interaction patterns.
 
 TOOLS
-Figma · Framer · Adobe Creative Cloud · Unreal Engine · TouchDesigner · Python · Lua · React · HTML/CSS
+Figma (components, variables, auto layout, prototyping) · Framer · Adobe Creative Cloud · Unreal Engine · TouchDesigner · Python · Lua · React · HTML/CSS
 
 EXPERIENCE
 Skinjester Studio — Founder & Principal Product Designer
@@ -16,7 +16,7 @@ Skinjester Studio — Founder & Principal Product Designer
 
 ZeniMax Online Studios — User Experience Lead, The Elder Scrolls Online (ESO)
 2013–2016 • Cockeysville, MD
-- Led UX/UI for ESO’s console launch and live service, helping redesign a dense PC MMORPG for growth in new marketplaces, on a game that later reached 26M users.
+- Led UX/UI for ESO’s console launch, translating a dense PC MMORPG into controller-first PlayStation and Xbox experiences across customization, progression, itemization, and commerce. ESO remains an active live service that has since reached 26M players.
 - Built UI workflows for ESO, documenting patterns, component states, and token definitions to support engineering and QA during implementation and for issue resolution.
 - Wrote test plans for item trading and the in-game storefront, partnering with QA to run playtests that surfaced interaction issues early and refined player-facing flows before launch.
 
